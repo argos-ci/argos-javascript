@@ -1,0 +1,7 @@
+{
+  "endOfLine": "lf",
+  "parser": "babel",
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "all"
+}
