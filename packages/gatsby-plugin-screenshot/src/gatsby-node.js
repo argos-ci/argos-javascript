@@ -30,7 +30,9 @@ async function screenshotPages(browser, paths, options = {}) {
 
   const page = await browser.newPage()
   for (let i = 0; i < paths.length; i += 1) {
-    await page.goto(`http://localhost:${port}${[paths[i]]}`)
+    await page.goto(`http://localhost:${port}${[paths[i]]}`, {
+      waitUntil: 'networkidle0',
+    })
     if (!withText) {
       page.addStyleTag({
         content: `
