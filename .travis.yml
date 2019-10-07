@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   - node
-before_script:
+script:
   - yarn lint
-after_script:
+  - yarn test
   - yarn build
