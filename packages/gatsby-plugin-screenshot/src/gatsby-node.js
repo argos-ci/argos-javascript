@@ -20,7 +20,7 @@ function waitFor(fn) {
   })
 }
 
-async function screenshotPages(browser, paths, options = {}) {
+async function takeScreenshots(browser, paths, options = {}) {
   const {
     output = path.join('.', path.sep, 'screenshots'),
     server: { port = 8000 } = {},
@@ -88,7 +88,7 @@ async function runServer(fn, options = {}) {
   }
 }
 
-export async function onPostBuild({ graphql }, options = {}) {
+export async function onPostBuild({ graphql, reporter }, options = {}) {
   const { data, errors } = await graphql(`
     {
       allSitePage {
@@ -109,13 +109,16 @@ export async function onPostBuild({ graphql }, options = {}) {
     allSitePage: { edges: pages },
   } = data
 
+  const activity = reporter.activityTimer('take screenshots')
+  activity.start()
   await runServer(
     () =>
       runBrowser(
         async browser =>
-          screenshotPages(browser, pages.map(({ node }) => node.path), options),
+          takeScreenshots(browser, pages.map(({ node }) => node.path), options),
         options,
       ),
     options,
   )
+  activity.end()
 }
