@@ -1,0 +1,20 @@
+{
+  "description": "Push your Gatsby screenshots to Argos CI.",
+  "license": "MIT",
+  "main": "index.js",
+  "name": "gatsby-plugin-argos",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "cross-env NODE_ENV=production babel src --out-dir . --ignore **/*.test.js"
+  },
+  "version": "0.0.0",
+  "dependencies": {
+    "argos-cli": "^0.1.2",
+    "cross-spawn": "^7.0.1",
+    "gatsby-plugin-screenshot": "^0.0.0",
+    "rimraf": "^3.0.0",
+    "tmp": "^0.1.0"
+  }
+}

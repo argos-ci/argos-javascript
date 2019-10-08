@@ -22,11 +22,11 @@ function waitFor(fn) {
 
 async function takeScreenshots(browser, paths, options = {}) {
   const {
-    output = path.join('.', path.sep, 'screenshots'),
+    dir = path.join('.', path.sep, 'screenshots'),
     server: { port = 8000 } = {},
     withText = true,
   } = options
-  mkdirp.sync(output)
+  mkdirp.sync(dir)
 
   const page = await browser.newPage()
   for (let i = 0; i < paths.length; i += 1) {
@@ -43,7 +43,7 @@ async function takeScreenshots(browser, paths, options = {}) {
       })
     }
     await page.screenshot({
-      path: path.join(output, `${kebabcase(paths[i]) || 'home'}.png`),
+      path: path.join(dir, `${kebabcase(paths[i]) || 'home'}.png`),
     })
   }
 }
