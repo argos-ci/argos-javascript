@@ -109,7 +109,7 @@ export async function onPostBuild({ graphql, reporter }, options = {}) {
     allSitePage: { edges: pages },
   } = data
 
-  const activity = reporter.activityTimer('take screenshots')
+  const activity = reporter.activityTimer('taking screenshots')
   activity.start()
   await runServer(
     () =>
