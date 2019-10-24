@@ -15,5 +15,11 @@ module.exports = {
   rules: {
     'arrow-parens': 'off',
     'import/prefer-default-export': 'off',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        peerDependencies: true,
+      },
+    ],
   },
 }

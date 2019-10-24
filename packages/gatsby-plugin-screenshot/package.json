@@ -3,16 +3,26 @@
     "@babel/runtime": "^7.6.2",
     "cross-spawn": "^7.0.0",
     "lodash.kebabcase": "^4.1.1",
-    "mkdirp": "^0.5.1",
-    "puppeteer": "^1.20.0"
+    "mkdirp": "^0.5.1"
   },
   "description": "Screenshots all routes of a Gatsby project.",
-  "devDependencies": {},
+  "devDependencies": {
+    "puppeteer": "^2.0.0"
+  },
   "license": "MIT",
   "main": "index.js",
   "name": "gatsby-plugin-screenshot",
+  "peerDependencies": {
+    "gatsby": "^2.17.2",
+    "puppeteer": "^2.0.0"
+  },
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/gatsby-plugin-screenshot"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production babel src --out-dir . --ignore **/*.test.js"
