@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/argos-ci/argos-javascript/compare/gatsby-plugin-screenshot@0.1.0...gatsby-plugin-screenshot@0.1.1) (2019-10-24)
+
+
+### Bug Fixes
+
+* **gatsby-plugin-screenshot:** release process ([01b40ea](https://github.com/argos-ci/argos-javascript/commit/01b40ea1ae73b5580c44ff33a03ededd3d62686f))
+
+
+
+
+
 # 0.1.0 (2019-10-24)
 
 
