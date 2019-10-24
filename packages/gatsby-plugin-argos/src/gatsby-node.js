@@ -7,7 +7,7 @@ async function takeScreenshots(fn, gatsbyParams, options) {
   // Failed to use unsafeCleanup
   const tmpDir = tmp.dirSync()
   try {
-    await onPostBuildScreenshot(gatsbyParams, { dir: tmpDir.name })
+    await onPostBuildScreenshot(gatsbyParams, { ...options, dir: tmpDir.name })
     await fn(gatsbyParams, { ...options, dir: tmpDir.name })
   } finally {
     rimraf.sync(tmpDir.name)
