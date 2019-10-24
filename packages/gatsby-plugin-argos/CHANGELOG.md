@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.2](https://github.com/argos-ci/argos-javascript/compare/gatsby-plugin-argos@0.1.1...gatsby-plugin-argos@0.1.2) (2019-10-24)
+
+
+### Bug Fixes
+
+* **gatsby-plugin-argos:** screenshot options ([af78b16](https://github.com/argos-ci/argos-javascript/commit/af78b16f191fcf74d67b1a9f2bb8ebd81d3269a8))
+
+
+
+
+
 ## [0.1.1](https://github.com/argos-ci/argos-javascript/compare/gatsby-plugin-argos@0.1.0...gatsby-plugin-argos@0.1.1) (2019-10-24)
 
 **Note:** Version bump only for package gatsby-plugin-argos
