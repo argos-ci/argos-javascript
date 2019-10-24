@@ -20,7 +20,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production lerna run build",
     "lint": "prettier --check packages/*/src/**/*.{js,jsx} && eslint .",
-    "release": "lerna publish --conventional-commits && conventional-github-releaser --preset angular",
+    "release": "yarn build && lerna publish --conventional-commits && conventional-github-releaser --preset angular",
     "test": "cross-env NODE_ENV=test jest --passWithNoTests"
   },
   "workspaces": [
