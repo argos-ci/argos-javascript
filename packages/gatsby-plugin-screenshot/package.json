@@ -42,5 +42,5 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production babel src --out-dir . --ignore **/*.test.js"
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

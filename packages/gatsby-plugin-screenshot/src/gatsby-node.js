@@ -72,7 +72,7 @@ async function runServer(fn, options = {}) {
 
   let running = false
   child.stdout.on('data', data => {
-    if (String(data).includes('gatsby serve running')) {
+    if (String(data).includes('You can now view')) {
       running = true
     }
   })
