@@ -4,21 +4,7 @@ import spawn from 'cross-spawn'
 import mkdirp from 'mkdirp'
 import puppeteer from 'puppeteer'
 import kebabcase from 'lodash.kebabcase'
-
-function waitFor(fn) {
-  return new Promise((resolve, reject) => {
-    const timeoutID = setTimeout(() => reject(new Error('Timeout')), 10e3)
-    function check() {
-      if (!fn()) {
-        setTimeout(check, 1e3)
-      } else {
-        clearTimeout(timeoutID)
-        resolve()
-      }
-    }
-    check()
-  })
-}
+import waitOn from 'wait-on'
 
 async function takeScreenshots(browser, paths, options = {}) {
   const {
@@ -70,15 +56,11 @@ async function runServer(fn, options = {}) {
     shell: true,
   })
 
-  let running = false
-  child.stdout.on('data', data => {
-    if (String(data).includes('You can now view')) {
-      running = true
-    }
-  })
-
   try {
-    await waitFor(() => running)
+    await waitOn({
+      resources: [`http-get://localhost:${port}`],
+      timeout: 30000,
+    })
     await fn(child)
   } finally {
     await new Promise(resolve => {
