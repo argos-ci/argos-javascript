@@ -4,12 +4,12 @@
   },
   "dependencies": {
     "cross-spawn": "^7.0.1",
-    "rimraf": "^3.0.0",
-    "tmp": "^0.1.0"
+    "rimraf": "^3.0.2",
+    "tmp": "^0.2.1"
   },
   "description": "Push your Gatsby screenshots to Argos CI.",
   "engines": {
-    "node": ">=8.16.0"
+    "node": ">=16.0.0"
   },
   "files": [
     "gatsby-node.js"

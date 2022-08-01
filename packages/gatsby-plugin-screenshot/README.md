@@ -16,7 +16,7 @@ these screenshots as documentation or to avoid visual regressions with services 
 Just add the plugin to the plugins array in your `gatsby-config.js`
 
 ```javascript
-plugins: [`gatsby-plugin-screenshot`]
+plugins: [`gatsby-plugin-screenshot`];
 ```
 
 By default, the plugin will run `gatsby serve` to port 8000, and save screenshots in `./screenshots` directory.
@@ -31,13 +31,16 @@ module.exports = {
       options: {
         // The puppeteer launch options
         browser: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-fullscreen']
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--start-fullscreen",
+          ],
         },
-        dir: './screenshots',
+        dir: "./screenshots",
         port: 8000,
       },
     },
   ],
-}
+};
 ```
-

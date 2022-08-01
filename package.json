@@ -1,28 +1,25 @@
 {
-  "devDependencies": {
-    "@babel/cli": "^7.6.2",
-    "@babel/core": "^7.6.2",
-    "@babel/preset-env": "^7.6.2",
-    "babel-jest": "^24.9.0",
-    "babel-preset-gatsby-package": "^0.2.7",
-    "cross-env": "^6.0.3",
-    "eslint": "^6.5.1",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.4.0",
-    "eslint-plugin-import": "^2.18.2",
-    "jest": "^24.9.0",
-    "lerna": "^3.16.4",
-    "prettier": "^1.18.2"
-  },
-  "name": "argos-javascript",
   "private": true,
-  "scripts": {
-    "build": "cross-env NODE_ENV=production lerna run build",
-    "lint": "prettier --check packages/*/src/**/*.{js,jsx} && eslint .",
-    "release": "yarn build && lerna publish --conventional-commits",
-    "test": "cross-env NODE_ENV=test jest --passWithNoTests"
-  },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "@babel/cli": "^7.18.9",
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9",
+    "babel-preset-gatsby-package": "^2.19.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.21.0",
+    "lerna": "^5.3.0",
+    "prettier": "^2.7.1"
+  },
+  "scripts": {
+    "build": "cross-env NODE_ENV=production lerna run build",
+    "format": "prettier --write .",
+    "lint": "prettier --check . && eslint .",
+    "release": "yarn build && lerna publish --conventional-commits"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
