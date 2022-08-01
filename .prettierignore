@@ -1,3 +1,5 @@
 node_modules
-*.json
-*.yml
+package.json
+CHANGELOG.md
+/packages/*/index.js
+/packages/*/gatsby-node.js

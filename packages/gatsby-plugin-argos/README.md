@@ -25,18 +25,18 @@ module.exports = {
     ...(process.env.CI
       ? [
           {
-            resolve: 'gatsby-plugin-argos',
+            resolve: "gatsby-plugin-argos",
             options: {
               branch: process.env.TRAVIS_BRANCH,
               commit: process.env.TRAVIS_COMMIT,
-              dir: './where-your-screenshots-are',
+              dir: "./where-your-screenshots-are",
               token: process.env.ARGOS_TOKEN,
             },
           },
         ]
       : []),
-  ]
-}
+  ],
+};
 ```
 
 Here's a travis example without available screenshots:
@@ -48,7 +48,7 @@ module.exports = {
     ...(process.env.CI
       ? [
           {
-            resolve: 'gatsby-plugin-argos',
+            resolve: "gatsby-plugin-argos",
             options: {
               branch: process.env.TRAVIS_BRANCH,
               commit: process.env.TRAVIS_COMMIT,
@@ -57,8 +57,8 @@ module.exports = {
           },
         ]
       : []),
-  ]
-}
+  ],
+};
 ```
 
 You can also override [gatsby-plugin-screenshot](https://github.com/argos-ci/argos-javascript/tree/master/packages/gatsby-plugin-screenshot#readme) options if needed:
@@ -70,20 +70,24 @@ module.exports = {
     ...(process.env.CI
       ? [
           {
-            resolve: 'gatsby-plugin-argos',
+            resolve: "gatsby-plugin-argos",
             options: {
               branch: process.env.TRAVIS_BRANCH,
               browser: {
-                args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-fullscreen']
+                args: [
+                  "--no-sandbox",
+                  "--disable-setuid-sandbox",
+                  "--start-fullscreen",
+                ],
               },
               commit: process.env.TRAVIS_COMMIT,
-              dir: './screenshots',
+              dir: "./screenshots",
               port: 8000,
               token: process.env.ARGOS_TOKEN,
             },
           },
         ]
       : []),
-  ]
-}
+  ],
+};
 ```

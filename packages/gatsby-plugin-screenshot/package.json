@@ -3,10 +3,10 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "dependencies": {
-    "@babel/runtime": "^7.6.2",
-    "cross-spawn": "^7.0.0",
+    "@babel/runtime": "^7.18.9",
+    "cross-spawn": "^7.0.3",
     "lodash.kebabcase": "^4.1.1",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^1.0.4",
     "wait-on": "^6.0.1"
   },
   "description": "Screenshots all routes of a Gatsby project.",
@@ -14,7 +14,7 @@
     "puppeteer": "^15.0.0"
   },
   "engines": {
-    "node": ">=8.16.0"
+    "node": ">=16.0.0"
   },
   "files": [
     "gatsby-node.js"
