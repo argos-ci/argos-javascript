@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/argos-ci/argos-javascript/compare/gatsby-plugin-argos@1.0.0...gatsby-plugin-argos@2.0.0) (2022-08-02)
+
+
+### Bug Fixes
+
+* fix wait for Gatsby to start ([97fbaad](https://github.com/argos-ci/argos-javascript/commit/97fbaad6d785d2e1cc3e74e298f25a72c73564d9))
+
+
+### BREAKING CHANGES
+
+* only support gatsby v4+
+
+
+
+
+
 ## [0.1.2](https://github.com/argos-ci/argos-javascript/compare/gatsby-plugin-argos@0.1.1...gatsby-plugin-argos@0.1.2) (2019-10-24)
 
 
