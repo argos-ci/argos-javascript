@@ -1,29 +1,31 @@
 {
+  "name": "gatsby-plugin-argos",
+  "description": "Push your Gatsby screenshots to Argos CI.",
+  "version": "2.0.0",
+  "main": "index.js",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
-  "dependencies": {
-    "cross-spawn": "^7.0.1",
-    "rimraf": "^3.0.2",
-    "tmp": "^0.2.1"
-  },
-  "description": "Push your Gatsby screenshots to Argos CI.",
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "files": [
-    "gatsby-node.js"
-  ],
-  "homepage": "https://github.com/argos-ci/argos-javascript/tree/master/packages/gatsby-plugin-argos#readme",
+  "homepage": "https://github.com/argos-ci/argos-javascript/tree/main/packages/gatsby-plugin-argos#readme",
   "keywords": [
     "gatsby",
     "argos",
     "visual-regression",
     "screenshot"
   ],
+  "dependencies": {
+    "cross-spawn": "^7.0.1",
+    "rimraf": "^3.0.2",
+    "tmp": "^0.2.1"
+  },
+  "devDependencies": {
+    "babel-preset-gatsby-package": "^2.19.0",
+    "puppeteer": "^15.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "license": "MIT",
-  "main": "index.js",
-  "name": "gatsby-plugin-argos",
   "optionalDependencies": {
     "gatsby-plugin-screenshot": "^2.0.0"
   },
@@ -34,7 +36,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/argos-ci/argos-javascript.git",
@@ -42,6 +43,5 @@
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production babel src --out-dir . --ignore **/*.test.js"
-  },
-  "version": "2.0.0"
+  }
 }

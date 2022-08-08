@@ -1,6 +1,19 @@
 {
+  "name": "gatsby-plugin-screenshot",
+  "description": "Screenshots all routes of a Gatsby project.",
+  "version": "2.0.0",
+  "main": "index.js",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
+  "homepage": "https://github.com/argos-ci/argos-javascript/tree/main/packages/gatsby-plugin-screenshot#readme",
+  "keywords": [
+    "gatsby",
+    "screenshot"
+  ],
+  "peerDependencies": {
+    "gatsby": "^4.0.0",
+    "puppeteer": "^2.0.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.18.9",
@@ -9,32 +22,17 @@
     "mkdirp": "^1.0.4",
     "wait-on": "^6.0.1"
   },
-  "description": "Screenshots all routes of a Gatsby project.",
   "devDependencies": {
+    "babel-preset-gatsby-package": "^2.19.0",
     "puppeteer": "^15.0.0"
   },
   "engines": {
     "node": ">=16.0.0"
   },
-  "files": [
-    "gatsby-node.js"
-  ],
-  "homepage": "https://github.com/argos-ci/argos-javascript/tree/master/packages/gatsby-plugin-screenshot#readme",
-  "keywords": [
-    "gatsby",
-    "screenshot"
-  ],
   "license": "MIT",
-  "main": "index.js",
-  "name": "gatsby-plugin-screenshot",
-  "peerDependencies": {
-    "gatsby": "^4.0.0",
-    "puppeteer": "^2.0.0"
-  },
   "publishConfig": {
     "access": "public"
   },
-  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/argos-ci/argos-javascript.git",
@@ -42,6 +40,5 @@
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production babel src --out-dir . --ignore **/*.test.js"
-  },
-  "version": "2.0.0"
+  }
 }
