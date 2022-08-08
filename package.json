@@ -17,7 +17,7 @@
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
     "test": "jest",
-    "release": "yarn build && lerna publish --conventional-commits"
+    "release": "npm run build && lerna publish --conventional-commits"
   },
   "engines": {
     "node": ">=16.0.0"
