@@ -19,8 +19,8 @@
     "tmp": "^0.2.1"
   },
   "devDependencies": {
-    "babel-preset-gatsby-package": "^2.19.0",
-    "puppeteer": "^15.0.0"
+    "babel-preset-gatsby-package": "^2.20.0",
+    "puppeteer": "^16.1.0"
   },
   "engines": {
     "node": ">=16.0.0"
