@@ -8,5 +8,13 @@
   "parserOptions": {
     "ecmaVersion": 2022,
     "sourceType": "module"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.test.?(m)js"],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
 }
