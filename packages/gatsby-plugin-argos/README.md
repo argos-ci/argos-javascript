@@ -6,11 +6,11 @@ Push your gatsby screenshots to [Argos](https://www.argos-ci.com/), and check fo
 
 If you already have a screenshots available:
 
-`npm install --save-dev gatsby-plugin-argos argos-cli`
+`npm install --save-dev gatsby-plugin-argos`
 
 If you don't have screenshots available:
 
-`npm install --save-dev gatsby-plugin-argos argos-cli gatsby-plugin-screenshot puppeteer`
+`npm install --save-dev gatsby-plugin-argos gatsby-plugin-screenshot`
 
 ## How to use
 

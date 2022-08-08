@@ -9,7 +9,7 @@ these screenshots as documentation or to avoid visual regressions with services 
 
 ## Install
 
-`npm install --save-dev gatsby-plugin-screenshot puppeteer`
+`npm install --save-dev gatsby-plugin-screenshot`
 
 ## How to use
 
