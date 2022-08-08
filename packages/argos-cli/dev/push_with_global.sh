@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ev
 
-export ARGOS_COMMIT=51becaa7a4da00f9e542ca39446fd0ef68bf13dd
-export ARGOS_BRANCH=pull/25
-yarn dev:upload
+export ARGOS_COMMIT=e5ff79c2137ed3dd321d0e9a2ceba98bba11f579
+export ARGOS_BRANCH=test
+yarn argos upload packages/argos-cli/__fixtures__
