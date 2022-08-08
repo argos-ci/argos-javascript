@@ -27,7 +27,7 @@ async function upload(options) {
   let environment = {};
 
   if (process.env.ARGOS_CLI_TEST !== "true") {
-    environment = getEnvironment(process.env);
+    environment = getEnvironment();
   }
   const branch = branchOption || config.get("branch") || environment.branch;
   const commit = commitOption || config.get("commit") || environment.commit;

@@ -20,7 +20,7 @@ async function cancel(options) {
   let environment = {};
 
   if (process.env.ARGOS_CLI_TEST !== "true") {
-    environment = getEnvironment(process.env);
+    environment = getEnvironment();
   }
 
   const externalBuildId =
