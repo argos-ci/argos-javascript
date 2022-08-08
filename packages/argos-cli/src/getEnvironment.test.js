@@ -1,21 +1,12 @@
 import getEnvironment from "./getEnvironment";
 
 describe("getEnvironment", () => {
-  describe("no known environment", () => {
-    it("has the correct properties", () => {
-      const environment = getEnvironment({});
-      expect(environment.ci).toBe(null);
-      expect(environment.commit).toBe(null);
-      expect(environment.branch).toBe(null);
-      expect(environment.pullRequestNumber).toBe(null);
-    });
-  });
-
   describe("travis", () => {
     let env;
 
     beforeEach(() => {
       env = {
+        TRAVIS: "true",
         TRAVIS_BUILD_ID: "1234",
         TRAVIS_BUILD_NUMBER: "build-number",
         TRAVIS_REPO_SLUG: "travis/repo-slug",
@@ -41,11 +32,10 @@ describe("getEnvironment", () => {
         ...env,
         TRAVIS_PULL_REQUEST: "256",
         TRAVIS_PULL_REQUEST_BRANCH: "travis-pr-branch",
-        TRAVIS_PULL_REQUEST_SHA: "travis-pr-head-commit-sha",
       });
       expect(environment.pullRequestNumber).toBe("256");
       expect(environment.branch).toBe("travis-pr-branch");
-      expect(environment.commit).toBe("travis-pr-head-commit-sha");
+      expect(environment.commit).toBe("travis-commit-sha");
     });
   });
 
@@ -61,13 +51,13 @@ describe("getEnvironment", () => {
         CIRCLE_PROJECT_REPONAME: "repo-name",
         CIRCLE_BUILD_NUM: "build-number",
         CIRCLE_NODE_TOTAL: "3",
-        CI_PULL_REQUESTS: "https://github.com/owner/repo-name/pull/123",
+        CIRCLE_PR_NUMBER: "123",
       };
     });
 
     it("has the correct properties", () => {
       const environment = getEnvironment(env);
-      expect(environment.ci).toBe("circle");
+      expect(environment.ci).toBe("circleci");
       expect(environment.commit).toBe("circle-commit-sha");
       expect(environment.branch).toBe("circle-branch");
       expect(environment.pullRequestNumber).toBe("123");
@@ -103,9 +93,9 @@ describe("getEnvironment", () => {
     beforeEach(() => {
       env = {
         DRONE: "true",
-        DRONE_COMMIT: "drone-commit-sha",
+        DRONE_COMMIT_SHA: "drone-commit-sha",
         DRONE_BRANCH: "drone-branch",
-        CI_PULL_REQUEST: "123",
+        DRONE_PULL_REQUEST: "123",
         DRONE_BUILD_NUMBER: "drone-build-number",
       };
     });
@@ -126,7 +116,7 @@ describe("getEnvironment", () => {
       env = {
         SEMAPHORE: "true",
         BRANCH_NAME: "semaphore-branch",
-        REVISION: "semaphore-commit-sha",
+        SEMAPHORE_GIT_SHA: "semaphore-commit-sha",
         SEMAPHORE_REPO_SLUG: "repo-owner/repo-name",
         SEMAPHORE_BUILD_NUMBER: "semaphore-build-number",
         SEMAPHORE_THREAD_COUNT: "2",
@@ -171,14 +161,6 @@ describe("getEnvironment", () => {
         BUILDKITE_PULL_REQUEST: "123",
       });
       expect(environment.pullRequestNumber).toBe("123");
-    });
-
-    it("UI-triggered HEAD build returns null commit SHA if set to HEAD", () => {
-      const environment = getEnvironment({
-        ...env,
-        BUILDKITE_COMMIT: "HEAD",
-      });
-      expect(environment.commit).toBe(null);
     });
   });
 });
