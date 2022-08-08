@@ -14,7 +14,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -27,3 +27,11 @@ jobs:
 
       - name: Build
         run: yarn build
+
+      - name: Test
+        run: yarn test
+
+      - name: Argos
+        run: yarn argos upload packages/argos-cli/__fixtures__
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}

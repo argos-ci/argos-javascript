@@ -1,5 +1,8 @@
 node_modules
 package.json
 CHANGELOG.md
-/packages/*/index.js
-/packages/*/gatsby-node.js
+/packages/gatsby-plugin-argos/index.js
+/packages/gatsby-plugin-argos/gatsby-node.js
+/packages/gatsby-plugin-screenshot/index.js
+/packages/gatsby-plugin-screenshot/gatsby-node.js
+/packages/argos-cli/lib
