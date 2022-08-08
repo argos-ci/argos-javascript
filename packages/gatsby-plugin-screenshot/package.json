@@ -11,20 +11,19 @@
     "gatsby",
     "screenshot"
   ],
-  "peerDependencies": {
-    "gatsby": "^4.0.0",
-    "puppeteer": "^2.0.0"
-  },
   "dependencies": {
     "@babel/runtime": "^7.18.9",
     "cross-spawn": "^7.0.3",
     "lodash.kebabcase": "^4.1.1",
     "mkdirp": "^1.0.4",
+    "puppeteer": "^16.1.0",
     "wait-on": "^6.0.1"
   },
+  "peerDependencies": {
+    "gatsby": "^4.0.0"
+  },
   "devDependencies": {
-    "babel-preset-gatsby-package": "^2.20.0",
-    "puppeteer": "^16.1.0"
+    "babel-preset-gatsby-package": "^2.20.0"
   },
   "engines": {
     "node": ">=16.0.0"

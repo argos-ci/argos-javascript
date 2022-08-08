@@ -20,19 +20,19 @@ jobs:
           node-version: 16
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Lint
-        run: yarn lint
+        run: npm run lint
 
       - name: Build
-        run: yarn build
+        run: npm run build
 
       - name: Test
-        run: yarn test
+        run: npm run test
 
       - name: Argos
-        run: yarn argos upload packages/argos-cli/__fixtures__
+        run: npx argos upload packages/argos-cli/__fixtures__
         env:
           ARGOS_BRANCH: ${{ github.ref_name }}
           ARGOS_COMMIT: ${{ github.sha }}
