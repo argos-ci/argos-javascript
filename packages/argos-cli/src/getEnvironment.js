@@ -1,26 +1,23 @@
-const envCi = require("env-ci");
+import envCi from "env-ci";
+import heroku from "./services/heroku";
+import githubActions from "./services/github-actions";
 
-const getEnvironment = (env = process.env) => {
-  // Heroku
-  if (env.HEROKU_TEST_RUN_ID) {
-    return {
-      ci: "heroku",
-      commit: env.HEROKU_TEST_RUN_COMMIT_VERSION || null,
-      branch: env.HEROKU_TEST_RUN_BRANCH || null,
-      externalBuildId: env.HEROKU_TEST_RUN_ID || null,
-      batchCount: env.CI_NODE_TOTAL || null,
-    };
+const services = [heroku, githubActions];
+
+export const getEnvironment = ({ env = process.env }) => {
+  const ctx = { env };
+  const service = services.find((service) => service.detect(ctx));
+
+  // Internal service matched
+  if (service) {
+    return service.config(ctx);
   }
 
-  const { service, pr, commit, branch, prBranch } = envCi({ env });
+  // Fallback on env-ci detection
+  const { name, commit, branch, prBranch } = envCi(ctx);
   return {
-    ci: service || null,
-    pullRequestNumber: pr || null,
+    name: name || null,
     commit: commit || null,
     branch: prBranch || branch || null,
-    externalBuildId: null,
-    batchCount: null,
   };
 };
-
-export default getEnvironment;
