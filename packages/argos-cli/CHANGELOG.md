@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/argos-ci/argos-javascript/compare/argos-cli@0.3.4...argos-cli@0.4.0) (2022-08-09)
+
+
+### Features
+
+* **cli:** automatic variable detection for CI providers ([dad277a](https://github.com/argos-ci/argos-javascript/commit/dad277a1106624eb012e5c0b53b339def8dfa3ee))
+
+
+
+
+
 ## 0.3.4 (2022-08-08)
 
 **Note:** Version bump only for package argos-cli

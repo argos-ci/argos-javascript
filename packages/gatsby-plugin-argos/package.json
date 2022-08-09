@@ -1,7 +1,7 @@
 {
   "name": "gatsby-plugin-argos",
   "description": "Push your Gatsby screenshots to Argos CI.",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "index.js",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
@@ -23,7 +23,7 @@
     "gatsby": "^4.0.0"
   },
   "optionalDependencies": {
-    "gatsby-plugin-screenshot": "^2.0.1"
+    "gatsby-plugin-screenshot": "^2.0.2"
   },
   "devDependencies": {
     "babel-preset-gatsby-package": "^2.20.0"
