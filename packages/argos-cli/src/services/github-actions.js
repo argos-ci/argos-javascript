@@ -21,22 +21,21 @@ const getSha = ({ env }) => {
       return mergeCommit;
     } else if (mergeCommitMessage === "") {
       console.error(
-        "Issue detecting commit SHA. Please run actions/checkout with fetch-depth: 2"
-      );
-      console.error(
         `
-      steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-      `.trim()
+Issue detecting commit SHA. Please run actions/checkout with "fetch-depth: 2":
+
+steps:
+  - uses: actions/checkout@v3
+    with:
+      fetch-depth: 2
+`.trim()
       );
-      process.exit(0);
+      process.exit(1);
     } else {
       console.error(
         `Commit with SHA ${process.env.GITHUB_SHA} is not a valid commit`
       );
-      process.exit(0);
+      process.exit(1);
     }
   }
 
@@ -44,7 +43,7 @@ const getSha = ({ env }) => {
 };
 
 function getBranch({ env }) {
-  if (env.GITHUB_HEAD_REF && env.GITHUB_HEAD_REF !== "") {
+  if (env.GITHUB_HEAD_REF) {
     return env.GITHUB_HEAD_REF;
   }
 
