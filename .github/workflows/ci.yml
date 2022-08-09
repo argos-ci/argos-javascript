@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -34,6 +35,4 @@ jobs:
       - name: Argos
         run: npx argos upload packages/argos-cli/__fixtures__
         env:
-          ARGOS_BRANCH: ${{ github.ref_name }}
-          ARGOS_COMMIT: ${{ github.sha }}
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}

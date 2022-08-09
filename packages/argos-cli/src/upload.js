@@ -4,7 +4,7 @@ import FormData from "form-data";
 import isDirectory from "./isDirectory";
 import isReadable from "./isReadable";
 import readScreenshots, { GLOB_PATTERN } from "./readScreenshots";
-import getEnvironment from "./getEnvironment";
+import { getEnvironment } from "./getEnvironment";
 import config from "./config";
 import { displayInfo } from "./display";
 import pkg from "../package.json";
@@ -24,23 +24,23 @@ async function upload(options) {
   } = options;
 
   const token = tokenOption || config.get("token");
-  let environment = {};
+  const definedCommit = commitOption || config.get("commit");
 
-  if (process.env.ARGOS_CLI_TEST !== "true") {
-    environment = getEnvironment();
-  }
-  const branch = branchOption || config.get("branch") || environment.branch;
-  const commit = commitOption || config.get("commit") || environment.commit;
+  const ciContext =
+    process.env.ARGOS_CLI_TEST !== "true" && !definedCommit
+      ? getEnvironment({ env: process.env })
+      : null;
+
+  const commit = definedCommit || ciContext?.commit || null;
+  const branch =
+    branchOption || config.get("branch") || ciContext?.branch || null;
   const externalBuildId =
-    externalBuildIdOption ||
-    config.get("externalBuildId") ||
-    environment.externalBuildId;
-  const batchCount =
-    batchCountOption || config.get("batchCount") || environment.batchCount;
+    externalBuildIdOption || config.get("externalBuildId");
+  const batchCount = batchCountOption || config.get("batchCount");
   const name = buildNameOption || config.get("buildName");
 
-  if (environment.ci) {
-    displayInfo(`identified \`${environment.ci}\` environment`);
+  if (ciContext) {
+    displayInfo(`"${ciContext.name}" CI detected.`);
   }
 
   if (!token) {

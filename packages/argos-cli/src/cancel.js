@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import getEnvironment from "./getEnvironment";
 import config from "./config";
 import pkg from "../package.json";
 
@@ -17,16 +16,8 @@ async function cancel(options) {
     );
   }
 
-  let environment = {};
-
-  if (process.env.ARGOS_CLI_TEST !== "true") {
-    environment = getEnvironment();
-  }
-
   const externalBuildId =
-    externalBuildIdOption ||
-    config.get("externalBuildId") ||
-    environment.externalBuildId;
+    externalBuildIdOption || config.get("externalBuildId");
 
   return fetch(`${config.get("endpoint")}/cancel-build`, {
     headers: {
