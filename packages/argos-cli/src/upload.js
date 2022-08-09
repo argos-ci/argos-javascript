@@ -31,8 +31,9 @@ async function upload(options) {
       ? getEnvironment({ env: process.env })
       : null;
 
-  const commit = definedCommit ?? ciContext?.commit;
-  const branch = branchOption || config.get("branch") || ciContext?.branch;
+  const commit = definedCommit || ciContext?.commit || null;
+  const branch =
+    branchOption || config.get("branch") || ciContext?.branch || null;
   const externalBuildId =
     externalBuildIdOption || config.get("externalBuildId");
   const batchCount = batchCountOption || config.get("batchCount");
