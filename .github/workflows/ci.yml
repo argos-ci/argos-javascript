@@ -34,6 +34,4 @@ jobs:
       - name: Argos
         run: npx argos upload packages/argos-cli/__fixtures__
         env:
-          ARGOS_BRANCH: ${{ github.ref_name }}
-          ARGOS_COMMIT: ${{ github.sha }}
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
