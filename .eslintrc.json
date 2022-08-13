@@ -11,7 +11,7 @@
   },
   "overrides": [
     {
-      "files": ["*.test.?(m)js"],
+      "files": ["*.test.?(m|t)js"],
       "env": {
         "jest": true
       }
