@@ -2,10 +2,9 @@
   "include": ["./src", "./typings"],
   "exclude": ["node_modules/**"],
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "Node16",
     "moduleResolution": "node",
-    "baseUrl": ".",
-    "target": "ESNext",
+    "target": "ES2022",
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,

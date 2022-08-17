@@ -2,15 +2,16 @@
   "name": "@argos-ci/core",
   "description": "Visual testing solution to avoid visual regression. The core component of Argos SDK that handles build creation.",
   "version": "0.0.0",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c"
+  },
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
       "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -46,8 +47,9 @@
   },
   "devDependencies": {
     "@types/convict": "^6.1.1",
-    "@babel/preset-typescript": "^7.18.6",
     "msw": "^0.44.2",
-    "typescript": "^4.7.4"
+    "rollup": "^2.78.0",
+    "rollup-plugin-dts": "^4.2.2",
+    "rollup-plugin-swc3": "^0.3.0"
   }
 }

@@ -1,1 +1,5 @@
-module.exports = {};
+module.exports = {
+  transform: {
+    "^.+\\.(t|j)sx?$": ["@swc/jest"],
+  },
+};
