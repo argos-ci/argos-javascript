@@ -5,16 +5,17 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "test": "node ./integrations/upload.cjs && node ./integrations/upload.mjs"
+    "e2e": "node ./e2e/upload.cjs && node ./e2e/upload.mjs"
   },
   "type": "module",
   "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.cjs"
+      "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -26,6 +27,9 @@
   "homepage": "https://github.com/argos-ci/argos-javascript/tree/main/packages/core#readme",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
+  "engines": {
+    "node": ">=16.14.0"
   },
   "license": "MIT",
   "keywords": [

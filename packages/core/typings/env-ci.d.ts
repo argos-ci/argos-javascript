@@ -1,7 +1,7 @@
 declare module "env-ci" {
   interface Options {
     env?: { [envVar: string]: any } | undefined;
-    cwd?: string | undefined;
+    root?: string | undefined;
   }
 
   interface CiEnv {

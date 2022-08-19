@@ -11,7 +11,7 @@ describe("#upload", () => {
   it("uploads", async () => {
     const result = await upload({
       apiBaseUrl: "https://api.argos-ci.dev",
-      cwd: join(__dirname, "../__fixtures__/screenshots"),
+      root: join(__dirname, "../../../__fixtures__/screenshots"),
       commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
       token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
     });

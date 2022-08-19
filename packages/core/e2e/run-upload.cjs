@@ -8,7 +8,7 @@ const { join } = require("node:path");
 const runUpload = async (implementation, name) => {
   try {
     const result = await implementation({
-      cwd: join(__dirname, "../__fixtures__/screenshots"),
+      root: join(__dirname, "../../../__fixtures__/screenshots"),
       token: process.env.ARGOS_TOKEN,
       name,
     });

@@ -3,11 +3,12 @@
   "description": "Visual testing solution to avoid visual regression. Argos CLI is used to interact with and upload screenshots to argos-ci.com via command line.",
   "version": "0.0.0",
   "bin": {
-    "argos-ci": "./bin/argos-cli.js"
+    "argos": "./bin/argos-cli.js"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "e2e": "node ./bin/argos-cli.js upload ../../__fixtures__"
   },
   "type": "module",
   "exports": {
@@ -21,6 +22,9 @@
   "homepage": "https://github.com/argos-ci/argos-javascript/tree/main/packages/core#readme",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
+  "engines": {
+    "node": ">=16.14.0"
   },
   "license": "MIT",
   "keywords": [
@@ -36,7 +40,10 @@
     "access": "public"
   },
   "dependencies": {
-    "commander": "^9.4.0"
+    "@argos-ci/core": "^0.0.0",
+    "commander": "^9.4.0",
+    "ora": "^6.1.2",
+    "update-notifier": "^6.0.2"
   },
   "devDependencies": {
     "rollup": "^2.78.0",

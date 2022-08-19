@@ -10,7 +10,7 @@ import { debug } from "./debug";
 
 export interface UploadParameters {
   files?: string[];
-  cwd?: string;
+  root?: string;
   ignore?: string[];
   apiBaseUrl?: string;
   commit?: string;
@@ -67,7 +67,7 @@ export const upload = async (params: UploadParameters) => {
 
   // Collect screenshots
   const foundScreenshots = await discoverScreenshots(files, {
-    cwd: params.cwd,
+    root: params.root,
     ignore: params.ignore,
   });
 

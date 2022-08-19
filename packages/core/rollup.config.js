@@ -9,13 +9,19 @@ const bundle = (config) => ({
   ...config,
 });
 
+const swcPlugin = swc({
+  jsc: {
+    target: "es2021",
+  },
+});
+
 export default [
   bundle({
     output: {
       file: `dist/index.mjs`,
       format: "es",
     },
-    plugins: [swc()],
+    plugins: [swcPlugin],
   }),
   bundle({
     input: "src/index.cjs.ts",
@@ -23,7 +29,7 @@ export default [
       file: `dist/index.cjs`,
       format: "es",
     },
-    plugins: [swc()],
+    plugins: [swcPlugin],
   }),
   bundle({
     plugins: [dts()],

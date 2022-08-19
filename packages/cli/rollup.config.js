@@ -3,7 +3,7 @@ import swc from "rollup-plugin-swc3";
 const bundle = (config) => ({
   ...config,
   input: "src/index.ts",
-  external: (id) => !/^[./]/.test(id),
+  external: (id) => id === "../package.json" || !/^[./]/.test(id),
 });
 
 export default [
@@ -12,6 +12,12 @@ export default [
       file: `dist/index.mjs`,
       format: "es",
     },
-    plugins: [swc()],
+    plugins: [
+      swc({
+        jsc: {
+          target: "es2021",
+        },
+      }),
+    ],
   }),
 ];
