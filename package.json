@@ -21,6 +21,7 @@
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint . && tsc",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest && lerna run test",
+    "e2e": "lerna run e2e",
     "release": "npm run build && lerna publish --conventional-commits"
   },
   "engines": {

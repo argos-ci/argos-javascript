@@ -32,7 +32,7 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: Test
+      - name: Run integration tests
         run: npm run e2e
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
