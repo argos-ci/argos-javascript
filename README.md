@@ -19,5 +19,5 @@ All Argos JavaScript SDK packages are centralized in that mono-repo, usually ava
 
 For each major JavaScript platform, there is a specific high-level SDK that provides all the tools you need in a single package. Please refer to the README and instructions of those SDKs for more detailed information:
 
-- `@sentry/cli`: interact with and upload screenshots to [argos-ci.com](https://argos-ci.com) via command line
-- `@sentry/core`: SDK for Node.js, the base to create other integrations
+- `@argos-ci/cli`: interact with and upload screenshots to [argos-ci.com](https://argos-ci.com) via command line
+- `@argos-ci/core`: SDK for Node.js, the base to create other integrations
