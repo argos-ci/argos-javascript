@@ -19,7 +19,7 @@
     "build": "cross-env NODE_ENV=production lerna run build",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest && lerna run test",
     "release": "npm run build && lerna publish --conventional-commits"
   },
   "engines": {

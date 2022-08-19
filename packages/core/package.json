@@ -4,14 +4,17 @@
   "version": "0.0.0",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "test": "node ./integrations/upload.cjs && node ./integrations/upload.mjs"
   },
   "type": "module",
+  "main": "./dist/index.cjs",
   "exports": {
     ".": {
+      "require": "./dist/index.cjs",
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -40,6 +43,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "convict": "^6.2.3",
+    "debug": "^4.3.4",
     "env-ci": "^7.3.0",
     "fast-glob": "^3.2.11",
     "sharp": "^0.30.7",

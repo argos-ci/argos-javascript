@@ -30,7 +30,7 @@ const mustBeArgosToken = (value: any) => {
 const schema = {
   apiBaseUrl: {
     env: "ARGOS_API_BASE_URL",
-    default: "https://api.argos-ci.com",
+    default: "https://api.argos-ci.com/v2/",
     format: mustBeApiBaseUrl,
   },
   commit: {

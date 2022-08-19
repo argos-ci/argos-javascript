@@ -1,5 +1,8 @@
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { hashFile } from "./hashing";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 describe("#hashFile", () => {
   it("hashes file", async () => {

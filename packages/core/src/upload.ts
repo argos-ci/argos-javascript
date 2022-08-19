@@ -6,8 +6,9 @@ import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
 import { createArgosApiClient } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
+import { debug } from "./debug";
 
-interface UploadParameters {
+export interface UploadParameters {
   files?: string[];
   cwd?: string;
   ignore?: string[];
@@ -85,6 +86,7 @@ export const upload = async (params: UploadParameters) => {
   });
 
   // Create build
+  debug("Creating build");
   const result = await apiClient.createBuild({
     commit: config.commit,
     branch: config.branch,
@@ -94,7 +96,10 @@ export const upload = async (params: UploadParameters) => {
     screenshotKeys: screenshots.map((screenshot) => screenshot.hash),
   });
 
+  debug("Got screenshots", result);
+
   // Upload screenshots
+  debug("Uploading screenshots");
   await Promise.all(
     result.screenshots.map(async ({ key, putUrl }) => {
       const screenshot = screenshots.find((s) => s.hash === key);
@@ -106,6 +111,7 @@ export const upload = async (params: UploadParameters) => {
   );
 
   // Update build
+  debug("Updating build");
   await apiClient.updateBuild({
     buildId: result.build.id,
     screenshots: screenshots.map((screenshot) => ({

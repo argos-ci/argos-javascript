@@ -1,6 +1,9 @@
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { upload } from "./upload";
 import { setupJest } from "../mocks/server";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 setupJest();
 

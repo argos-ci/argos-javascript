@@ -1,6 +1,9 @@
 import { join } from "node:path";
-import { stat } from "fs/promises";
+import { fileURLToPath } from "node:url";
+import { stat } from "node:fs/promises";
 import { optimizeScreenshot } from "./optimize";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const exists = async (filepath: string) => {
   try {
