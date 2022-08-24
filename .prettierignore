@@ -7,3 +7,4 @@ dist
 /packages/gatsby-plugin-screenshot/index.js
 /packages/gatsby-plugin-screenshot/gatsby-node.js
 /packages/argos-cli/lib
+/docs

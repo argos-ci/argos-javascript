@@ -9,17 +9,28 @@ import { upload as uploadToS3 } from "./s3";
 import { debug } from "./debug";
 
 export interface UploadParameters {
+  /** Globs matching image file paths to upload */
   files?: string[];
+  /** Root directory to look for image to upload (default to current directory) */
   root?: string;
+  /** Globs matching image file paths to ignore (default to "**\/*.{png,jpg,jpeg}") */
   ignore?: string[];
+  /** Base URL of Argos API (default to "https://api.argos-ci.com/v2/") */
   apiBaseUrl?: string;
+  /** Git commit */
   commit?: string;
+  /** Git branch */
   branch?: string;
+  /** Argos repository token */
   token?: string;
+  /** Name of the build used to trigger multiple Argos builds on one commit */
   buildName?: string;
+  /** Parallel test suite mode */
   parallel?:
     | {
+        /** Unique build ID for this parallel build */
         nonce: string;
+        /** The number of parallel nodes being ran */
         total: number;
       }
     | false;
@@ -60,6 +71,9 @@ const getConfigFromOptions = (options: UploadParameters) => {
   return config.get();
 };
 
+/**
+ * Upload screenshots to argos-ci.com.
+ */
 export const upload = async (params: UploadParameters) => {
   // Read config
   const config = getConfigFromOptions(params);
