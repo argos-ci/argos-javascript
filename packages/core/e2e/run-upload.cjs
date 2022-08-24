@@ -3,14 +3,14 @@ const { join } = require("node:path");
 /**
  * Run upload command.
  * @param {typeof import('../src/index').upload} implementation
- * @param {string} name
+ * @param {string} buildName
  */
-const runUpload = async (implementation, name) => {
+const runUpload = async (implementation, buildName) => {
   try {
     const result = await implementation({
       root: join(__dirname, "../../../__fixtures__/screenshots"),
       token: process.env.ARGOS_TOKEN,
-      name,
+      buildName,
     });
     console.log(result);
   } catch (err) {
