@@ -16,4 +16,5 @@ Argos Core JavaScript SDK contains interface definitions, base classes and utili
 
 ## Links
 
-- [Official SDK Docs](https://docs.argos-ci.com/)
+- [Official SDK Docs](https://docs.argos-ci.com)
+- [API Reference](https://js-sdk-reference.argos-ci.com)
