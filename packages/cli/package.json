@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "e2e": "node ./bin/argos-cli.js upload ../../__fixtures__ --build-name argos-cli-e2e"
+    "e2e": "npx @argos-ci/cli upload ../../__fixtures__ --build-name argos-cli-e2e"
   },
   "type": "module",
   "exports": {
