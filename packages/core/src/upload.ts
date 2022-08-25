@@ -107,7 +107,9 @@ export const upload = async (params: UploadParameters) => {
     name: config.buildName,
     parallel: config.parallel,
     parallelNonce: config.parallelNonce,
-    screenshotKeys: screenshots.map((screenshot) => screenshot.hash),
+    screenshotKeys: Array.from(
+      new Set(screenshots.map((screenshot) => screenshot.hash))
+    ),
   });
 
   debug("Got screenshots", result);

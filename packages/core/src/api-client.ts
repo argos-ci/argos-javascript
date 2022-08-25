@@ -68,7 +68,11 @@ export const createArgosApiClient = (
         data,
       });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.response?.data?.error?.message) {
+        // @ts-ignore
+        throw new Error(error.response.data.error.message, { cause: error });
+      }
       throw error;
     }
   };
