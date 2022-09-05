@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "target": "es2021",
+    "parser": {
+      "syntax": "typescript"
+    }
+  }
+}

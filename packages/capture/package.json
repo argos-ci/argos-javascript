@@ -1,0 +1,49 @@
+{
+  "name": "@argos-ci/capture",
+  "description": "Capture screenshots of website. Part of Argos SDK.",
+  "version": "0.2.0",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/capture"
+  },
+  "homepage": "https://github.com/argos-ci/argos-javascript/tree/main/packages/capture#readme",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
+  "engines": {
+    "node": ">=16.14.0"
+  },
+  "license": "MIT",
+  "keywords": [
+    "argos",
+    "capture"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "filenamify-url": "^3.0.0",
+    "mkdirp": "^1.0.4",
+    "puppeteer": "^17.1.0"
+  },
+  "devDependencies": {
+    "rollup": "^2.78.0",
+    "rollup-plugin-dts": "^4.2.2",
+    "rollup-plugin-swc3": "^0.3.0"
+  }
+}
