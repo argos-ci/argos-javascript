@@ -7,9 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  static:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,6 +25,29 @@ jobs:
       - name: Lint
         run: npm run lint
 
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [14, 16]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install last npm version
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build
         run: npm run build
 
@@ -36,3 +58,4 @@ jobs:
         run: npm run e2e
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
