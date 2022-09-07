@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.3.0...@argos-ci/core@0.4.0) (2022-09-07)
+
+
+### Bug Fixes
+
+* **core:** use correct content-type for image ([22625c0](https://github.com/argos-ci/argos-javascript/commit/22625c0faa6562946298fe0850a1b24b4bd44715))
+
+
+### Features
+
+* **core:** optimize compression ([d27e96b](https://github.com/argos-ci/argos-javascript/commit/d27e96b0b8edd1d87d6774b9b9fbfd0f0e225bd9))
+
+
+
+
+
 # [0.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.2.0...@argos-ci/core@0.3.0) (2022-09-06)
 
 
