@@ -2,7 +2,7 @@ import { createConfig } from "./config";
 import { omitUndefined } from "./util";
 import { getCiEnvironment } from "./ci-environment";
 import { discoverScreenshots } from "./discovery";
-import { optimizeScreenshot } from "./optimize";
+import { optimizeScreenshot, getImageFormat } from "./optimize";
 import { hashFile } from "./hashing";
 import { createArgosApiClient } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
@@ -88,9 +88,10 @@ export const upload = async (params: UploadParameters) => {
   // Optimize & compute hashes
   const screenshots = await Promise.all(
     foundScreenshots.map(async (screenshot) => {
-      const optimizedPath = await optimizeScreenshot(screenshot.path);
+      const format = await getImageFormat(screenshot.path);
+      const optimizedPath = await optimizeScreenshot(screenshot.path, format);
       const hash = await hashFile(optimizedPath);
-      return { ...screenshot, optimizedPath, hash };
+      return { ...screenshot, optimizedPath, format, hash };
     })
   );
 
@@ -122,7 +123,11 @@ export const upload = async (params: UploadParameters) => {
       if (!screenshot) {
         throw new Error(`Invariant: screenshot with hash ${key} not found`);
       }
-      await uploadToS3({ url: putUrl, path: screenshot.optimizedPath });
+      await uploadToS3({
+        url: putUrl,
+        path: screenshot.optimizedPath,
+        format: screenshot.format,
+      });
     })
   );
 
