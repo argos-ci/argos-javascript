@@ -5,10 +5,25 @@ import tmp from "tmp";
 const tmpFile = promisify<string>(tmp.file);
 
 export const optimizeScreenshot = async (filepath: string) => {
-  const resultFilePath = await tmpFile();
-  await sharp(filepath)
-    .resize(1024, 1024, { fit: "inside", withoutEnlargement: true })
-    .jpeg()
-    .toFile(resultFilePath);
+  const [resultFilePath, metadata] = await Promise.all([
+    tmpFile(),
+    sharp(filepath).metadata(),
+  ]);
+  const optimization = sharp(filepath).resize(2048, 20480, {
+    fit: "inside",
+    withoutEnlargement: true,
+  });
+  switch (metadata.format) {
+    case "jpeg":
+    case "jpg": {
+      optimization.jpeg();
+      break;
+    }
+    case "png": {
+      optimization.png();
+      break;
+    }
+  }
+  await optimization.toFile(resultFilePath);
   return resultFilePath;
 };
