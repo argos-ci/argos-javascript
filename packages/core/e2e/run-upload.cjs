@@ -19,6 +19,8 @@ const runUpload = async (implementation, buildName) => {
       if (err.response?.data?.message) {
         console.error(err.response?.data?.message);
       }
+    } else {
+      console.error(err);
     }
     process.exit(1);
   }
