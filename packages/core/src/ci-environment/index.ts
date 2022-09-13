@@ -26,7 +26,7 @@ export const getCiEnvironment = ({
     ? "Git"
     : null;
   const commit = ciContext.commit ?? null;
-  const branch = ciContext.branch ?? null;
+  const branch = (ciContext.branch || ciContext.prBranch) ?? null;
 
   return commit ? { name, commit, branch } : null;
 };
