@@ -11,25 +11,27 @@ const getSha = ({ env }: Context) => {
     const mergeCommitMessage = execSync("git show --no-patch --format=%P")
       .toString()
       .trim();
-    console.log(
-      `Handling PR with parent hash(es) '${mergeCommitMessage}' of current commit.`
-    );
+    // console.log(
+    //   `Handling PR with parent hash(es) '${mergeCommitMessage}' of current commit.`
+    // );
     if (mergeCommitRegex.exec(mergeCommitMessage)) {
       const mergeCommit = mergeCommitMessage.split(" ")[1];
-      console.log(
-        `Fixing merge commit SHA ${process.env.GITHUB_SHA} -> ${mergeCommit}`
-      );
+      // console.log(
+      //   `Fixing merge commit SHA ${process.env.GITHUB_SHA} -> ${mergeCommit}`
+      // );
       return mergeCommit;
     } else if (mergeCommitMessage === "") {
       console.error(
-        `
-Issue detecting commit SHA. Please run actions/checkout with "fetch-depth: 2":
+        `Error: automatic detection of commit SHA failed.
 
-steps:
-  - uses: actions/checkout@v3
-    with:
-      fetch-depth: 2
-`.trim()
+Please run "actions/checkout" with "fetch-depth: 2". Example:
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+`
       );
       process.exit(1);
     } else {
