@@ -10,6 +10,9 @@ export interface CiEnvironment {
   name: string | null;
   commit: string | null;
   branch: string | null;
+  owner: string | null;
+  repository: string | null;
+  jobId: string | null;
 }
 
 export interface Service {

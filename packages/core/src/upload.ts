@@ -4,7 +4,7 @@ import { getCiEnvironment } from "./ci-environment";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot, getImageFormat } from "./optimize";
 import { hashFile } from "./hashing";
-import { createArgosApiClient } from "./api-client";
+import { createArgosApiClient, getBearerToken } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
 import { debug } from "./debug";
 
@@ -61,6 +61,9 @@ const getConfigFromOptions = (options: UploadParameters) => {
           commit: ciEnv.commit,
           branch: ciEnv.branch,
           ciService: ciEnv.name,
+          owner: ciEnv.owner,
+          repository: ciEnv.repository,
+          jobId: ciEnv.jobId,
         })
       );
     }
@@ -79,6 +82,11 @@ export const upload = async (params: UploadParameters) => {
   const config = getConfigFromOptions(params);
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
 
+  const apiClient = createArgosApiClient({
+    baseUrl: config.apiBaseUrl,
+    bearerToken: getBearerToken(config),
+  });
+
   // Collect screenshots
   const foundScreenshots = await discoverScreenshots(files, {
     root: params.root,
@@ -94,11 +102,6 @@ export const upload = async (params: UploadParameters) => {
       return { ...screenshot, optimizedPath, format, hash };
     })
   );
-
-  const apiClient = createArgosApiClient({
-    baseUrl: config.apiBaseUrl,
-    token: config.token,
-  });
 
   // Create build
   debug("Creating build");

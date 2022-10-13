@@ -22,7 +22,7 @@ const mustBeCommit = (value: any) => {
 };
 
 const mustBeArgosToken = (value: any) => {
-  if (value.length !== 40) {
+  if (value && value.length !== 40) {
     throw new Error("Must be a valid Argos repository token");
   }
 };
@@ -46,7 +46,7 @@ const schema = {
   },
   token: {
     env: "ARGOS_TOKEN",
-    default: "",
+    default: null,
     format: mustBeArgosToken,
   },
   buildName: {
@@ -77,17 +77,35 @@ const schema = {
     default: null,
     nullable: true,
   },
+  jobId: {
+    format: String,
+    default: null,
+    nullable: true,
+  },
+  owner: {
+    format: String,
+    default: null,
+    nullable: true,
+  },
+  repository: {
+    format: String,
+    default: null,
+    nullable: true,
+  },
 };
 
 export interface Config {
   apiBaseUrl: string;
   commit: string;
   branch: string | null;
-  token: string;
+  token: string | null;
   buildName: string | null;
   parallel: boolean;
   parallelNonce: string | null;
   parallelTotal: number | null;
+  owner: string | null;
+  repository: string | null;
+  jobId: string | null;
 }
 
 export const createConfig = () => {

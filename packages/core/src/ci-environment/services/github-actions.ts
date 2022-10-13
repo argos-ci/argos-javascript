@@ -62,9 +62,12 @@ function getBranch({ env }: Context) {
 const service: Service = {
   detect: ({ env }) => Boolean(env.GITHUB_ACTIONS),
   config: ({ env }) => ({
-    name: "GiHub Actions",
+    name: "GitHub Actions",
     commit: getSha({ env }),
     branch: getBranch({ env }),
+    owner: env.GITHUB_REPOSITORY_OWNER || null,
+    repository: env.GITHUB_REPOSITORY || null,
+    jobId: env.GITHUB_JOB || null,
   }),
 };
 

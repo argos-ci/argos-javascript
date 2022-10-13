@@ -2,7 +2,7 @@ import axios from "axios";
 
 export interface ApiClientOptions {
   baseUrl: string;
-  token: string;
+  bearerToken: string;
 }
 
 export interface CreateBuildInput {
@@ -44,13 +44,51 @@ export interface ArgosApiClient {
   updateBuild: (input: UpdateBuildInput) => Promise<UpdateBuildOutput>;
 }
 
+const base64Encode = (obj: any) =>
+  Buffer.from(JSON.stringify(obj), "utf8").toString("base64");
+
+export const getBearerToken = ({
+  token,
+  ciService,
+  owner,
+  repository,
+  jobId,
+}: {
+  token?: string | null;
+  ciService?: string | null;
+  owner?: string | null;
+  repository?: string | null;
+  jobId?: string | null;
+}) => {
+  if (token) return `Bearer ${token}`;
+
+  switch (ciService) {
+    case "GitHub Actions": {
+      if (!owner || !repository || !jobId) {
+        throw new Error(
+          `Automatic ${ciService} variables detection failed. Please add the 'ARGOS_TOKEN'`
+        );
+      }
+
+      return `Bearer tokenless-github-${base64Encode({
+        owner,
+        repository,
+        jobId,
+      })}`;
+    }
+
+    default:
+      throw new Error("Missing Argos repository token 'ARGOS_TOKEN'");
+  }
+};
+
 export const createArgosApiClient = (
   options: ApiClientOptions
 ): ArgosApiClient => {
   const axiosInstance = axios.create({
     baseURL: options.baseUrl,
     headers: {
-      Authorization: `Bearer ${options.token}`,
+      Authorization: options.bearerToken,
       "Content-Type": "application/json",
       Accept: "application/json",
     },

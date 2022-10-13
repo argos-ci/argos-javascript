@@ -27,6 +27,10 @@ export const getCiEnvironment = ({
     : null;
   const commit = ciContext.commit ?? null;
   const branch = (ciContext.branch || ciContext.prBranch) ?? null;
+  const slug = ciContext.slug ? ciContext.slug.split("/") : null;
+  const owner = slug ? slug[0] : null;
+  const repository = slug ? slug[1] : null;
+  const jobId = ciContext.job ?? null;
 
-  return commit ? { name, commit, branch } : null;
+  return commit ? { name, commit, branch, owner, repository, jobId } : null;
 };
