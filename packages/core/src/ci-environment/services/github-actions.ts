@@ -59,6 +59,12 @@ function getBranch({ env }: Context) {
   return null;
 }
 
+function getRepository({ env }: Context) {
+  if (!env.GITHUB_REPOSITORY_OWNER) return null;
+  const [, ...repositoryParts] = env.GITHUB_REPOSITORY_OWNER.split("/");
+  return repositoryParts.join("/");
+}
+
 const service: Service = {
   detect: ({ env }) => Boolean(env.GITHUB_ACTIONS),
   config: ({ env }) => ({
@@ -66,8 +72,9 @@ const service: Service = {
     commit: getSha({ env }),
     branch: getBranch({ env }),
     owner: env.GITHUB_REPOSITORY_OWNER || null,
-    repository: env.GITHUB_REPOSITORY || null,
+    repository: getRepository({ env }),
     jobId: env.GITHUB_JOB || null,
+    runId: env.GITHUB_RUN_ID || null,
   }),
 };
 

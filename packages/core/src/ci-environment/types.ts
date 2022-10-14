@@ -13,6 +13,7 @@ export interface CiEnvironment {
   owner: string | null;
   repository: string | null;
   jobId: string | null;
+  runId: string | null;
 }
 
 export interface Service {

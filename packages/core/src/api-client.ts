@@ -53,18 +53,20 @@ export const getBearerToken = ({
   owner,
   repository,
   jobId,
+  runId,
 }: {
   token?: string | null;
   ciService?: string | null;
   owner?: string | null;
   repository?: string | null;
   jobId?: string | null;
+  runId?: string | null;
 }) => {
   if (token) return `Bearer ${token}`;
 
   switch (ciService) {
     case "GitHub Actions": {
-      if (!owner || !repository || !jobId) {
+      if (!owner || !repository || !jobId || !runId) {
         throw new Error(
           `Automatic ${ciService} variables detection failed. Please add the 'ARGOS_TOKEN'`
         );
@@ -74,6 +76,7 @@ export const getBearerToken = ({
         owner,
         repository,
         jobId,
+        runId,
       })}`;
     }
 
