@@ -82,6 +82,11 @@ const schema = {
     default: null,
     nullable: true,
   },
+  runId: {
+    format: String,
+    default: null,
+    nullable: true,
+  },
   owner: {
     format: String,
     default: null,
@@ -106,6 +111,7 @@ export interface Config {
   owner: string | null;
   repository: string | null;
   jobId: string | null;
+  runId: string | null;
 }
 
 export const createConfig = () => {

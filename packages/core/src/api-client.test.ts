@@ -117,6 +117,7 @@ describe("#getBearerToken", () => {
           owner: "this-owner",
           repository: "this-repository",
           jobId: "this-jobId",
+          runId: "12345",
         };
 
         const base64 = Buffer.from(
@@ -124,6 +125,7 @@ describe("#getBearerToken", () => {
             owner: config.owner,
             repository: config.repository,
             jobId: config.jobId,
+            runId: config.runId,
           }),
           "utf8"
         ).toString("base64");
@@ -132,7 +134,7 @@ describe("#getBearerToken", () => {
 
         expect(bearerToken).toBe(`Bearer tokenless-github-${base64}`);
         expect(bearerToken).toBe(
-          "Bearer tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIn0="
+          "Bearer tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9"
         );
       });
     });

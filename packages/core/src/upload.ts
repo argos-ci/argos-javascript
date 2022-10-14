@@ -64,6 +64,7 @@ const getConfigFromOptions = (options: UploadParameters) => {
           owner: ciEnv.owner,
           repository: ciEnv.repository,
           jobId: ciEnv.jobId,
+          runId: ciEnv.runId,
         })
       );
     }

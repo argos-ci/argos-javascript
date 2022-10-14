@@ -15,6 +15,7 @@ describe("#createConfig", () => {
       parallelTotal: null,
       ciService: null,
       jobId: null,
+      runId: null,
       repository: null,
       owner: null,
     });

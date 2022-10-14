@@ -31,6 +31,9 @@ export const getCiEnvironment = ({
   const owner = slug ? slug[0] : null;
   const repository = slug ? slug[1] : null;
   const jobId = ciContext.job ?? null;
+  const runId = null;
 
-  return commit ? { name, commit, branch, owner, repository, jobId } : null;
+  return commit
+    ? { name, commit, branch, owner, repository, jobId, runId }
+    : null;
 };
