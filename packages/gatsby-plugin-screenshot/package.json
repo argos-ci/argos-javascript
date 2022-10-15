@@ -12,18 +12,18 @@
     "screenshot"
   ],
   "dependencies": {
-    "@babel/runtime": "^7.18.9",
+    "@babel/runtime": "^7.19.4",
     "cross-spawn": "^7.0.3",
     "lodash.kebabcase": "^4.1.1",
     "mkdirp": "^1.0.4",
-    "puppeteer": "^16.1.0",
+    "puppeteer": "^19.0.0",
     "wait-on": "^6.0.1"
   },
   "peerDependencies": {
     "gatsby": "^4.0.0"
   },
   "devDependencies": {
-    "babel-preset-gatsby-package": "^2.20.0"
+    "babel-preset-gatsby-package": "^2.24.0"
   },
   "engines": {
     "node": ">=14.0.0"

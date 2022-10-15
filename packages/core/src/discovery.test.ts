@@ -1,8 +1,8 @@
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+// import { fileURLToPath } from "node:url";
 import { discoverScreenshots } from "./discovery";
 
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
+// const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 describe("#discoverScreenshots", () => {
   it("finds all images", async () => {

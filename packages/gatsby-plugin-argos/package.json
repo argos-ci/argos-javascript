@@ -14,8 +14,7 @@
     "screenshot"
   ],
   "dependencies": {
-    "argos-cli": "^0.1.0",
-    "cross-spawn": "^7.0.1",
+    "@argos-ci/core": "^0.4.1",
     "rimraf": "^3.0.2",
     "tmp": "^0.2.1"
   },
@@ -26,7 +25,7 @@
     "gatsby-plugin-screenshot": "^2.1.0"
   },
   "devDependencies": {
-    "babel-preset-gatsby-package": "^2.20.0"
+    "babel-preset-gatsby-package": "^2.24.0"
   },
   "engines": {
     "node": ">=14.0.0"

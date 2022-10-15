@@ -1,6 +1,6 @@
 import tmp from "tmp";
 import rimraf from "rimraf";
-import spawn from "cross-spawn";
+import { upload } from "@argos-ci/core";
 import { onPostBuild as onPostBuildScreenshot } from "gatsby-plugin-screenshot/gatsby-node";
 
 async function takeScreenshots(fn, gatsbyParams, options) {
@@ -18,36 +18,12 @@ async function runArgosCLI({ reporter }, options) {
   const activity = reporter.activityTimer("upload to Argos");
   activity.start();
 
-  const child = spawn(
-    "node_modules/.bin/argos",
-    [
-      "upload",
-      "--branch",
-      options.branch,
-      "--commit",
-      options.commit,
-      "--token",
-      options.token,
-      options.dir,
-    ],
-    {
-      shell: true,
-    }
-  );
-
-  let error = "";
-  child.stderr.on("data", (data) => {
-    error += String(data);
+  await upload({
+    branch: options.branch,
+    commit: options.commit,
+    token: options.token,
+    root: options.dir,
   });
-
-  await Promise.race([
-    new Promise((resolve, reject) => {
-      child.on("error", reject);
-    }),
-    new Promise((resolve, reject) => {
-      child.on("exit", (code) => (code ? reject(new Error(error)) : resolve()));
-    }),
-  ]);
 
   activity.end();
 }
