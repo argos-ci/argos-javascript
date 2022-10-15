@@ -13,7 +13,7 @@ export interface UploadParameters {
   files?: string[];
   /** Root directory to look for image to upload (default to current directory) */
   root?: string;
-  /** Globs matching image file paths to ignore (default to "**\/*.{png,jpg,jpeg}") */
+  /** Globs matching image file paths to ignore (default to "**\/*.\{png,jpg,jpeg\}") */
   ignore?: string[];
   /** Base URL of Argos API (default to "https://api.argos-ci.com/v2/") */
   apiBaseUrl?: string;
