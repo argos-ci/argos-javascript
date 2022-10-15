@@ -60,9 +60,8 @@ function getBranch({ env }: Context) {
 }
 
 function getRepository({ env }: Context) {
-  if (!env.GITHUB_REPOSITORY_OWNER) return null;
-  const [, ...repositoryParts] = env.GITHUB_REPOSITORY_OWNER.split("/");
-  return repositoryParts.join("/");
+  if (!env.GITHUB_REPOSITORY) return null;
+  return env.GITHUB_REPOSITORY.split("/")[1];
 }
 
 const service: Service = {
