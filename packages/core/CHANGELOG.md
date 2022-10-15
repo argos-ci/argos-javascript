@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.5.0...@argos-ci/core@0.5.1) (2022-10-15)
+
+### Bug Fixes
+
+- **ci:** fix repository detection in GitHub Actions ([46ed1b9](https://github.com/argos-ci/argos-javascript/commit/46ed1b99228c8e2d9c17b698b0f0c39f813fd0ca))
+
 # [0.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.4.1...@argos-ci/core@0.5.0) (2022-10-15)
 
 ### Features
