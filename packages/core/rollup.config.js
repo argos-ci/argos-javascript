@@ -1,5 +1,5 @@
 import dts from "rollup-plugin-dts";
-import swc from "rollup-plugin-swc3";
+import { swc, defineRollupSwcOption } from "rollup-plugin-swc3";
 
 const bundle = (config) => ({
   input: "src/index.ts",
@@ -9,11 +9,16 @@ const bundle = (config) => ({
   ...config,
 });
 
-const swcPlugin = swc({
-  jsc: {
-    target: "es2021",
-  },
-});
+const swcPlugin = swc(
+  defineRollupSwcOption({
+    jsc: {
+      target: "es2021",
+      parser: {
+        syntax: "typescript",
+      },
+    },
+  })
+);
 
 export default [
   bundle({

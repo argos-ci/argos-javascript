@@ -1,4 +1,4 @@
-import swc from "rollup-plugin-swc3";
+import { swc, defineRollupSwcOption } from "rollup-plugin-swc3";
 
 const bundle = (config) => ({
   ...config,
@@ -6,18 +6,23 @@ const bundle = (config) => ({
   external: (id) => id === "../package.json" || !/^[./]/.test(id),
 });
 
+const swcPlugin = swc(
+  defineRollupSwcOption({
+    jsc: {
+      target: "es2021",
+      parser: {
+        syntax: "typescript",
+      },
+    },
+  })
+);
+
 export default [
   bundle({
     output: {
       file: `dist/index.mjs`,
       format: "es",
     },
-    plugins: [
-      swc({
-        jsc: {
-          target: "es2021",
-        },
-      }),
-    ],
+    plugins: [swcPlugin],
   }),
 ];
