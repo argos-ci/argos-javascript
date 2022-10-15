@@ -1,12 +1,13 @@
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { program } from "commander";
 import { upload } from "@argos-ci/core";
 import ora from "ora";
 
-const rawPkg = await readFile(
-  new URL("../package.json", import.meta.url).pathname,
-  "utf8"
-);
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
+const rawPkg = await readFile(resolve(__dirname, "..", "package.json"), "utf8");
 const pkg = JSON.parse(rawPkg);
 
 program

@@ -25,12 +25,13 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  tests:
-    runs-on: ubuntu-latest
+  unit:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14, 16]
+        node-version: [14, 16, 18]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
@@ -43,6 +44,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install last npm version
+        if: ${{ matrix.node-version == 14 }}
         run: npm install -g npm@latest
 
       - name: Install dependencies
@@ -53,6 +55,37 @@ jobs:
 
       - name: Test
         run: npm run test
+
+  e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [14, 16, 18]
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install last npm version
+        if: ${{ matrix.node-version == 14 }}
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - run: cat packages/core/dist/index.mjs
 
       - name: Run integration tests
         run: npm run e2e
