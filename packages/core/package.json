@@ -45,7 +45,7 @@
     "access": "public"
   },
   "dependencies": {
-    "axios": "^1.1.2",
+    "axios": "1.1.2",
     "convict": "^6.2.3",
     "debug": "^4.3.4",
     "env-ci": "^7.3.0",
