@@ -13,7 +13,7 @@ All Argos JavaScript SDK packages are centralized in that mono-repo, usually ava
 ## Links
 
 - [Official SDK Docs](https://docs.argos-ci.com/)
-- [Discord](https://discord.gg/pK79sv85Vg)
+- [Discord](https://discord.gg/WjzGrQGS4A)
 
 ## Supported environments
 
