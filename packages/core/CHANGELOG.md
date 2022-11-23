@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.5.1...@argos-ci/core@0.6.0) (2022-11-23)
+
+### Features
+
+- **cli:** log stack when an error occurs ([0c47590](https://github.com/argos-ci/argos-javascript/commit/0c47590879fbff1ab6ae9ca01390bc14059e3c91))
+
 ## [0.5.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.5.0...@argos-ci/core@0.5.1) (2022-10-15)
 
 ### Bug Fixes

@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/core",
   "description": "Visual testing solution to avoid visual regression. The core component of Argos SDK that handles build creation.",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
