@@ -65,6 +65,7 @@ const getConfigFromOptions = (options: UploadParameters) => {
           repository: ciEnv.repository,
           jobId: ciEnv.jobId,
           runId: ciEnv.runId,
+          prNumber: ciEnv.prNumber,
         })
       );
     }
