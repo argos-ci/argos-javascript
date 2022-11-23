@@ -56,6 +56,7 @@ program
       spinner.succeed(`Build created: ${result.build.url}`);
     } catch (error: any) {
       spinner.fail(`Build failed: ${error.message}`);
+      console.error(error.stack);
       process.exit(1);
     }
   });
