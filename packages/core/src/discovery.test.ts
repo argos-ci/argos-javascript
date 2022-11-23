@@ -5,6 +5,12 @@ import { discoverScreenshots } from "./discovery";
 // const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 describe("#discoverScreenshots", () => {
+  it("returns empty array if no screenshots are found", async () => {
+    const screenshots = await discoverScreenshots(["**/*.{png,jpg,jpeg}"], {
+      root: join(__dirname, "../../../__fixtures__/not-found"),
+    });
+    expect(screenshots).toEqual([]);
+  });
   it("finds all images", async () => {
     const screenshots = await discoverScreenshots(["**/*.{png,jpg,jpeg}"], {
       root: join(__dirname, "../../../__fixtures__/screenshots"),
