@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.6.0...@argos-ci/core@0.6.1) (2022-11-23)
+
+### Bug Fixes
+
+- stabilize axios version ([2a1d487](https://github.com/argos-ci/argos-javascript/commit/2a1d487756d01bfc93ae2371cf361c96c5d087b9))
+
 # [0.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.5.1...@argos-ci/core@0.6.0) (2022-11-23)
 
 ### Features
