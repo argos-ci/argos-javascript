@@ -2,11 +2,12 @@ import envCi from "env-ci";
 import heroku from "./services/heroku";
 import githubActions from "./services/github-actions";
 import circleci from "./services/circleci";
+import travis from "./services/travis";
 import type { CiEnvironment, Options, Context } from "./types";
 
 export { CiEnvironment };
 
-const services = [heroku, githubActions, circleci];
+const services = [heroku, githubActions, circleci, travis];
 
 export const envCiDetection = (ctx: Context) => {
   const ciContext = envCi(ctx);
