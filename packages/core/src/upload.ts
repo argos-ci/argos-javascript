@@ -2,7 +2,7 @@ import { createConfig } from "./config";
 import { omitUndefined } from "./util";
 import { getCiEnvironment } from "./ci-environment";
 import { discoverScreenshots } from "./discovery";
-import { optimizeScreenshot, getImageFormat } from "./optimize";
+import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
 import { createArgosApiClient, getBearerToken } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
@@ -97,10 +97,9 @@ export const upload = async (params: UploadParameters) => {
   // Optimize & compute hashes
   const screenshots = await Promise.all(
     foundScreenshots.map(async (screenshot) => {
-      const format = await getImageFormat(screenshot.path);
-      const optimizedPath = await optimizeScreenshot(screenshot.path, format);
+      const optimizedPath = await optimizeScreenshot(screenshot.path);
       const hash = await hashFile(optimizedPath);
-      return { ...screenshot, optimizedPath, format, hash };
+      return { ...screenshot, optimizedPath, hash };
     })
   );
 
@@ -130,7 +129,6 @@ export const upload = async (params: UploadParameters) => {
       await uploadToS3({
         url: putUrl,
         path: screenshot.optimizedPath,
-        format: screenshot.format,
       });
     })
   );
