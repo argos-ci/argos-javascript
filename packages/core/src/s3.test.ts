@@ -10,7 +10,7 @@ setupJest();
 describe("#upload", () => {
   it("uploads", async () => {
     await upload({
-      path: join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg"),
+      path: join(__dirname, "../../../__fixtures__/screenshots/penelope.png"),
       url: "https://api.s3.dev/upload/123",
     });
   });
