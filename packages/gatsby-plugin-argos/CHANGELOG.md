@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.5](https://github.com/argos-ci/argos-javascript/compare/gatsby-plugin-argos@2.1.4...gatsby-plugin-argos@2.1.5) (2022-12-10)
+
+**Note:** Version bump only for package gatsby-plugin-argos
+
 ## [2.1.4](https://github.com/argos-ci/argos-javascript/compare/gatsby-plugin-argos@2.1.3...gatsby-plugin-argos@2.1.4) (2022-11-23)
 
 **Note:** Version bump only for package gatsby-plugin-argos
