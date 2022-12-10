@@ -21,7 +21,6 @@ describe("#upload", () => {
       screenshots: [
         {
           name: "penelope.jpg",
-          format: "jpeg",
           path: expect.stringMatching(
             /__fixtures__\/screenshots\/penelope\.jpg$/
           ),
@@ -29,8 +28,15 @@ describe("#upload", () => {
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
         },
         {
+          name: "penelope.png",
+          path: expect.stringMatching(
+            /__fixtures__\/screenshots\/penelope\.png$/
+          ),
+          optimizedPath: expect.any(String),
+          hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
+        },
+        {
           name: "nested/alicia.jpg",
-          format: "jpeg",
           path: expect.stringMatching(
             /__fixtures__\/screenshots\/nested\/alicia\.jpg$/
           ),

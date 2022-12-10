@@ -21,6 +21,10 @@ describe("#discoverScreenshots", () => {
         path: join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg"),
       },
       {
+        name: "penelope.png",
+        path: join(__dirname, "../../../__fixtures__/screenshots/penelope.png"),
+      },
+      {
         name: "nested/alicia.jpg",
         path: join(
           __dirname,
@@ -39,6 +43,10 @@ describe("#discoverScreenshots", () => {
       {
         name: "penelope.jpg",
         path: join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg"),
+      },
+      {
+        name: "penelope.png",
+        path: join(__dirname, "../../../__fixtures__/screenshots/penelope.png"),
       },
     ]);
   });
