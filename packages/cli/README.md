@@ -16,4 +16,4 @@ Argos CLI is used to interact with and upload screenshots to [argos-ci.com](http
 
 ## Links
 
-- [Official CLI Docs](https://docs.argos-ci.com)
+- [Official CLI Docs](https://argos-ci.com/docs)
