@@ -23,6 +23,8 @@ export interface UploadParameters {
   branch?: string;
   /** Argos repository token */
   token?: string;
+  /** Pull-request number */
+  prNumber?: number;
   /** Name of the build used to trigger multiple Argos builds on one commit */
   buildName?: string;
   /** Parallel test suite mode */
@@ -37,7 +39,8 @@ export interface UploadParameters {
 }
 
 const getConfigFromOptions = (options: UploadParameters) => {
-  const { apiBaseUrl, commit, branch, token, buildName, parallel } = options;
+  const { apiBaseUrl, commit, branch, token, buildName, parallel, prNumber } =
+    options;
 
   const config = createConfig();
   config.load(
@@ -46,6 +49,7 @@ const getConfigFromOptions = (options: UploadParameters) => {
       commit,
       branch,
       token,
+      prNumber,
       buildName,
       parallel: Boolean(parallel),
       parallelNonce: parallel ? parallel.nonce : null,
