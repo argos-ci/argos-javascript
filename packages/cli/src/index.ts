@@ -50,7 +50,7 @@ program
         buildName: options.buildName,
         files: options.files,
         ignore: options.ignore,
-        prNumber: options.pullRequest,
+        prNumber: options.pullRequest ? Number(options.pullRequest) : undefined,
         parallel: options.parallel
           ? { nonce: options.parallelNonce, total: options.parallelTotal }
           : false,

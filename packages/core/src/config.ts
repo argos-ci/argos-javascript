@@ -88,7 +88,7 @@ const schema = {
     nullable: true,
   },
   prNumber: {
-    format: String,
+    format: Number,
     default: null,
     nullable: true,
   },
