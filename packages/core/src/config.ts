@@ -88,7 +88,7 @@ const schema = {
     nullable: true,
   },
   prNumber: {
-    format: String,
+    format: Number,
     default: null,
     nullable: true,
   },
@@ -117,7 +117,7 @@ export interface Config {
   repository: string | null;
   jobId: string | null;
   runId: string | null;
-  prNumber: string | null;
+  prNumber: number | null;
 }
 
 export const createConfig = () => {

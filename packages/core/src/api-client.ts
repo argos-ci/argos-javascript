@@ -12,6 +12,7 @@ export interface CreateBuildInput {
   name?: string | null;
   parallel?: boolean | null;
   parallelNonce?: string | null;
+  prNumber?: number | null;
 }
 
 export interface CreateBuildOutput {
@@ -62,7 +63,7 @@ export const getBearerToken = ({
   repository?: string | null;
   jobId?: string | null;
   runId?: string | null;
-  prNumber?: string | null;
+  prNumber?: number | null;
 }) => {
   if (token) return `Bearer ${token}`;
 

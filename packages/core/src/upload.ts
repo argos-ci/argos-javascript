@@ -39,41 +39,37 @@ export interface UploadParameters {
 }
 
 const getConfigFromOptions = (options: UploadParameters) => {
-  const { apiBaseUrl, commit, branch, token, buildName, parallel, prNumber } =
-    options;
-
   const config = createConfig();
+
+  const ciEnv = getCiEnvironment();
+  if (ciEnv) {
+    config.load(
+      omitUndefined({
+        commit: ciEnv.commit,
+        branch: ciEnv.branch,
+        ciService: ciEnv.name,
+        owner: ciEnv.owner,
+        repository: ciEnv.repository,
+        jobId: ciEnv.jobId,
+        runId: ciEnv.runId,
+        prNumber: ciEnv.prNumber,
+      })
+    );
+  }
+
   config.load(
     omitUndefined({
-      apiBaseUrl,
-      commit,
-      branch,
-      token,
-      prNumber,
-      buildName,
-      parallel: Boolean(parallel),
-      parallelNonce: parallel ? parallel.nonce : null,
-      parallelTotal: parallel ? parallel.total : null,
+      apiBaseUrl: options.apiBaseUrl,
+      commit: options.commit,
+      branch: options.branch,
+      token: options.token,
+      prNumber: options.prNumber,
+      buildName: options.buildName,
+      parallel: Boolean(options.parallel),
+      parallelNonce: options.parallel ? options.parallel.nonce : null,
+      parallelTotal: options.parallel ? options.parallel.total : null,
     })
   );
-
-  if (!config.get("commit")) {
-    const ciEnv = getCiEnvironment();
-    if (ciEnv) {
-      config.load(
-        omitUndefined({
-          commit: ciEnv.commit,
-          branch: ciEnv.branch,
-          ciService: ciEnv.name,
-          owner: ciEnv.owner,
-          repository: ciEnv.repository,
-          jobId: ciEnv.jobId,
-          runId: ciEnv.runId,
-          prNumber: ciEnv.prNumber,
-        })
-      );
-    }
-  }
 
   config.validate();
 
@@ -119,6 +115,7 @@ export const upload = async (params: UploadParameters) => {
     screenshotKeys: Array.from(
       new Set(screenshots.map((screenshot) => screenshot.hash))
     ),
+    prNumber: config.prNumber,
   });
 
   debug("Got screenshots", result);
