@@ -10,6 +10,7 @@ const service: Service = {
     repository: null,
     jobId: env.HEROKU_TEST_RUN_ID || null,
     runId: null,
+    prNumber: null,
   }),
 };
 

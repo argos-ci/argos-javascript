@@ -16,6 +16,7 @@ describe("#createConfig", () => {
       ciService: null,
       jobId: null,
       runId: null,
+      prNumber: null,
       repository: null,
       owner: null,
     });

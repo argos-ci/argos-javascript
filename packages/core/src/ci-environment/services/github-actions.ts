@@ -64,6 +64,16 @@ function getRepository({ env }: Context) {
   return env.GITHUB_REPOSITORY.split("/")[1];
 }
 
+const getPrNumber = ({ env }: Context) => {
+  const branchRegex = /refs\/pull\/(\d+)/;
+  const branchMatches = branchRegex.exec(env.GITHUB_REF || "");
+  if (branchMatches) {
+    branchMatches[1];
+  }
+
+  return null;
+};
+
 const service: Service = {
   detect: ({ env }) => Boolean(env.GITHUB_ACTIONS),
   config: ({ env }) => ({
@@ -74,6 +84,7 @@ const service: Service = {
     repository: getRepository({ env }),
     jobId: env.GITHUB_JOB || null,
     runId: env.GITHUB_RUN_ID || null,
+    prNumber: getPrNumber({ env }),
   }),
 };
 

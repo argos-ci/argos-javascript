@@ -54,6 +54,7 @@ export const getBearerToken = ({
   repository,
   jobId,
   runId,
+  prNumber,
 }: {
   token?: string | null;
   ciService?: string | null;
@@ -61,6 +62,7 @@ export const getBearerToken = ({
   repository?: string | null;
   jobId?: string | null;
   runId?: string | null;
+  prNumber?: string | null;
 }) => {
   if (token) return `Bearer ${token}`;
 
@@ -77,6 +79,7 @@ export const getBearerToken = ({
         repository,
         jobId,
         runId,
+        prNumber,
       })}`;
     }
 
