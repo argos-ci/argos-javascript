@@ -5,7 +5,7 @@ const getPrNumber = ({ env }: Context) => {
   const branchRegex = /pull\/(\d+)/;
   const branchMatches = branchRegex.exec(env.CIRCLE_PULL_REQUEST || "");
   if (branchMatches) {
-    branchMatches[1];
+    return Number(branchMatches[1]);
   }
 
   return null;

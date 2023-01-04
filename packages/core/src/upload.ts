@@ -119,6 +119,7 @@ export const upload = async (params: UploadParameters) => {
     screenshotKeys: Array.from(
       new Set(screenshots.map((screenshot) => screenshot.hash))
     ),
+    prNumber: config.prNumber,
   });
 
   debug("Got screenshots", result);

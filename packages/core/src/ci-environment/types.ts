@@ -14,7 +14,7 @@ export interface CiEnvironment {
   repository: string | null;
   jobId: string | null;
   runId: string | null;
-  prNumber: string | null;
+  prNumber: number | null;
 }
 
 export interface Service {

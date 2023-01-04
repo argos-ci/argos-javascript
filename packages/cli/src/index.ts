@@ -31,7 +31,7 @@ program
     'One or more globs matching image file paths to ignore (ex: "**/*.png **/diff.jpg")'
   )
   .option("--token <token>", "Repository token")
-  .option("--prNumber <number>", "Pull-request number")
+  .option("--pull-request <number>", "Pull-request number")
   .option(
     "--build-name <string>",
     "Name of the build, in case you want to run multiple Argos builds in a single CI job"
@@ -50,7 +50,7 @@ program
         buildName: options.buildName,
         files: options.files,
         ignore: options.ignore,
-        prNumber: options.prNumber,
+        prNumber: options.pullRequest,
         parallel: options.parallel
           ? { nonce: options.parallelNonce, total: options.parallelTotal }
           : false,

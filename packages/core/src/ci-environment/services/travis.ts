@@ -14,7 +14,9 @@ const service: Service = {
       repository: ciProps?.repository || null,
       jobId: ciProps?.jobId || null,
       runId: ciProps?.runId || null,
-      prNumber: env.TRAVIS_PULL_REQUEST || null,
+      prNumber: env.TRAVIS_PULL_REQUEST
+        ? Number(env.TRAVIS_PULL_REQUEST)
+        : null,
     };
   },
 };

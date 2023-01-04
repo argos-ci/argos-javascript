@@ -68,7 +68,7 @@ const getPrNumber = ({ env }: Context) => {
   const branchRegex = /refs\/pull\/(\d+)/;
   const branchMatches = branchRegex.exec(env.GITHUB_REF || "");
   if (branchMatches) {
-    branchMatches[1];
+    return Number(branchMatches[1]);
   }
 
   return null;

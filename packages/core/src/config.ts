@@ -117,7 +117,7 @@ export interface Config {
   repository: string | null;
   jobId: string | null;
   runId: string | null;
-  prNumber: string | null;
+  prNumber: number | null;
 }
 
 export const createConfig = () => {

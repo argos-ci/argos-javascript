@@ -14,7 +14,9 @@ const service: Service = {
       repository: env.BUILDKITE_PROJECT_SLUG || null,
       jobId: env.BUILDKITE_JOB_ID || null,
       runId: ciProps?.runId || null,
-      prNumber: env.BUILDKITE_PULL_REQUEST || null,
+      prNumber: env.BUILDKITE_PULL_REQUEST
+        ? Number(env.BUILDKITE_PULL_REQUEST)
+        : null,
     };
   },
 };
