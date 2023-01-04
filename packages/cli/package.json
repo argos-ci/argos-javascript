@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/cli",
   "description": "Visual testing solution to avoid visual regression. Argos CLI is used to interact with and upload screenshots to argos-ci.com via command line.",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "bin": {
     "argos": "./bin/argos-cli.js"
   },
@@ -40,7 +40,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@argos-ci/core": "^0.6.2",
+    "@argos-ci/core": "^0.7.0",
     "commander": "^9.4.1",
     "ora": "^6.1.2",
     "update-notifier": "^6.0.2"

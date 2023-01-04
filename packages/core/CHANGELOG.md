@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.6.2...@argos-ci/core@0.7.0) (2023-01-04)
+
+### Bug Fixes
+
+- options overrides ci ([047d865](https://github.com/argos-ci/argos-javascript/commit/047d865e2d5638c3021010ca9fd928f93eb2f1b0))
+
+### Features
+
+- add buildkite pr number ([0111827](https://github.com/argos-ci/argos-javascript/commit/01118275e58d41abb6826d9a650a030cc9adee9c))
+- add circle pr number ([4512cd9](https://github.com/argos-ci/argos-javascript/commit/4512cd93c253e5bd2737b720464e72aa0db07f81))
+- add github pr number ([61c455d](https://github.com/argos-ci/argos-javascript/commit/61c455d35d18b841979430f69b2d17375b31bf37))
+- add prNumber option ([6ae3824](https://github.com/argos-ci/argos-javascript/commit/6ae38249c1cbe4901d464925f92982104cbc73df))
+- add travis pr number ([4b1aad8](https://github.com/argos-ci/argos-javascript/commit/4b1aad81977cc4423e3735f8ab0f4049fb5b8da9))
+
 ## [0.6.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.6.1...@argos-ci/core@0.6.2) (2022-12-10)
 
 **Note:** Version bump only for package @argos-ci/core
