@@ -35,7 +35,7 @@ const schema = {
   },
   commit: {
     env: "ARGOS_COMMIT",
-    default: "",
+    default: null,
     format: mustBeCommit,
   },
   branch: {
@@ -52,6 +52,12 @@ const schema = {
     env: "ARGOS_BUILD_NAME",
     default: null,
     format: String,
+    nullable: true,
+  },
+  prNumber: {
+    env: "ARGOS_PR_NUMBER",
+    format: Number,
+    default: null,
     nullable: true,
   },
   parallel: {
@@ -83,12 +89,6 @@ const schema = {
   },
   runId: {
     format: String,
-    default: null,
-    nullable: true,
-  },
-  prNumber: {
-    env: "ARGOS_PR_NUMBER",
-    format: Number,
     default: null,
     nullable: true,
   },
