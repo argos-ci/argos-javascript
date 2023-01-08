@@ -42,7 +42,6 @@ const schema = {
     env: "ARGOS_BRANCH",
     default: null,
     format: String,
-    nullable: true,
   },
   token: {
     env: "ARGOS_TOKEN",
@@ -107,7 +106,7 @@ const schema = {
 export interface Config {
   apiBaseUrl: string;
   commit: string;
-  branch: string | null;
+  branch: string;
   token: string | null;
   buildName: string | null;
   parallel: boolean;
