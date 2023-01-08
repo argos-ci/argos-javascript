@@ -18,6 +18,7 @@ export interface CiEnvironment {
 }
 
 export interface Service {
+  name: string;
   detect(ctx: Context): boolean;
-  config(ctx: Context): CiEnvironment;
+  config(ctx: Context): Omit<CiEnvironment, "name">;
 }

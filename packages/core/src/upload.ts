@@ -1,5 +1,4 @@
 import { createConfig } from "./config";
-import { omitUndefined } from "./util";
 import { getCiEnvironment } from "./ci-environment";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
@@ -42,34 +41,29 @@ const getConfigFromOptions = (options: UploadParameters) => {
   const config = createConfig();
 
   const ciEnv = getCiEnvironment();
-  if (ciEnv) {
-    config.load(
-      omitUndefined({
-        commit: ciEnv.commit,
-        branch: ciEnv.branch,
-        ciService: ciEnv.name,
-        owner: ciEnv.owner,
-        repository: ciEnv.repository,
-        jobId: ciEnv.jobId,
-        runId: ciEnv.runId,
-        prNumber: ciEnv.prNumber,
-      })
-    );
-  }
 
-  config.load(
-    omitUndefined({
-      apiBaseUrl: options.apiBaseUrl,
-      commit: options.commit,
-      branch: options.branch,
-      token: options.token,
-      prNumber: options.prNumber,
-      buildName: options.buildName,
+  config.load({
+    apiBaseUrl: config.get("apiBaseUrl") ?? options.apiBaseUrl,
+    commit: config.get("commit") ?? options.commit ?? ciEnv?.commit ?? null,
+    branch: config.get("branch") ?? options.branch ?? ciEnv?.branch ?? null,
+    token: config.get("token") ?? options.token ?? null,
+    buildName: config.get("buildName") ?? options.buildName ?? null,
+    prNumber:
+      config.get("prNumber") ?? options.prNumber ?? ciEnv?.prNumber ?? null,
+    ciService: ciEnv?.name ?? null,
+    owner: ciEnv?.owner ?? null,
+    repository: ciEnv?.repository ?? null,
+    jobId: ciEnv?.jobId ?? null,
+    runId: ciEnv?.runId ?? null,
+  });
+
+  if (options.parallel) {
+    config.load({
       parallel: Boolean(options.parallel),
       parallelNonce: options.parallel ? options.parallel.nonce : null,
       parallelTotal: options.parallel ? options.parallel.total : null,
-    })
-  );
+    });
+  }
 
   config.validate();
 
@@ -80,9 +74,12 @@ const getConfigFromOptions = (options: UploadParameters) => {
  * Upload screenshots to argos-ci.com.
  */
 export const upload = async (params: UploadParameters) => {
+  debug("Starting upload with params", params);
+
   // Read config
   const config = getConfigFromOptions(params);
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
+  debug("Using config and files", config, files);
 
   const apiClient = createArgosApiClient({
     baseUrl: config.apiBaseUrl,
@@ -94,6 +91,8 @@ export const upload = async (params: UploadParameters) => {
     root: params.root,
     ignore: params.ignore,
   });
+
+  debug("Found screenshots", foundScreenshots);
 
   // Optimize & compute hashes
   const screenshots = await Promise.all(

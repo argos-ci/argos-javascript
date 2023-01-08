@@ -12,12 +12,12 @@ const getPrNumber = ({ env }: Context) => {
 };
 
 const service: Service = {
+  name: "CircleCI",
   detect: ({ env }) => Boolean(env.CIRCLECI),
   config: ({ env }) => {
     const ciProps = envCiDetection({ env });
 
     return {
-      name: "CircleCI",
       commit: ciProps?.commit || null,
       branch: ciProps?.branch || null,
       owner: ciProps?.owner || null,

@@ -75,9 +75,9 @@ const getPrNumber = ({ env }: Context) => {
 };
 
 const service: Service = {
+  name: "GitHub Actions",
   detect: ({ env }) => Boolean(env.GITHUB_ACTIONS),
   config: ({ env }) => ({
-    name: "GitHub Actions",
     commit: getSha({ env }),
     branch: getBranch({ env }),
     owner: env.GITHUB_REPOSITORY_OWNER || null,
