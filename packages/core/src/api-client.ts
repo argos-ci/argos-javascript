@@ -1,4 +1,5 @@
 import axios from "axios";
+import { debug } from "./debug";
 
 export interface ApiClientOptions {
   baseUrl: string;
@@ -107,10 +108,15 @@ export const createArgosApiClient = (
     data: Record<string, any>
   ): Promise<TResult> => {
     try {
+      debug("Sending request", { method, path, data });
       const response = await axiosInstance.request({
         method,
         url: path,
         data,
+      });
+      debug("Getting response", {
+        status: response.status,
+        data: response.data,
       });
       return response.data;
     } catch (error: any) {

@@ -80,9 +80,12 @@ const getConfigFromOptions = (options: UploadParameters) => {
  * Upload screenshots to argos-ci.com.
  */
 export const upload = async (params: UploadParameters) => {
+  debug("Starting upload with params", params);
+
   // Read config
   const config = getConfigFromOptions(params);
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
+  debug("Using config and files", config, files);
 
   const apiClient = createArgosApiClient({
     baseUrl: config.apiBaseUrl,
@@ -94,6 +97,8 @@ export const upload = async (params: UploadParameters) => {
     root: params.root,
     ignore: params.ignore,
   });
+
+  debug("Found screenshots", foundScreenshots);
 
   // Optimize & compute hashes
   const screenshots = await Promise.all(
