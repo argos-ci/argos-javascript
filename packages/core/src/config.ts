@@ -87,6 +87,7 @@ const schema = {
     nullable: true,
   },
   prNumber: {
+    env: "ARGOS_PR_NUMBER",
     format: Number,
     default: null,
     nullable: true,

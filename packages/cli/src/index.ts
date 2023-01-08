@@ -31,7 +31,6 @@ program
     'One or more globs matching image file paths to ignore (ex: "**/*.png **/diff.jpg")'
   )
   .option("--token <token>", "Repository token")
-  .option("--pull-request <number>", "Pull-request number")
   .option(
     "--build-name <string>",
     "Name of the build, in case you want to run multiple Argos builds in a single CI job"
