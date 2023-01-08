@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.7.0...@argos-ci/core@0.7.1) (2023-01-08)
+
+### Bug Fixes
+
+- add ARGOS_PR_NUMBER, remove --pull-request arg ([362bd57](https://github.com/argos-ci/argos-javascript/commit/362bd5725334ebaca2ce66a0bfabc3f8206dce74))
+- **core:** branch is now required ([840aec6](https://github.com/argos-ci/argos-javascript/commit/840aec63cece1dee589c90cb2bf0fd63563f17b5))
+- make ARGOS\_ environment variables prioritary ([b8e0ea7](https://github.com/argos-ci/argos-javascript/commit/b8e0ea7f6be7e381a0faeaf23892f39873425adb))
+
 # [0.7.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.6.2...@argos-ci/core@0.7.0) (2023-01-04)
 
 ### Bug Fixes

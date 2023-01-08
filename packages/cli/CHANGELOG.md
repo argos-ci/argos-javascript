@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@0.4.0...@argos-ci/cli@0.4.1) (2023-01-08)
+
+### Bug Fixes
+
+- add ARGOS_PR_NUMBER, remove --pull-request arg ([362bd57](https://github.com/argos-ci/argos-javascript/commit/362bd5725334ebaca2ce66a0bfabc3f8206dce74))
+
 # [0.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@0.3.2...@argos-ci/cli@0.4.0) (2023-01-04)
 
 ### Features
