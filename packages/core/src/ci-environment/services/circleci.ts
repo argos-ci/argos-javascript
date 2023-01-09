@@ -1,11 +1,10 @@
 import type { Service, Context } from "../types";
-import { envCiDetection } from "../index";
 
 const getPrNumber = ({ env }: Context) => {
   const branchRegex = /pull\/(\d+)/;
-  const branchMatches = branchRegex.exec(env.CIRCLE_PULL_REQUEST || "");
-  if (branchMatches) {
-    return Number(branchMatches[1]);
+  const matches = branchRegex.exec(env.CIRCLE_PULL_REQUEST || "");
+  if (matches) {
+    return Number(matches[1]);
   }
 
   return null;
@@ -15,15 +14,13 @@ const service: Service = {
   name: "CircleCI",
   detect: ({ env }) => Boolean(env.CIRCLECI),
   config: ({ env }) => {
-    const ciProps = envCiDetection({ env });
-
     return {
-      commit: ciProps?.commit || null,
-      branch: ciProps?.branch || null,
-      owner: ciProps?.owner || null,
-      repository: ciProps?.repository || null,
-      jobId: ciProps?.jobId || null,
-      runId: ciProps?.runId || null,
+      commit: env.CIRCLE_SHA1 || null,
+      branch: env.CIRCLE_BRANCH || null,
+      owner: env.CIRCLE_PROJECT_USERNAME || null,
+      repository: env.CIRCLE_PROJECT_REPONAME || null,
+      jobId: null,
+      runId: null,
       prNumber: getPrNumber({ env }),
     };
   },
