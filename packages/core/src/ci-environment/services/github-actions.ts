@@ -45,24 +45,24 @@ Please run "actions/checkout" with "fetch-depth: 2". Example:
   return process.env.GITHUB_SHA ?? null;
 };
 
-function getBranch({ env }: Context) {
+const getBranch = ({ env }: Context) => {
   if (env.GITHUB_HEAD_REF) {
     return env.GITHUB_HEAD_REF;
   }
 
   const branchRegex = /refs\/heads\/(.*)/;
-  const branchMatches = branchRegex.exec(env.GITHUB_REF || "");
-  if (branchMatches) {
-    return branchMatches[1];
+  const matches = branchRegex.exec(env.GITHUB_REF || "");
+  if (matches) {
+    return matches[1];
   }
 
   return null;
-}
+};
 
-function getRepository({ env }: Context) {
+const getRepository = ({ env }: Context) => {
   if (!env.GITHUB_REPOSITORY) return null;
   return env.GITHUB_REPOSITORY.split("/")[1];
-}
+};
 
 const getPrNumber = ({ env }: Context) => {
   const branchRegex = /refs\/pull\/(\d+)/;

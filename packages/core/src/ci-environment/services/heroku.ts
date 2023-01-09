@@ -8,7 +8,7 @@ const service: Service = {
     branch: env.HEROKU_TEST_RUN_BRANCH || null,
     owner: null,
     repository: null,
-    jobId: env.HEROKU_TEST_RUN_ID || null,
+    jobId: null,
     runId: null,
     prNumber: null,
   }),
