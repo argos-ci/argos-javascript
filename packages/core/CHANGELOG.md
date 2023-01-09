@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.7.1...@argos-ci/core@0.7.2) (2023-01-09)
+
+### Bug Fixes
+
+- better CI handling, specially Buildkite ([b6bc04c](https://github.com/argos-ci/argos-javascript/commit/b6bc04c43c3b0d5db88744495f0c5115faca5ad6))
+
 ## [0.7.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.7.0...@argos-ci/core@0.7.1) (2023-01-08)
 
 ### Bug Fixes
