@@ -5,7 +5,13 @@ import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
 import { createArgosApiClient, getBearerToken } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
-import { debug } from "./debug";
+import { debug, debugTime, debugTimeEnd } from "./debug";
+import { chunk } from "./util/chunk";
+
+/**
+ * Size of the chunks used to upload screenshots to Argos.
+ */
+const CHUNK_SIZE = 10;
 
 export interface UploadParameters {
   /** Globs matching image file paths to upload */
@@ -119,20 +125,29 @@ export const upload = async (params: UploadParameters) => {
 
   debug("Got screenshots", result);
 
-  // Upload screenshots
-  debug("Uploading screenshots");
-  await Promise.all(
-    result.screenshots.map(async ({ key, putUrl }) => {
-      const screenshot = screenshots.find((s) => s.hash === key);
-      if (!screenshot) {
-        throw new Error(`Invariant: screenshot with hash ${key} not found`);
-      }
-      await uploadToS3({
-        url: putUrl,
-        path: screenshot.optimizedPath,
-      });
-    })
-  );
+  debug(`Split screenshots in chunks of ${CHUNK_SIZE}`);
+  const chunks = chunk(result.screenshots, CHUNK_SIZE);
+
+  debug(`Starting upload of ${chunks.length} chunks`);
+
+  for (let i = 0; i < chunks.length; i++) {
+    debug(`Uploading chunk ${i + 1}/${chunks.length}`);
+    const timeLabel = `Chunk ${i + 1}/${chunks.length}`;
+    debugTime(timeLabel);
+    await Promise.all(
+      chunks[i].map(async ({ key, putUrl }) => {
+        const screenshot = screenshots.find((s) => s.hash === key);
+        if (!screenshot) {
+          throw new Error(`Invariant: screenshot with hash ${key} not found`);
+        }
+        await uploadToS3({
+          url: putUrl,
+          path: screenshot.optimizedPath,
+        });
+      })
+    );
+    debugTimeEnd(timeLabel);
+  }
 
   // Update build
   debug("Updating build");
