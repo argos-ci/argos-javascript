@@ -29,5 +29,6 @@
   },
   "engines": {
     "node": ">=14.0.0"
-  }
+  },
+  "name": "argos-javascript"
 }
