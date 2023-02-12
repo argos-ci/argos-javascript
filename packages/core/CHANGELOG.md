@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.7.3...@argos-ci/core@0.8.0) (2023-02-12)
+
+
+### Features
+
+* **core:** split upload in chunks ([2c1917e](https://github.com/argos-ci/argos-javascript/commit/2c1917e65c73eb49b8c6011bad6b3823bdec327b))
+
+
+
+
+
 ## [0.7.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.7.2...@argos-ci/core@0.7.3) (2023-01-18)
 
 ### Bug Fixes
