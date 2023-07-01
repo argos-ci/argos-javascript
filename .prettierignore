@@ -1,5 +1,6 @@
 node_modules
 package.json
+lerna.json
 CHANGELOG.md
 dist
 /packages/gatsby-plugin-argos/index.js
