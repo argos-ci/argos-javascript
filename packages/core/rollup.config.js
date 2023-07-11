@@ -11,6 +11,7 @@ const bundle = (config) => ({
 
 const swcPlugin = swc(
   defineRollupSwcOption({
+    tsconfig: "../../tsconfig.build.json",
     jsc: {
       target: "es2021",
       parser: {
