@@ -60,6 +60,12 @@ const schema = {
     default: null,
     nullable: true,
   },
+  prHeadCommit: {
+    env: "ARGOS_PR_HEAD_COMMIT",
+    format: String,
+    default: null,
+    nullable: true,
+  },
   parallel: {
     env: "ARGOS_PARALLEL",
     default: false,
@@ -118,6 +124,7 @@ export interface Config {
   jobId: string | null;
   runId: string | null;
   prNumber: number | null;
+  prHeadCommit: string | null;
 }
 
 export const createConfig = () => {

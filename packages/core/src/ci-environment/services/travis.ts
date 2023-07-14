@@ -29,6 +29,7 @@ const service: Service = {
       jobId: null,
       runId: null,
       prNumber: getPrNumber(ctx),
+      prHeadCommit: null,
     };
   },
 };

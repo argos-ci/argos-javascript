@@ -18,8 +18,19 @@ export const getCiEnvironmentFromEnvCi = (
   const jobId = ciContext.job ?? null;
   const runId = null;
   const prNumber = null;
+  const prHeadCommit = null;
 
   return commit
-    ? { name, commit, branch, owner, repository, jobId, runId, prNumber }
+    ? {
+        name,
+        commit,
+        branch,
+        owner,
+        repository,
+        jobId,
+        runId,
+        prNumber,
+        prHeadCommit,
+      }
     : null;
 };

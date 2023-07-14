@@ -56,6 +56,7 @@ const getConfigFromOptions = (options: UploadParameters) => {
     buildName: config.get("buildName") ?? options.buildName ?? null,
     prNumber:
       config.get("prNumber") ?? options.prNumber ?? ciEnv?.prNumber ?? null,
+    prHeadCommit: config.get("prHeadCommit") ?? ciEnv?.prHeadCommit ?? null,
     ciService: ciEnv?.name ?? null,
     owner: ciEnv?.owner ?? null,
     repository: ciEnv?.repository ?? null,
@@ -121,6 +122,7 @@ export const upload = async (params: UploadParameters) => {
       new Set(screenshots.map((screenshot) => screenshot.hash))
     ),
     prNumber: config.prNumber,
+    prHeadCommit: config.prHeadCommit,
   });
 
   debug("Got screenshots", result);

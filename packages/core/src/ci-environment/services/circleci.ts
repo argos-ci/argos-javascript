@@ -22,6 +22,7 @@ const service: Service = {
       jobId: null,
       runId: null,
       prNumber: getPrNumber({ env }),
+      prHeadCommit: null,
     };
   },
 };
