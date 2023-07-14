@@ -42,13 +42,14 @@ const service: Service = {
   config: ({ env }) => {
     const payload = readEventPayload({ env });
     return {
-      commit: payload?.pull_request?.head.sha || process.env.GITHUB_SHA || null,
+      commit: process.env.GITHUB_SHA || null,
       branch: payload?.pull_request?.head.ref || getBranch({ env }) || null,
       owner: env.GITHUB_REPOSITORY_OWNER || null,
       repository: getRepository({ env }),
       jobId: env.GITHUB_JOB || null,
       runId: env.GITHUB_RUN_ID || null,
       prNumber: payload?.pull_request?.number || null,
+      prHeadCommit: payload?.pull_request?.head.sha ?? null,
     };
   },
 };

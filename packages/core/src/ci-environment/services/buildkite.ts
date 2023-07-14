@@ -16,6 +16,7 @@ const service: Service = {
       prNumber: env.BUILDKITE_PULL_REQUEST
         ? Number(env.BUILDKITE_PULL_REQUEST)
         : null,
+      prHeadCommit: null,
     };
   },
 };

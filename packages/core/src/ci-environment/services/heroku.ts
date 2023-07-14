@@ -11,6 +11,7 @@ const service: Service = {
     jobId: null,
     runId: null,
     prNumber: null,
+    prHeadCommit: null,
   }),
 };
 

@@ -14,6 +14,7 @@ export interface CreateBuildInput {
   parallel?: boolean | null;
   parallelNonce?: string | null;
   prNumber?: number | null;
+  prHeadCommit?: string | null;
 }
 
 export interface CreateBuildOutput {
