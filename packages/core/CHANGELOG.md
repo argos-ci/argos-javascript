@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.8.1...@argos-ci/core@0.9.0) (2023-07-14)
+
+
+### Features
+
+* **core:** send prHeadCommit at build creation ([bcd0fa7](https://github.com/argos-ci/argos-javascript/commit/bcd0fa71479f3590c1cbc31cfcf11fab00ab68f5)), closes [#50](https://github.com/argos-ci/argos-javascript/issues/50)
+
+
+
+
+
 ## [0.8.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.8.0...@argos-ci/core@0.8.1) (2023-07-11)
 
 
