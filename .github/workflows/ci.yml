@@ -61,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14, 16, 18]
+        node-version: [16, 18, 20]
 
     runs-on: ${{ matrix.os }}
 
@@ -74,10 +74,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Install last npm version
-        if: ${{ matrix.node-version == 14 }}
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm ci
@@ -103,13 +99,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14, 16, 18]
+        node-version: [16, 18, 20]
         os: [ubuntu-latest, macos-latest, windows-latest]
-        exclude:
-          # `npm i -g npm@latest` does not work
-          # It is not very critical if it does not work on windows/node-14
-          - os: windows-latest
-            node-version: 14
 
     runs-on: ${{ matrix.os }}
 
@@ -122,10 +113,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Install last npm version
-        if: ${{ matrix.node-version == 14 }}
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm ci

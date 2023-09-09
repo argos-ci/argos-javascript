@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { join } from "node:path";
 // import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
@@ -17,7 +18,7 @@ const exists = async (filepath: string) => {
 describe("#optimizeScreenshot", () => {
   it("optimizes", async () => {
     const optimizedPath = await optimizeScreenshot(
-      join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg")
+      join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg"),
     );
     expect(await exists(optimizedPath)).toBe(true);
   });

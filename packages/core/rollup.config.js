@@ -18,7 +18,7 @@ const swcPlugin = swc(
         syntax: "typescript",
       },
     },
-  })
+  }),
 );
 
 export default [

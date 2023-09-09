@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { createConfig } from "./config";
 
 describe("#createConfig", () => {
@@ -19,6 +20,7 @@ describe("#createConfig", () => {
       prNumber: null,
       repository: null,
       owner: null,
+      prHeadCommit: null,
     });
   });
 

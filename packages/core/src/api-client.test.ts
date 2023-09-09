@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeAll } from "vitest";
+
 import { setupJest } from "../mocks/server";
 import {
   ArgosApiClient,
@@ -67,7 +69,7 @@ describe("#getBearerToken", () => {
       it("should throw", () => {
         const config = {};
         expect(() => getBearerToken(config)).toThrow(
-          "Missing Argos repository token 'ARGOS_TOKEN'"
+          "Missing Argos repository token 'ARGOS_TOKEN'",
         );
       });
     });
@@ -87,7 +89,7 @@ describe("#getBearerToken", () => {
       it("should throw", () => {
         const config = { ...configProps };
         expect(() => getBearerToken(config)).toThrow(
-          "Missing Argos repository token 'ARGOS_TOKEN'"
+          "Missing Argos repository token 'ARGOS_TOKEN'",
         );
       });
     });
@@ -127,14 +129,14 @@ describe("#getBearerToken", () => {
             jobId: config.jobId,
             runId: config.runId,
           }),
-          "utf8"
+          "utf8",
         ).toString("base64");
 
         const bearerToken = getBearerToken(config);
 
         expect(bearerToken).toBe(`Bearer tokenless-github-${base64}`);
         expect(bearerToken).toBe(
-          "Bearer tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9"
+          "Bearer tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9",
         );
       });
     });
@@ -143,7 +145,7 @@ describe("#getBearerToken", () => {
       it("should throw", () => {
         const config = { ...configProps };
         expect(() => getBearerToken(config)).toThrow(
-          "Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'"
+          "Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'",
         );
       });
     });

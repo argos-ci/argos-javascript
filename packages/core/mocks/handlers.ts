@@ -30,9 +30,9 @@ export const handlers = [
             key,
             putUrl: `https://api.s3.dev/upload/${key}`,
           })),
-        })
+        }),
       );
-    }
+    },
   ),
   rest.put<UpdateBuildBody>(
     "https://api.argos-ci.dev/builds/:buildId",
@@ -44,9 +44,9 @@ export const handlers = [
             id: buildId,
             url: `https://app.argos-ci.dev/builds/${buildId}`,
           },
-        })
+        }),
       );
-    }
+    },
   ),
   rest.put("https://api.s3.dev/upload/*", async (_req, res, ctx) => {
     return res(ctx.status(201));

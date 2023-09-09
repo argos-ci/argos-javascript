@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { join } from "node:path";
 // import { fileURLToPath } from "node:url";
 import { discoverScreenshots } from "./discovery";
@@ -28,7 +29,7 @@ describe("#discoverScreenshots", () => {
         name: "nested/alicia.jpg",
         path: join(
           __dirname,
-          "../../../__fixtures__/screenshots/nested/alicia.jpg"
+          "../../../__fixtures__/screenshots/nested/alicia.jpg",
         ),
       },
     ]);

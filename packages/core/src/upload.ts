@@ -49,13 +49,13 @@ const getConfigFromOptions = (options: UploadParameters) => {
   const ciEnv = getCiEnvironment();
 
   config.load({
-    apiBaseUrl: config.get("apiBaseUrl") ?? options.apiBaseUrl,
-    commit: config.get("commit") ?? options.commit ?? ciEnv?.commit ?? null,
-    branch: config.get("branch") ?? options.branch ?? ciEnv?.branch ?? null,
-    token: config.get("token") ?? options.token ?? null,
-    buildName: config.get("buildName") ?? options.buildName ?? null,
+    apiBaseUrl: options.apiBaseUrl ?? config.get("apiBaseUrl"),
+    commit: options.commit ?? config.get("commit") ?? ciEnv?.commit ?? null,
+    branch: options.branch ?? config.get("branch") ?? ciEnv?.branch ?? null,
+    token: options.token ?? config.get("token") ?? null,
+    buildName: options.buildName ?? config.get("buildName") ?? null,
     prNumber:
-      config.get("prNumber") ?? options.prNumber ?? ciEnv?.prNumber ?? null,
+      options.prNumber ?? config.get("prNumber") ?? ciEnv?.prNumber ?? null,
     prHeadCommit: config.get("prHeadCommit") ?? ciEnv?.prHeadCommit ?? null,
     ciService: ciEnv?.name ?? null,
     owner: ciEnv?.owner ?? null,
@@ -107,7 +107,7 @@ export const upload = async (params: UploadParameters) => {
       const optimizedPath = await optimizeScreenshot(screenshot.path);
       const hash = await hashFile(optimizedPath);
       return { ...screenshot, optimizedPath, hash };
-    })
+    }),
   );
 
   // Create build
@@ -119,7 +119,7 @@ export const upload = async (params: UploadParameters) => {
     parallel: config.parallel,
     parallelNonce: config.parallelNonce,
     screenshotKeys: Array.from(
-      new Set(screenshots.map((screenshot) => screenshot.hash))
+      new Set(screenshots.map((screenshot) => screenshot.hash)),
     ),
     prNumber: config.prNumber,
     prHeadCommit: config.prHeadCommit,
@@ -146,7 +146,7 @@ export const upload = async (params: UploadParameters) => {
           url: putUrl,
           path: screenshot.optimizedPath,
         });
-      })
+      }),
     );
     debugTimeEnd(timeLabel);
   }
