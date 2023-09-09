@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@0.4.7...@argos-ci/cli@0.5.0) (2023-09-09)
+
+
+### Features
+
+* modernize project ([43c9975](https://github.com/argos-ci/argos-javascript/commit/43c9975441ea49038851259db2bec314aa9f1df9))
+
+
+### BREAKING CHANGES
+
+* Require Node.js v16
+
+
+
+
+
 ## [0.4.7](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@0.4.6...@argos-ci/cli@0.4.7) (2023-09-09)
 
 **Note:** Version bump only for package @argos-ci/cli
