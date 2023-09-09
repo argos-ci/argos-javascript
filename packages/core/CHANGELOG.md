@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.9.0...@argos-ci/core@0.10.0) (2023-09-09)
+
+
+### Features
+
+* **gitlab:** support gitlab ci ([8f9e7b8](https://github.com/argos-ci/argos-javascript/commit/8f9e7b8ea7bc05074ad45b9b8c697ebfcc4f30d8))
+
+
+
+
+
 # [0.9.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@0.8.1...@argos-ci/core@0.9.0) (2023-07-14)
 
 
