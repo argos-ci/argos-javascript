@@ -29,7 +29,7 @@ describe("#discoverScreenshots", () => {
         name: "nested/alicia.jpg",
         path: join(
           __dirname,
-          "../../../__fixtures__/screenshots/nested/alicia.jpg"
+          "../../../__fixtures__/screenshots/nested/alicia.jpg",
         ),
       },
     ]);

@@ -13,7 +13,7 @@ const pkg = JSON.parse(rawPkg);
 program
   .name(pkg.name)
   .description(
-    "Interact with and upload screenshots to argos-ci.com via command line."
+    "Interact with and upload screenshots to argos-ci.com via command line.",
   )
   .version(pkg.version);
 
@@ -24,20 +24,20 @@ program
   .option(
     "-f, --files <patterns...>",
     "One or more globs matching image file paths to upload",
-    "**/*.{png,jpg,jpeg}"
+    "**/*.{png,jpg,jpeg}",
   )
   .option(
     "-i, --ignore <patterns...>",
-    'One or more globs matching image file paths to ignore (ex: "**/*.png **/diff.jpg")'
+    'One or more globs matching image file paths to ignore (ex: "**/*.png **/diff.jpg")',
   )
   .option("--token <token>", "Repository token")
   .option(
     "--build-name <string>",
-    "Name of the build, in case you want to run multiple Argos builds in a single CI job"
+    "Name of the build, in case you want to run multiple Argos builds in a single CI job",
   )
   .option(
     "--parallel",
-    "Enable parallel mode. Run multiple Argos builds and combine them at the end"
+    "Enable parallel mode. Run multiple Argos builds and combine them at the end",
   )
   .option("--parallel-total <number>", "The number of parallel nodes being ran")
   .option("--parallel-nonce <string>", "A unique ID for this parallel build")

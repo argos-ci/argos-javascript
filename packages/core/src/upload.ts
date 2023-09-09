@@ -107,7 +107,7 @@ export const upload = async (params: UploadParameters) => {
       const optimizedPath = await optimizeScreenshot(screenshot.path);
       const hash = await hashFile(optimizedPath);
       return { ...screenshot, optimizedPath, hash };
-    })
+    }),
   );
 
   // Create build
@@ -119,7 +119,7 @@ export const upload = async (params: UploadParameters) => {
     parallel: config.parallel,
     parallelNonce: config.parallelNonce,
     screenshotKeys: Array.from(
-      new Set(screenshots.map((screenshot) => screenshot.hash))
+      new Set(screenshots.map((screenshot) => screenshot.hash)),
     ),
     prNumber: config.prNumber,
     prHeadCommit: config.prHeadCommit,
@@ -146,7 +146,7 @@ export const upload = async (params: UploadParameters) => {
           url: putUrl,
           path: screenshot.optimizedPath,
         });
-      })
+      }),
     );
     debugTimeEnd(timeLabel);
   }

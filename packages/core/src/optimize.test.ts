@@ -18,7 +18,7 @@ const exists = async (filepath: string) => {
 describe("#optimizeScreenshot", () => {
   it("optimizes", async () => {
     const optimizedPath = await optimizeScreenshot(
-      join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg")
+      join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg"),
     );
     expect(await exists(optimizedPath)).toBe(true);
   });

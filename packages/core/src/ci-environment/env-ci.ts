@@ -2,7 +2,7 @@ import envCi from "env-ci";
 import type { CiEnvironment, Context } from "./types";
 
 export const getCiEnvironmentFromEnvCi = (
-  ctx: Context
+  ctx: Context,
 ): CiEnvironment | null => {
   const ciContext = envCi(ctx);
   const name = ciContext.isCi

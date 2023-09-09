@@ -73,7 +73,7 @@ export const getBearerToken = ({
     case "GitHub Actions": {
       if (!owner || !repository || !jobId || !runId) {
         throw new Error(
-          `Automatic ${ciService} variables detection failed. Please add the 'ARGOS_TOKEN'`
+          `Automatic ${ciService} variables detection failed. Please add the 'ARGOS_TOKEN'`,
         );
       }
 
@@ -92,7 +92,7 @@ export const getBearerToken = ({
 };
 
 export const createArgosApiClient = (
-  options: ApiClientOptions
+  options: ApiClientOptions,
 ): ArgosApiClient => {
   const axiosInstance = axios.create({
     baseURL: options.baseUrl,
@@ -106,7 +106,7 @@ export const createArgosApiClient = (
   const call = async <TResult extends Record<string, any>>(
     method: string,
     path: string,
-    data: Record<string, any>
+    data: Record<string, any>,
   ): Promise<TResult> => {
     try {
       debug("Sending request", { method, path, data });
@@ -131,12 +131,12 @@ export const createArgosApiClient = (
 
   return {
     createBuild: async (
-      input: CreateBuildInput
+      input: CreateBuildInput,
     ): Promise<CreateBuildOutput> => {
       return call("POST", "/builds", input);
     },
     updateBuild: async (
-      input: UpdateBuildInput
+      input: UpdateBuildInput,
     ): Promise<UpdateBuildOutput> => {
       const { buildId, ...body } = input;
       return call("PUT", `/builds/${buildId}`, body);
