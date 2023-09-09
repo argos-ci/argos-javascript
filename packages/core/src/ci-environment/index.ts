@@ -3,13 +3,14 @@ import heroku from "./services/heroku";
 import githubActions from "./services/github-actions";
 import circleci from "./services/circleci";
 import travis from "./services/travis";
+import gitlab from "./services/gitlab";
 import type { CiEnvironment, Options } from "./types";
 import { debug } from "../debug";
 import { getCiEnvironmentFromEnvCi } from "./env-ci";
 
 export { CiEnvironment };
 
-const services = [heroku, githubActions, circleci, travis, buildkite];
+const services = [heroku, githubActions, circleci, travis, buildkite, gitlab];
 
 export const getCiEnvironment = ({
   env = process.env,
