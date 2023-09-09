@@ -1,4 +1,5 @@
 import { head, branch } from "./git";
+import { describe, it, expect } from "vitest";
 
 describe("#head", () => {
   it("returns the current commit", () => {
@@ -9,7 +10,7 @@ describe("#head", () => {
 /**
  * This test can be run locally, too hard to make it work on CI.
  */
-xdescribe("#branch", () => {
+describe.skip("#branch", () => {
   it("returns the current branch", () => {
     expect(branch()).toBe("main");
   });

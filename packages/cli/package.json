@@ -24,7 +24,7 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "license": "MIT",
   "keywords": [
@@ -41,12 +41,12 @@
   },
   "dependencies": {
     "@argos-ci/core": "^0.10.0",
-    "commander": "^9.4.1",
-    "ora": "^6.1.2",
+    "commander": "^11.0.0",
+    "ora": "^7.0.1",
     "update-notifier": "^6.0.2"
   },
   "devDependencies": {
-    "rollup": "^2.79.1",
-    "rollup-plugin-swc3": "^0.6.0"
+    "rollup": "^3.29.0",
+    "rollup-plugin-swc3": "^0.10.1"
   }
 }
