@@ -20,7 +20,7 @@
     "lint": "prettier --check . && eslint . && tsc",
     "test": "vitest",
     "e2e": "lerna run e2e",
-    "release": "npm run build && lerna publish --conventional-commits",
+    "release": "npm run build && lerna publish --conventional-commits --create-release=github",
     "release-canary": "npm run build && lerna publish --canary --dist-tag canary"
   },
   "engines": {
