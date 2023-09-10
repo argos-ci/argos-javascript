@@ -23,7 +23,7 @@ const mustBeCommit = (value: any) => {
 
 const mustBeArgosToken = (value: any) => {
   if (value && value.length !== 40) {
-    throw new Error("Must be a valid Argos repository token");
+    throw new Error("Invalid Argos repository token (must be 40 characters)");
   }
 };
 
