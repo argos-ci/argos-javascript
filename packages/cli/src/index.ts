@@ -45,6 +45,7 @@ program
     const spinner = ora("Uploading screenshots").start();
     try {
       const result = await upload({
+        token: options.token,
         root: directory,
         buildName: options.buildName,
         files: options.files,
