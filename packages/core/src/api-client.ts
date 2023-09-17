@@ -15,6 +15,8 @@ export interface CreateBuildInput {
   parallelNonce?: string | null;
   prNumber?: number | null;
   prHeadCommit?: string | null;
+  referenceBranch?: string | null;
+  referenceCommit?: string | null;
 }
 
 export interface CreateBuildOutput {

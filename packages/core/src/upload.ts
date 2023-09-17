@@ -41,6 +41,10 @@ export interface UploadParameters {
         total: number;
       }
     | false;
+  /** Branch used as baseline for screenshot comparison */
+  referenceBranch?: string;
+  /** Commit used as baseline for screenshot comparison */
+  referenceCommit?: string;
 }
 
 const getConfigFromOptions = (options: UploadParameters) => {
@@ -57,6 +61,10 @@ const getConfigFromOptions = (options: UploadParameters) => {
     prNumber:
       options.prNumber ?? config.get("prNumber") ?? ciEnv?.prNumber ?? null,
     prHeadCommit: config.get("prHeadCommit") ?? ciEnv?.prHeadCommit ?? null,
+    referenceBranch:
+      options.referenceBranch ?? config.get("referenceBranch") ?? null,
+    referenceCommit:
+      options.referenceCommit ?? config.get("referenceCommit") ?? null,
     ciService: ciEnv?.name ?? null,
     owner: ciEnv?.owner ?? null,
     repository: ciEnv?.repository ?? null,
@@ -123,6 +131,8 @@ export const upload = async (params: UploadParameters) => {
     ),
     prNumber: config.prNumber,
     prHeadCommit: config.prHeadCommit,
+    referenceBranch: config.referenceBranch,
+    referenceCommit: config.referenceCommit,
   });
 
   debug("Got screenshots", result);

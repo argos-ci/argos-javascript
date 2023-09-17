@@ -41,6 +41,14 @@ program
   )
   .option("--parallel-total <number>", "The number of parallel nodes being ran")
   .option("--parallel-nonce <string>", "A unique ID for this parallel build")
+  .option(
+    "--reference-branch <string>",
+    "Branch used as baseline for screenshot comparison",
+  )
+  .option(
+    "--reference-commit <string>",
+    "Commit used as baseline for screenshot comparison",
+  )
   .action(async (directory, options) => {
     const spinner = ora("Uploading screenshots").start();
     try {
@@ -54,6 +62,8 @@ program
         parallel: options.parallel
           ? { nonce: options.parallelNonce, total: options.parallelTotal }
           : false,
+        referenceBranch: options.referenceBranch,
+        referenceCommit: options.referenceCommit,
       });
       spinner.succeed(`Build created: ${result.build.url}`);
     } catch (error: any) {

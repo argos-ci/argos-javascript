@@ -83,6 +83,18 @@ const schema = {
     default: null,
     nullable: true,
   },
+  referenceBranch: {
+    env: "ARGOS_REFERENCE_BRANCH",
+    format: String,
+    default: null,
+    nullable: true,
+  },
+  referenceCommit: {
+    env: "ARGOS_REFERENCE_COMMIT",
+    format: String,
+    default: null,
+    nullable: true,
+  },
   ciService: {
     format: String,
     default: null,
@@ -119,6 +131,8 @@ export interface Config {
   parallel: boolean;
   parallelNonce: string | null;
   parallelTotal: number | null;
+  referenceBranch: string | null;
+  referenceCommit: string | null;
   owner: string | null;
   repository: string | null;
   jobId: string | null;
