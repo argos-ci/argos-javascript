@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@0.5.1...@argos-ci/cli@0.6.0) (2023-09-18)
+
+
+### Features
+
+* allow to specify ref branch & ref commit ([a6c4ee3](https://github.com/argos-ci/argos-javascript/commit/a6c4ee3d5eda68c2b224c385f7aaa32c565f2c8f))
+
+
+
+
+
 ## [0.5.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@0.5.0...@argos-ci/cli@0.5.1) (2023-09-10)
 
 
