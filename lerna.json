@@ -5,8 +5,6 @@
       "allowBranch": "main"
     }
   },
-  "packages": [
-    "packages/*"
-  ],
-  "version": "independent"
+  "version": "independent",
+  "npmClient": "pnpm"
 }

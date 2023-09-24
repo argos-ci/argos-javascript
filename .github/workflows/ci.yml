@@ -10,17 +10,11 @@ jobs:
   static:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
 
       - name: Lint
         run: npm run lint
@@ -28,17 +22,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
 
       - name: Build
         run: npm run build
@@ -63,20 +51,16 @@ jobs:
       matrix:
         node-version: [16, 18, 20]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
@@ -105,17 +89,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
