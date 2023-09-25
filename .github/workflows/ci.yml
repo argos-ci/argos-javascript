@@ -80,9 +80,6 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
-      - name: Fix sharp install
-        run: pnpm install -w --config.arch=x64 --config.platform=linux --config.libc=glibc sharp
-
       - name: Test
         run: npm run test
 
