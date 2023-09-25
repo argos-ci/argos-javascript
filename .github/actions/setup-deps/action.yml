@@ -38,6 +38,6 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    - name: Rebuild dependencies
+    - name: Rebuild sharp
       shell: bash
-      run: pnpm rebuild
+      run: npm rebuild sharp
