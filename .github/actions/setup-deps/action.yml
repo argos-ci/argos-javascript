@@ -36,8 +36,4 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: pnpm install --frozen-lockfile
-
-    - name: Rebuild sharp
-      shell: bash
-      run: npm rebuild sharp
+      run: pnpm install --frozen-lockfile --ignore-scripts=false
