@@ -37,3 +37,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile
+
+    - name: Rebuild dependencies
+      shell: bash
+      run: pnpm rebuild
