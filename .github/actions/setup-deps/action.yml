@@ -40,4 +40,4 @@ runs:
 
     - name: Install sharp
       shell: bash
-      run: pnpm install sharp -w
+      run: npm rebuild --verbose sharp
