@@ -21,6 +21,8 @@ describe("#createConfig", () => {
       repository: null,
       owner: null,
       prHeadCommit: null,
+      referenceBranch: null,
+      referenceCommit: null,
     });
   });
 

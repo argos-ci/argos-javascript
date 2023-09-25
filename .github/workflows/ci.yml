@@ -19,6 +19,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Check format
+        run: npm run check-format
+
+      - name: Check types
+        run: npm run check-types
+
   build:
     runs-on: ubuntu-latest
     steps:
