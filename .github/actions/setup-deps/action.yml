@@ -36,4 +36,8 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: pnpm install --frozen-lockfile --ignore-scripts=false
+      run: pnpm install --frozen-lockfile
+
+    - name: Install sharp
+      shell: bash
+      run: pnpm install sharp -w
