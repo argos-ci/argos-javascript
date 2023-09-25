@@ -19,7 +19,7 @@ describe("#optimizeScreenshot", () => {
   it("optimizes", async () => {
     const { optimizeScreenshot } = await import("./optimize");
     const optimizedPath = await optimizeScreenshot(
-      join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg")
+      join(__dirname, "../../../__fixtures__/screenshots/penelope.jpg"),
     );
     expect(await exists(optimizedPath)).toBe(true);
   });
