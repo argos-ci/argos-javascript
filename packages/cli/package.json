@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "e2e": "npx @argos-ci/cli upload ../../__fixtures__ --build-name \"argos-cli-e2e-node-$NODE_VERSION-$OS\""
+    "e2e": "node bin/argos-cli.js upload ../../__fixtures__ --build-name \"argos-cli-e2e-node-$NODE_VERSION-$OS\""
   },
   "type": "module",
   "exports": {
@@ -40,7 +40,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@argos-ci/core": "^0.12.0",
+    "@argos-ci/core": "workspace:*",
     "commander": "^11.0.0",
     "ora": "^7.0.1",
     "update-notifier": "^6.0.2"

@@ -1,0 +1,26 @@
+name: "Setup dependencies"
+description: "Setup Node.js & install dependencies"
+inputs:
+  node-version:
+    description: "Node.js version"
+    required: false
+    default: latest
+runs:
+  using: "composite"
+  steps:
+    - uses: pnpm/action-setup@v2
+      name: Install pnpm
+      id: pnpm-install
+      with:
+        version: 8
+        run_install: false
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
