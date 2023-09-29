@@ -40,7 +40,7 @@ jobs:
       - name: Upload "@argos-ci/cli" dist
         uses: actions/upload-artifact@v3
         with:
-          name: cli-dist
+          name: dist
           path: packages/cli/dist
 
       - name: Upload "@argos-ci/core" dist
@@ -48,6 +48,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Upload "@argos-ci/playwright" dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
 
   unit:
     needs: ["build"]
@@ -80,6 +86,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/playwright" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
 
       - name: Test
         run: npm run test
@@ -117,6 +129,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/playwright" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
 
       - name: Run integration tests
         run: npm run e2e
