@@ -35,7 +35,7 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "e2e": "npx playwright test && pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\""
+    "e2e": "pnpm exec playwright test && pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\""
   },
   "devDependencies": {
     "@playwright/test": "^1.38.1",
