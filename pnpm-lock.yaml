@@ -103,6 +103,9 @@ importers:
 
   packages/playwright:
     devDependencies:
+      '@argos-ci/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@playwright/test':
         specifier: ^1.38.1
         version: 1.38.1
