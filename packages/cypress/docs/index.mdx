@@ -1,0 +1,85 @@
+---
+title: Cypress
+slug: /cypress
+---
+
+# Use Argos with Cypress
+
+Integrating Argos with your [Cypress](https://www.cypress.io/) tests to enable visual testing on your application.
+
+Cypress already offers a command to take screenshots. The official Argos Cypress integration uses it but also does several things:
+
+- Wait for all images to be loaded
+- Wait for all fonts to be loaded
+- Wait for no `aria-busy` (loader) elements to be present in the page
+- Hide scrollbars
+- Hide carets
+- Expose CSS helpers to help you hiding content
+
+## 1. Setup
+
+```
+npm install --save-dev @argos-ci/cli @argos-ci/cypress
+```
+
+And add this line to your `cypress/support/index.js` file.
+
+```js
+import "@argos-ci/cypress/support";
+```
+
+## 2. Use in your tests
+
+`cy.argosScreenshot` command stabilizes the UI and takes a screenshot.
+
+_How to take a screenshot with `cy.argosScreenshot` command_
+
+```js
+describe("Homepage", () => {
+  it("screenshots the page", () => {
+    // Screenshot a full page
+    cy.argosScreenshot("home");
+
+    // Screenshot a component
+    cy.get("main div.breadcrumb").argosScreenshot("home-breadcrumb");
+  });
+});
+```
+
+By default screenshots are stored in `cypress/screenshots` folder, relative to current directory.
+
+## 3. Upload screenshots to Argos
+
+Look at Argos doc to know [how to configure your CI](https://argos-ci.com/docs/upload-screenshots) to send screenshots to Argos.
+
+As Cypress store the screenshots into the "cypress/screenshots" folder by default, have to specify it when you use Argos CLI command: `npx @argos-ci/cli upload cypress/screenshots`.
+
+## API
+
+### cy.argosScreenshot([name][, options])
+
+- `name` - The screenshot name; must be unique; default value to test title
+- `options` - See [cy.screenshot command options](https://docs.cypress.io/api/commands/screenshot)
+
+#### Helper attributes
+
+The `data-visual-test` attributes allow you to control how elements behave in the Argos screenshot.
+
+It is often used to hide changing element like dates.
+
+- `[data-visual-test="transparent"]` - Make the element transparent (`opacity: 0`)
+- `[data-visual-test="removed"]` - Remove the element (`display: none`)
+- `[data-visual-test="blackout"]` - Blacked out the element
+- `[data-test-no-radius]` - removes border radius
+
+_How to use an helper to hide a div from a screenshot_
+
+```html
+<div id="clock" data-visual-test="transparent">...</div>
+```
+
+## Resources
+
+- [Example of Argos + Cypress](https://github.com/argos-ci/argos/tree/main/examples/cypress)
+- [@argos-ci/cypress on GitHub](https://github.com/argos-ci/argos-cypress)
+- [@argos-ci/cypress on npm](https://www.npmjs.com/package/@argos-ci/cypress)

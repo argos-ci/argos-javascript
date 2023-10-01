@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "plugins": ["cypress", "eslint-plugin-html"],
+  "extends": ["eslint:recommended", "plugin:cypress/recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "node": true,
+    "cypress/globals": true
+  }
+}

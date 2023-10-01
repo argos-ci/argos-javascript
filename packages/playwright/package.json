@@ -35,8 +35,9 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "e2e": "pnpm exec playwright test && pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\""
-
+    "test": "pnpm exec playwright test",
+    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\"",
+    "e2e": "pnpm run test && pnpm run argos-upload"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",

@@ -1,0 +1,48 @@
+{
+  "name": "@argos-ci/cypress",
+  "description": "Visual testing solution to avoid visual regression. Cypress commands and utilities for Argos visual testing.",
+  "version": "0.0.8",
+  "author": "Smooth Code",
+  "license": "MIT",
+  "repository": "github:argos-ci/argos-cypress",
+  "keywords": [
+    "cypress",
+    "argos",
+    "automation",
+    "test automation",
+    "testing",
+    "visual testing",
+    "regression",
+    "visual regression"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    "./support": {
+      "import": "./support.js",
+      "types": "./support.d.ts",
+      "default": "./support.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "pnpm exec cypress run",
+    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-cypress-e2e-node-$NODE_VERSION-$OS\"",
+    "e2e": "pnpm run test && pnpm run argos-upload"
+  },
+  "dependencies": {
+    "cypress-wait-until": "^1.7.2"
+  },
+  "peerDependencies": {
+    "cypress": ">=3"
+  },
+  "devDependencies": {
+    "@argos-ci/cli": "workspace:*",
+    "@argos-ci/cypress": "file:.",
+    "cypress": "^10.6.0",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-html": "^7.1.0"
+  }
+}
