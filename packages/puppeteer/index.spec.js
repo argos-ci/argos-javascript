@@ -1,4 +1,3 @@
-import "expect-puppeteer";
 import puppeteer from "puppeteer";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
