@@ -18,9 +18,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "engines": {
-    "node": ">=16"
-  },
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -32,12 +29,8 @@
     },
     "./package.json": "./package.json"
   },
-  "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "rollup -c",
-    "test": "pnpm exec playwright test",
-    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\"",
-    "e2e": "pnpm run test && pnpm run argos-upload"
+  "engines": {
+    "node": ">=16.0.0"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
@@ -46,5 +39,12 @@
     "rollup": "^3.29.2",
     "rollup-plugin-swc3": "^0.10.1",
     "rollup-plugin-ts": "^3.4.5"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
+    "test": "pnpm exec playwright test",
+    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\"",
+    "e2e": "pnpm run test && pnpm run argos-upload"
   }
 }

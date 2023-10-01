@@ -18,9 +18,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "engines": {
-    "node": ">=16"
-  },
   "type": "module",
   "exports": {
     ".": {
@@ -31,11 +28,8 @@
     },
     "./package.json": "./package.json"
   },
-  "scripts": {
-    "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test": "pnpm run jest --runInBand",
-    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-puppeteer-e2e-node-$NODE_VERSION-$OS\"",
-    "e2e": "pnpm run test && pnpm run argos-upload"
+  "engines": {
+    "node": ">=16.0.0"
   },
   "peerDependencies": {
     "puppeteer": ">=1"
@@ -53,5 +47,11 @@
   },
   "dependencies": {
     "mkdirp": "^1.0.4"
+  },
+  "scripts": {
+    "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "pnpm run jest --runInBand",
+    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-puppeteer-e2e-node-$NODE_VERSION-$OS\"",
+    "e2e": "pnpm run test && pnpm run argos-upload"
   }
 }
