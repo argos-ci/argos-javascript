@@ -10,7 +10,7 @@ declare namespace Cypress {
      */
     argosScreenshot: (
       name: string,
-      options?: Partial<Loggable & Timeoutable & ScreenshotOptions>
+      options?: Partial<Loggable & Timeoutable & ScreenshotOptions>,
     ) => Chainable<null>;
   }
 }

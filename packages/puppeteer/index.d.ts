@@ -20,5 +20,5 @@ export interface ArgosScreenshotOptions
 export function argosScreenshot(
   page: Page,
   name: string,
-  options?: ArgosScreenshotOptions
+  options?: ArgosScreenshotOptions,
 ): Promise<void>;

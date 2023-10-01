@@ -62,7 +62,7 @@ describe("argosScreenshot", () => {
     it("waits for loader hiding", async () => {
       const loaderContainer = await page.$eval(
         "#loader-container",
-        (div) => div.innerHTML
+        (div) => div.innerHTML,
       );
       expect(loaderContainer.trim()).toBe("");
     });
@@ -70,7 +70,7 @@ describe("argosScreenshot", () => {
     it("hides div with data-visual-test='transparent'", async () => {
       const opacityStyle = await page.$eval(
         "div[data-visual-test='transparent']",
-        (div) => getComputedStyle(div).opacity
+        (div) => getComputedStyle(div).opacity,
       );
       expect(opacityStyle).toBe("0");
     });
@@ -78,14 +78,14 @@ describe("argosScreenshot", () => {
     it("removes div with data-visual-test='removed'", async () => {
       const displayStyle = await page.$eval(
         "div[data-visual-test='removed']",
-        (div) => getComputedStyle(div).display
+        (div) => getComputedStyle(div).display,
       );
       expect(displayStyle).toBe("none");
     });
 
     it("takes a screenshot", async () => {
       const filepath = fileURLToPath(
-        new URL("screenshots/argos/page.png", import.meta.url).href
+        new URL("screenshots/argos/page.png", import.meta.url).href,
       );
       expect(await exists(filepath)).toBe(true);
     });
@@ -95,7 +95,7 @@ describe("argosScreenshot", () => {
     it("takes a screenshot of full page", async () => {
       await argosScreenshot(page, "full-page", { fullPage: true });
       const filepath = fileURLToPath(
-        new URL("screenshots/argos/full-page.png", import.meta.url).href
+        new URL("screenshots/argos/full-page.png", import.meta.url).href,
       );
       expect(await exists(filepath)).toBe(true);
     });
@@ -105,7 +105,7 @@ describe("argosScreenshot", () => {
     it("takes a screenshot of an element", async () => {
       await argosScreenshot(page, "element", { element: ".red-square" });
       const filepath = fileURLToPath(
-        new URL("screenshots/argos/element.png", import.meta.url).href
+        new URL("screenshots/argos/element.png", import.meta.url).href,
       );
       expect(await exists(filepath)).toBe(true);
     });
@@ -115,7 +115,7 @@ describe("argosScreenshot", () => {
     it("works", async () => {
       await argosScreenshotCjs(page, "full-page-cjs", { fullPage: true });
       const filepath = fileURLToPath(
-        new URL("screenshots/argos/full-page-cjs.png", import.meta.url).href
+        new URL("screenshots/argos/full-page-cjs.png", import.meta.url).href,
       );
       expect(await exists(filepath)).toBe(true);
     });

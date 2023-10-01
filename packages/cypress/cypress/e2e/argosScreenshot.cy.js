@@ -18,13 +18,13 @@ describe("argosScreenshot", () => {
 
     it("hides div with data-visual-test attribute", () => {
       cy.get(`[data-visual-test="transparent"]`, { timeout: 0 }).should(
-        "not.be.visible"
+        "not.be.visible",
       );
     });
 
     it("takes a screenshot with generic name", () => {
       cy.readFile(
-        `${screenshotsFolder}/argosScreenshot -- without name -- waits for loader hiding -- before all hook.png`
+        `${screenshotsFolder}/argosScreenshot -- without name -- waits for loader hiding -- before all hook.png`,
       );
     });
   });

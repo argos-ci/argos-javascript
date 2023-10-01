@@ -42,7 +42,7 @@ function isVisible(element) {
   return Boolean(
     element.offsetWidth ||
       element.offsetHeight ||
-      element.getClientRects().length
+      element.getClientRects().length,
   );
 }
 
@@ -54,7 +54,7 @@ function waitUntilNoBusy() {
     cy.document().then((document) => {
       const busy = Array.from(document.querySelectorAll('[aria-busy="true"]'));
       return busy.every((element) => !isVisible(element));
-    })
+    }),
   );
 }
 
@@ -70,7 +70,7 @@ function waitForImagesLoading() {
         img.decoding = "sync";
       });
       return allImages.every((img) => img.complete && img.naturalWidth > 0);
-    })
+    }),
   );
 }
 
@@ -121,9 +121,9 @@ Cypress.Commands.add(
     // Screenshot
     cy.wrap(subject).screenshot(name, {
       blackout: ['[data-visual-test="blackout"]'].concat(
-        options.blackout || []
+        options.blackout || [],
       ),
       ...options,
     });
-  }
+  },
 );

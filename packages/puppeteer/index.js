@@ -30,11 +30,11 @@ async function ensureNoBusy() {
     Boolean(
       element.offsetWidth ||
         element.offsetHeight ||
-        element.getClientRects().length
+        element.getClientRects().length,
     );
 
   return [...document.querySelectorAll('[aria-busy="true"]')].every(
-    (element) => !checkIsVisible(element)
+    (element) => !checkIsVisible(element),
   );
 }
 
@@ -56,8 +56,8 @@ async function waitForImages() {
         (img) =>
           new Promise((resolve) => {
             img.onload = img.onerror = resolve;
-          })
-      )
+          }),
+      ),
   );
 }
 
@@ -75,7 +75,7 @@ function disableSpellCheck() {
 export async function argosScreenshot(
   page,
   name,
-  { element = page, ...options } = {}
+  { element = page, ...options } = {},
 ) {
   if (!page) throw new Error("A Puppeteer `page` object is required.");
   if (!name) throw new Error("The `name` argument is required.");
