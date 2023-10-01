@@ -121,6 +121,9 @@ jobs:
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
 
+      - name: Install Cypress
+        uses: pnpm --filter cypress exec cypress install
+
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
         with:
