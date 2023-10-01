@@ -124,6 +124,9 @@ jobs:
       - name: Install Cypress
         run: pnpm --filter cypress exec cypress install
 
+      - name: Install Puppeteer
+        run: pnpm dlx @puppeteer/browsers install chrome
+
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
         with:
