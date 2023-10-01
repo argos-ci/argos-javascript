@@ -2,4 +2,4 @@
 import "./support";
 
 // findBy*
-cy.argosScreenshot("foo"); // $ExpectTypex Chainable<null>
+cy.argosScreenshot("foo"); // $ExpectType Chainable<null>
