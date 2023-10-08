@@ -2,9 +2,6 @@
   "exclude": ["node_modules/**"],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@argos-ci/*": ["packages/*/src"]
-    },
     "module": "ESNext",
     "moduleResolution": "node",
     "target": "ES2021",
@@ -17,7 +14,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true,
-    "skipLibCheck": true
+    "noEmit": true
   }
 }

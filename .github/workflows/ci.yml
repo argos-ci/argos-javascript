@@ -49,6 +49,12 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
+      - name: Upload "@argos-ci/playwright" dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
+
   unit:
     needs: ["build"]
 
@@ -80,10 +86,16 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
+      - name: Download "@argos-ci/playwright" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
+
       - name: Test
         run: npm run test
 
-  e2e:
+  e2e-core:
     needs: ["build"]
 
     strategy:
@@ -116,7 +128,151 @@ jobs:
           path: packages/core/dist
 
       - name: Run integration tests
-        run: npm run e2e
+        run: pnpm --filter core --filter cli run e2e
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
+
+  e2e-cypress:
+    needs: ["build"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [current]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
+
+      - name: Install Cypress
+        run: pnpm --filter cypress exec cypress install
+
+      - name: Download "@argos-ci/cli" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: cli-dist
+          path: packages/cli/dist
+
+      - name: Download "@argos-ci/core" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: core-dist
+          path: packages/core/dist
+
+      - name: Run integration tests
+        run: pnpm --filter cypress run e2e
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
+
+  e2e-playwright:
+    needs: ["build"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [current]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
+
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
+
+      - name: Download "@argos-ci/cli" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: cli-dist
+          path: packages/cli/dist
+
+      - name: Download "@argos-ci/core" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: core-dist
+          path: packages/core/dist
+
+      - name: Download "@argos-ci/playwright" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
+
+      - name: Run integration tests
+        run: pnpm --filter playwright run e2e
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
+
+  e2e-puppeteer:
+    needs: ["build"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [current]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup Puppeteer
+        run: node packages/puppeteer/node_modules/puppeteer/install.mjs
+
+      - name: Download "@argos-ci/cli" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: cli-dist
+          path: packages/cli/dist
+
+      - name: Download "@argos-ci/core" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: core-dist
+          path: packages/core/dist
+
+      - name: Download "@argos-ci/playwright" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
+
+      - name: Run integration tests
+        run: pnpm --filter puppeteer run e2e
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}

@@ -1,0 +1,6 @@
+{
+  "testEnvironment": "jest-environment-node",
+  "transform": {},
+  "preset": "jest-puppeteer",
+  "runner": "jest-light-runner"
+}

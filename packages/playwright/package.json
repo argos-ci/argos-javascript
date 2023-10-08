@@ -1,0 +1,54 @@
+{
+  "name": "@argos-ci/playwright",
+  "description": "Visual testing solution to avoid visual regression. Playwright commands and utilities for Argos visual testing.",
+  "version": "0.0.7",
+  "author": "Smooth Code",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/playwright"
+  },
+  "keywords": [
+    "playwright",
+    "argos",
+    "automation",
+    "test automation",
+    "testing",
+    "visual testing",
+    "regression",
+    "visual regression"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@argos-ci/cli": "workspace:*",
+    "@playwright/test": "^1.38.1",
+    "@types/node": "^20.7.0",
+    "rollup": "^3.29.2",
+    "rollup-plugin-swc3": "^0.10.1",
+    "rollup-plugin-ts": "^3.4.5"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
+    "test": "pnpm exec playwright test",
+    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\"",
+    "e2e": "pnpm run test && pnpm run argos-upload"
+  }
+}

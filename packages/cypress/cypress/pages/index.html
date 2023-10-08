@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Fake page</title>
+    <style>
+      main {
+        width: 650px;
+        margin: 0 auto;
+      }
+      h3 {
+        margin-bottom: 4px;
+      }
+      .field {
+        padding: 8px;
+        min-height: 40px;
+        background-color: #f3f3f3;
+        border-radius: 6px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      #loader {
+        border: 6px solid #cccccc;
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Fake page</h1>
+
+      <h3>data-visual-test="transparent"</h3>
+      <div class="field">
+        <div data-visual-test="transparent">
+          This div has `data-visual-test="transparent"` attribute.
+        </div>
+      </div>
+
+      <h3>Hidden</h3>
+      <div class="field">
+        <div data-visual-test="hidden">
+          This div has `data-visual-test="hidden"` attribute.
+        </div>
+      </div>
+
+      <h3>Blackout</h3>
+      <div class="field">
+        <div data-visual-test="blackout">
+          This div has `data-visual-test="blackout"` attribute.
+        </div>
+      </div>
+
+      <h3>Loader (3s)</h3>
+      <div class="field">
+        <div id="loader" aria-busy="true"></div>
+      </div>
+
+      <h3>Red square</h3>
+      <div
+        class="red-square"
+        style="width: 100px; height: 100px; background-color: red"
+      ></div>
+
+      <h3>Editable contents</h3>
+      <div class="field">
+        <div><input value="an orrange carrot" /></div>
+        <div><textarea>an orrange carrot</textarea></div>
+        <p contenteditable="true" autofocus>an orrange carrot</p>
+      </div>
+    </main>
+
+    <script>
+      setTimeout(() => {
+        document.querySelector("#loader").remove();
+      }, 300);
+    </script>
+  </body>
+</html>

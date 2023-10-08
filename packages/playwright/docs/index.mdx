@@ -1,0 +1,76 @@
+---
+title: Playwright
+slug: /playwright
+---
+
+# Use Argos with Playwright
+
+Integrating Argos with your [Playwright](https://playwright.dev/) tests to enable visual testing on your application.
+
+Playwright already offers a command to take screenshots. The official Argos Playwright integration uses it but also does several things:
+
+- Wait for all images to be loaded
+- Wait for all fonts to be loaded
+- Wait for no `aria-busy` (loader) elements to be present in the page
+- Hide scrollbars
+- Hide carets
+- Expose CSS helpers to help you hiding content
+
+## 1. Setup
+
+```
+npm install --save-dev @argos-ci/playwright @playwright/test
+```
+
+## 2. Use in your tests
+
+`argosScreenshot` command stabilizes the UI and takes a screenshot.
+
+_How to take a screenshot with `argosScreenshot` command_
+
+```js
+import { test } from "@playwright/test";
+import { argosScreenshot } from "@argos-ci/playwright";
+
+test.describe("Homepage", () => {
+  test("take screenshot", async ({ page }) => {
+    await page.goto(TEST_URL);
+    await argosScreenshot(page, "homepage");
+  });
+});
+```
+
+Screenshots are stored in `./screenshots` folder.
+
+## 3. Upload screenshots to Argos
+
+Look at Argos doc to know [how to configure your CI](https://argos-ci.com/docs/upload-screenshots) to send screenshots to Argos.
+
+## API
+
+### argosScreenshot(page, name[, options])
+
+- `page` - A `playwright` page instance
+- `name` - The screenshot name; must be unique
+- `options` - See [Page.screenshot command options](https://playwright.dev/docs/api/class-page#page-screenshot)
+- `options.element` - Accept an ElementHandle or a string selector to screenshot an element
+
+#### Helper attributes
+
+The `data-visual-test` attributes allow you to control how elements behave in the Argos screenshot.
+
+It is often used to hide changing element like dates.
+
+- `[data-visual-test="transparent"]` - Make the element transparent (`opacity: 0`)
+- `[data-visual-test="removed"]` - Remove the element (`display: none`)
+
+_How to use an helper to hide a div from a screenshot_
+
+```html
+<div id="clock" data-visual-test="transparent">...</div>
+```
+
+## Resources
+
+- [@argos-ci/playwright on GitHub](https://github.com/argos-ci/argos-playwright)
+- [@argos-ci/playwright on npm](https://www.npmjs.com/package/@argos-ci/playwright)
