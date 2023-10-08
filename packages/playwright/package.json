@@ -4,7 +4,11 @@
   "version": "0.0.7",
   "author": "Smooth Code",
   "license": "MIT",
-  "repository": "github:argos-ci/argos-playwright",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/playwright"
+  },
   "keywords": [
     "playwright",
     "argos",

@@ -4,7 +4,11 @@
   "version": "0.0.3",
   "author": "Smooth Code",
   "license": "MIT",
-  "repository": "github:argos-ci/argos-puppeteer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/puppeteer"
+  },
   "keywords": [
     "puppeteer",
     "argos",
