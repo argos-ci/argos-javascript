@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@argos-ci/*": ["packages/*/src"]
+      "@argos-ci/*": ["packages/*/src"],
+      "@argos-ci/browser/global.js": ["packages/browser/src/global.js"]
     },
     "module": "ESNext",
     "moduleResolution": "node",

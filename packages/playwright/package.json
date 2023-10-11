@@ -36,6 +36,9 @@
   "engines": {
     "node": ">=16.0.0"
   },
+  "dependencies": {
+    "@argos-ci/browser": "workspace:*"
+  },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@playwright/test": "^1.38.1",

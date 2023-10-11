@@ -1,8 +1,8 @@
-import ts from "rollup-plugin-ts";
 import { swc, defineRollupSwcOption } from "rollup-plugin-swc3";
+import ts from "rollup-plugin-ts";
+import { fileURLToPath, URL } from "node:url";
 
 const bundle = (config) => ({
-  input: "src/index.ts",
   external: (id) => {
     return id === "./index.mjs" || !/^[./]/.test(id);
   },
@@ -12,6 +12,7 @@ const bundle = (config) => ({
 const swcPlugin = swc(
   defineRollupSwcOption({
     jsc: {
+      baseUrl: fileURLToPath(new URL(".", import.meta.url)),
       target: "es2021",
       parser: {
         syntax: "typescript",
@@ -22,8 +23,9 @@ const swcPlugin = swc(
 
 export default [
   bundle({
+    input: "src/index.ts",
     output: {
-      file: `dist/index.mjs`,
+      file: "dist/index.mjs",
       format: "es",
     },
     plugins: [swcPlugin],
@@ -31,16 +33,17 @@ export default [
   bundle({
     input: "src/index.cjs.ts",
     output: {
-      file: `dist/index.cjs`,
+      file: "dist/index.cjs",
       format: "es",
     },
     plugins: [swcPlugin],
   }),
-  bundle({
+  {
+    input: "src/index.ts",
     plugins: [ts({ transpiler: "swc" })],
     output: {
-      file: `dist/index.d.ts`,
+      file: "dist/index.d.ts",
       format: "es",
     },
-  }),
+  },
 ];

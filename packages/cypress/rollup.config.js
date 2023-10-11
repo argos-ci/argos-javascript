@@ -2,9 +2,9 @@ import ts from "rollup-plugin-ts";
 import { swc, defineRollupSwcOption } from "rollup-plugin-swc3";
 
 const bundle = (config) => ({
-  input: "src/index.ts",
+  input: "src/support.ts",
   external: (id) => {
-    return id === "./index.mjs" || !/^[./]/.test(id);
+    return !/^[./]/.test(id);
   },
   ...config,
 });
@@ -23,15 +23,7 @@ const swcPlugin = swc(
 export default [
   bundle({
     output: {
-      file: `dist/index.mjs`,
-      format: "es",
-    },
-    plugins: [swcPlugin],
-  }),
-  bundle({
-    input: "src/index.cjs.ts",
-    output: {
-      file: `dist/index.cjs`,
+      file: `dist/support.mjs`,
       format: "es",
     },
     plugins: [swcPlugin],
@@ -39,7 +31,7 @@ export default [
   bundle({
     plugins: [ts({ transpiler: "swc" })],
     output: {
-      file: `dist/index.d.ts`,
+      file: `dist/support.d.ts`,
       format: "es",
     },
   }),

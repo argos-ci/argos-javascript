@@ -1,0 +1,50 @@
+{
+  "name": "@argos-ci/browser",
+  "description": "Browser utilities to stabilize visual testing.",
+  "version": "0.0.0",
+  "author": "Smooth Code",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/browser"
+  },
+  "keywords": [
+    "browser",
+    "argos",
+    "automation",
+    "test automation",
+    "testing",
+    "visual testing",
+    "regression",
+    "visual regression"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./global.js": {
+      "types": "./dist/global.d.ts",
+      "default": "./dist/global.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "rollup": "^3.29.0",
+    "rollup-plugin-swc3": "^0.10.1",
+    "rollup-plugin-ts": "^3.4.5"
+  }
+}
