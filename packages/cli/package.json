@@ -43,6 +43,6 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "e2e": "node bin/argos-cli.js upload ../../__fixtures__ --build-name \"argos-cli-e2e-node-$NODE_VERSION-$OS\""
+    "e2e": "node e2e/upload.js"
   }
 }
