@@ -42,10 +42,7 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@playwright/test": "^1.38.1",
-    "@types/node": "^20.7.0",
-    "rollup": "^3.29.2",
-    "rollup-plugin-swc3": "^0.10.1",
-    "rollup-plugin-ts": "^3.4.5"
+    "@types/node": "^20.7.0"
   },
   "scripts": {
     "prebuild": "rm -rf dist",

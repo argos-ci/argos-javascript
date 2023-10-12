@@ -40,10 +40,6 @@
     "ora": "^7.0.1",
     "update-notifier": "^6.0.2"
   },
-  "devDependencies": {
-    "rollup": "^3.29.0",
-    "rollup-plugin-swc3": "^0.10.1"
-  },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",

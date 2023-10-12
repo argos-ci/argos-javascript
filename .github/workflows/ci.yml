@@ -55,6 +55,18 @@ jobs:
           name: playwright-dist
           path: packages/playwright/dist
 
+      - name: Upload "@argos-ci/cypress" dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-dist
+          path: packages/cypress/dist
+
+      - name: Upload "@argos-ci/puppeteer" dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: puppeteer-dist
+          path: packages/puppeteer/dist
+
   unit:
     needs: ["build"]
 
@@ -85,12 +97,6 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
-
-      - name: Download "@argos-ci/playwright" dist
-        uses: actions/download-artifact@v3
-        with:
-          name: playwright-dist
-          path: packages/playwright/dist
 
       - name: Test
         run: npm run test
@@ -171,6 +177,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/cypress" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: cypress-dist
+          path: packages/cypress/dist
 
       - name: Run integration tests
         run: pnpm --filter cypress run e2e
@@ -265,11 +277,11 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
-      - name: Download "@argos-ci/playwright" dist
+      - name: Download "@argos-ci/puppeteer" dist
         uses: actions/download-artifact@v3
         with:
-          name: playwright-dist
-          path: packages/playwright/dist
+          name: puppeteer-dist
+          path: packages/puppeteer/dist
 
       - name: Run integration tests
         run: pnpm --filter puppeteer run e2e

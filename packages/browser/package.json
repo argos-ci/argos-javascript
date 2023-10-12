@@ -41,10 +41,5 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c"
-  },
-  "devDependencies": {
-    "rollup": "^3.29.0",
-    "rollup-plugin-swc3": "^0.10.1",
-    "rollup-plugin-ts": "^3.4.5"
   }
 }

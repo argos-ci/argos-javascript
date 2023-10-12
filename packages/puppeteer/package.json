@@ -51,10 +51,7 @@
     "jest-light-runner": "^0.4.0",
     "jest-puppeteer": "^9.0.1",
     "expect-puppeteer": "^9.0.1",
-    "puppeteer": "^21.3.6",
-    "rollup": "^3.29.2",
-    "rollup-plugin-swc3": "^0.10.1",
-    "rollup-plugin-ts": "^3.4.5"
+    "puppeteer": "^21.3.6"
   },
   "scripts": {
     "prebuild": "rm -rf dist",

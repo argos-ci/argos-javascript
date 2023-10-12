@@ -1,46 +1,11 @@
-import ts from "rollup-plugin-ts";
-import { swc, defineRollupSwcOption } from "rollup-plugin-swc3";
-
-const bundle = (config) => ({
-  input: "src/index.ts",
-  external: (id) => {
-    return id === "./index.mjs" || !/^[./]/.test(id);
-  },
-  ...config,
-});
-
-const swcPlugin = swc(
-  defineRollupSwcOption({
-    jsc: {
-      target: "es2021",
-      parser: {
-        syntax: "typescript",
-      },
-    },
-  }),
-);
+import { buildEs, buildTypes, ignoreRelative } from "../../build/rollup.js";
 
 export default [
-  bundle({
-    output: {
-      file: `dist/index.mjs`,
-      format: "es",
-    },
-    plugins: [swcPlugin],
-  }),
-  bundle({
+  buildEs(),
+  buildTypes(),
+  buildEs({
     input: "src/index.cjs.ts",
-    output: {
-      file: `dist/index.cjs`,
-      format: "es",
-    },
-    plugins: [swcPlugin],
-  }),
-  bundle({
-    plugins: [ts({ transpiler: "swc" })],
-    output: {
-      file: `dist/index.d.ts`,
-      format: "es",
-    },
+    output: "dist/index.cjs",
+    external: (id) => ignoreRelative(id) || id === "./index.mjs",
   }),
 ];

@@ -47,10 +47,7 @@
     "@types/node": "^20.8.4",
     "cypress": "^13.3.0",
     "eslint-plugin-cypress": "^2.15.1",
-    "eslint-plugin-html": "^7.1.0",
-    "rollup": "^3.29.0",
-    "rollup-plugin-swc3": "^0.10.1",
-    "rollup-plugin-ts": "^3.4.5"
+    "eslint-plugin-html": "^7.1.0"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
