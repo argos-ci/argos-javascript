@@ -221,7 +221,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
+        run: pnpm --filter playwright exec playwright install chromium --with-deps
 
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
