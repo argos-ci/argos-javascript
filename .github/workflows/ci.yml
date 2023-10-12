@@ -49,6 +49,12 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
+      - name: Upload "@argos-ci/browser" dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: browser-dist
+          path: packages/browser/dist
+
       - name: Upload "@argos-ci/playwright" dist
         uses: actions/upload-artifact@v3
         with:
@@ -160,9 +166,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
-
       - name: Install Cypress
         run: pnpm --filter cypress exec cypress install
 
@@ -177,6 +180,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/browser" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: browser-dist
+          path: packages/browser/dist
 
       - name: Download "@argos-ci/cypress" dist
         uses: actions/download-artifact@v3
@@ -214,9 +223,6 @@ jobs:
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
 
-      - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
-
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
         with:
@@ -228,6 +234,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/browser" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: browser-dist
+          path: packages/browser/dist
 
       - name: Download "@argos-ci/playwright" dist
         uses: actions/download-artifact@v3
@@ -276,6 +288,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/browser" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: browser-dist
+          path: packages/browser/dist
 
       - name: Download "@argos-ci/puppeteer" dist
         uses: actions/download-artifact@v3
