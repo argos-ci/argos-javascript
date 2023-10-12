@@ -34,8 +34,8 @@ describe("argosScreenshot", () => {
   describe("component", () => {
     it("takes a screenshot of a component with a generic name", () => {
       cy.visit("cypress/pages/index.html");
-      cy.get(".red-square").argosScreenshot("red-square");
-      cy.readFile(`${screenshotsFolder}/red-square.png`);
+      cy.get(".specific-target").argosScreenshot("specific-target");
+      cy.readFile(`${screenshotsFolder}/specific-target.png`);
     });
   });
 });

@@ -40,13 +40,9 @@
     "ora": "^7.0.1",
     "update-notifier": "^6.0.2"
   },
-  "devDependencies": {
-    "rollup": "^3.29.0",
-    "rollup-plugin-swc3": "^0.10.1"
-  },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "e2e": "node bin/argos-cli.js upload ../../__fixtures__ --build-name \"argos-cli-e2e-node-$NODE_VERSION-$OS\""
+    "e2e": "node e2e/upload.js"
   }
 }

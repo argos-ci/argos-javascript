@@ -38,50 +38,49 @@
     <main>
       <h1>Fake page</h1>
 
-      <h3>data-visual-test="transparent"</h3>
+      <h3>[data-visual-test="transparent"]</h3>
       <div class="field">
         <div data-visual-test="transparent">
           This div has `data-visual-test="transparent"` attribute.
         </div>
       </div>
 
-      <h3>Hidden</h3>
+      <h3>[data-visual-test="removed"]</h3>
       <div class="field">
-        <div data-visual-test="hidden">
-          This div has `data-visual-test="hidden"` attribute.
+        <div data-visual-test="removed">
+          This div has `data-visual-test="removed"` attribute.
         </div>
       </div>
 
-      <h3>Blackout</h3>
+      <h3>[data-visual-test="blackout"]</h3>
       <div class="field">
         <div data-visual-test="blackout">
           This div has `data-visual-test="blackout"` attribute.
         </div>
       </div>
 
-      <h3>Loader (3s)</h3>
+      <h3>[aria-busy="true"] disappears after 300ms</h3>
       <div class="field">
         <div id="loader" aria-busy="true"></div>
+        <script>
+          setTimeout(() => {
+            document.querySelector("#loader").remove();
+          }, 300);
+        </script>
       </div>
 
-      <h3>Red square</h3>
+      <h3>.specific-target element</h3>
       <div
-        class="red-square"
+        class="specific-target"
         style="width: 100px; height: 100px; background-color: red"
       ></div>
 
-      <h3>Editable contents</h3>
+      <h3>Spell check</h3>
       <div class="field">
         <div><input value="an orrange carrot" /></div>
         <div><textarea>an orrange carrot</textarea></div>
         <p contenteditable="true" autofocus>an orrange carrot</p>
       </div>
     </main>
-
-    <script>
-      setTimeout(() => {
-        document.querySelector("#loader").remove();
-      }, 300);
-    </script>
   </body>
 </html>

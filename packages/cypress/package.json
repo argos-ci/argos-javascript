@@ -25,9 +25,9 @@
   "type": "module",
   "exports": {
     "./support": {
-      "import": "./support.js",
-      "types": "./support.d.ts",
-      "default": "./support.js"
+      "import": "./dist/support.mjs",
+      "types": "./dist/support.d.ts",
+      "default": "./dist/support.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -35,6 +35,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
+    "@argos-ci/browser": "workspace:*",
     "cypress-wait-until": "^1.7.2"
   },
   "peerDependencies": {
@@ -43,13 +44,16 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/cypress": "file:.",
+    "@types/node": "^20.8.4",
     "cypress": "^13.3.0",
     "eslint-plugin-cypress": "^2.15.1",
     "eslint-plugin-html": "^7.1.0"
   },
   "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
     "test": "pnpm exec cypress run",
-    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-cypress-e2e-node-$NODE_VERSION-$OS\"",
+    "argos-upload": "pnpm exec argos upload cypress/screenshots --build-name \"argos-cypress-e2e-node-$NODE_VERSION-$OS\"",
     "e2e": "pnpm run test && pnpm run argos-upload"
   }
 }

@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import type {
   Page,
@@ -6,50 +6,12 @@ import type {
   LocatorScreenshotOptions,
   ElementHandle,
 } from "@playwright/test";
+import { createRequire } from "node:module";
+import { ArgosGlobal } from "@argos-ci/browser/global.js";
+
+const require = createRequire(import.meta.url);
 
 const screenshotFolder = "./screenshots";
-
-const GLOBAL_STYLES = `
-  /* Hide carets */
-  * { caret-color: transparent !important; }
-
-  /* Hide scrollbars */
-  ::-webkit-scrollbar {
-    display: none !important;
-  }
-
-  /* Generic hide */
-  [data-visual-test="transparent"] {
-    color: transparent !important;
-    font-family: monospace !important;
-    opacity: 0 !important;
-  }
-
-  [data-visual-test="removed"] {
-    display: none !important;
-  }
-`;
-
-// Check if the fonts are loaded
-function waitForFontLoading() {
-  return document.fonts.status === "loaded";
-}
-
-// Check if the images are loaded
-function waitForImagesLoading() {
-  const allImages = Array.from(document.images);
-  allImages.forEach((img) => (img.loading = "eager"));
-  return allImages.every((img) => img.complete);
-}
-
-// Disable spellcheck to avoid red underlines
-function disableSpellCheck() {
-  const query =
-    "[contenteditable]:not([contenteditable=false]):not([spellcheck=false]), input:not([spellcheck=false]), textarea:not([spellcheck=false])";
-  const inputs = document.querySelectorAll(query);
-  inputs.forEach((input) => input.setAttribute("spellcheck", "false"));
-  return true;
-}
 
 type LocatorOptions = Parameters<Page["locator"]>[1];
 
@@ -66,33 +28,45 @@ export type ArgosScreenshotOptions = {
   ScreenshotOptions<LocatorScreenshotOptions> &
   ScreenshotOptions<PageScreenshotOptions>;
 
+/**
+ * Inject Argos script into the page.
+ */
+async function injectArgos(page: Page) {
+  const fileName = require.resolve("@argos-ci/browser/global.js");
+  const content = await readFile(fileName, "utf-8");
+  await page.addScriptTag({ content });
+}
+
 export async function argosScreenshot(
   page: Page,
   name: string,
   { element, has, hasText, ...options }: ArgosScreenshotOptions = {},
 ) {
-  if (!page) throw new Error("A Playwright `page` object is required.");
-  if (!name) throw new Error("The `name` argument is required.");
+  if (!page) {
+    throw new Error("A Playwright `page` object is required.");
+  }
+  if (!name) {
+    throw new Error("The `name` argument is required.");
+  }
 
   const handle =
     typeof element === "string"
       ? page.locator(element, { has, hasText })
       : element ?? page;
 
-  mkdir(screenshotFolder, { recursive: true });
-
-  // Inject global styles
-  await page.addStyleTag({ content: GLOBAL_STYLES });
-
-  // Wait for all busy elements to be loaded
-  await page.waitForSelector('[aria-busy="true"]', { state: "hidden" });
-
-  // Code injection to improve the screenshot stability
   await Promise.all([
-    page.waitForFunction(waitForImagesLoading),
-    page.waitForFunction(waitForFontLoading),
-    page.waitForFunction(disableSpellCheck),
+    // Create the screenshot folder if it doesn't exist
+    mkdir(screenshotFolder, { recursive: true }),
+    // Inject Argos script into the page
+    injectArgos(page),
   ]);
+
+  await page.evaluate(() =>
+    ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
+  );
+  await page.waitForFunction(() =>
+    ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
+  );
 
   await handle.screenshot({
     path: resolve(screenshotFolder, `${name}.png`),

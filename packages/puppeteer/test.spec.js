@@ -1,8 +1,8 @@
 import puppeteer from "puppeteer";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
-import { argosScreenshot } from "./index.js";
-import { argosScreenshot as argosScreenshotCjs } from "./index.cjs";
+import { argosScreenshot } from "./dist/index.mjs";
+import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
 
 export async function exists(path) {
   try {
