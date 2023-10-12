@@ -2,6 +2,7 @@ import { swc } from "rollup-plugin-swc3";
 import ts from "rollup-plugin-ts";
 
 export const swcPlugin = swc({
+  tsconfig: false,
   jsc: {
     parser: {
       syntax: "typescript",
