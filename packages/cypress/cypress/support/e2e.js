@@ -1,1 +1,1 @@
-import "@argos-ci/cypress/support";
+import "../../dist/support.mjs";

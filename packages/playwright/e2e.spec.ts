@@ -9,7 +9,7 @@ import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
 test.describe.configure({ mode: "serial" });
 const screenshotFolder = "screenshots";
 
-export async function exists(path: string) {
+export async function checkExists(path: string) {
   try {
     await stat(path);
     return true;
@@ -18,11 +18,12 @@ export async function exists(path: string) {
   }
 }
 
-async function screenshotExists(screenshotName: string) {
+async function expectScreenshotToExists(screenshotName: string) {
   const filepath = fileURLToPath(
     new URL(`${screenshotFolder}/${screenshotName}.png`, import.meta.url).href,
   );
-  return exists(filepath);
+  const exists = await checkExists(filepath);
+  expect(exists).toBe(true);
 }
 
 const url = new URL("fixtures/dummy.html", import.meta.url).href;
@@ -103,30 +104,48 @@ test.describe("#argosScreenshot", () => {
   });
 
   test("takes a screenshot", async () => {
-    expect(screenshotExists(screenshotName)).toBeTruthy();
+    await expectScreenshotToExists(screenshotName);
   });
 
-  test.describe("with fullPage option", () => {
-    test("takes a screenshot of full page", async () => {
-      const screenshotName = "full-page";
-      await argosScreenshot(page, screenshotName, { fullPage: true });
-      expect(screenshotExists(screenshotName)).toBeTruthy();
+  test.describe("with fullPage option false", () => {
+    test("does not take a screenshot of full page", async () => {
+      await argosScreenshot(page, "full-page", { fullPage: false });
     });
   });
 
   test.describe("screenshot element", () => {
     test("takes a screenshot of an element", async () => {
-      const screenshotName = "red-square";
-      await argosScreenshot(page, screenshotName, { element: ".red-square" });
-      expect(screenshotExists(screenshotName)).toBeTruthy();
+      await argosScreenshot(page, "red-square", { element: ".red-square" });
+    });
+  });
+
+  test.describe("viewports", () => {
+    test("takes screenshots on different viewports", async () => {
+      await argosScreenshot(page, "viewport", {
+        viewports: [
+          "iphone-4",
+          "macbook-15",
+          {
+            preset: "ipad-2",
+            orientation: "landscape",
+          },
+          { width: 800, height: 600 },
+        ],
+        fullPage: false,
+      });
+
+      await Promise.all([
+        expectScreenshotToExists(`viewport vw-320`),
+        expectScreenshotToExists(`viewport vw-800`),
+        expectScreenshotToExists(`viewport vw-1024`),
+        expectScreenshotToExists(`viewport vw-1440`),
+      ]);
     });
   });
 
   test.describe("with cjs version", () => {
     test("works", async () => {
-      const screenshotName = "full-page-cjs";
-      await argosScreenshotCjs(page, screenshotName, { fullPage: true });
-      expect(screenshotExists(screenshotName)).toBeTruthy();
+      await argosScreenshotCjs(page, "full-page-cjs");
     });
   });
 });

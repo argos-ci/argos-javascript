@@ -1,5 +1,10 @@
 import "cypress-wait-until";
 import type { ArgosGlobal } from "@argos-ci/browser/global.js";
+import {
+  getScreenshotName,
+  resolveViewport,
+  ViewportOption,
+} from "@argos-ci/browser";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -15,7 +20,9 @@ declare global {
        */
       argosScreenshot: (
         name: string,
-        options?: Partial<Loggable & Timeoutable & ScreenshotOptions>,
+        options?: Partial<Loggable & Timeoutable & ScreenshotOptions> & {
+          viewports?: ViewportOption[];
+        },
       ) => Chainable<null>;
     }
   }
@@ -36,7 +43,11 @@ function injectArgos() {
 Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
-  (subject, name, options = {}) => {
+  (subject, name, { viewports, ...options } = {}) => {
+    if (!name) {
+      throw new Error("The `name` argument is required.");
+    }
+
     Cypress.log({
       name: "argosScreenshot",
       displayName: `Argos Screenshot`,
@@ -49,19 +60,40 @@ Cypress.Commands.add(
       ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
     );
 
-    cy.waitUntil(() =>
-      cy
-        .window({ log: false })
-        .then((window) =>
-          ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
-        ),
-    );
+    function stabilizeAndScreenshot(name: string) {
+      cy.waitUntil(() =>
+        cy
+          .window({ log: false })
+          .then((window) =>
+            ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
+          ),
+      );
 
-    cy.wrap(subject).screenshot(name, {
-      blackout: ['[data-visual-test="blackout"]'].concat(
-        options.blackout || [],
-      ),
-      ...options,
-    });
+      cy.wrap(subject).screenshot(name, {
+        blackout: ['[data-visual-test="blackout"]'].concat(
+          options.blackout || [],
+        ),
+        ...options,
+      });
+    }
+
+    if (!viewports) {
+      stabilizeAndScreenshot(name);
+      return;
+    }
+
+    for (const viewport of viewports) {
+      const viewportSize = resolveViewport(viewport);
+      cy.viewport(viewportSize.width, viewportSize.height);
+      stabilizeAndScreenshot(
+        getScreenshotName(name, { viewportWidth: viewportSize.width }),
+      );
+    }
+
+    // Restore the original viewport
+    cy.viewport(
+      Cypress.config("viewportWidth"),
+      Cypress.config("viewportHeight"),
+    );
   },
 );

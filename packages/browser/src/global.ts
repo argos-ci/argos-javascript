@@ -1,4 +1,4 @@
-import { waitForStability, prepareForScreenshot } from "./index";
+import { waitForStability, prepareForScreenshot } from "./stabilization";
 
 const ArgosGlobal = {
   waitForStability: () => waitForStability(document),
