@@ -1,7 +1,11 @@
 import "cypress-wait-until";
 import type { ArgosGlobal } from "@argos-ci/browser/global.js";
 import { resolveViewport, ViewportOption } from "@argos-ci/browser";
-import { getScreenshotName, ScreenshotMetadata } from "@argos-ci/util/browser";
+import {
+  getMetadataPath,
+  getScreenshotName,
+  ScreenshotMetadata,
+} from "@argos-ci/util/browser";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -118,7 +122,10 @@ Cypress.Commands.add(
             },
           };
 
-          cy.writeFile(ref.props.path + ".meta.json", JSON.stringify(metadata));
+          cy.writeFile(
+            getMetadataPath(ref.props.path),
+            JSON.stringify(metadata),
+          );
         });
       });
     }

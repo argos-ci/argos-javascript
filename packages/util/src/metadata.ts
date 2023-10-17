@@ -26,5 +26,5 @@ export type ScreenshotMetadata = {
  * Get metadata path from screenshot path.
  */
 export function getMetadataPath(screenshotPath: string) {
-  return screenshotPath + ".meta.json";
+  return screenshotPath + ".argos.json";
 }
