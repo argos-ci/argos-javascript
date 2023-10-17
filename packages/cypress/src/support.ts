@@ -1,10 +1,7 @@
 import "cypress-wait-until";
 import type { ArgosGlobal } from "@argos-ci/browser/global.js";
-import {
-  getScreenshotName,
-  resolveViewport,
-  ViewportOption,
-} from "@argos-ci/browser";
+import { resolveViewport, ViewportOption } from "@argos-ci/browser";
+import { getScreenshotName, ScreenshotMetadata } from "@argos-ci/util/browser";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -40,6 +37,13 @@ function injectArgos() {
   );
 }
 
+function readArgosCypressVersion() {
+  const fileName = require.resolve("@argos-ci/cypress/package.json");
+  return cy.readFile(fileName).then((source) => {
+    return source.version;
+  });
+}
+
 Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
@@ -69,11 +73,53 @@ Cypress.Commands.add(
           ),
       );
 
+      let ref: any = {};
+
       cy.wrap(subject).screenshot(name, {
         blackout: ['[data-visual-test="blackout"]'].concat(
           options.blackout || [],
         ),
+        onAfterScreenshot: (_$el, props) => {
+          ref.props = props;
+        },
         ...options,
+      });
+
+      cy.window({ log: false }).then((window) => {
+        const mediaType = (
+          (window as any).__ARGOS__ as ArgosGlobal
+        ).getMediaType();
+        const colorScheme = (
+          (window as any).__ARGOS__ as ArgosGlobal
+        ).getColorScheme();
+
+        readArgosCypressVersion().then((argosCypressVersion) => {
+          const metadata: ScreenshotMetadata = {
+            url: window.location.href,
+            viewport: {
+              width: window.innerWidth,
+              height: window.innerHeight,
+            },
+            media: {
+              colorScheme,
+              mediaType,
+            },
+            browser: {
+              name: Cypress.browser.name,
+              version: Cypress.browser.version,
+            },
+            controller: {
+              name: "cypress",
+              version: Cypress.version,
+            },
+            sdk: {
+              name: "@argos-ci/cypress",
+              version: argosCypressVersion,
+            },
+          };
+
+          cy.writeFile(ref.props.path + ".meta.json", JSON.stringify(metadata));
+        });
       });
     }
 

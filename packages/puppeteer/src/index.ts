@@ -3,11 +3,8 @@ import { mkdir, readFile } from "node:fs/promises";
 import { ElementHandle, Page, ScreenshotOptions } from "puppeteer";
 import { createRequire } from "node:module";
 import { ArgosGlobal } from "@argos-ci/browser/global.js";
-import {
-  ViewportOption,
-  getScreenshotName,
-  resolveViewport,
-} from "@argos-ci/browser";
+import { ViewportOption, resolveViewport } from "@argos-ci/browser";
+import { getScreenshotName } from "@argos-ci/util";
 
 const require = createRequire(import.meta.url);
 

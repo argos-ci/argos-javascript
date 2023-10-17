@@ -24,6 +24,7 @@ describe("#upload", () => {
           ),
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
+          metadata: null,
         },
         {
           name: "penelope.png",
@@ -32,6 +33,29 @@ describe("#upload", () => {
           ),
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
+          metadata: {
+            browser: {
+              name: "chromium",
+              version: "119.0.6045.9",
+            },
+            controller: {
+              name: "playwright",
+              version: "1.39.0",
+            },
+            media: {
+              colorScheme: "light",
+              mediaType: "screen",
+            },
+            sdk: {
+              name: "@argos-ci/playwright",
+              version: "0.0.7",
+            },
+            url: "https://localhost:3000/test",
+            viewport: {
+              height: 768,
+              width: 1024,
+            },
+          },
         },
         {
           name: "nested/alicia.jpg",
@@ -40,6 +64,7 @@ describe("#upload", () => {
           ),
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
+          metadata: null,
         },
       ],
     });
