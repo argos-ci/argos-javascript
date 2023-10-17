@@ -104,15 +104,13 @@ Cypress.Commands.add(
               width: window.innerWidth,
               height: window.innerHeight,
             },
-            media: {
-              colorScheme,
-              mediaType,
-            },
+            colorScheme,
+            mediaType,
             browser: {
               name: Cypress.browser.name,
               version: Cypress.browser.version,
             },
-            controller: {
+            automationLibrary: {
               name: "cypress",
               version: Cypress.version,
             },

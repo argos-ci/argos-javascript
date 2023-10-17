@@ -4,15 +4,13 @@ export type ScreenshotMetadata = {
     width: number;
     height: number;
   };
-  media: {
-    colorScheme: "light" | "dark";
-    mediaType: "screen" | "print";
-  };
+  colorScheme: "light" | "dark";
+  mediaType: "screen" | "print";
   browser: {
     name: string;
     version: string;
   };
-  controller: {
+  automationLibrary: {
     name: string;
     version: string;
   };

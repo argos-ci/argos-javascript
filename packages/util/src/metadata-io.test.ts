@@ -23,9 +23,10 @@ describe("#readMetadata", () => {
     expect(result).toEqual({
       url: "https://localhost:3000/test",
       viewport: { width: 1024, height: 768 },
-      media: { colorScheme: "light", mediaType: "screen" },
+      colorScheme: "light",
+      mediaType: "screen",
       browser: { name: "chromium", version: "119.0.6045.9" },
-      controller: { name: "playwright", version: "1.39.0" },
+      automationLibrary: { name: "playwright", version: "1.39.0" },
       sdk: { name: "@argos-ci/playwright", version: "0.0.7" },
     });
   });

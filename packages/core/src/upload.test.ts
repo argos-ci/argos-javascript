@@ -38,14 +38,12 @@ describe("#upload", () => {
               name: "chromium",
               version: "119.0.6045.9",
             },
-            controller: {
+            automationLibrary: {
               name: "playwright",
               version: "1.39.0",
             },
-            media: {
-              colorScheme: "light",
-              mediaType: "screen",
-            },
+            colorScheme: "light",
+            mediaType: "screen",
             sdk: {
               name: "@argos-ci/playwright",
               version: "0.0.7",

@@ -121,15 +121,13 @@ export async function argosScreenshot(
     const metadata: ScreenshotMetadata = {
       url: page.url(),
       viewport: viewportSize,
-      media: {
-        colorScheme,
-        mediaType,
-      },
+      colorScheme,
+      mediaType,
       browser: {
         name: browserName,
         version: browserVersion,
       },
-      controller: {
+      automationLibrary: {
         name: "playwright",
         version: playwrightVersion,
       },
