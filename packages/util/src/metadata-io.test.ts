@@ -10,13 +10,15 @@ describe("#readMetadata", () => {
 
   it("throws if invalid", async () => {
     await expect(
-      readMetadata(join(__dirname, "../../../__fixtures__/invalid")),
+      readMetadata(
+        join(__dirname, "../../../__fixtures__/screenshots/invalid"),
+      ),
     ).rejects.toThrow("Failed to read metadata");
   });
 
   it("reads if valid", async () => {
     const result = await readMetadata(
-      join(__dirname, "../../../__fixtures__/valid"),
+      join(__dirname, "../../../__fixtures__/screenshots/penelope.png"),
     );
     expect(result).toEqual({
       url: "https://localhost:3000/test",
