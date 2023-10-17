@@ -1,5 +1,5 @@
 {
-  "exclude": ["node_modules/**"],
+  "exclude": ["node_modules/**", "__fixtures__/screenshots/invalid.meta.json"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
