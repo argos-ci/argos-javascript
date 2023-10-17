@@ -22,7 +22,7 @@ describe("argosScreenshot", () => {
     it("takes a screenshot of a component with a generic name", () => {
       cy.visit("cypress/pages/index.html");
       cy.get(".specific-target").argosScreenshot("specific-target");
-      cy.readFile(`${screenshotsFolder}/specific-target vw-1000.png`);
+      cy.readFile(`${screenshotsFolder}/specific-target.png`);
     });
   });
 });

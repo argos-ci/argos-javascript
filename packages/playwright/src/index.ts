@@ -8,11 +8,13 @@ import type {
 } from "@playwright/test";
 import { createRequire } from "node:module";
 import { ArgosGlobal } from "@argos-ci/browser/global.js";
+import { ViewportOption, resolveViewport } from "@argos-ci/browser";
 import {
-  ViewportOption,
   getScreenshotName,
-  resolveViewport,
-} from "@argos-ci/browser";
+  ScreenshotMetadata,
+  readVersionFromPackage,
+  writeMetadata,
+} from "@argos-ci/util";
 
 const require = createRequire(import.meta.url);
 
@@ -46,6 +48,24 @@ async function injectArgos(page: Page) {
   await page.addScriptTag({ content });
 }
 
+async function getPlaywrightVersion(): Promise<string> {
+  const pkgPath = require.resolve("playwright/package.json");
+  return readVersionFromPackage(pkgPath);
+}
+
+async function getArgosPlaywrightVersion(): Promise<string> {
+  const pkgPath = require.resolve("@argos-ci/playwright/package.json");
+  return readVersionFromPackage(pkgPath);
+}
+
+function getViewportSize(page: Page) {
+  const viewportSize = page.viewportSize();
+  if (!viewportSize) {
+    throw new Error("Can't take screenshots without a viewport.");
+  }
+  return viewportSize;
+}
+
 export async function argosScreenshot(
   page: Page,
   name: string,
@@ -63,29 +83,75 @@ export async function argosScreenshot(
       ? page.locator(element, { has, hasText })
       : element ?? page;
 
-  const [originalViewportSize] = await Promise.all([
-    page.viewportSize(),
+  await Promise.all([
     // Create the screenshot folder if it doesn't exist
     mkdir(screenshotFolder, { recursive: true }),
     // Inject Argos script into the page
     injectArgos(page),
   ]);
 
-  if (!originalViewportSize) {
-    throw new Error("Can't take screenshots without a viewport.");
-  }
+  const originalViewportSize = getViewportSize(page);
 
   await page.evaluate(() =>
     ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
   );
+
+  async function collectMetadata(): Promise<ScreenshotMetadata> {
+    const [colorScheme, mediaType, playwrightVersion, argosPlaywrightVersion] =
+      await Promise.all([
+        page.evaluate(() =>
+          ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
+        ),
+        page.evaluate(() =>
+          ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
+        ),
+        getPlaywrightVersion(),
+        getArgosPlaywrightVersion(),
+      ]);
+
+    const viewportSize = getViewportSize(page);
+
+    const browser = page.context().browser();
+    if (!browser) {
+      throw new Error("Can't take screenshots without a browser.");
+    }
+    const browserName = browser.browserType().name();
+    const browserVersion = browser.version();
+
+    const metadata: ScreenshotMetadata = {
+      url: page.url(),
+      viewport: viewportSize,
+      colorScheme,
+      mediaType,
+      browser: {
+        name: browserName,
+        version: browserVersion,
+      },
+      automationLibrary: {
+        name: "playwright",
+        version: playwrightVersion,
+      },
+      sdk: {
+        name: "@argos-ci/playwright",
+        version: argosPlaywrightVersion,
+      },
+    };
+
+    return metadata;
+  }
 
   async function stabilizeAndScreenshot(name: string) {
     await page.waitForFunction(() =>
       ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
     );
 
+    const metadata = await collectMetadata();
+    const screenshotPath = resolve(screenshotFolder, `${name}.png`);
+
+    await writeMetadata(screenshotPath, metadata);
+
     await handle.screenshot({
-      path: resolve(screenshotFolder, `${name}.png`),
+      path: screenshotPath,
       type: "png",
       fullPage: handle === page,
       mask: [page.locator('[data-visual-test="blackout"]')],

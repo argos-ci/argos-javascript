@@ -1,3 +1,6 @@
+/**
+ * Build a screenshot name from a test name and options.
+ */
 export function getScreenshotName(
   name: string,
   options: {

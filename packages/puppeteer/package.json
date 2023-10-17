@@ -39,12 +39,13 @@
     "puppeteer": ">=1"
   },
   "dependencies": {
-    "@argos-ci/browser": "workspace:*"
+    "@argos-ci/browser": "workspace:*",
+    "@argos-ci/util": "workspace:*"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@types/jest": "^28.1.8",
-    "@types/node": "^20.7.0",
+    "@types/node": "^16.0.0",
     "eslint": "^8.23.0",
     "eslint-plugin-html": "^7.1.0",
     "jest": "^29.0.1",

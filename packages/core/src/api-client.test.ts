@@ -49,8 +49,8 @@ describe("#createArgosApiClient", () => {
       const result = await apiClient.updateBuild({
         buildId: "123",
         screenshots: [
-          { key: "123", name: "screenshot 1" },
-          { key: "456", name: "screenshot 2" },
+          { key: "123", name: "screenshot 1", metadata: null },
+          { key: "456", name: "screenshot 2", metadata: null },
         ],
       });
       expect(result).toEqual({

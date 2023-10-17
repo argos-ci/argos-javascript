@@ -37,6 +37,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Upload "@argos-ci/util" dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
+
       - name: Upload "@argos-ci/cli" dist
         uses: actions/upload-artifact@v3
         with:
@@ -92,6 +98,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
+
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
         with:
@@ -126,6 +138,12 @@ jobs:
         uses: ./.github/actions/setup-deps
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
@@ -168,6 +186,12 @@ jobs:
 
       - name: Install Cypress
         run: pnpm --filter cypress exec cypress install
+
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
@@ -223,6 +247,12 @@ jobs:
       - name: Setup Playwright
         run: pnpm --filter playwright exec playwright install chromium --with-deps
 
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
+
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
         with:
@@ -276,6 +306,12 @@ jobs:
 
       - name: Setup Puppeteer
         run: node packages/puppeteer/node_modules/puppeteer/install.mjs
+
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3

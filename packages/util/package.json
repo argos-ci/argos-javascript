@@ -1,24 +1,14 @@
 {
-  "name": "@argos-ci/browser",
-  "description": "Browser utilities to stabilize visual testing.",
+  "name": "@argos-ci/util",
+  "description": "Set of utilities used across all Argos SDKs",
   "version": "0.0.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/argos-ci/argos-javascript.git",
-    "directory": "packages/browser"
+    "directory": "packages/util"
   },
-  "keywords": [
-    "browser",
-    "argos",
-    "automation",
-    "test automation",
-    "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
-  ],
   "publishConfig": {
     "access": "public"
   },
@@ -29,9 +19,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.mjs"
     },
-    "./global.js": {
-      "types": "./dist/global.d.ts",
-      "default": "./dist/global.js"
+    "./browser": {
+      "import": "./dist/browser.mjs",
+      "types": "./dist/browser.d.ts",
+      "default": "./dist/browser.mjs"
     },
     "./package.json": "./package.json"
   },

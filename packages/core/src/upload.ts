@@ -7,6 +7,7 @@ import { createArgosApiClient, getBearerToken } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
+import { readMetadata } from "@argos-ci/util";
 
 /**
  * Size of the chunks used to upload screenshots to Argos.
@@ -112,9 +113,12 @@ export const upload = async (params: UploadParameters) => {
   // Optimize & compute hashes
   const screenshots = await Promise.all(
     foundScreenshots.map(async (screenshot) => {
-      const optimizedPath = await optimizeScreenshot(screenshot.path);
+      const [metadata, optimizedPath] = await Promise.all([
+        readMetadata(screenshot.path),
+        optimizeScreenshot(screenshot.path),
+      ]);
       const hash = await hashFile(optimizedPath);
-      return { ...screenshot, optimizedPath, hash };
+      return { ...screenshot, metadata, optimizedPath, hash };
     }),
   );
 
@@ -168,6 +172,7 @@ export const upload = async (params: UploadParameters) => {
     screenshots: screenshots.map((screenshot) => ({
       key: screenshot.hash,
       name: screenshot.name,
+      metadata: screenshot.metadata,
     })),
     parallel: config.parallel,
     parallelTotal: config.parallelTotal,

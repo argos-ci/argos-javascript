@@ -1,11 +1,13 @@
 {
-  "exclude": ["node_modules/**"],
+  "exclude": ["node_modules/**", "__fixtures__/screenshots/invalid.argos.json"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@argos-ci/*": ["packages/*/src"],
-      "@argos-ci/browser/global.js": ["packages/browser/src/global.js"]
+      "@argos-ci/browser/global.js": ["packages/browser/src/global.js"],
+      "@argos-ci/util/browser": ["packages/util/src/browser.js"]
     },
+    "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "node",
     "target": "ES2021",

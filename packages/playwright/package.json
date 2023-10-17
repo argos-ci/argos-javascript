@@ -37,12 +37,13 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@argos-ci/browser": "workspace:*"
+    "@argos-ci/browser": "workspace:*",
+    "@argos-ci/util": "workspace:*"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@playwright/test": "^1.38.1",
-    "@types/node": "^20.7.0"
+    "@types/node": "^16.0.0"
   },
   "scripts": {
     "prebuild": "rm -rf dist",

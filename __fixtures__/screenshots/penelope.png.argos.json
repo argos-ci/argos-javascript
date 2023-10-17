@@ -1,0 +1,9 @@
+{
+  "url": "https://localhost:3000/test",
+  "viewport": { "width": 1024, "height": 768 },
+  "colorScheme": "light",
+  "mediaType": "screen",
+  "browser": { "name": "chromium", "version": "119.0.6045.9" },
+  "automationLibrary": { "name": "playwright", "version": "1.39.0" },
+  "sdk": { "name": "@argos-ci/playwright", "version": "0.0.7" }
+}

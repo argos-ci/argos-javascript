@@ -1,5 +1,6 @@
 import axios from "axios";
 import { debug } from "./debug";
+import { ScreenshotMetadata } from "@argos-ci/util";
 
 export interface ApiClientOptions {
   baseUrl: string;
@@ -32,7 +33,11 @@ export interface CreateBuildOutput {
 
 export interface UpdateBuildInput {
   buildId: string;
-  screenshots: { key: string; name: string }[];
+  screenshots: {
+    key: string;
+    name: string;
+    metadata: ScreenshotMetadata | null;
+  }[];
   parallel?: boolean | null;
   parallelTotal?: number | null;
 }
