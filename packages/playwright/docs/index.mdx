@@ -54,6 +54,7 @@ Look at Argos doc to know [how to configure your CI](https://argos-ci.com/docs/u
 - `name` - The screenshot name; must be unique
 - `options` - See [Page.screenshot command options](https://playwright.dev/docs/api/class-page#page-screenshot)
 - `options.element` - Accept an ElementHandle or a string selector to screenshot an element
+- `options.viewports` - Specifies the viewports for which to capture screenshots. See [viewports configuration](https://argos-ci.com/docs/viewports).
 
 #### Helper attributes
 
@@ -63,6 +64,7 @@ It is often used to hide changing element like dates.
 
 - `[data-visual-test="transparent"]` - Make the element transparent (`opacity: 0`)
 - `[data-visual-test="removed"]` - Remove the element (`display: none`)
+- `[data-visual-test="blackout"]` - Blacked out the element
 - `[data-visual-test-no-radius]` - Removes border radius
 
 _How to use an helper to hide a div from a screenshot_

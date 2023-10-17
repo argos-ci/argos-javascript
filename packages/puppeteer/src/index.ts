@@ -3,6 +3,11 @@ import { mkdir, readFile } from "node:fs/promises";
 import { ElementHandle, Page, ScreenshotOptions } from "puppeteer";
 import { createRequire } from "node:module";
 import { ArgosGlobal } from "@argos-ci/browser/global.js";
+import {
+  ViewportOption,
+  getScreenshotName,
+  resolveViewport,
+} from "@argos-ci/browser";
 
 const require = createRequire(import.meta.url);
 
@@ -23,12 +28,16 @@ export type ArgosScreenshotOptions = Omit<
    * ElementHandle or string selector of the element to take a screenshot of.
    */
   element?: string | ElementHandle;
+  /**
+   * Viewports to take screenshots of.
+   */
+  viewports?: ViewportOption[];
 };
 
 export async function argosScreenshot(
   page: Page,
   name: string,
-  { element, ...options }: ArgosScreenshotOptions = {},
+  { element, viewports, ...options }: ArgosScreenshotOptions = {},
 ) {
   if (!page) {
     throw new Error("A Puppeteer `page` object is required.");
@@ -39,43 +48,70 @@ export async function argosScreenshot(
 
   const screenshotFolder = resolve(process.cwd(), "screenshots/argos");
 
-  await Promise.all([
+  const [originalViewport] = await Promise.all([
+    page.viewport(),
     // Create the screenshot folder if it doesn't exist
     mkdir(screenshotFolder, { recursive: true }),
     // Inject Argos script into the page
     injectArgos(page),
   ]);
 
+  if (!originalViewport) {
+    throw new Error("Can't take screenshots without a viewport.");
+  }
+
   await page.evaluate(() =>
     ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
   );
-  await page.waitForFunction(() =>
-    ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
-  );
 
-  const screenshotOptions: ScreenshotOptions = {
-    path: resolve(screenshotFolder, `${name}.png`),
-    type: "png",
-    ...options,
-  };
+  async function stabilizeAndScreenshot(name: string) {
+    await page.waitForFunction(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
+    );
 
-  // If no element is specified, take a screenshot of the whole page
-  if (element === undefined) {
-    await page.screenshot(screenshotOptions);
-    return;
-  }
+    const screenshotOptions: ScreenshotOptions = {
+      path: resolve(screenshotFolder, `${name}.png`),
+      type: "png",
+      fullPage: element === undefined,
+      ...options,
+    };
 
-  // If a string is passed, take a screenshot of the element matching the selector
-  if (typeof element === "string") {
-    await page.waitForSelector(element);
-    const handle = await page.$(element);
-    if (!handle) {
-      throw new Error(`Unable to find element ${element}`);
+    // If no element is specified, take a screenshot of the whole page
+    if (element === undefined) {
+      await page.screenshot(screenshotOptions);
+      return;
     }
-    await handle.screenshot(screenshotOptions);
+
+    // If a string is passed, take a screenshot of the element matching the selector
+    if (typeof element === "string") {
+      await page.waitForSelector(element);
+      const handle = await page.$(element);
+      if (!handle) {
+        throw new Error(`Unable to find element ${element}`);
+      }
+      await handle.screenshot(screenshotOptions);
+      return;
+    }
+
+    // If an element is passed, take a screenshot of it
+    await element.screenshot(screenshotOptions);
+  }
+
+  // If no viewports are specified, take a single screenshot
+  if (!viewports) {
+    await stabilizeAndScreenshot(name);
     return;
   }
 
-  // If an element is passed, take a screenshot of it
-  await element.screenshot(screenshotOptions);
+  // Take screenshots for each viewport
+  for (const viewport of viewports) {
+    const viewportSize = resolveViewport(viewport);
+    await page.setViewport(viewportSize);
+    await stabilizeAndScreenshot(
+      getScreenshotName(name, { viewportWidth: viewportSize.width }),
+    );
+  }
+
+  // Restore the original viewport
+  await page.setViewport(originalViewport);
 }

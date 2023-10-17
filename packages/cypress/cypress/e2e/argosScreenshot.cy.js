@@ -3,31 +3,18 @@ const screenshotsFolder = Cypress.browser.isHeaded
   : `./cypress/screenshots/${Cypress.spec.name}`;
 
 describe("argosScreenshot", () => {
-  describe("without name", () => {
+  describe("with name", () => {
     before(() => {
       cy.visit("cypress/pages/index.html");
-      cy.argosScreenshot();
+      cy.argosScreenshot("screen");
     });
 
     it("waits for loader hiding", () => {
       cy.get("#loader", { timeout: 0 }).should("not.exist");
     });
 
-    it("takes a screenshot with generic name", () => {
-      cy.readFile(
-        `${screenshotsFolder}/argosScreenshot -- without name -- waits for loader hiding -- before all hook.png`,
-      );
-    });
-  });
-
-  describe("with name", () => {
-    before(() => {
-      cy.visit("cypress/pages/index.html");
-      cy.argosScreenshot("named-screenshot");
-    });
-
     it("takes a named screenshot", () => {
-      cy.readFile(`${screenshotsFolder}/named-screenshot.png`);
+      cy.readFile(`${screenshotsFolder}/screen.png`);
     });
   });
 
@@ -35,7 +22,7 @@ describe("argosScreenshot", () => {
     it("takes a screenshot of a component with a generic name", () => {
       cy.visit("cypress/pages/index.html");
       cy.get(".specific-target").argosScreenshot("specific-target");
-      cy.readFile(`${screenshotsFolder}/specific-target.png`);
+      cy.readFile(`${screenshotsFolder}/specific-target vw-1000.png`);
     });
   });
 });
