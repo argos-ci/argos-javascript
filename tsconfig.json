@@ -1,5 +1,5 @@
 {
-  "exclude": ["node_modules/**", "__fixtures__/screenshots/invalid.meta.json"],
+  "exclude": ["node_modules/**", "__fixtures__/screenshots/invalid.argos.json"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
