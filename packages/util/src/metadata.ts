@@ -1,11 +1,11 @@
 export type ScreenshotMetadata = {
-  url: string;
-  viewport: {
+  url?: string;
+  viewport?: {
     width: number;
     height: number;
   };
-  colorScheme: "light" | "dark";
-  mediaType: "screen" | "print";
+  colorScheme?: "light" | "dark";
+  mediaType?: "screen" | "print";
   test: {
     id?: string;
     title: string;
@@ -16,7 +16,7 @@ export type ScreenshotMetadata = {
       column: number;
     };
   } | null;
-  browser: {
+  browser?: {
     name: string;
     version: string;
   };

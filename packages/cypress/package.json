@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
-    "@argos-ci/cypress": "file:.",
+    "@argos-ci/cypress": "workspace:.",
     "@types/node": "^16.0.0",
     "cypress": "^13.3.0",
     "eslint-plugin-cypress": "^2.15.1",

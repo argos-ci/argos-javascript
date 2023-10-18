@@ -1,10 +1,11 @@
 import { mkdir, readFile } from "node:fs/promises";
-import { resolve, relative } from "node:path";
+import { resolve } from "node:path";
 import type {
   Page,
   PageScreenshotOptions,
   LocatorScreenshotOptions,
   ElementHandle,
+  TestInfo,
 } from "@playwright/test";
 import { createRequire } from "node:module";
 import { ArgosGlobal } from "@argos-ci/browser/global.js";
@@ -12,10 +13,11 @@ import { ViewportOption, resolveViewport } from "@argos-ci/browser";
 import {
   getScreenshotName,
   ScreenshotMetadata,
-  readVersionFromPackage,
   writeMetadata,
-  getGitRepositoryPath,
 } from "@argos-ci/util";
+import { getAttachmentName } from "./attachment";
+import { getLibraryMetadata, getTestMetadataFromTestInfo } from "./metadata";
+import { checkIsUsingArgosReporter } from "./util";
 
 const require = createRequire(import.meta.url);
 
@@ -47,16 +49,6 @@ async function injectArgos(page: Page) {
   const fileName = require.resolve("@argos-ci/browser/global.js");
   const content = await readFile(fileName, "utf-8");
   await page.addScriptTag({ content });
-}
-
-async function getPlaywrightVersion(): Promise<string> {
-  const pkgPath = require.resolve("playwright/package.json");
-  return readVersionFromPackage(pkgPath);
-}
-
-async function getArgosPlaywrightVersion(): Promise<string> {
-  const pkgPath = require.resolve("@argos-ci/playwright/package.json");
-  return readVersionFromPackage(pkgPath);
 }
 
 async function getTestInfo() {
@@ -93,9 +85,15 @@ export async function argosScreenshot(
       ? page.locator(element, { has, hasText })
       : element ?? page;
 
+  const testInfo = await getTestInfo();
+
+  const useArgosReporter = Boolean(
+    testInfo && checkIsUsingArgosReporter(testInfo),
+  );
+
   await Promise.all([
     // Create the screenshot folder if it doesn't exist
-    mkdir(screenshotFolder, { recursive: true }),
+    useArgosReporter ? null : mkdir(screenshotFolder, { recursive: true }),
     // Inject Argos script into the page
     injectArgos(page),
   ]);
@@ -106,26 +104,20 @@ export async function argosScreenshot(
     ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
   );
 
-  async function collectMetadata(): Promise<ScreenshotMetadata> {
-    const [
-      testInfo,
-      repoPath,
-      colorScheme,
-      mediaType,
-      playwrightVersion,
-      argosPlaywrightVersion,
-    ] = await Promise.all([
-      getTestInfo(),
-      getGitRepositoryPath(),
-      page.evaluate(() =>
-        ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
-      ),
-      page.evaluate(() =>
-        ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
-      ),
-      getPlaywrightVersion(),
-      getArgosPlaywrightVersion(),
-    ]);
+  async function collectMetadata(
+    testInfo: TestInfo | null,
+  ): Promise<ScreenshotMetadata> {
+    const [colorScheme, mediaType, libMetadata, testMetadata] =
+      await Promise.all([
+        page.evaluate(() =>
+          ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
+        ),
+        page.evaluate(() =>
+          ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
+        ),
+        getLibraryMetadata(),
+        testInfo ? getTestMetadataFromTestInfo(testInfo) : null,
+      ]);
 
     const viewportSize = getViewportSize(page);
 
@@ -141,32 +133,12 @@ export async function argosScreenshot(
       viewport: viewportSize,
       colorScheme,
       mediaType,
-      test: testInfo
-        ? {
-            id: testInfo.testId,
-            title: testInfo.title,
-            titlePath: testInfo.titlePath,
-            location: {
-              file: repoPath
-                ? relative(repoPath, testInfo.file)
-                : testInfo.file,
-              line: testInfo.line,
-              column: testInfo.column,
-            },
-          }
-        : null,
+      test: testMetadata,
       browser: {
         name: browserName,
         version: browserVersion,
       },
-      automationLibrary: {
-        name: "playwright",
-        version: playwrightVersion,
-      },
-      sdk: {
-        name: "@argos-ci/playwright",
-        version: argosPlaywrightVersion,
-      },
+      ...libMetadata,
     };
 
     return metadata;
@@ -177,19 +149,35 @@ export async function argosScreenshot(
       ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
     );
 
-    const metadata = await collectMetadata();
-    const screenshotPath = resolve(screenshotFolder, `${name}.png`);
+    const metadata = await collectMetadata(testInfo);
+    const screenshotPath = useArgosReporter
+      ? null
+      : resolve(screenshotFolder, `${name}.png`);
 
-    await writeMetadata(screenshotPath, metadata);
+    const [screenshot] = await Promise.all([
+      handle.screenshot({
+        path: screenshotPath ?? undefined,
+        type: "png",
+        fullPage: handle === page,
+        mask: [page.locator('[data-visual-test="blackout"]')],
+        animations: "disabled",
+        ...options,
+      }),
+      screenshotPath ? writeMetadata(screenshotPath, metadata) : null,
+    ]);
 
-    await handle.screenshot({
-      path: screenshotPath,
-      type: "png",
-      fullPage: handle === page,
-      mask: [page.locator('[data-visual-test="blackout"]')],
-      animations: "disabled",
-      ...options,
-    });
+    if (useArgosReporter) {
+      await Promise.all([
+        testInfo!.attach(getAttachmentName(name, "metadata"), {
+          body: JSON.stringify(metadata),
+          contentType: "application/json",
+        }),
+        testInfo!.attach(getAttachmentName(name, "screenshot"), {
+          body: screenshot,
+          contentType: "image/png",
+        }),
+      ]);
+    }
   }
 
   // If no viewports are specified, take a single screenshot
