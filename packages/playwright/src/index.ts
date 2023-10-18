@@ -1,5 +1,5 @@
 import { mkdir, readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { resolve, relative } from "node:path";
 import type {
   Page,
   PageScreenshotOptions,
@@ -14,6 +14,7 @@ import {
   ScreenshotMetadata,
   readVersionFromPackage,
   writeMetadata,
+  getGitRepositoryPath,
 } from "@argos-ci/util";
 
 const require = createRequire(import.meta.url);
@@ -58,6 +59,15 @@ async function getArgosPlaywrightVersion(): Promise<string> {
   return readVersionFromPackage(pkgPath);
 }
 
+async function getTestInfo() {
+  try {
+    const { test } = await import("@playwright/test");
+    return test.info();
+  } catch (error: unknown) {
+    return null;
+  }
+}
+
 function getViewportSize(page: Page) {
   const viewportSize = page.viewportSize();
   if (!viewportSize) {
@@ -97,17 +107,25 @@ export async function argosScreenshot(
   );
 
   async function collectMetadata(): Promise<ScreenshotMetadata> {
-    const [colorScheme, mediaType, playwrightVersion, argosPlaywrightVersion] =
-      await Promise.all([
-        page.evaluate(() =>
-          ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
-        ),
-        page.evaluate(() =>
-          ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
-        ),
-        getPlaywrightVersion(),
-        getArgosPlaywrightVersion(),
-      ]);
+    const [
+      testInfo,
+      repoPath,
+      colorScheme,
+      mediaType,
+      playwrightVersion,
+      argosPlaywrightVersion,
+    ] = await Promise.all([
+      getTestInfo(),
+      getGitRepositoryPath(),
+      page.evaluate(() =>
+        ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
+      ),
+      page.evaluate(() =>
+        ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
+      ),
+      getPlaywrightVersion(),
+      getArgosPlaywrightVersion(),
+    ]);
 
     const viewportSize = getViewportSize(page);
 
@@ -123,6 +141,20 @@ export async function argosScreenshot(
       viewport: viewportSize,
       colorScheme,
       mediaType,
+      test: testInfo
+        ? {
+            id: testInfo.testId,
+            title: testInfo.title,
+            titlePath: testInfo.titlePath,
+            location: {
+              file: repoPath
+                ? relative(repoPath, testInfo.file)
+                : testInfo.file,
+              line: testInfo.line,
+              column: testInfo.column,
+            },
+          }
+        : null,
       browser: {
         name: browserName,
         version: browserVersion,
