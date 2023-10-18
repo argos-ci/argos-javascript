@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/playwright",
   "description": "Visual testing solution to avoid visual regression. Playwright commands and utilities for Argos visual testing.",
-  "version": "0.0.7",
+  "version": "1.0.0-alpha.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
@@ -42,13 +42,13 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@argos-ci/core": "workspace:*",
     "@argos-ci/browser": "workspace:*",
+    "@argos-ci/core": "workspace:*",
     "@argos-ci/util": "workspace:*"
   },
   "devDependencies": {
-    "@argos-ci/playwright": "workspace:.",
     "@argos-ci/cli": "workspace:*",
+    "@argos-ci/playwright": "workspace:.",
     "@playwright/test": "^1.38.1",
     "@types/node": "^16.0.0"
   },
