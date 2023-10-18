@@ -4,7 +4,12 @@ import { ElementHandle, Page, ScreenshotOptions } from "puppeteer";
 import { createRequire } from "node:module";
 import { ArgosGlobal } from "@argos-ci/browser/global.js";
 import { ViewportOption, resolveViewport } from "@argos-ci/browser";
-import { getScreenshotName } from "@argos-ci/util";
+import {
+  ScreenshotMetadata,
+  getScreenshotName,
+  readVersionFromPackage,
+  writeMetadata,
+} from "@argos-ci/util";
 
 const require = createRequire(import.meta.url);
 
@@ -31,6 +36,30 @@ export type ArgosScreenshotOptions = Omit<
   viewports?: ViewportOption[];
 };
 
+async function getPuppeteerVersion(): Promise<string> {
+  const pkgPath = require.resolve("puppeteer/package.json");
+  return readVersionFromPackage(pkgPath);
+}
+
+async function getArgosPuppeteerVersion(): Promise<string> {
+  const pkgPath = require.resolve("@argos-ci/puppeteer/package.json");
+  return readVersionFromPackage(pkgPath);
+}
+
+function getViewport(page: Page) {
+  const viewport = page.viewport();
+  if (!viewport) {
+    throw new Error("Can't take screenshots without a viewport.");
+  }
+  return viewport;
+}
+
+async function getBrowserInfo(page: Page) {
+  const rawVersion = await page.browser().version();
+  const [browserName, browserVersion] = rawVersion.split("/");
+  return { browserName, browserVersion };
+}
+
 export async function argosScreenshot(
   page: Page,
   name: string,
@@ -46,28 +75,73 @@ export async function argosScreenshot(
   const screenshotFolder = resolve(process.cwd(), "screenshots/argos");
 
   const [originalViewport] = await Promise.all([
-    page.viewport(),
+    getViewport(page),
     // Create the screenshot folder if it doesn't exist
     mkdir(screenshotFolder, { recursive: true }),
     // Inject Argos script into the page
     injectArgos(page),
   ]);
 
-  if (!originalViewport) {
-    throw new Error("Can't take screenshots without a viewport.");
-  }
-
   await page.evaluate(() =>
     ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
   );
+
+  async function collectMetadata(): Promise<ScreenshotMetadata> {
+    const [
+      colorScheme,
+      mediaType,
+      puppeteerVersion,
+      argosPuppeteerVersion,
+      { browserName, browserVersion },
+    ] = await Promise.all([
+      page.evaluate(() =>
+        ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
+      ),
+      page.evaluate(() =>
+        ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
+      ),
+      getPuppeteerVersion(),
+      getArgosPuppeteerVersion(),
+      getBrowserInfo(page),
+    ]);
+
+    const viewport = getViewport(page);
+
+    const metadata: ScreenshotMetadata = {
+      url: page.url(),
+      viewport: { width: viewport.width, height: viewport.height },
+      colorScheme,
+      mediaType,
+      browser: {
+        name: browserName,
+        version: browserVersion,
+      },
+      automationLibrary: {
+        name: "puppeteer",
+        version: puppeteerVersion,
+      },
+      sdk: {
+        name: "@argos-ci/puppeteer",
+        version: argosPuppeteerVersion,
+      },
+    };
+
+    return metadata;
+  }
 
   async function stabilizeAndScreenshot(name: string) {
     await page.waitForFunction(() =>
       ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
     );
 
+    const screenshotPath = resolve(screenshotFolder, `${name}.png`);
+
+    const metadata = await collectMetadata();
+
+    await writeMetadata(screenshotPath, metadata);
+
     const screenshotOptions: ScreenshotOptions = {
-      path: resolve(screenshotFolder, `${name}.png`),
+      path: screenshotPath,
       type: "png",
       fullPage: element === undefined,
       ...options,
