@@ -106,6 +106,10 @@ Cypress.Commands.add(
             },
             colorScheme,
             mediaType,
+            test: {
+              title: Cypress.currentTest.title,
+              titlePath: Cypress.currentTest.titlePath,
+            },
             browser: {
               name: Cypress.browser.name,
               version: Cypress.browser.version,

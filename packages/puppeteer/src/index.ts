@@ -112,6 +112,7 @@ export async function argosScreenshot(
       viewport: { width: viewport.width, height: viewport.height },
       colorScheme,
       mediaType,
+      test: null,
       browser: {
         name: browserName,
         version: browserVersion,

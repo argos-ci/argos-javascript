@@ -6,6 +6,16 @@ export type ScreenshotMetadata = {
   };
   colorScheme: "light" | "dark";
   mediaType: "screen" | "print";
+  test: {
+    id?: string;
+    title: string;
+    titlePath: string[];
+    location?: {
+      file: string;
+      line: number;
+      column: number;
+    };
+  } | null;
   browser: {
     name: string;
     version: string;

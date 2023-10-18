@@ -1,3 +1,4 @@
+export * from "./git";
 export * from "./introspection";
 export * from "./metadata";
 export * from "./metadata-io";
