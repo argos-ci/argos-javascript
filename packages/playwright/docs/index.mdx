@@ -18,8 +18,24 @@ Playwright already offers a command to take screenshots. The official Argos Play
 
 ## 1. Setup
 
+### Install packages
+
 ```
 npm install --save-dev @argos-ci/playwright @playwright/test
+```
+
+### Setup Argos reporter
+
+Argos reporter automatically uploads screenshots to Argos while your tests are running.
+
+```ts
+// playwright.config.{js,ts}
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+  // ...
+  reporter: [["list"], ["@argos-ci/playwright/reporter"]],
+});
 ```
 
 ## 2. Use in your tests
@@ -40,11 +56,11 @@ test.describe("Homepage", () => {
 });
 ```
 
-Screenshots are stored in `./screenshots` folder.
+## 3. Setup your CI
 
-## 3. Upload screenshots to Argos
+Run your Playwright tests as usual and screenshots will be automatically uploaded.
 
-Look at Argos doc to know [how to configure your CI](https://argos-ci.com/docs/upload-screenshots) to send screenshots to Argos.
+> If you use another CI than GitHub Actions, be sure to expose `ARGOS_TOKEN` as environment variable.
 
 ## API
 

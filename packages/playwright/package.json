@@ -31,16 +31,23 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.mjs"
     },
+    "./reporter": {
+      "import": "./dist/reporter.mjs",
+      "types": "./dist/reporter.d.ts",
+      "default": "./dist/reporter.mjs"
+    },
     "./package.json": "./package.json"
   },
   "engines": {
     "node": ">=16.0.0"
   },
   "dependencies": {
+    "@argos-ci/core": "workspace:*",
     "@argos-ci/browser": "workspace:*",
     "@argos-ci/util": "workspace:*"
   },
   "devDependencies": {
+    "@argos-ci/playwright": "workspace:.",
     "@argos-ci/cli": "workspace:*",
     "@playwright/test": "^1.38.1",
     "@types/node": "^16.0.0"
@@ -49,7 +56,6 @@
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
     "test": "pnpm exec playwright test",
-    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-playwright-e2e-node-$NODE_VERSION-$OS\"",
-    "e2e": "pnpm run test && pnpm run argos-upload"
+    "e2e": "WITH_ARGOS_REPORTER=true pnpm run test"
   }
 }

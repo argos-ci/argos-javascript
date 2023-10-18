@@ -4,13 +4,21 @@ import githubActions from "./services/github-actions";
 import circleci from "./services/circleci";
 import travis from "./services/travis";
 import gitlab from "./services/gitlab";
+import git from "./services/git";
 import type { CiEnvironment, Options } from "./types";
 import { debug } from "../debug";
-import { getCiEnvironmentFromEnvCi } from "./env-ci";
 
 export { CiEnvironment };
 
-const services = [heroku, githubActions, circleci, travis, buildkite, gitlab];
+const services = [
+  heroku,
+  githubActions,
+  circleci,
+  travis,
+  buildkite,
+  gitlab,
+  git,
+];
 
 export const getCiEnvironment = ({
   env = process.env,
@@ -28,9 +36,5 @@ export const getCiEnvironment = ({
     return ciEnvironment;
   }
 
-  // We fallback on "env-ci" library, not very good but it's better than nothing
-  debug("Falling back on env-ci");
-  const ciEnvironment = getCiEnvironmentFromEnvCi(ctx);
-  debug("CI environment", ciEnvironment);
-  return ciEnvironment;
+  return null;
 };
