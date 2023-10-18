@@ -1,6 +1,20 @@
 import { execSync } from "node:child_process";
 
 /**
+ * Check if the current directory is a git repository.
+ */
+export const checkIsGitRepository = () => {
+  try {
+    return (
+      execSync("git rev-parse --is-inside-work-tree").toString().trim() ===
+      "true"
+    );
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Returns the head commit.
  */
 export const head = () => {
