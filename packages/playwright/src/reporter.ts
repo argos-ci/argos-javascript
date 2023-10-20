@@ -58,7 +58,12 @@ class ArgosReporter implements Reporter {
         ) {
           const metadata = await getMetadataFromTestCase(test);
           const name = test.titlePath().join(" ");
-          const path = join(this.uploadDir, `${name} (failed).png`);
+          const path = join(
+            this.uploadDir,
+            result.status === "failed" || result.status === "timedOut"
+              ? `${name} (failed).png`
+              : `${name}.png`,
+          );
           await Promise.all([
             writeFile(path + ".argos.json", JSON.stringify(metadata)),
             copyFile(attachment.path, path),
