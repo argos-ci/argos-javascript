@@ -10,7 +10,7 @@ import { upload, UploadParameters } from "@argos-ci/core";
 import { randomBytes } from "node:crypto";
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { getAttachementFilename } from "./attachment";
 import { getMetadataFromTestCase } from "./metadata";
 
@@ -31,6 +31,14 @@ class ArgosReporter implements Reporter {
     this.config = config;
   }
 
+  async writeFile(path: string, body: Buffer | string) {
+    const dir = dirname(path);
+    if (dir !== this.uploadDir) {
+      await mkdir(dir, { recursive: true });
+    }
+    await writeFile(path, body);
+  }
+
   async onBegin(_config: FullConfig, _suite: Suite) {
     this.uploadDir = await createTempDirectory();
   }
@@ -46,7 +54,7 @@ class ArgosReporter implements Reporter {
             this.uploadDir,
             getAttachementFilename(attachment.name),
           );
-          await writeFile(path, attachment.body);
+          await this.writeFile(path, attachment.body);
           return;
         }
 
@@ -65,7 +73,7 @@ class ArgosReporter implements Reporter {
               : `${name}.png`,
           );
           await Promise.all([
-            writeFile(path + ".argos.json", JSON.stringify(metadata)),
+            this.writeFile(path + ".argos.json", JSON.stringify(metadata)),
             copyFile(attachment.path, path),
           ]);
         }
