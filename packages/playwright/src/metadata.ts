@@ -10,9 +10,29 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 
-async function getPlaywrightVersion(): Promise<string> {
-  const pkgPath = require.resolve("playwright/package.json");
-  return readVersionFromPackage(pkgPath);
+const tryResolve = (pkg: string) => {
+  try {
+    return require.resolve(pkg);
+  } catch {
+    return null;
+  }
+};
+
+async function getAutomationLibrary(): Promise<{
+  version: string;
+  name: string;
+}> {
+  const libraries = ["@playwright/test", "playwright", "playwright-core"];
+  for (const name of libraries) {
+    const pkgPath = tryResolve(`${name}/package.json`);
+    if (pkgPath) {
+      const version = await readVersionFromPackage(pkgPath);
+      return { version, name };
+    }
+  }
+  throw new Error(
+    `Unable to find any of the following packages: ${libraries.join(", ")}`,
+  );
 }
 
 async function getArgosPlaywrightVersion(): Promise<string> {
@@ -21,16 +41,13 @@ async function getArgosPlaywrightVersion(): Promise<string> {
 }
 
 export async function getLibraryMetadata() {
-  const [playwrightVersion, argosPlaywrightVersion] = await Promise.all([
-    getPlaywrightVersion(),
+  const [automationLibrary, argosPlaywrightVersion] = await Promise.all([
+    getAutomationLibrary(),
     getArgosPlaywrightVersion(),
   ]);
 
   const metadata = {
-    automationLibrary: {
-      name: "playwright",
-      version: playwrightVersion,
-    },
+    automationLibrary,
     sdk: {
       name: "@argos-ci/playwright",
       version: argosPlaywrightVersion,
