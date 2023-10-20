@@ -3,30 +3,31 @@ title: Playwright
 slug: /playwright
 ---
 
-# Use Argos with Playwright
+# Integrating Argos with Playwright for Visual Testing
 
-Integrating Argos with your [Playwright](https://playwright.dev/) tests to enable visual testing on your application.
+Boost your visual testing capabilities by combining Argos with your [Playwright](https://playwright.dev/) tests.
 
-Playwright already offers a command to take screenshots. The official Argos Playwright integration uses it but also does several things:
+While Playwright inherently provides screenshot functionality, the Argos Playwright integration enhances this by:
 
-- Wait for all images to be loaded
-- Wait for all fonts to be loaded
-- Wait for no `aria-busy` (loader) elements to be present in the page
-- Hide scrollbars
-- Hide carets
-- Expose CSS helpers to help you hiding content
+- Ensuring all images are fully loaded.
+- Ensuring all fonts are rendered.
+- Confirming the absence of any `aria-busy` (loading) elements on the page.
+- Concealing scrollbars.
+- Obscuring text cursors or carets.
+- Providing CSS utilities to simplify content hiding.
+- Gives you visility on test failures.
 
-## 1. Setup
+## 1. Setting Up
 
-### Install packages
+### Installation of Packages
 
 ```
 npm install --save-dev @argos-ci/playwright @playwright/test
 ```
 
-### Setup Argos reporter
+### Configure Argos Reporter
 
-Argos reporter automatically uploads screenshots to Argos while your tests are running.
+The Argos reporter seamlessly uploads test screenshots to Argos in real-time.
 
 ```ts
 // playwright.config.{js,ts}
@@ -38,11 +39,9 @@ export default defineConfig({
 });
 ```
 
-## 2. Use in your tests
+## 2. Take screenshots
 
-`argosScreenshot` command stabilizes the UI and takes a screenshot.
-
-_How to take a screenshot with `argosScreenshot` command_
+`argosScreenshot` command stabilizes the UI before capturing the screenshot.
 
 ```js
 import { test } from "@playwright/test";
@@ -58,38 +57,76 @@ test.describe("Homepage", () => {
 
 ## 3. Setup your CI
 
-Run your Playwright tests as usual and screenshots will be automatically uploaded.
+Execute your Playwright tests in the usual manner. Screenshots will be auto-uploaded.
 
-> If you use another CI than GitHub Actions, be sure to expose `ARGOS_TOKEN` as environment variable.
+> Note: For CI platforms other than GitHub Actions, ensure `ARGOS_TOKEN` is set as an environment variable.
 
-## API
+## API Overview
 
 ### argosScreenshot(page, name[, options])
 
-- `page` - A `playwright` page instance
-- `name` - The screenshot name; must be unique
-- `options` - See [Page.screenshot command options](https://playwright.dev/docs/api/class-page#page-screenshot)
-- `options.element` - Accept an ElementHandle or a string selector to screenshot an element
-- `options.viewports` - Specifies the viewports for which to capture screenshots. See [viewports configuration](https://argos-ci.com/docs/viewports).
+- `page`: Instance of the [Playwright Page](https://playwright.dev/docs/api/class-page).
+- `name`: Unique name for the screenshot.
+- `options`: Explore [Page.screenshot command options](https://playwright.dev/docs/api/class-page#page-screenshot) for details.
+- `options.element`: Use an ElementHandle or string selector to capture a specific element's screenshot.
+- `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](https://argos-ci.com/docs/viewports).
 
-#### Helper attributes
+### Argos Reporter
 
-The `data-visual-test` attributes allow you to control how elements behave in the Argos screenshot.
+The Argos reporter offers extensive configuration options. Specifically, all [upload parameters](<(https://js-sdk-reference.argos-ci.com/interfaces/uploadparameters)>) are available for customizing the reporter.
 
-It is often used to hide changing element like dates.
+```ts
+// playwright.config.ts
+import { defineConfig } from "@playwright/test";
+import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
-- `[data-visual-test="transparent"]` - Make the element transparent (`opacity: 0`)
-- `[data-visual-test="removed"]` - Remove the element (`display: none`)
-- `[data-visual-test="blackout"]` - Blacked out the element
-- `[data-visual-test-no-radius]` - Removes border radius
+export default defineConfig({
+  // ...
+  reporter: [
+    ["list"],
+    [
+      "@argos-ci/playwright/reporter",
+      {
+        buildName: "custom-build-name",
+      } as ArgosReporterOptions,
+    ],
+  ],
+});
+```
 
-_How to use an helper to hide a div from a screenshot_
+## Capturing Screenshots on Test Failures
+
+Playwright's [recording options](https://playwright.dev/docs/test-use-options#recording-options) facilitate the automated capture of screenshots upon test failures. Notably, these captured screenshots are then automatically uploaded to Argos.
+
+```ts
+// playwright.config.{js,ts}
+
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+  use: {
+    // Setting to capture screenshot only when a test fails.
+    screenshot: "only-on-failure",
+  },
+});
+```
+
+## Helper Attributes for Visual Testing
+
+For tailored visual testing, the `data-visual-test` attributes provide control over how elements appear in Argos screenshots. This can be especially useful for obscuring or modifying elements with dynamic content, like dates.
+
+- `[data-visual-test="transparent"]`: Renders the element transparent (`visiblity: hidden`).
+- `[data-visual-test="removed"]`: Removes the element from view (`display: none`).
+- `[data-visual-test="blackout"]`: Masks the element with a blackout effect.
+- `[data-visual-test-no-radius]`: Strips the border radius from the element.
+
+**Example: Using a helper attribute to hide a div from the captured screenshot:**
 
 ```html
 <div id="clock" data-visual-test="transparent">...</div>
 ```
 
-## Resources
+## Additional Resources
 
 - [@argos-ci/playwright on GitHub](https://github.com/argos-ci/argos-playwright)
 - [@argos-ci/playwright on npm](https://www.npmjs.com/package/@argos-ci/playwright)
