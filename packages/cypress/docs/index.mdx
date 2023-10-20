@@ -3,24 +3,29 @@ title: Cypress
 slug: /cypress
 ---
 
-# Use Argos with Cypress
+# Integrating Argos with Cypress for Visual Testing
 
-Integrating Argos with your [Cypress](https://www.cypress.io/) tests to enable visual testing on your application.
+Boost your visual testing capabilities by combining Argos with your [Cypress](https://www.cypress.io/) tests.
 
-Cypress already offers a command to take screenshots. The official Argos Cypress integration uses it but also does several things:
+While Cypress inherently provides screenshot functionality, the Argos Cypress integration enhances this by:
 
-- Wait for all images to be loaded
-- Wait for all fonts to be loaded
-- Wait for no `aria-busy` (loader) elements to be present in the page
-- Hide scrollbars
-- Hide carets
-- Expose CSS helpers to help you hiding content
+- Ensuring all images are fully loaded.
+- Ensuring all fonts are rendered.
+- Confirming the absence of any `aria-busy` (loading) elements on the page.
+- Concealing scrollbars.
+- Obscuring text cursors or carets.
+- Providing CSS utilities to simplify content hiding.
+- Gives you visility on test failures.
 
-## 1. Setup
+## 1. Setting Up
+
+### Installation of Packages
 
 ```
 npm install --save-dev @argos-ci/cli @argos-ci/cypress
 ```
+
+### Add `cy.argosScreenshot` command
 
 And add this line to your `cypress/support/index.js` file.
 
@@ -30,9 +35,7 @@ import "@argos-ci/cypress/support";
 
 ## 2. Use in your tests
 
-`cy.argosScreenshot` command stabilizes the UI and takes a screenshot.
-
-_How to take a screenshot with `cy.argosScreenshot` command_
+`cy.argosScreenshot` command stabilizes the UI before capturing the screenshot.
 
 ```js
 describe("Homepage", () => {
@@ -54,33 +57,32 @@ Look at Argos doc to know [how to configure your CI](https://argos-ci.com/docs/u
 
 As Cypress store the screenshots into the "cypress/screenshots" folder by default, have to specify it when you use Argos CLI command: `npx @argos-ci/cli upload cypress/screenshots`.
 
-## API
+## API Overview
 
 ### cy.argosScreenshot([name][, options])
 
-- `name` - The screenshot name; must be unique; default value to test title
-- `options` - See [cy.screenshot command options](https://docs.cypress.io/api/commands/screenshot)
-- `options.viewports` - Specifies the viewports for which to capture screenshots. See [viewports configuration](https://argos-ci.com/docs/viewports).
+- `name`: Unique name for the screenshot.
+- `options`: Explore [cy.screenshot command options](https://docs.cypress.io/api/commands/screenshot) for details.
+- `options.element`: Use an ElementHandle or string selector to capture a specific element's screenshot.
+- `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](https://argos-ci.com/docs/viewports).
 
-#### Helper attributes
+## Helper Attributes for Visual Testing
 
-The `data-visual-test` attributes allow you to control how elements behave in the Argos screenshot.
+For tailored visual testing, the `data-visual-test` attributes provide control over how elements appear in Argos screenshots. This can be especially useful for obscuring or modifying elements with dynamic content, like dates.
 
-It is often used to hide changing element like dates.
+- `[data-visual-test="transparent"]`: Renders the element transparent (`visiblity: hidden`).
+- `[data-visual-test="removed"]`: Removes the element from view (`display: none`).
+- `[data-visual-test="blackout"]`: Masks the element with a blackout effect.
+- `[data-visual-test-no-radius]`: Strips the border radius from the element.
 
-- `[data-visual-test="transparent"]` - Make the element transparent (`opacity: 0`)
-- `[data-visual-test="removed"]` - Remove the element (`display: none`)
-- `[data-visual-test="blackout"]` - Blacked out the element
-- `[data-visual-test-no-radius]` - Removes border radius
-
-_How to use an helper to hide a div from a screenshot_
+**Example: Using a helper attribute to hide a div from the captured screenshot:**
 
 ```html
 <div id="clock" data-visual-test="transparent">...</div>
 ```
 
-## Resources
+## Additional Resources
 
 - [Example of Argos + Cypress](https://github.com/argos-ci/argos/tree/main/examples/cypress)
-- [@argos-ci/cypress on GitHub](https://github.com/argos-ci/argos-cypress)
+- [@argos-ci/cypress on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/cypress)
 - [@argos-ci/cypress on npm](https://www.npmjs.com/package/@argos-ci/cypress)
