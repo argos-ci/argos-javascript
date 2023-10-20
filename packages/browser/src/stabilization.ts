@@ -104,11 +104,11 @@ export function waitForNoBusy(document: Document) {
 /**
  * Wait for the document to be stable.
  */
-export async function waitForStability(document: Document) {
-  const results = await Promise.all([
+export function waitForStability(document: Document) {
+  const results = [
     waitForNoBusy(document),
     waitForImagesToLoad(document),
     waitForFontsToLoad(document),
-  ]);
+  ];
   return results.every(Boolean);
 }
