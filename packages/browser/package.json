@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/browser",
   "description": "Browser utilities to stabilize visual testing.",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
