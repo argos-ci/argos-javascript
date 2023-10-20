@@ -1,5 +1,5 @@
 import { mkdir, readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
 import type {
   Page,
   PageScreenshotOptions,
@@ -153,6 +153,13 @@ export async function argosScreenshot(
     const screenshotPath = useArgosReporter
       ? null
       : resolve(screenshotFolder, `${name}.png`);
+
+    if (screenshotPath) {
+      const dir = dirname(screenshotPath);
+      if (dir !== screenshotFolder) {
+        await mkdir(dirname(screenshotPath), { recursive: true });
+      }
+    }
 
     const [screenshot] = await Promise.all([
       handle.screenshot({
