@@ -61,6 +61,26 @@ Execute your Playwright tests in the usual manner. Screenshots will be auto-uplo
 
 > Note: For CI platforms other than GitHub Actions, ensure `ARGOS_TOKEN` is set as an environment variable.
 
+## Upgrading from v0.0.x
+
+### Step 1: Set Up Argos Playwright Reporter:
+
+Setup `@argos-ci/playwright/reporter` into your Playwright config:
+
+```typescript
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+  // ... other configurations ...
+  reporter: [["list"], ["@argos-ci/playwright/reporter"]],
+});
+```
+
+### Step 2: Phase Out CLI Usage:
+
+- Remove `argos upload` calls from your CI. (Note: Screenshots now upload through the reporter.)
+- Delete `@argos-ci/cli` from `package.json`.
+
 ## API Overview
 
 ### argosScreenshot(page, name[, options])
