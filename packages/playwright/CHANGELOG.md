@@ -1,3 +1,19 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [1.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.0.0...@argos-ci/playwright@1.0.1) (2023-10-24)
+
+
+### Bug Fixes
+
+* **playwright:** upload nested screenshots ([6c9dbeb](https://github.com/argos-ci/argos-javascript/commit/6c9dbebbeecc80825a9eb828ef6c10d26d6c5618))
+
+
+
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
