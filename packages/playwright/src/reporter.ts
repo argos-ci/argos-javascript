@@ -84,7 +84,7 @@ class ArgosReporter implements Reporter {
   async onEnd(_result: FullResult) {
     try {
       await upload({
-        files: ["*.png"],
+        files: ["**/*.png"],
         root: this.uploadDir,
         ...this.config,
       });
