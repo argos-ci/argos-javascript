@@ -42,7 +42,10 @@ function injectArgos() {
 }
 
 function readArgosCypressVersion() {
-  const fileName = require.resolve("@argos-ci/cypress/package.json");
+  const fileName =
+    typeof require?.resolve === "function"
+      ? require.resolve("@argos-ci/cypress/package.json")
+      : "node_modules/@argos-ci/cypress/package.json";
   return cy.readFile(fileName).then((source) => {
     return source.version;
   });
