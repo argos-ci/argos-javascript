@@ -1,9 +1,12 @@
-import { defineConfig, devices } from "@playwright/test";
+import { PlaywrightTestConfig, defineConfig, devices } from "@playwright/test";
 import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
+
+const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
 
 export default defineConfig({
   use: {
     screenshot: "only-on-failure",
+    trace: "on",
   },
   projects: [
     {
@@ -14,7 +17,7 @@ export default defineConfig({
   reporter:
     process.env.WITH_ARGOS_REPORTER === "true"
       ? [
-          ["list"],
+          ...defaultReporters,
           [
             "@argos-ci/playwright/reporter",
             {
@@ -22,5 +25,5 @@ export default defineConfig({
             } as ArgosReporterOptions,
           ],
         ]
-      : [["list"]],
+      : defaultReporters,
 });

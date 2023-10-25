@@ -29,13 +29,21 @@ npm install --save-dev @argos-ci/playwright @playwright/test
 
 The Argos reporter seamlessly uploads test screenshots to Argos in real-time.
 
-```ts
-// playwright.config.{js,ts}
+Install reporter in your Playwright config:
+
+```typescript
 import { defineConfig } from "@playwright/test";
 
+// "list" is the default reporter, if you use any other, don't forget to add it back
+const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
+
 export default defineConfig({
-  // ...
-  reporter: [["list"], ["@argos-ci/playwright/reporter"]],
+  // ... other configuration
+
+  // Add Argos reporter only when it runs on CI
+  reporter: process.env.CI
+    ? [...defaultReporters, ["@argos-ci/playwright/reporter"]]
+    : defaultReporters,
 });
 ```
 
@@ -70,9 +78,16 @@ Setup `@argos-ci/playwright/reporter` into your Playwright config:
 ```typescript
 import { defineConfig } from "@playwright/test";
 
+// "list" is the default reporter, if you use any other, don't forget to add it back
+const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
+
 export default defineConfig({
-  // ... other configurations ...
-  reporter: [["list"], ["@argos-ci/playwright/reporter"]],
+  // ... other configuration
+
+  // Add Argos reporter only when it runs on CI
+  reporter: process.env.CI
+    ? [...defaultReporters, ["@argos-ci/playwright/reporter"]]
+    : defaultReporters,
 });
 ```
 
@@ -101,9 +116,9 @@ import { defineConfig } from "@playwright/test";
 import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
-  // ...
+  // ... other configurations
   reporter: [
-    ["list"],
+    // ... other reporters
     [
       "@argos-ci/playwright/reporter",
       {
