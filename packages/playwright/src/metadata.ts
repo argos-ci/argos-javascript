@@ -4,7 +4,7 @@ import {
   readVersionFromPackage,
 } from "@argos-ci/util";
 import { TestInfo } from "@playwright/test";
-import { TestCase } from "@playwright/test/reporter";
+import { TestCase, TestResult } from "@playwright/test/reporter";
 import { relative } from "node:path";
 import { createRequire } from "node:module";
 
@@ -63,6 +63,8 @@ export async function getTestMetadataFromTestInfo(testInfo: TestInfo) {
     id: testInfo.testId,
     title: testInfo.title,
     titlePath: testInfo.titlePath,
+    retry: testInfo.retry,
+    retries: testInfo.project.retries,
     location: {
       file: repositoryPath
         ? relative(repositoryPath, testInfo.file)
@@ -74,11 +76,16 @@ export async function getTestMetadataFromTestInfo(testInfo: TestInfo) {
   return testMetadata;
 }
 
-export async function getTestMetadataFromTestCase(testCase: TestCase) {
+export async function getTestMetadataFromTestCase(
+  testCase: TestCase,
+  testResult: TestResult,
+) {
   const repositoryPath = await getGitRepositoryPath();
   const testMetadata: ScreenshotMetadata["test"] = {
     title: testCase.title,
     titlePath: testCase.titlePath(),
+    retry: testResult.retry,
+    retries: testCase.retries,
     location: {
       file: repositoryPath
         ? relative(repositoryPath, testCase.location.file)
@@ -90,10 +97,13 @@ export async function getTestMetadataFromTestCase(testCase: TestCase) {
   return testMetadata;
 }
 
-export async function getMetadataFromTestCase(testCase: TestCase) {
+export async function getMetadataFromTestCase(
+  testCase: TestCase,
+  testResult: TestResult,
+) {
   const [libMetadata, testMetadata] = await Promise.all([
     getLibraryMetadata(),
-    getTestMetadataFromTestCase(testCase),
+    getTestMetadataFromTestCase(testCase, testResult),
   ]);
 
   const metadata: ScreenshotMetadata = {

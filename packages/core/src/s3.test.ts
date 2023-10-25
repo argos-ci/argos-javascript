@@ -13,6 +13,7 @@ describe("#upload", () => {
     await upload({
       path: join(__dirname, "../../../__fixtures__/screenshots/penelope.png"),
       url: "https://api.s3.dev/upload/123",
+      contentType: "image/png",
     });
   });
 });

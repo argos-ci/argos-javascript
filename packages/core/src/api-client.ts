@@ -10,6 +10,10 @@ export interface ApiClientOptions {
 export interface CreateBuildInput {
   commit: string;
   screenshotKeys: string[];
+  pwTraces: {
+    screenshotKey: string;
+    traceKey: string;
+  }[];
   branch?: string | null;
   name?: string | null;
   parallel?: boolean | null;
@@ -28,6 +32,7 @@ export interface CreateBuildOutput {
   screenshots: {
     key: string;
     putUrl: string;
+    putTraceUrl?: string;
   }[];
 }
 
@@ -37,6 +42,7 @@ export interface UpdateBuildInput {
     key: string;
     name: string;
     metadata: ScreenshotMetadata | null;
+    pwTraceKey: string | null;
   }[];
   parallel?: boolean | null;
   parallelTotal?: number | null;

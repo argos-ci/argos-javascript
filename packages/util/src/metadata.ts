@@ -10,6 +10,8 @@ export type ScreenshotMetadata = {
     id?: string;
     title: string;
     titlePath: string[];
+    retries?: number;
+    retry?: number;
     location?: {
       file: string;
       line: number;
