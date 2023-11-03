@@ -13,6 +13,7 @@ const service: Service = {
       runId: null,
       prNumber: null,
       prHeadCommit: null,
+      nonce: env.CI_PIPELINE_ID || null,
     };
   },
 };

@@ -6,7 +6,7 @@ import type {
   TestCase,
   TestResult,
 } from "@playwright/test/reporter";
-import { upload, UploadParameters } from "@argos-ci/core";
+import { readConfig, upload, UploadParameters } from "@argos-ci/core";
 import { randomBytes } from "node:crypto";
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -23,9 +23,27 @@ async function createTempDirectory() {
 
 export type ArgosReporterOptions = Omit<UploadParameters, "files" | "root">;
 
+const getParallelFromConfig = (
+  config: FullConfig,
+): null | UploadParameters["parallel"] => {
+  if (!config.shard) return null;
+  if (config.shard.total === 1) return null;
+  const argosConfig = readConfig();
+  if (!argosConfig.parallelNonce) {
+    throw new Error(
+      "Playwright shard mode detected. Please specify ARGOS_PARALLEL_NONCE env variable. Read https://argos-ci.com/docs/parallel-testing",
+    );
+  }
+  return {
+    total: config.shard.total,
+    nonce: argosConfig.parallelNonce,
+  };
+};
+
 class ArgosReporter implements Reporter {
   uploadDir!: string;
   config: ArgosReporterOptions;
+  playwrightConfig!: FullConfig;
 
   constructor(config: ArgosReporterOptions) {
     this.config = config;
@@ -39,7 +57,8 @@ class ArgosReporter implements Reporter {
     await writeFile(path, body);
   }
 
-  async onBegin(_config: FullConfig, _suite: Suite) {
+  async onBegin(config: FullConfig, _suite: Suite) {
+    this.playwrightConfig = config;
     this.uploadDir = await createTempDirectory();
   }
 
@@ -82,10 +101,13 @@ class ArgosReporter implements Reporter {
   }
 
   async onEnd(_result: FullResult) {
+    const parallel = getParallelFromConfig(this.playwrightConfig);
+
     try {
       await upload({
         files: ["**/*.png"],
         root: this.uploadDir,
+        parallel: parallel ?? undefined,
         ...this.config,
       });
     } catch (error) {

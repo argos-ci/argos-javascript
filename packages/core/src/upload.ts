@@ -1,5 +1,4 @@
-import { createConfig } from "./config";
-import { getCiEnvironment } from "./ci-environment";
+import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
@@ -48,42 +47,14 @@ export interface UploadParameters {
   referenceCommit?: string;
 }
 
-const getConfigFromOptions = (options: UploadParameters) => {
-  const config = createConfig();
-
-  const ciEnv = getCiEnvironment();
-
-  config.load({
-    apiBaseUrl: options.apiBaseUrl ?? config.get("apiBaseUrl"),
-    commit: options.commit ?? config.get("commit") ?? ciEnv?.commit ?? null,
-    branch: options.branch ?? config.get("branch") ?? ciEnv?.branch ?? null,
-    token: options.token ?? config.get("token") ?? null,
-    buildName: options.buildName ?? config.get("buildName") ?? null,
-    prNumber:
-      options.prNumber ?? config.get("prNumber") ?? ciEnv?.prNumber ?? null,
-    prHeadCommit: config.get("prHeadCommit") ?? ciEnv?.prHeadCommit ?? null,
-    referenceBranch:
-      options.referenceBranch ?? config.get("referenceBranch") ?? null,
-    referenceCommit:
-      options.referenceCommit ?? config.get("referenceCommit") ?? null,
-    ciService: ciEnv?.name ?? null,
-    owner: ciEnv?.owner ?? null,
-    repository: ciEnv?.repository ?? null,
-    jobId: ciEnv?.jobId ?? null,
-    runId: ciEnv?.runId ?? null,
+const getConfigFromOptions = ({ parallel, ...options }: UploadParameters) => {
+  const config = readConfig({
+    ...options,
+    parallel: Boolean(parallel),
+    parallelNonce: parallel ? parallel.nonce : null,
+    parallelTotal: parallel ? parallel.total : null,
   });
-
-  if (options.parallel) {
-    config.load({
-      parallel: Boolean(options.parallel),
-      parallelNonce: options.parallel ? options.parallel.nonce : null,
-      parallelTotal: options.parallel ? options.parallel.total : null,
-    });
-  }
-
-  config.validate();
-
-  return config.get();
+  return config;
 };
 
 /**
