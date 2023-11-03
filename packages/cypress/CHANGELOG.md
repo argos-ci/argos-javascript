@@ -1,3 +1,20 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [1.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.0.0...@argos-ci/cypress@1.0.1) (2023-11-03)
+
+
+### Bug Fixes
+
+* address Cypress `require.resolve` issue ([7aae22b](https://github.com/argos-ci/argos-javascript/commit/7aae22bec58db5d61628e359e59f8fc6eea6ec26))
+* **cypress:** compatibility with esm bundlers ([fbf3d91](https://github.com/argos-ci/argos-javascript/commit/fbf3d91fc988de69d89513b088ef5d9aabf83fae))
+
+
+
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.

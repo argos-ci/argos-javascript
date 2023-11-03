@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.0.1...@argos-ci/playwright@1.1.0) (2023-11-03)
+
+
+### Features
+
+* **playwright:** sharding support ([a495905](https://github.com/argos-ci/argos-javascript/commit/a49590517e9668ae007dca486302f79bca37ed28))
+
+
+
+
+
 ## [1.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.0.0...@argos-ci/playwright@1.0.1) (2023-10-24)
 
 
