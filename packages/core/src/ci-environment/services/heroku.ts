@@ -12,6 +12,7 @@ const service: Service = {
     runId: null,
     prNumber: null,
     prHeadCommit: null,
+    nonce: env.HEROKU_TEST_RUN_ID || null,
   }),
 };
 

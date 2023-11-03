@@ -55,7 +55,7 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
-    "test": "pnpm exec playwright test",
+    "test": "pnpm exec playwright test --shard=2/4",
     "e2e": "WITH_ARGOS_REPORTER=true pnpm run test"
   }
 }

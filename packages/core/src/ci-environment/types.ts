@@ -16,6 +16,7 @@ export interface CiEnvironment {
   runId: string | null;
   prNumber: number | null;
   prHeadCommit: string | null;
+  nonce: string | null;
 }
 
 export interface Service {

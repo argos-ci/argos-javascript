@@ -50,6 +50,7 @@ const service: Service = {
       runId: env.GITHUB_RUN_ID || null,
       prNumber: payload?.pull_request?.number || null,
       prHeadCommit: payload?.pull_request?.head.sha ?? null,
+      nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}` || null,
     };
   },
 };

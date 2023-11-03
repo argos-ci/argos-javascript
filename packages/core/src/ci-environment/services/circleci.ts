@@ -23,6 +23,7 @@ const service: Service = {
       runId: null,
       prNumber: getPrNumber({ env }),
       prHeadCommit: null,
+      nonce: env.CIRCLE_WORKFLOW_ID || env.CIRCLE_BUILD_NUM || null,
     };
   },
 };

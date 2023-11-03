@@ -1,4 +1,5 @@
 import convict from "convict";
+import { getCiEnvironment } from "./ci-environment";
 
 const mustBeApiBaseUrl = (value: any) => {
   const URL_REGEX =
@@ -141,8 +142,45 @@ export interface Config {
   prHeadCommit: string | null;
 }
 
-export const createConfig = () => {
+const createConfig = () => {
   return convict<Config>(schema, {
     args: [],
   });
+};
+
+export const readConfig = (options: Partial<Config> = {}) => {
+  const config = createConfig();
+
+  const ciEnv = getCiEnvironment();
+
+  config.load({
+    apiBaseUrl: options.apiBaseUrl ?? config.get("apiBaseUrl"),
+    commit: options.commit ?? config.get("commit") ?? ciEnv?.commit ?? null,
+    branch: options.branch ?? config.get("branch") ?? ciEnv?.branch ?? null,
+    token: options.token ?? config.get("token") ?? null,
+    buildName: options.buildName ?? config.get("buildName") ?? null,
+    prNumber:
+      options.prNumber ?? config.get("prNumber") ?? ciEnv?.prNumber ?? null,
+    prHeadCommit: config.get("prHeadCommit") ?? ciEnv?.prHeadCommit ?? null,
+    referenceBranch:
+      options.referenceBranch ?? config.get("referenceBranch") ?? null,
+    referenceCommit:
+      options.referenceCommit ?? config.get("referenceCommit") ?? null,
+    ciService: ciEnv?.name ?? null,
+    owner: ciEnv?.owner ?? null,
+    repository: ciEnv?.repository ?? null,
+    jobId: ciEnv?.jobId ?? null,
+    runId: ciEnv?.runId ?? null,
+    parallel: options.parallel ?? config.get("parallel") ?? false,
+    parallelNonce:
+      options.parallelNonce ??
+      config.get("parallelNonce") ??
+      ciEnv?.nonce ??
+      null,
+    parallelTotal: options.parallelTotal ?? config.get("parallelTotal") ?? null,
+  });
+
+  config.validate();
+
+  return config.get();
 };
