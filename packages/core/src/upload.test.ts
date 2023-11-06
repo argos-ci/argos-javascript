@@ -22,6 +22,7 @@ describe("#upload", () => {
           path: expect.stringMatching(
             /__fixtures__\/screenshots\/penelope\.jpg$/,
           ),
+          pwTrace: null,
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
           metadata: null,
@@ -31,6 +32,7 @@ describe("#upload", () => {
           path: expect.stringMatching(
             /__fixtures__\/screenshots\/penelope\.png$/,
           ),
+          pwTrace: null,
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
           metadata: {
@@ -60,6 +62,7 @@ describe("#upload", () => {
           path: expect.stringMatching(
             /__fixtures__\/screenshots\/nested\/alicia\.jpg$/,
           ),
+          pwTrace: null,
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
           metadata: null,

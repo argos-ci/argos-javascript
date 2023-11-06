@@ -4,6 +4,7 @@ import axios from "axios";
 interface UploadInput {
   url: string;
   path: string;
+  contentType: string;
 }
 
 export const upload = async (input: UploadInput) => {
@@ -13,7 +14,7 @@ export const upload = async (input: UploadInput) => {
     url: input.url,
     data: file,
     headers: {
-      "Content-Type": "image/png",
+      "Content-Type": input.contentType,
     },
   });
 };

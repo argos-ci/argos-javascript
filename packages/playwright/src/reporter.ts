@@ -11,7 +11,12 @@ import { randomBytes } from "node:crypto";
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { getAttachementFilename } from "./attachment";
+import {
+  checkIsArgosScreenshot,
+  checkIsAutomaticScreenshot,
+  checkIsTrace,
+  getAttachementFilename,
+} from "./attachment";
 import { getMetadataFromTestCase } from "./metadata";
 
 async function createTempDirectory() {
@@ -57,6 +62,16 @@ class ArgosReporter implements Reporter {
     await writeFile(path, body);
   }
 
+  getAutomaticScreenshotName(test: TestCase, result: TestResult) {
+    let name = test.titlePath().join(" ");
+    name += result.retry > 0 ? ` #${result.retry + 1}` : "";
+    name +=
+      result.status === "failed" || result.status === "timedOut"
+        ? " (failed)"
+        : "";
+    return name;
+  }
+
   async onBegin(config: FullConfig, _suite: Suite) {
     this.playwrightConfig = config;
     this.uploadDir = await createTempDirectory();
@@ -65,7 +80,7 @@ class ArgosReporter implements Reporter {
   async onTestEnd(test: TestCase, result: TestResult) {
     await Promise.all(
       result.attachments.map(async (attachment) => {
-        if (attachment.name.startsWith("argos/")) {
+        if (checkIsArgosScreenshot(attachment)) {
           if (!attachment.body) {
             throw new Error("Missing attachment body");
           }
@@ -78,23 +93,17 @@ class ArgosReporter implements Reporter {
         }
 
         // Error screenshots are sent to Argos
-        if (
-          attachment.name === "screenshot" &&
-          attachment.contentType === "image/png" &&
-          attachment.path
-        ) {
-          const metadata = await getMetadataFromTestCase(test);
-          const name = test.titlePath().join(" ");
-          const path = join(
-            this.uploadDir,
-            result.status === "failed" || result.status === "timedOut"
-              ? `${name} (failed).png`
-              : `${name}.png`,
-          );
+        if (checkIsAutomaticScreenshot(attachment)) {
+          const trace = result.attachments.find(checkIsTrace) ?? null;
+          const metadata = await getMetadataFromTestCase(test, result);
+          const name = this.getAutomaticScreenshotName(test, result);
+          const path = join(this.uploadDir, `${name}.png`);
           await Promise.all([
             this.writeFile(path + ".argos.json", JSON.stringify(metadata)),
             copyFile(attachment.path, path),
+            trace ? copyFile(trace.path, path + ".pw-trace.zip") : null,
           ]);
+          return;
         }
       }),
     );
