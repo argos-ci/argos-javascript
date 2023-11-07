@@ -5,31 +5,41 @@ slug: /playwright
 
 # Integrating Argos with Playwright for Visual Testing
 
-Boost your visual testing capabilities by combining Argos with your [Playwright](https://playwright.dev/) tests.
+Improve test debugging and boost your visual testing capabilities by combining Argos with your [Playwright](https://playwright.dev/) tests.
 
-While Playwright inherently provides screenshot functionality, the Argos Playwright integration enhances this by:
+## Introduction
 
-- Ensuring all images are fully loaded.
-- Ensuring all fonts are rendered.
-- Confirming the absence of any `aria-busy` (loading) elements on the page.
-- Concealing scrollbars.
-- Obscuring text cursors or carets.
-- Providing CSS utilities to simplify content hiding.
-- Gives you visility on test failures.
+### Test debugging
 
-## 1. Setting Up
+The Argos Playwright reporter automatically reports failure screenshots and playwright traces. You can access them directly in Argos UI. If you are tired to download traces from artifact and run a command to see them, it is the solution for you.
 
-### Installation of Packages
+- **Failure Screenshots**: View failure screenshots from your CI tests directly in Argos. No extra steps, just immediate clarity where you need it most.
+
+- **Playwright Traces**: “Time travel” through your failing tests with remote Playwright traces. Gain a complete, step-by-step visual journey to the heart of any test issue.
+
+### Visual Testing
+
+Argos presents a significant advantage over traditional Playwright visual tests with its streamlined approach to managing and reviewing test results:
+
+- **Visual Testing on CI**: With Argos, there's no need to run tests locally or commit screenshots to your repository. This not only saves time but also keeps your repository clean and focused on code rather than binary assets.
+
+- **Fluid UI for Comparison**: Argos intuitive interface makes it easy to spot discrepancies and understand visual changes without the need for cumbersome manual checks.
+
+- **Enhanced Stabilization**: The Argos integration with Playwright takes visual testing to the next level by ensuring stability and consistency in the screenshots captured. Fonts, images, animations, loaders, everything is just stable.
+
+## Get started
+
+### 1. Install package
 
 ```
-npm install --save-dev @argos-ci/playwright @playwright/test
+npm install --save-dev @argos-ci/playwright
 ```
 
-### Configure Argos Reporter
+### 2. Configure Argos
 
-The Argos reporter seamlessly uploads test screenshots to Argos in real-time.
+The Argos reporter seamlessly uploads screenshots and traces to Argos in real-time.
 
-Install reporter in your Playwright config:
+Install Argos in your Playwright config:
 
 ```typescript
 import { defineConfig } from "@playwright/test";
@@ -40,6 +50,14 @@ const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
 export default defineConfig({
   // ... other configuration
 
+  // Setup recording option to enable test debugging features
+  use: {
+    // Setting to capture screenshot only when a test fails
+    screenshot: "only-on-failure",
+    // Setting to retain traces only when a test fails
+    trace: "retain-on-failure",
+  },
+
   // Add Argos reporter only when it runs on CI
   reporter: process.env.CI
     ? [...defaultReporters, ["@argos-ci/playwright/reporter"]]
@@ -47,7 +65,9 @@ export default defineConfig({
 });
 ```
 
-## 2. Take screenshots
+Playwright's [recording options](https://playwright.dev/docs/test-use-options#recording-options) facilitate the automated capture of screenshots upon test failures. Notably, these captured screenshots and traces are then automatically uploaded to Argos.
+
+### 3. Take screenshots
 
 `argosScreenshot` command stabilizes the UI before capturing the screenshot.
 
@@ -63,38 +83,11 @@ test.describe("Homepage", () => {
 });
 ```
 
-## 3. Setup your CI
+### 4. Setup your CI
 
 Execute your Playwright tests in the usual manner. Screenshots will be auto-uploaded.
 
 > Note: For CI platforms other than GitHub Actions, ensure `ARGOS_TOKEN` is set as an environment variable.
-
-## Upgrading from v0.0.x
-
-### Step 1: Set Up Argos Playwright Reporter:
-
-Setup `@argos-ci/playwright/reporter` into your Playwright config:
-
-```typescript
-import { defineConfig } from "@playwright/test";
-
-// "list" is the default reporter, if you use any other, don't forget to add it back
-const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
-
-export default defineConfig({
-  // ... other configuration
-
-  // Add Argos reporter only when it runs on CI
-  reporter: process.env.CI
-    ? [...defaultReporters, ["@argos-ci/playwright/reporter"]]
-    : defaultReporters,
-});
-```
-
-### Step 2: Phase Out CLI Usage:
-
-- Remove `argos upload` calls from your CI. (Note: Screenshots now upload through the reporter.)
-- Delete `@argos-ci/cli` from `package.json`.
 
 ## API Overview
 
@@ -117,6 +110,7 @@ import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
   // ... other configurations
+
   reporter: [
     // ... other reporters
     [
@@ -129,24 +123,7 @@ export default defineConfig({
 });
 ```
 
-## Capturing Screenshots on Test Failures
-
-Playwright's [recording options](https://playwright.dev/docs/test-use-options#recording-options) facilitate the automated capture of screenshots upon test failures. Notably, these captured screenshots are then automatically uploaded to Argos.
-
-```ts
-// playwright.config.{js,ts}
-
-import { defineConfig } from "@playwright/test";
-
-export default defineConfig({
-  use: {
-    // Setting to capture screenshot only when a test fails.
-    screenshot: "only-on-failure",
-  },
-});
-```
-
-## Sharding
+## Tests Sharding
 
 Argos seamlessly integrates with [Playwright test sharding](https://playwright.dev/docs/test-sharding), enabling efficient test distribution without the need for manual configuration. [Argos Sharding/Parallel mode](https://argos-ci.com/docs/parallel-testing) is automatically configured for you.
 
@@ -165,7 +142,41 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 <div id="clock" data-visual-test="transparent">...</div>
 ```
 
+## Upgrading from v0.0.x
+
+### Step 1: Setup Argos in your Playwright config
+
+```typescript
+import { defineConfig } from "@playwright/test";
+
+// "list" is the default reporter, if you use any other, don't forget to add it back
+const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
+
+export default defineConfig({
+  // ... other configuration
+
+  // Setup recording option to enable test debugging features
+  use: {
+    // Setting to capture screenshot only when a test fails
+    screenshot: "only-on-failure",
+    // Setting to retain traces only when a test fails
+    trace: "retain-on-failure",
+  },
+
+  // Add Argos reporter only when it runs on CI
+  reporter: process.env.CI
+    ? [...defaultReporters, ["@argos-ci/playwright/reporter"]]
+    : defaultReporters,
+});
+```
+
+### Step 2: Phase Out CLI Usage:
+
+- Remove `argos upload` calls from your CI. (Note: Screenshots now upload through the reporter.)
+- Delete `@argos-ci/cli` from `package.json`.
+
 ## Additional Resources
 
+- [Argos + Playwright example](https://github.com/argos-ci/argos/tree/main/examples/playwright)
 - [@argos-ci/playwright on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/playwright)
 - [@argos-ci/playwright on npm](https://www.npmjs.com/package/@argos-ci/playwright)
