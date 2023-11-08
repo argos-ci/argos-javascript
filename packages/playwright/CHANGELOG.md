@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.2.0...@argos-ci/playwright@1.2.1) (2023-11-08)
+
+
+### Bug Fixes
+
+* **playwright:** fix screenshot metadata in reporter ([f8a6552](https://github.com/argos-ci/argos-javascript/commit/f8a65523ff8d5c11c9b892c4fdb8a41bdf56154c))
+
+
+
+
+
 # [1.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.1.0...@argos-ci/playwright@1.2.0) (2023-11-07)
 
 
