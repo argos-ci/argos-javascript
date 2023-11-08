@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
   checkIsArgosScreenshot,
+  checkIsArgosScreenshotMetadata,
   checkIsAutomaticScreenshot,
   checkIsTrace,
   getAttachementFilename,
@@ -80,10 +81,10 @@ class ArgosReporter implements Reporter {
   async onTestEnd(test: TestCase, result: TestResult) {
     await Promise.all(
       result.attachments.map(async (attachment) => {
-        if (checkIsArgosScreenshot(attachment)) {
-          if (!attachment.body) {
-            throw new Error("Missing attachment body");
-          }
+        if (
+          checkIsArgosScreenshot(attachment) ||
+          checkIsArgosScreenshotMetadata(attachment)
+        ) {
           const path = join(
             this.uploadDir,
             getAttachementFilename(attachment.name),
