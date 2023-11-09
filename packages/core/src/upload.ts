@@ -57,6 +57,32 @@ const getConfigFromOptions = ({ parallel, ...options }: UploadParameters) => {
   return config;
 };
 
+async function uploadFilesToS3(
+  files: { url: string; path: string; contentType: string }[],
+) {
+  debug(`Split files in chunks of ${CHUNK_SIZE}`);
+  const chunks = chunk(files, CHUNK_SIZE);
+
+  debug(`Starting upload of ${chunks.length} chunks`);
+
+  for (let i = 0; i < chunks.length; i++) {
+    // Upload files
+    debug(`Uploading chunk ${i + 1}/${chunks.length}`);
+    const timeLabel = `Chunk ${i + 1}/${chunks.length}`;
+    debugTime(timeLabel);
+    await Promise.all(
+      chunks[i].map(async ({ url, path, contentType }) => {
+        await uploadToS3({
+          url,
+          path,
+          contentType,
+        });
+      }),
+    );
+    debugTimeEnd(timeLabel);
+  }
+}
+
 /**
  * Upload screenshots to argos-ci.com.
  */
@@ -108,26 +134,20 @@ export const upload = async (params: UploadParameters) => {
 
   // Create build
   debug("Creating build");
-  const screenshotKeys = Array.from(
-    new Set(screenshots.map((screenshot) => screenshot.hash)),
-  );
-  const pwTraces = screenshotKeys.reduce(
-    (pwTraces, key) => {
-      const screenshot = screenshots.find(
-        (screenshot) => screenshot.hash === key,
-      );
-      if (!screenshot) {
-        throw new Error(`Invariant: screenshot with hash ${key} not found`);
+  const [pwTraceKeys, screenshotKeys] = screenshots.reduce(
+    ([pwTraceKeys, screenshotKeys], screenshot) => {
+      if (
+        screenshot.pwTrace &&
+        !pwTraceKeys.includes(screenshot.pwTrace.hash)
+      ) {
+        pwTraceKeys.push(screenshot.pwTrace.hash);
       }
-      if (screenshot.pwTrace) {
-        pwTraces.push({
-          screenshotKey: screenshot.hash,
-          traceKey: screenshot.pwTrace.hash,
-        });
+      if (!screenshotKeys.includes(screenshot.hash)) {
+        screenshotKeys.push(screenshot.hash);
       }
-      return pwTraces;
+      return [pwTraceKeys, screenshotKeys];
     },
-    [] as { screenshotKey: string; traceKey: string }[],
+    [[], []] as [string[], string[]],
   );
   const result = await apiClient.createBuild({
     commit: config.commit,
@@ -136,58 +156,43 @@ export const upload = async (params: UploadParameters) => {
     parallel: config.parallel,
     parallelNonce: config.parallelNonce,
     screenshotKeys,
-    pwTraces,
+    pwTraceKeys,
     prNumber: config.prNumber,
     prHeadCommit: config.prHeadCommit,
     referenceBranch: config.referenceBranch,
     referenceCommit: config.referenceCommit,
   });
 
-  debug("Got screenshots", result);
+  debug("Got uploads url", result);
 
-  debug(`Split screenshots in chunks of ${CHUNK_SIZE}`);
-  const chunks = chunk(result.screenshots, CHUNK_SIZE);
+  const uploadFiles = [
+    ...result.screenshots.map(({ key, putUrl }) => {
+      const screenshot = screenshots.find((s) => s.hash === key);
+      if (!screenshot) {
+        throw new Error(`Invariant: screenshot with hash ${key} not found`);
+      }
+      return {
+        url: putUrl,
+        path: screenshot.optimizedPath,
+        contentType: "image/png",
+      };
+    }),
+    ...(result.pwTraces?.map(({ key, putUrl }) => {
+      const screenshot = screenshots.find(
+        (s) => s.pwTrace && s.pwTrace.hash === key,
+      );
+      if (!screenshot || !screenshot.pwTrace) {
+        throw new Error(`Invariant: trace with ${key} not found`);
+      }
+      return {
+        url: putUrl,
+        path: screenshot.pwTrace.path,
+        contentType: "application/json",
+      };
+    }) ?? []),
+  ];
 
-  debug(`Starting upload of ${chunks.length} chunks`);
-
-  for (let i = 0; i < chunks.length; i++) {
-    // Upload screenshots
-    debug(`Uploading chunk ${i + 1}/${chunks.length}`);
-    const timeLabel = `Chunk ${i + 1}/${chunks.length}`;
-    debugTime(timeLabel);
-    await Promise.all(
-      chunks[i].map(async ({ key, putUrl, putTraceUrl }) => {
-        const screenshot = screenshots.find((s) => s.hash === key);
-        if (!screenshot) {
-          throw new Error(`Invariant: screenshot with hash ${key} not found`);
-        }
-        await Promise.all([
-          // Upload screenshot
-          uploadToS3({
-            url: putUrl,
-            path: screenshot.optimizedPath,
-            contentType: "image/png",
-          }),
-          // Upload trace
-          (async () => {
-            if (putTraceUrl) {
-              if (!screenshot.pwTrace) {
-                throw new Error(
-                  `Invariant: screenshot with hash ${key} has a putTraceUrl but no pwTrace`,
-                );
-              }
-              await uploadToS3({
-                url: putTraceUrl,
-                path: screenshot.pwTrace.path,
-                contentType: "application/zip",
-              });
-            }
-          })(),
-        ]);
-      }),
-    );
-    debugTimeEnd(timeLabel);
-  }
+  await uploadFilesToS3(uploadFiles);
 
   // Update build
   debug("Updating build");

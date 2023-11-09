@@ -16,7 +16,7 @@ import {
   checkIsArgosScreenshotMetadata,
   checkIsAutomaticScreenshot,
   checkIsTrace,
-  getAttachementFilename,
+  getAttachmentFilename,
 } from "./attachment";
 import { getMetadataFromTestCase } from "./metadata";
 
@@ -87,7 +87,7 @@ class ArgosReporter implements Reporter {
         ) {
           const path = join(
             this.uploadDir,
-            getAttachementFilename(attachment.name),
+            getAttachmentFilename(attachment.name),
           );
           await this.writeFile(path, attachment.body);
           return;
