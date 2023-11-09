@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.2.0...@argos-ci/core@1.2.1) (2023-11-09)
+
+
+### Bug Fixes
+
+* **playwright:** fix trace upload ([aa4f9c3](https://github.com/argos-ci/argos-javascript/commit/aa4f9c394d3349ce6dc42d5e5b8f05932f9b4098))
+
+
+
+
+
 # [1.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.1.0...@argos-ci/core@1.2.0) (2023-11-07)
 
 
