@@ -8,7 +8,7 @@ function getOriginalAttachmentName(name: string) {
   return name.replace(/^argos\/[^/]+___/, "");
 }
 
-export function getAttachementFilename(name: string) {
+export function getAttachmentFilename(name: string) {
   if (name.startsWith("argos/screenshot")) {
     return `${getOriginalAttachmentName(name)}.png`;
   }
