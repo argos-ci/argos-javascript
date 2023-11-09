@@ -24,7 +24,7 @@ describe("#createArgosApiClient", () => {
       const result = await apiClient.createBuild({
         commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
         screenshotKeys: ["123", "456"],
-        pwTraces: [],
+        pwTraceKeys: [],
       });
       expect(result).toEqual({
         build: {
