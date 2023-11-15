@@ -44,9 +44,6 @@ Install Argos in your Playwright config:
 ```typescript
 import { defineConfig } from "@playwright/test";
 
-// "list" is the default reporter, if you use any other, don't forget to add it back
-const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
-
 export default defineConfig({
   // ... other configuration
 
@@ -60,8 +57,8 @@ export default defineConfig({
 
   // Add Argos reporter only when it runs on CI
   reporter: process.env.CI
-    ? [...defaultReporters, ["@argos-ci/playwright/reporter"]]
-    : defaultReporters,
+    ? [["list"], ["@argos-ci/playwright/reporter"]]
+    : "list",
 });
 ```
 
@@ -149,9 +146,6 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 ```typescript
 import { defineConfig } from "@playwright/test";
 
-// "list" is the default reporter, if you use any other, don't forget to add it back
-const defaultReporters: PlaywrightTestConfig["reporter"] = [["list"]];
-
 export default defineConfig({
   // ... other configuration
 
@@ -165,8 +159,8 @@ export default defineConfig({
 
   // Add Argos reporter only when it runs on CI
   reporter: process.env.CI
-    ? [...defaultReporters, ["@argos-ci/playwright/reporter"]]
-    : defaultReporters,
+    ? [["list"], ["@argos-ci/playwright/reporter"]]
+    : "list",
 });
 ```
 
