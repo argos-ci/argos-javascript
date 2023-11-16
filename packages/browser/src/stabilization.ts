@@ -45,7 +45,7 @@ export function disableSpellCheck(document: Document) {
 }
 
 /**
- *
+ * Inject global styles in the DOM.
  */
 export function injectGlobalStyles(document: Document) {
   const style = document.createElement("style");
@@ -53,12 +53,43 @@ export function injectGlobalStyles(document: Document) {
   document.head.appendChild(style);
 }
 
+const checkIsHTMLElement = (element: Element): element is HTMLElement => {
+  return "style" in element;
+};
+
+/**
+ * Stabilize sticky and fixed elements.
+ */
+export function stabilizeElementPositions(document: Document) {
+  const window = document.defaultView;
+  if (!window) return;
+  const elements = Array.from(document.querySelectorAll("*"));
+  elements.forEach((element) => {
+    if (!checkIsHTMLElement(element)) return;
+    const style = window.getComputedStyle(element);
+    const position = style.position;
+    if (position === "fixed") {
+      element.style.position = "absolute";
+    } else if (position === "sticky") {
+      element.style.position = "relative";
+    }
+  });
+}
+
+export type PrepareForScreenshotOptions = { fullPage?: boolean };
+
 /**
  * Prepare the document for a screenshot.
  */
-export function prepareForScreenshot(document: Document) {
+export function prepareForScreenshot(
+  document: Document,
+  { fullPage }: PrepareForScreenshotOptions = {},
+) {
   injectGlobalStyles(document);
   disableSpellCheck(document);
+  if (fullPage) {
+    stabilizeElementPositions(document);
+  }
 }
 
 /**

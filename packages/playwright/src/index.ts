@@ -100,8 +100,13 @@ export async function argosScreenshot(
 
   const originalViewportSize = getViewportSize(page);
 
+  const fullPage =
+    options.fullPage !== undefined ? options.fullPage : handle === page;
+
   await page.evaluate(() =>
-    ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
+    ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
+      fullPage,
+    }),
   );
 
   async function collectMetadata(
@@ -165,7 +170,7 @@ export async function argosScreenshot(
       handle.screenshot({
         path: screenshotPath ?? undefined,
         type: "png",
-        fullPage: handle === page,
+        fullPage,
         mask: [page.locator('[data-visual-test="blackout"]')],
         animations: "disabled",
         ...options,
