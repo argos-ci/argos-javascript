@@ -82,8 +82,15 @@ export async function argosScreenshot(
     injectArgos(page),
   ]);
 
-  await page.evaluate(() =>
-    ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
+  const fullPage =
+    options.fullPage !== undefined ? options.fullPage : element === undefined;
+
+  await page.evaluate(
+    ({ fullPage }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
+        fullPage,
+      }),
+    { fullPage },
   );
 
   async function collectMetadata(): Promise<ScreenshotMetadata> {
@@ -144,7 +151,7 @@ export async function argosScreenshot(
     const screenshotOptions: ScreenshotOptions = {
       path: screenshotPath,
       type: "png",
-      fullPage: element === undefined,
+      fullPage,
       ...options,
     };
 

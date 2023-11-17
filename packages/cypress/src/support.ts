@@ -67,8 +67,12 @@ Cypress.Commands.add(
 
     injectArgos();
 
+    const fullPage = !options.capture || options.capture === "fullPage";
+
     cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot(),
+      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
+        fullPage,
+      }),
     );
 
     function stabilizeAndScreenshot(name: string) {
