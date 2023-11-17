@@ -57,6 +57,20 @@ Look at Argos doc to know [how to configure your CI](https://argos-ci.com/docs/u
 
 As Cypress store the screenshots into the "cypress/screenshots" folder by default, have to specify it when you use Argos CLI command: `npx @argos-ci/cli upload cypress/screenshots`.
 
+## TypeScript support
+
+Typings should be added as follows in `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "types": ["cypress", "@argos-ci/cypress"]
+  }
+}
+```
+
+You can find [library definition here](https://github.com/argos-ci/argos-javascript/blob/main/packages/cypress/src/support.ts).
+
 ## API Overview
 
 ### cy.argosScreenshot([name][, options])
