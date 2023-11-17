@@ -103,10 +103,12 @@ export async function argosScreenshot(
   const fullPage =
     options.fullPage !== undefined ? options.fullPage : handle === page;
 
-  await page.evaluate(() =>
-    ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
-      fullPage,
-    }),
+  await page.evaluate(
+    ({ fullPage }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
+        fullPage,
+      }),
+    { fullPage },
   );
 
   async function collectMetadata(
