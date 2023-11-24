@@ -6,7 +6,6 @@ const service: Service = {
   detect: () => checkIsGitRepository(),
   config: () => {
     return {
-      // Buildkite doesn't work well so we fallback to git to ensure we have commit and branch
       commit: head() || null,
       branch: branch() || null,
       owner: null,

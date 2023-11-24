@@ -1,3 +1,4 @@
+import bitrise from "./services/bitrise";
 import buildkite from "./services/buildkite";
 import heroku from "./services/heroku";
 import githubActions from "./services/github-actions";
@@ -10,6 +11,8 @@ import { debug } from "../debug";
 
 export { CiEnvironment };
 
+// List of services ordered by usage
+// "git" must be the last one
 const services = [
   heroku,
   githubActions,
@@ -17,6 +20,7 @@ const services = [
   travis,
   buildkite,
   gitlab,
+  bitrise,
   git,
 ];
 
