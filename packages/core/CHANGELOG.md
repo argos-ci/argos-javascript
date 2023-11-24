@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.2.1...@argos-ci/core@1.3.0) (2023-11-24)
+
+
+### Features
+
+* **ci:** support Bitrise CI ([#89](https://github.com/argos-ci/argos-javascript/issues/89)) ([98c8359](https://github.com/argos-ci/argos-javascript/commit/98c83595f4710e865cbeccdac3686fcf85b53908))
+
+
+
+
+
 ## [1.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.2.0...@argos-ci/core@1.2.1) (2023-11-09)
 
 
