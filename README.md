@@ -8,7 +8,7 @@ _Argos is a visual testing solution that fits in your workflow to avoid visual r
 
 # Official Argos SDKs for JavaScript
 
-All Argos JavaScript SDK packages are centralized in that mono-repo, usually available on `@argos-ci/` namespace. It provides a convenient interface and improves consistency between various JavaScript environments.
+All Argos JavaScript SDK packages are centralized in that mono-repo, usually available on `@argos-ci/` namespace. It provides a convenient interface and improves consistency between various JavaScript environments
 
 ## Links
 
