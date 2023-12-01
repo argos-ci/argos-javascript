@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.1.3...@argos-ci/puppeteer@1.1.4) (2023-12-01)
+
+
+### Bug Fixes
+
+* **puppeteer:** fix puppeteer missing files ([0556f34](https://github.com/argos-ci/argos-javascript/commit/0556f34a05c98753b206b3a183927471d95c451f))
+
+
+
+
+
 ## [1.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.1.2...@argos-ci/puppeteer@1.1.3) (2023-12-01)
 
 
