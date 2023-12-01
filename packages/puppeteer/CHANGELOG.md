@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.1.4...@argos-ci/puppeteer@1.1.5) (2023-12-01)
+
+
+### Bug Fixes
+
+* **puppeteer:** expose types ([63a465e](https://github.com/argos-ci/argos-javascript/commit/63a465e78fb24683f26f1f42ad6da26316b00744))
+
+
+
+
+
 ## [1.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.1.3...@argos-ci/puppeteer@1.1.4) (2023-12-01)
 
 
