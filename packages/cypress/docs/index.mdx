@@ -3,7 +3,7 @@ title: Cypress
 slug: /cypress
 ---
 
-# Integrating Argos with Cypress for Visual Testing
+# Argos Cypress SDK
 
 Boost your visual testing capabilities by combining Argos with your [Cypress](https://www.cypress.io/) tests.
 
@@ -17,15 +17,15 @@ While Cypress inherently provides screenshot functionality, the Argos Cypress in
 - Providing CSS utilities to simplify content hiding.
 - Gives you visility on test failures.
 
-## 1. Setting Up
+## Get started
 
-### Installation of Packages
+### 1. Installation of Packages
 
 ```
 npm install --save-dev @argos-ci/cli @argos-ci/cypress
 ```
 
-### Add `cy.argosScreenshot` command
+### 2. Add `cy.argosScreenshot` command
 
 And add this line to your `cypress/support/index.js` file.
 
@@ -33,7 +33,19 @@ And add this line to your `cypress/support/index.js` file.
 import "@argos-ci/cypress/support";
 ```
 
-## 2. Use in your tests
+If you use TypeScript, update your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "types": ["cypress", "@argos-ci/cypress"]
+  }
+}
+```
+
+You can find [library definition here](https://github.com/argos-ci/argos-javascript/blob/main/packages/cypress/src/support.ts).
+
+### 3. Use in your tests
 
 `cy.argosScreenshot` command stabilizes the UI before capturing the screenshot.
 
@@ -50,26 +62,6 @@ describe("Homepage", () => {
 ```
 
 By default screenshots are stored in `cypress/screenshots` folder, relative to current directory.
-
-## 3. Upload screenshots to Argos
-
-Look at Argos doc to know [how to configure your CI](https://argos-ci.com/docs/upload-screenshots) to send screenshots to Argos.
-
-As Cypress store the screenshots into the "cypress/screenshots" folder by default, have to specify it when you use Argos CLI command: `npx @argos-ci/cli upload cypress/screenshots`.
-
-## TypeScript support
-
-Typings should be added as follows in `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["cypress", "@argos-ci/cypress"]
-  }
-}
-```
-
-You can find [library definition here](https://github.com/argos-ci/argos-javascript/blob/main/packages/cypress/src/support.ts).
 
 ## API Overview
 
