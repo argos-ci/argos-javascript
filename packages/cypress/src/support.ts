@@ -145,17 +145,22 @@ Cypress.Commands.add(
       });
     }
 
-    if (!viewports) {
-      stabilizeAndScreenshot(name);
-      return;
-    }
+    if (viewports) {
+      for (const viewport of viewports) {
+        const viewportSize = resolveViewport(viewport);
+        cy.viewport(viewportSize.width, viewportSize.height);
+        stabilizeAndScreenshot(
+          getScreenshotName(name, { viewportWidth: viewportSize.width }),
+        );
+      }
 
-    for (const viewport of viewports) {
-      const viewportSize = resolveViewport(viewport);
-      cy.viewport(viewportSize.width, viewportSize.height);
-      stabilizeAndScreenshot(
-        getScreenshotName(name, { viewportWidth: viewportSize.width }),
+      // Restore the original viewport
+      cy.viewport(
+        Cypress.config("viewportWidth"),
+        Cypress.config("viewportHeight"),
       );
+    } else {
+      stabilizeAndScreenshot(name);
     }
 
     // Teardown Argos
@@ -164,12 +169,6 @@ Cypress.Commands.add(
         fullPage,
         argosCSS,
       }),
-    );
-
-    // Restore the original viewport
-    cy.viewport(
-      Cypress.config("viewportWidth"),
-      Cypress.config("viewportHeight"),
     );
   },
 );

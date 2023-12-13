@@ -208,20 +208,22 @@ export async function argosScreenshot(
   }
 
   // If no viewports are specified, take a single screenshot
-  if (!viewports) {
-    await stabilizeAndScreenshot(name);
-    return;
-  }
+  if (viewports) {
+    // Take screenshots for each viewport
+    for (const viewport of viewports) {
+      const viewportSize = resolveViewport(viewport);
+      await page.setViewportSize(viewportSize);
+      await stabilizeAndScreenshot(
+        getScreenshotName(name, {
+          viewportWidth: viewportSize.width,
+        }),
+      );
+    }
 
-  // Take screenshots for each viewport
-  for (const viewport of viewports) {
-    const viewportSize = resolveViewport(viewport);
-    await page.setViewportSize(viewportSize);
-    await stabilizeAndScreenshot(
-      getScreenshotName(name, {
-        viewportWidth: viewportSize.width,
-      }),
-    );
+    // Restore the original viewport size
+    await page.setViewportSize(originalViewportSize);
+  } else {
+    await stabilizeAndScreenshot(name);
   }
 
   // Teardown Argos
@@ -233,7 +235,4 @@ export async function argosScreenshot(
       }),
     { fullPage, argosCSS },
   );
-
-  // Restore the original viewport size
-  await page.setViewportSize(originalViewportSize);
 }
