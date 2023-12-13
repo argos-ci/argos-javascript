@@ -150,6 +150,14 @@ export function restoreElementPositions(document: Document) {
   });
 }
 
+export function addGlobalClass(document: Document, className: string) {
+  document.documentElement.classList.add(className);
+}
+
+export function removeGlobalClass(document: Document, className: string) {
+  document.documentElement.classList.remove(className);
+}
+
 export type SetupOptions = { fullPage?: boolean; argosCSS?: string };
 
 /**
@@ -159,6 +167,7 @@ export function setup(
   document: Document,
   { fullPage, argosCSS }: SetupOptions = {},
 ) {
+  addGlobalClass(document, "__argos__");
   injectGlobalStyles(document, GLOBAL_CSS, "argos-reset-style");
   if (argosCSS) {
     injectGlobalStyles(document, argosCSS, "argos-user-style");
@@ -178,6 +187,7 @@ export function teardown(
   document: Document,
   { fullPage, argosCSS }: SetupOptions = {},
 ) {
+  removeGlobalClass(document, "__argos__");
   removeGlobalStyles(document, "argos-reset-style");
   if (argosCSS) {
     removeGlobalStyles(document, "argos-user-style");
