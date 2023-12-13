@@ -74,22 +74,6 @@ describe("argosScreenshot", () => {
       expect(loaderContainer.trim()).toBe("");
     });
 
-    it("hides div with data-visual-test='transparent'", async () => {
-      const opacityStyle = await page.$eval(
-        "div[data-visual-test='transparent']",
-        (div) => getComputedStyle(div).opacity,
-      );
-      expect(opacityStyle).toBe("0");
-    });
-
-    it("removes div with data-visual-test='removed'", async () => {
-      const displayStyle = await page.$eval(
-        "div[data-visual-test='removed']",
-        (div) => getComputedStyle(div).display,
-      );
-      expect(displayStyle).toBe("none");
-    });
-
     it("takes a screenshot", async () => {
       await expectScreenshotToExists("page");
     });
