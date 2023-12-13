@@ -46,6 +46,10 @@ export type ArgosScreenshotOptions = {
  * Inject Argos script into the page.
  */
 async function injectArgos(page: Page) {
+  const injected = await page.evaluate(
+    () => typeof (window as any).__ARGOS__ !== "undefined",
+  );
+  if (injected) return;
   const fileName = require.resolve("@argos-ci/browser/global.js");
   const content = await readFile(fileName, "utf-8");
   await page.addScriptTag({ content });

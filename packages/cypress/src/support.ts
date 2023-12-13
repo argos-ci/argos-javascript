@@ -30,15 +30,16 @@ declare global {
 }
 
 function injectArgos() {
-  const fileName =
-    typeof require.resolve === "function"
-      ? require.resolve("@argos-ci/browser/global.js")
-      : "node_modules/@argos-ci/browser/dist/global.js";
-  cy.readFile<string>(fileName).then((source) =>
-    cy.window({ log: false }).then((window) => {
+  cy.window({ log: false }).then((window) => {
+    if (typeof (window as any).__ARGOS__ !== "undefined") return;
+    const fileName =
+      typeof require.resolve === "function"
+        ? require.resolve("@argos-ci/browser/global.js")
+        : "node_modules/@argos-ci/browser/dist/global.js";
+    return cy.readFile<string>(fileName).then((source) => {
       window.eval(source);
-    }),
-  );
+    });
+  });
 }
 
 function readArgosCypressVersion() {
