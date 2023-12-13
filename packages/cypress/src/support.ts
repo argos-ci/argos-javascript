@@ -70,9 +70,7 @@ Cypress.Commands.add(
     const fullPage = !options.capture || options.capture === "fullPage";
 
     cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
-        fullPage,
-      }),
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage }),
     );
 
     function stabilizeAndScreenshot(name: string) {
@@ -151,6 +149,11 @@ Cypress.Commands.add(
         getScreenshotName(name, { viewportWidth: viewportSize.width }),
       );
     }
+
+    // Teardown Argos
+    cy.window({ log: false }).then((window) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({ fullPage }),
+    );
 
     // Restore the original viewport
     cy.viewport(

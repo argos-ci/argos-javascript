@@ -87,9 +87,7 @@ export async function argosScreenshot(
 
   await page.evaluate(
     ({ fullPage }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
-        fullPage,
-      }),
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage }),
     { fullPage },
   );
 
@@ -190,6 +188,13 @@ export async function argosScreenshot(
       getScreenshotName(name, { viewportWidth: viewportSize.width }),
     );
   }
+
+  // Teardown Argos
+  await page.evaluate(
+    ({ fullPage }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({ fullPage }),
+    { fullPage },
+  );
 
   // Restore the original viewport
   await page.setViewport(originalViewport);

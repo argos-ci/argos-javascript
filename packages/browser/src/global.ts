@@ -1,14 +1,17 @@
 import {
   waitForStability,
-  prepareForScreenshot,
+  setup,
+  teardown,
   PrepareForScreenshotOptions,
 } from "./stabilization";
 import { getColorScheme, getMediaType } from "./media";
 
 const ArgosGlobal = {
   waitForStability: () => waitForStability(document),
-  prepareForScreenshot: (options: PrepareForScreenshotOptions = {}) =>
-    prepareForScreenshot(document, options),
+  setup: (options: PrepareForScreenshotOptions = {}) =>
+    setup(document, options),
+  teardown: (options: PrepareForScreenshotOptions = {}) =>
+    teardown(document, options),
   getColorScheme: () => getColorScheme(window),
   getMediaType: () => getMediaType(window),
 };
