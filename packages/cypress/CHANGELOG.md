@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.1.2...@argos-ci/cypress@1.2.0) (2023-12-13)
+
+
+### Features
+
+* add argosCSS option to inject custom CSS ([9ab7efd](https://github.com/argos-ci/argos-javascript/commit/9ab7efd9b7573657a92d73010e2d5bbddfced353))
+* reset argos changes after screenshot ([23c4a3d](https://github.com/argos-ci/argos-javascript/commit/23c4a3d60c8d3b1d8357847d5589d3765be241a9))
+
+
+### Performance Improvements
+
+* avoid multiple script injection ([12e0748](https://github.com/argos-ci/argos-javascript/commit/12e074816fe14e24e0ecdfd673b2908e060713ca))
+
+
+
+
+
 ## [1.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.1.1...@argos-ci/cypress@1.1.2) (2023-11-27)
 
 **Note:** Version bump only for package @argos-ci/cypress
