@@ -35,27 +35,83 @@ export const GLOBAL_CSS: string = `
 `;
 
 /**
+ * Set the position of an element and backup the previous one.
+ */
+function setAndBackupSpellcheck(element: HTMLElement, spellcheck: string) {
+  element.setAttribute(
+    "data-argos-bck-position",
+    element.getAttribute("spellcheck") ?? "unset",
+  );
+  element.setAttribute("spellcheck", spellcheck);
+}
+
+const SPELL_CHECK_QUERY =
+  "[contenteditable]:not([contenteditable=false]):not([spellcheck=false]), input:not([spellcheck=false]), textarea:not([spellcheck=false])";
+
+/**
  * Disable spellcheck to avoid displaying markers.
  */
 export function disableSpellCheck(document: Document) {
-  const query =
-    "[contenteditable]:not([contenteditable=false]):not([spellcheck=false]), input:not([spellcheck=false]), textarea:not([spellcheck=false])";
-  const inputs = document.querySelectorAll(query);
-  inputs.forEach((input) => input.setAttribute("spellcheck", "false"));
+  const inputs = document.querySelectorAll(SPELL_CHECK_QUERY);
+  inputs.forEach((element) => {
+    if (!checkIsHTMLElement(element)) return;
+    setAndBackupSpellcheck(element, "false");
+  });
+}
+
+/**
+ * Restore spellcheck attribute.
+ */
+export function restoreSpellCheck(document: Document) {
+  const inputs = document.querySelectorAll(SPELL_CHECK_QUERY);
+  inputs.forEach((input) => {
+    const spellcheck = input.getAttribute("data-argos-bck-spellcheck");
+    if (spellcheck === "unset") {
+      input.removeAttribute("spellcheck");
+    } else if (spellcheck) {
+      input.setAttribute("spellcheck", spellcheck);
+    }
+  });
 }
 
 /**
  * Inject global styles in the DOM.
  */
-export function injectGlobalStyles(document: Document) {
+export function injectGlobalStyles(
+  document: Document,
+  css: string,
+  id: string,
+) {
   const style = document.createElement("style");
-  style.textContent = GLOBAL_CSS;
+  style.textContent = css;
+  style.id = id;
   document.head.appendChild(style);
+}
+
+/**
+ * Remove global styles from the DOM.
+ */
+export function removeGlobalStyles(document: Document, id: string) {
+  const style = document.getElementById(id);
+  if (style) {
+    style.remove();
+  }
 }
 
 const checkIsHTMLElement = (element: Element): element is HTMLElement => {
   return "style" in element;
 };
+
+/**
+ * Set the position of an element and backup the previous one.
+ */
+function setAndBackupPosition(element: HTMLElement, position: string) {
+  element.setAttribute(
+    "data-argos-bck-position",
+    element.style.position ?? "unset",
+  );
+  element.style.position = position;
+}
 
 /**
  * Stabilize sticky and fixed elements.
@@ -69,26 +125,66 @@ export function stabilizeElementPositions(document: Document) {
     const style = window.getComputedStyle(element);
     const position = style.position;
     if (position === "fixed") {
-      element.style.position = "absolute";
+      setAndBackupPosition(element, "absolute");
     } else if (position === "sticky") {
-      element.style.position = "relative";
+      setAndBackupPosition(element, "relative");
     }
   });
 }
 
-export type PrepareForScreenshotOptions = { fullPage?: boolean };
+/**
+ * Restore the position of elements.
+ */
+export function restoreElementPositions(document: Document) {
+  const window = document.defaultView;
+  if (!window) return;
+  const elements = Array.from(document.querySelectorAll("*"));
+  elements.forEach((element) => {
+    if (!checkIsHTMLElement(element)) return;
+    const position = element.getAttribute("data-argos-bck-position");
+    if (position === "unset") {
+      element.style.removeProperty("position");
+    } else if (position) {
+      element.style.position = position;
+    }
+  });
+}
+
+export type SetupOptions = { fullPage?: boolean; argosCSS?: string };
 
 /**
- * Prepare the document for a screenshot.
+ * Setup the document for screenshots.
  */
-export function prepareForScreenshot(
+export function setup(
   document: Document,
-  { fullPage }: PrepareForScreenshotOptions = {},
+  { fullPage, argosCSS }: SetupOptions = {},
 ) {
-  injectGlobalStyles(document);
+  injectGlobalStyles(document, GLOBAL_CSS, "argos-reset-style");
+  if (argosCSS) {
+    injectGlobalStyles(document, argosCSS, "argos-user-style");
+  }
   disableSpellCheck(document);
   if (fullPage) {
     stabilizeElementPositions(document);
+  }
+}
+
+export type TeardownOptions = { fullPage?: boolean; argosCSS?: string };
+
+/**
+ * Restore the document after screenshots.
+ */
+export function teardown(
+  document: Document,
+  { fullPage, argosCSS }: SetupOptions = {},
+) {
+  removeGlobalStyles(document, "argos-reset-style");
+  if (argosCSS) {
+    removeGlobalStyles(document, "argos-user-style");
+  }
+  restoreSpellCheck(document);
+  if (fullPage) {
+    restoreElementPositions(document);
   }
 }
 

@@ -22,7 +22,14 @@ declare global {
       argosScreenshot: (
         name: string,
         options?: Partial<Loggable & Timeoutable & ScreenshotOptions> & {
+          /**
+           * Viewports to take screenshots of.
+           */
           viewports?: ViewportOption[];
+          /**
+           * Custom CSS evaluated during the screenshot process.
+           */
+          argosCSS?: string;
         },
       ) => Chainable<null>;
     }
@@ -30,15 +37,16 @@ declare global {
 }
 
 function injectArgos() {
-  const fileName =
-    typeof require.resolve === "function"
-      ? require.resolve("@argos-ci/browser/global.js")
-      : "node_modules/@argos-ci/browser/dist/global.js";
-  cy.readFile<string>(fileName).then((source) =>
-    cy.window({ log: false }).then((window) => {
+  cy.window({ log: false }).then((window) => {
+    if (typeof (window as any).__ARGOS__ !== "undefined") return;
+    const fileName =
+      typeof require.resolve === "function"
+        ? require.resolve("@argos-ci/browser/global.js")
+        : "node_modules/@argos-ci/browser/dist/global.js";
+    return cy.readFile<string>(fileName).then((source) => {
       window.eval(source);
-    }),
-  );
+    });
+  });
 }
 
 function readArgosCypressVersion() {
@@ -54,7 +62,7 @@ function readArgosCypressVersion() {
 Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
-  (subject, name, { viewports, ...options } = {}) => {
+  (subject, name, { viewports, argosCSS, ...options } = {}) => {
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -70,9 +78,7 @@ Cypress.Commands.add(
     const fullPage = !options.capture || options.capture === "fullPage";
 
     cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
-        fullPage,
-      }),
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
     );
 
     function stabilizeAndScreenshot(name: string) {
@@ -139,23 +145,30 @@ Cypress.Commands.add(
       });
     }
 
-    if (!viewports) {
-      stabilizeAndScreenshot(name);
-      return;
-    }
+    if (viewports) {
+      for (const viewport of viewports) {
+        const viewportSize = resolveViewport(viewport);
+        cy.viewport(viewportSize.width, viewportSize.height);
+        stabilizeAndScreenshot(
+          getScreenshotName(name, { viewportWidth: viewportSize.width }),
+        );
+      }
 
-    for (const viewport of viewports) {
-      const viewportSize = resolveViewport(viewport);
-      cy.viewport(viewportSize.width, viewportSize.height);
-      stabilizeAndScreenshot(
-        getScreenshotName(name, { viewportWidth: viewportSize.width }),
+      // Restore the original viewport
+      cy.viewport(
+        Cypress.config("viewportWidth"),
+        Cypress.config("viewportHeight"),
       );
+    } else {
+      stabilizeAndScreenshot(name);
     }
 
-    // Restore the original viewport
-    cy.viewport(
-      Cypress.config("viewportWidth"),
-      Cypress.config("viewportHeight"),
+    // Teardown Argos
+    cy.window({ log: false }).then((window) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+        fullPage,
+        argosCSS,
+      }),
     );
   },
 );

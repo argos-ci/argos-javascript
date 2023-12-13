@@ -17,6 +17,10 @@ const require = createRequire(import.meta.url);
  * Inject Argos script into the page.
  */
 async function injectArgos(page: Page) {
+  const injected = await page.evaluate(
+    () => typeof (window as any).__ARGOS__ !== "undefined",
+  );
+  if (injected) return;
   const fileName = require.resolve("@argos-ci/browser/global.js");
   const content = await readFile(fileName, "utf-8");
   await page.addScriptTag({ content });
@@ -34,6 +38,10 @@ export type ArgosScreenshotOptions = Omit<
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+  /**
+   * Custom CSS evaluated during the screenshot process.
+   */
+  argosCSS?: string;
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -63,7 +71,7 @@ async function getBrowserInfo(page: Page) {
 export async function argosScreenshot(
   page: Page,
   name: string,
-  { element, viewports, ...options }: ArgosScreenshotOptions = {},
+  { element, viewports, argosCSS, ...options }: ArgosScreenshotOptions = {},
 ) {
   if (!page) {
     throw new Error("A Puppeteer `page` object is required.");
@@ -86,11 +94,9 @@ export async function argosScreenshot(
     options.fullPage !== undefined ? options.fullPage : element === undefined;
 
   await page.evaluate(
-    ({ fullPage }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).prepareForScreenshot({
-        fullPage,
-      }),
-    { fullPage },
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+    { fullPage, argosCSS },
   );
 
   async function collectMetadata(): Promise<ScreenshotMetadata> {
@@ -177,20 +183,28 @@ export async function argosScreenshot(
   }
 
   // If no viewports are specified, take a single screenshot
-  if (!viewports) {
+  if (viewports) {
+    // Take screenshots for each viewport
+    for (const viewport of viewports) {
+      const viewportSize = resolveViewport(viewport);
+      await page.setViewport(viewportSize);
+      await stabilizeAndScreenshot(
+        getScreenshotName(name, { viewportWidth: viewportSize.width }),
+      );
+    }
+    // Restore the original viewport
+    await page.setViewport(originalViewport);
+  } else {
     await stabilizeAndScreenshot(name);
-    return;
   }
 
-  // Take screenshots for each viewport
-  for (const viewport of viewports) {
-    const viewportSize = resolveViewport(viewport);
-    await page.setViewport(viewportSize);
-    await stabilizeAndScreenshot(
-      getScreenshotName(name, { viewportWidth: viewportSize.width }),
-    );
-  }
-
-  // Restore the original viewport
-  await page.setViewport(originalViewport);
+  // Teardown Argos
+  await page.evaluate(
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+        fullPage,
+        argosCSS,
+      }),
+    { fullPage, argosCSS },
+  );
 }
