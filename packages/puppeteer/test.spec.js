@@ -131,6 +131,12 @@ describe("argosScreenshot", () => {
     });
   });
 
+  it("supports argosCSS option", async () => {
+    await argosScreenshot(page, "argosCSS-option", {
+      argosCSS: "body { background: blue; }",
+    });
+  });
+
   describe("with cjs version", () => {
     it("works", async () => {
       await argosScreenshotCjs(page, "cjs");

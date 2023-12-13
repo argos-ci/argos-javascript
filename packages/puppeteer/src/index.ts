@@ -38,6 +38,10 @@ export type ArgosScreenshotOptions = Omit<
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+  /**
+   * Custom CSS evaluated during the screenshot process.
+   */
+  argosCSS?: string;
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -67,7 +71,7 @@ async function getBrowserInfo(page: Page) {
 export async function argosScreenshot(
   page: Page,
   name: string,
-  { element, viewports, ...options }: ArgosScreenshotOptions = {},
+  { element, viewports, argosCSS, ...options }: ArgosScreenshotOptions = {},
 ) {
   if (!page) {
     throw new Error("A Puppeteer `page` object is required.");
@@ -90,9 +94,9 @@ export async function argosScreenshot(
     options.fullPage !== undefined ? options.fullPage : element === undefined;
 
   await page.evaluate(
-    ({ fullPage }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage }),
-    { fullPage },
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+    { fullPage, argosCSS },
   );
 
   async function collectMetadata(): Promise<ScreenshotMetadata> {
@@ -195,9 +199,12 @@ export async function argosScreenshot(
 
   // Teardown Argos
   await page.evaluate(
-    ({ fullPage }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).teardown({ fullPage }),
-    { fullPage },
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+        fullPage,
+        argosCSS,
+      }),
+    { fullPage, argosCSS },
   );
 
   // Restore the original viewport

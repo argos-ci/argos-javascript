@@ -147,6 +147,14 @@ test.describe("#argosScreenshot", () => {
     });
   });
 
+  test.describe("with argosCSS", () => {
+    test("works", async () => {
+      await argosScreenshot(page, "argosCSS-option", {
+        argosCSS: "body { background: blue; }",
+      });
+    });
+  });
+
   test.describe("with cjs version", () => {
     test("works", async () => {
       await argosScreenshotCjs(page, "full-page-cjs");

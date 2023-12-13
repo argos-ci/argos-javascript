@@ -77,18 +77,22 @@ export function restoreSpellCheck(document: Document) {
 /**
  * Inject global styles in the DOM.
  */
-export function injectGlobalStyles(document: Document) {
+export function injectGlobalStyles(
+  document: Document,
+  css: string,
+  id: string,
+) {
   const style = document.createElement("style");
-  style.textContent = GLOBAL_CSS;
-  style.id = "argos-global-styles";
+  style.textContent = css;
+  style.id = id;
   document.head.appendChild(style);
 }
 
 /**
  * Remove global styles from the DOM.
  */
-export function removeGlobalStyles(document: Document) {
-  const style = document.getElementById("argos-global-styles");
+export function removeGlobalStyles(document: Document, id: string) {
+  const style = document.getElementById(id);
   if (style) {
     style.remove();
   }
@@ -146,30 +150,38 @@ export function restoreElementPositions(document: Document) {
   });
 }
 
-export type PrepareForScreenshotOptions = { fullPage?: boolean };
+export type SetupOptions = { fullPage?: boolean; argosCSS?: string };
 
 /**
  * Setup the document for screenshots.
  */
 export function setup(
   document: Document,
-  { fullPage }: PrepareForScreenshotOptions = {},
+  { fullPage, argosCSS }: SetupOptions = {},
 ) {
-  injectGlobalStyles(document);
+  injectGlobalStyles(document, GLOBAL_CSS, "argos-reset-style");
+  if (argosCSS) {
+    injectGlobalStyles(document, argosCSS, "argos-user-style");
+  }
   disableSpellCheck(document);
   if (fullPage) {
     stabilizeElementPositions(document);
   }
 }
 
+export type TeardownOptions = { fullPage?: boolean; argosCSS?: string };
+
 /**
  * Restore the document after screenshots.
  */
 export function teardown(
   document: Document,
-  { fullPage }: PrepareForScreenshotOptions = {},
+  { fullPage, argosCSS }: SetupOptions = {},
 ) {
-  removeGlobalStyles(document);
+  removeGlobalStyles(document, "argos-reset-style");
+  if (argosCSS) {
+    removeGlobalStyles(document, "argos-user-style");
+  }
   restoreSpellCheck(document);
   if (fullPage) {
     restoreElementPositions(document);

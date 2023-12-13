@@ -25,4 +25,11 @@ describe("argosScreenshot", () => {
       cy.readFile(`${screenshotsFolder}/specific-target.png`);
     });
   });
+
+  it("supports argosCSS option", () => {
+    cy.visit("cypress/pages/index.html");
+    cy.argosScreenshot("argosCSS-option", {
+      argosCSS: "body { background: blue; }",
+    });
+  });
 });

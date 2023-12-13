@@ -38,6 +38,10 @@ export type ArgosScreenshotOptions = {
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+  /**
+   * Custom CSS evaluated during the screenshot process.
+   */
+  argosCSS?: string;
 } & LocatorOptions &
   ScreenshotOptions<LocatorScreenshotOptions> &
   ScreenshotOptions<PageScreenshotOptions>;
@@ -75,7 +79,14 @@ function getViewportSize(page: Page) {
 export async function argosScreenshot(
   page: Page,
   name: string,
-  { element, has, hasText, viewports, ...options }: ArgosScreenshotOptions = {},
+  {
+    element,
+    has,
+    hasText,
+    viewports,
+    argosCSS,
+    ...options
+  }: ArgosScreenshotOptions = {},
 ) {
   if (!page) {
     throw new Error("A Playwright `page` object is required.");
@@ -108,9 +119,9 @@ export async function argosScreenshot(
     options.fullPage !== undefined ? options.fullPage : handle === page;
 
   await page.evaluate(
-    ({ fullPage }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage }),
-    { fullPage },
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+    { fullPage, argosCSS },
   );
 
   async function collectMetadata(
@@ -215,9 +226,12 @@ export async function argosScreenshot(
 
   // Teardown Argos
   await page.evaluate(
-    ({ fullPage }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).teardown({ fullPage }),
-    { fullPage },
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+        fullPage,
+        argosCSS,
+      }),
+    { fullPage, argosCSS },
   );
 
   // Restore the original viewport size

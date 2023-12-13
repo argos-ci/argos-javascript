@@ -22,7 +22,14 @@ declare global {
       argosScreenshot: (
         name: string,
         options?: Partial<Loggable & Timeoutable & ScreenshotOptions> & {
+          /**
+           * Viewports to take screenshots of.
+           */
           viewports?: ViewportOption[];
+          /**
+           * Custom CSS evaluated during the screenshot process.
+           */
+          argosCSS?: string;
         },
       ) => Chainable<null>;
     }
@@ -55,7 +62,7 @@ function readArgosCypressVersion() {
 Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
-  (subject, name, { viewports, ...options } = {}) => {
+  (subject, name, { viewports, argosCSS, ...options } = {}) => {
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -71,7 +78,7 @@ Cypress.Commands.add(
     const fullPage = !options.capture || options.capture === "fullPage";
 
     cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage }),
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
     );
 
     function stabilizeAndScreenshot(name: string) {
@@ -153,7 +160,10 @@ Cypress.Commands.add(
 
     // Teardown Argos
     cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).teardown({ fullPage }),
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+        fullPage,
+        argosCSS,
+      }),
     );
 
     // Restore the original viewport
