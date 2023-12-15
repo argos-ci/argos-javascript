@@ -1,5 +1,6 @@
 import { swc } from "rollup-plugin-swc3";
 import ts from "rollup-plugin-ts";
+import json from "@rollup/plugin-json";
 
 export const swcPlugin = swc({
   tsconfig: false,
@@ -31,7 +32,7 @@ export const buildEs = ({
     file: output,
     format: "es",
   },
-  plugins: [swcPlugin],
+  plugins: [json(), swcPlugin],
 });
 
 export const buildTypes = ({
@@ -41,9 +42,9 @@ export const buildTypes = ({
 } = {}) => ({
   input,
   external,
-  plugins: [tsPlugin],
   output: {
     file: output,
     format: "es",
   },
+  plugins: [json(), tsPlugin],
 });

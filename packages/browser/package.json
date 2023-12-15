@@ -33,6 +33,10 @@
       "types": "./dist/global.d.ts",
       "default": "./dist/global.js"
     },
+    "./cypress.cjs": {
+      "types": "./dist/cypress.d.ts",
+      "default": "./dist/cypress.cjs"
+    },
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",

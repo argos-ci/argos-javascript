@@ -1,11 +1,14 @@
 import "cypress-wait-until";
 import type { ArgosGlobal } from "@argos-ci/browser/global.js";
-import { resolveViewport, ViewportOption } from "@argos-ci/browser";
+import { resolveViewport, type ViewportOption } from "@argos-ci/browser";
+import { getGlobalFilePath } from "@argos-ci/browser/cypress.cjs";
 import {
   getMetadataPath,
   getScreenshotName,
   ScreenshotMetadata,
 } from "@argos-ci/util/browser";
+// @ts-ignore
+import { version } from "../package.json";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -39,23 +42,10 @@ declare global {
 function injectArgos() {
   cy.window({ log: false }).then((window) => {
     if (typeof (window as any).__ARGOS__ !== "undefined") return;
-    const fileName =
-      typeof require.resolve === "function"
-        ? require.resolve("@argos-ci/browser/global.js")
-        : "node_modules/@argos-ci/browser/dist/global.js";
+    const fileName = getGlobalFilePath();
     return cy.readFile<string>(fileName).then((source) => {
       window.eval(source);
     });
-  });
-}
-
-function readArgosCypressVersion() {
-  const fileName =
-    typeof require.resolve === "function"
-      ? require.resolve("@argos-ci/cypress/package.json")
-      : "node_modules/@argos-ci/cypress/package.json";
-  return cy.readFile(fileName).then((source) => {
-    return source.version;
   });
 }
 
@@ -110,38 +100,33 @@ Cypress.Commands.add(
           (window as any).__ARGOS__ as ArgosGlobal
         ).getColorScheme();
 
-        readArgosCypressVersion().then((argosCypressVersion) => {
-          const metadata: ScreenshotMetadata = {
-            url: window.location.href,
-            viewport: {
-              width: window.innerWidth,
-              height: window.innerHeight,
-            },
-            colorScheme,
-            mediaType,
-            test: {
-              title: Cypress.currentTest.title,
-              titlePath: Cypress.currentTest.titlePath,
-            },
-            browser: {
-              name: Cypress.browser.name,
-              version: Cypress.browser.version,
-            },
-            automationLibrary: {
-              name: "cypress",
-              version: Cypress.version,
-            },
-            sdk: {
-              name: "@argos-ci/cypress",
-              version: argosCypressVersion,
-            },
-          };
+        const metadata: ScreenshotMetadata = {
+          url: window.location.href,
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight,
+          },
+          colorScheme,
+          mediaType,
+          test: {
+            title: Cypress.currentTest.title,
+            titlePath: Cypress.currentTest.titlePath,
+          },
+          browser: {
+            name: Cypress.browser.name,
+            version: Cypress.browser.version,
+          },
+          automationLibrary: {
+            name: "cypress",
+            version: Cypress.version,
+          },
+          sdk: {
+            name: "@argos-ci/cypress",
+            version,
+          },
+        };
 
-          cy.writeFile(
-            getMetadataPath(ref.props.path),
-            JSON.stringify(metadata),
-          );
-        });
+        cy.writeFile(getMetadataPath(ref.props.path), JSON.stringify(metadata));
       });
     }
 
