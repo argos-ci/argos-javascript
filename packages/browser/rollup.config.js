@@ -12,6 +12,12 @@ const bundleGlobal = (config) => ({
   ...config,
 });
 
+const bundleCypress = (config) => ({
+  input: "src/cypress.ts",
+  external: ignoreRelative,
+  ...config,
+});
+
 export default [
   buildEs(),
   buildTypes(),
@@ -25,6 +31,20 @@ export default [
   bundleGlobal({
     output: {
       file: `dist/global.d.ts`,
+      format: "es",
+    },
+    plugins: [tsPlugin],
+  }),
+  bundleCypress({
+    output: {
+      file: `dist/cypress.cjs`,
+      format: "cjs",
+    },
+    plugins: [swcPlugin],
+  }),
+  bundleCypress({
+    output: {
+      file: `dist/cypress.d.ts`,
       format: "es",
     },
     plugins: [tsPlugin],
