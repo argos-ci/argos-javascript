@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.2.0...@argos-ci/cypress@1.2.1) (2023-12-15)
+
+
+### Bug Fixes
+
+* **cypress:** improve compatibility with bundlers ([366b39c](https://github.com/argos-ci/argos-javascript/commit/366b39c374f9297cab53fb3919f63808cd13fcce))
+
+
+
+
+
 # [1.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.1.2...@argos-ci/cypress@1.2.0) (2023-12-13)
 
 
