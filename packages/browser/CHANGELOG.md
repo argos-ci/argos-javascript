@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@1.2.1...@argos-ci/browser@1.2.2) (2023-12-21)
+
+
+### Bug Fixes
+
+* **stabilization:** wait for aria-busy on svg elements ([96e69da](https://github.com/argos-ci/argos-javascript/commit/96e69da4e0f3f6fedaf451cc67cf08c1d709ebc1))
+
+
+
+
+
 ## [1.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@1.2.0...@argos-ci/browser@1.2.1) (2023-12-15)
 
 
