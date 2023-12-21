@@ -47,6 +47,10 @@
       .__argos__ h1 {
         font-variant: small-caps;
       }
+
+      .blue-fill circle {
+        fill: blue;
+      }
     </style>
   </head>
   <body>
@@ -69,10 +73,18 @@
         </div>
       </div>
 
-      <h3>Loader (300ms)</h3>
+      <h3>aria-busy (HTMLElement) (300ms)</h3>
       <div class="hint">Hint: the following div should be empty.</div>
       <div id="loader-container" class="field">
         <div id="loader" aria-busy="true"></div>
+      </div>
+
+      <h3>aria-busy (SVGElement) (300ms)</h3>
+      <div class="hint">Hint: the following square should be blue.</div>
+      <div>
+        <svg id="svg-loader" height="10" width="10" aria-busy="true">
+          <circle cx="5" cy="5" r="40" fill="red" />
+        </svg>
       </div>
 
       <h3>Red square</h3>
@@ -113,6 +125,12 @@
     <script>
       setTimeout(() => {
         document.querySelector("#loader").remove();
+      }, 300);
+
+      setTimeout(() => {
+        const svg = document.querySelector("#svg-loader");
+        svg.classList.add("blue-fill");
+        svg.removeAttribute("aria-busy");
       }, 300);
 
       setTimeout(() => {
