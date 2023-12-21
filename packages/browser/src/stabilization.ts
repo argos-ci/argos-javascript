@@ -225,17 +225,20 @@ export function waitForImagesToLoad(document: Document) {
  * Wait for all [aria-busy="true"] elements to invisible.
  */
 export function waitForNoBusy(document: Document) {
-  const checkIsVisible = (element: HTMLElement) =>
-    Boolean(
-      element.offsetWidth ||
-        element.offsetHeight ||
-        element.getClientRects().length,
-    );
+  const checkIsVisible = (element: Element) => {
+    // Basic check for HTMLElement
+    if (
+      element instanceof HTMLElement &&
+      (element.offsetHeight !== 0 || element.offsetWidth !== 0)
+    ) {
+      return true;
+    }
+    // Check for HTMLElement & SVGElement
+    return element.getClientRects().length > 0;
+  };
 
   const elements = Array.from(document.querySelectorAll('[aria-busy="true"]'));
-  return elements.every((element) => {
-    return !(element instanceof HTMLElement) || !checkIsVisible(element);
-  });
+  return elements.every((element) => !checkIsVisible(element));
 }
 
 /**
