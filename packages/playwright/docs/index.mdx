@@ -7,7 +7,7 @@ slug: /playwright
 
 Improve test debugging and boost your visual testing capabilities by combining Argos with your [Playwright](https://playwright.dev/) tests.
 
-## Introduction
+## Features
 
 ### Test debugging
 
@@ -29,62 +29,7 @@ Argos presents a significant advantage over traditional Playwright visual tests 
 
 ## Get started
 
-### 1. Install package
-
-```
-npm install --save-dev @argos-ci/playwright
-```
-
-### 2. Configure Argos
-
-The Argos reporter seamlessly uploads screenshots and traces to Argos in real-time.
-
-Install Argos in your Playwright config:
-
-```typescript
-import { defineConfig } from "@playwright/test";
-
-export default defineConfig({
-  // ... other configuration
-
-  // Setup recording option to enable test debugging features
-  use: {
-    // Setting to capture screenshot only when a test fails
-    screenshot: "only-on-failure",
-    // Setting to retain traces only when a test fails
-    trace: "retain-on-failure",
-  },
-
-  // Add Argos reporter only when it runs on CI
-  reporter: process.env.CI
-    ? [["list"], ["@argos-ci/playwright/reporter"]]
-    : "list",
-});
-```
-
-Playwright's [recording options](https://playwright.dev/docs/test-use-options#recording-options) facilitate the automated capture of screenshots upon test failures. Notably, these captured screenshots and traces are then automatically uploaded to Argos.
-
-### 3. Take screenshots
-
-`argosScreenshot` command stabilizes the UI before capturing the screenshot.
-
-```js
-import { test } from "@playwright/test";
-import { argosScreenshot } from "@argos-ci/playwright";
-
-test.describe("Homepage", () => {
-  test("take screenshot", async ({ page }) => {
-    await page.goto(TEST_URL);
-    await argosScreenshot(page, "homepage");
-  });
-});
-```
-
-### 4. Setup your CI
-
-Execute your Playwright tests in the usual manner. Screenshots will be auto-uploaded.
-
-> Note: For CI platforms other than GitHub Actions, ensure `ARGOS_TOKEN` is set as an environment variable.
+Please refer to our [Quickstart guide](/quickstart/playwright) to get started with Argos and Playwright.
 
 ## API Overview
 
@@ -114,6 +59,7 @@ export default defineConfig({
     [
       "@argos-ci/playwright/reporter",
       {
+        uploadToArgos: !!process.env.CI,
         buildName: "custom-build-name",
       } as ArgosReporterOptions,
     ],
@@ -150,6 +96,18 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   // ... other configuration
 
+  // Add Argos reporter.
+  reporter: [
+    ["list"],
+    [
+      "@argos-ci/playwright/reporter",
+      {
+        // Upload artefacts to Argos on CI.
+        uploadToArgos: !!process.env.CI,
+      },
+    ],
+  ],
+
   // Setup recording option to enable test debugging features
   use: {
     // Setting to capture screenshot only when a test fails
@@ -157,11 +115,6 @@ export default defineConfig({
     // Setting to retain traces only when a test fails
     trace: "retain-on-failure",
   },
-
-  // Add Argos reporter only when it runs on CI
-  reporter: process.env.CI
-    ? [["list"], ["@argos-ci/playwright/reporter"]]
-    : "list",
 });
 ```
 
@@ -172,6 +125,7 @@ export default defineConfig({
 
 ## Additional Resources
 
+- [Quickstart with Argos + Playwright](/quickstart/playwright)
 - [Argos + Playwright example](https://github.com/argos-ci/argos/tree/main/examples/playwright)
 - [@argos-ci/playwright on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/playwright)
 - [@argos-ci/playwright on npm](https://www.npmjs.com/package/@argos-ci/playwright)

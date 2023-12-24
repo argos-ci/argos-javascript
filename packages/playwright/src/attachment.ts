@@ -20,10 +20,10 @@ export function getAttachmentFilename(name: string) {
 
 export type Attachment = TestResult["attachments"][number];
 export type ArgosScreenshotAttachment = Attachment & {
-  body: Buffer;
+  path: string;
 };
 export type ArgosMetadataAttachment = Attachment & {
-  body: Buffer;
+  path: string;
 };
 export type AutomaticScreenshotAttachment = Attachment & {
   name: "screenshot";
@@ -50,7 +50,7 @@ export function checkIsArgosScreenshot(
   return (
     attachment.name.startsWith("argos/") &&
     attachment.contentType === "image/png" &&
-    Boolean(attachment.body)
+    Boolean(attachment.path)
   );
 }
 
@@ -60,7 +60,7 @@ export function checkIsArgosScreenshotMetadata(
   return (
     attachment.name.startsWith("argos/") &&
     attachment.contentType === "application/json" &&
-    Boolean(attachment.body)
+    Boolean(attachment.path)
   );
 }
 
