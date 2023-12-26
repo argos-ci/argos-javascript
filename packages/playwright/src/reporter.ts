@@ -6,6 +6,7 @@ import type {
   TestCase,
   TestResult,
 } from "@playwright/test/reporter";
+import chalk from "chalk";
 import { readConfig, upload, UploadParameters } from "@argos-ci/core";
 import { randomBytes } from "node:crypto";
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
@@ -27,7 +28,12 @@ async function createTempDirectory() {
   return path;
 }
 
-export type ArgosReporterOptions = Omit<UploadParameters, "files" | "root">;
+export type ArgosReporterOptions = Omit<UploadParameters, "files" | "root"> & {
+  /**
+   * If `true`, the report will be uploaded to Argos.
+   */
+  uploadToArgos?: boolean;
+};
 
 const getParallelFromConfig = (
   config: FullConfig,
@@ -50,9 +56,11 @@ class ArgosReporter implements Reporter {
   uploadDir!: string;
   config: ArgosReporterOptions;
   playwrightConfig!: FullConfig;
+  uploadToArgos: boolean;
 
   constructor(config: ArgosReporterOptions) {
     this.config = config;
+    this.uploadToArgos = config.uploadToArgos ?? false;
   }
 
   async writeFile(path: string, body: Buffer | string) {
@@ -89,7 +97,7 @@ class ArgosReporter implements Reporter {
             this.uploadDir,
             getAttachmentFilename(attachment.name),
           );
-          await this.writeFile(path, attachment.body);
+          await copyFile(attachment.path, path);
           return;
         }
 
@@ -111,15 +119,18 @@ class ArgosReporter implements Reporter {
   }
 
   async onEnd(_result: FullResult) {
+    if (!this.uploadToArgos) return;
+
     const parallel = getParallelFromConfig(this.playwrightConfig);
 
     try {
-      await upload({
+      const res = await upload({
         files: ["**/*.png"],
         root: this.uploadDir,
         parallel: parallel ?? undefined,
         ...this.config,
       });
+      console.log(chalk.green(`✅ Argos build created: ${res.build.url}`));
     } catch (error) {
       console.error(error);
       return { status: "failed" as const };

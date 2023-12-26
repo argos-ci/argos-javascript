@@ -44,7 +44,8 @@
   "dependencies": {
     "@argos-ci/browser": "workspace:*",
     "@argos-ci/core": "workspace:*",
-    "@argos-ci/util": "workspace:*"
+    "@argos-ci/util": "workspace:*",
+    "chalk": "^5.3.0"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
@@ -56,6 +57,6 @@
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
     "test": "pnpm exec playwright test",
-    "e2e": "WITH_ARGOS_REPORTER=true pnpm run test"
+    "e2e": "pnpm run test"
   }
 }

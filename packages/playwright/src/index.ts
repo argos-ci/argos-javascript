@@ -171,7 +171,7 @@ export async function argosScreenshot(
 
     const metadata = await collectMetadata(testInfo);
     const screenshotPath = useArgosReporter
-      ? null
+      ? testInfo!.outputPath("argos", `${name}.png`)
       : resolve(screenshotFolder, `${name}.png`);
 
     if (screenshotPath) {
