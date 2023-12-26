@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.5.0...@argos-ci/playwright@1.5.1) (2023-12-26)
+
+
+### Bug Fixes
+
+* **playwright:** upload report by default ([d6d8f94](https://github.com/argos-ci/argos-javascript/commit/d6d8f947c7e4222399a3fb1ead6eb78bda28fdeb))
+
+
+
+
+
 # [1.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.4.2...@argos-ci/playwright@1.5.0) (2023-12-26)
 
 
