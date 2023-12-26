@@ -30,7 +30,8 @@ async function createTempDirectory() {
 
 export type ArgosReporterOptions = Omit<UploadParameters, "files" | "root"> & {
   /**
-   * If `true`, the report will be uploaded to Argos.
+   * Upload the report to Argos.
+   * @default true
    */
   uploadToArgos?: boolean;
 };
@@ -60,7 +61,7 @@ class ArgosReporter implements Reporter {
 
   constructor(config: ArgosReporterOptions) {
     this.config = config;
-    this.uploadToArgos = config.uploadToArgos ?? false;
+    this.uploadToArgos = config.uploadToArgos ?? true;
   }
 
   async writeFile(path: string, body: Buffer | string) {
