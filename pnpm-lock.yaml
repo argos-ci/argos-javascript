@@ -114,6 +114,9 @@ importers:
       '@argos-ci/browser':
         specifier: workspace:*
         version: link:../browser
+      '@argos-ci/core':
+        specifier: workspace:*
+        version: link:../core
       '@argos-ci/util':
         specifier: workspace:*
         version: link:../util

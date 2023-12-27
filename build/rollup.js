@@ -35,6 +35,20 @@ export const buildEs = ({
   plugins: [json(), swcPlugin],
 });
 
+export const buildCjs = ({
+  input = "src/index.ts",
+  output = "dist/index.mjs",
+  external = ignoreRelative,
+} = {}) => ({
+  input,
+  external,
+  output: {
+    file: output,
+    format: "cjs",
+  },
+  plugins: [json(), swcPlugin],
+});
+
 export const buildTypes = ({
   input = "src/index.ts",
   output = "dist/index.d.ts",

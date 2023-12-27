@@ -19,49 +19,7 @@ While Cypress inherently provides screenshot functionality, the Argos Cypress in
 
 ## Get started
 
-### 1. Installation of Packages
-
-```
-npm install --save-dev @argos-ci/cli @argos-ci/cypress
-```
-
-### 2. Add `cy.argosScreenshot` command
-
-And add this line to your `cypress/support/index.js` file.
-
-```js
-import "@argos-ci/cypress/support";
-```
-
-If you use TypeScript, update your `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["cypress", "@argos-ci/cypress"]
-  }
-}
-```
-
-You can find [library definition here](https://github.com/argos-ci/argos-javascript/blob/main/packages/cypress/src/support.ts).
-
-### 3. Use in your tests
-
-`cy.argosScreenshot` command stabilizes the UI before capturing the screenshot.
-
-```js
-describe("Homepage", () => {
-  it("screenshots the page", () => {
-    // Screenshot a full page
-    cy.argosScreenshot("home");
-
-    // Screenshot a component
-    cy.get("main div.breadcrumb").argosScreenshot("home-breadcrumb");
-  });
-});
-```
-
-By default screenshots are stored in `cypress/screenshots` folder, relative to current directory.
+Please refer to our [Quickstart guide](/quickstart/cypress) to get started with Argos and Cypress.
 
 ## API Overview
 
@@ -70,8 +28,8 @@ By default screenshots are stored in `cypress/screenshots` folder, relative to c
 - `name`: Unique name for the screenshot.
 - `options`: Explore [cy.screenshot command options](https://docs.cypress.io/api/commands/screenshot) for details.
 - `options.element`: Use an ElementHandle or string selector to capture a specific element's screenshot.
-- `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](https://argos-ci.com/docs/viewports).
-- `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](https://argos-ci.com/docs/injecting-css)
+- `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](/viewports).
+- `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
 
 ## Helper Attributes for Visual Testing
 
@@ -88,8 +46,39 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 <div id="clock" data-visual-test="transparent">...</div>
 ```
 
+### registerArgosTask(on, config[, options])
+
+- `on`: Cypress plugin events.
+- `config`: Cypress config.
+- `options`: All [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/uploadparameters).
+- `options.uploadToArgos`: Upload results and create a build on Argos, `true` by default.
+
+```ts
+// cypress.config.js
+const { defineConfig } = require("cypress");
+
+module.exports = defineConfig({
+  // setupNodeEvents can be defined in either
+  // the e2e or component configuration
+  e2e: {
+    async setupNodeEvents(on, config) {
+      require("@argos-ci/cypress/task")(on, config, {
+        uploadToArgos: !!process.env.CI,
+      });
+
+      // include any other plugin code...
+
+      // It's IMPORTANT to return the config object
+      // with any changed environment variables
+      return config;
+    },
+  },
+});
+```
+
 ## Additional Resources
 
+- [Quickstart with Argos + Cypress](/quickstart/cypress)
 - [Example of Argos + Cypress](https://github.com/argos-ci/argos/tree/main/examples/cypress)
 - [@argos-ci/cypress on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/cypress)
 - [@argos-ci/cypress on npm](https://www.npmjs.com/package/@argos-ci/cypress)

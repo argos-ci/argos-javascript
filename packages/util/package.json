@@ -15,13 +15,13 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
       "default": "./dist/index.mjs"
     },
     "./browser": {
-      "import": "./dist/browser.mjs",
       "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.mjs",
       "default": "./dist/browser.mjs"
     },
     "./package.json": "./package.json"
