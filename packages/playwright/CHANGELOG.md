@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.5.1...@argos-ci/playwright@1.6.0) (2023-12-27)
+
+
+### Features
+
+* **cypress:** simplify setup ([de75af6](https://github.com/argos-ci/argos-javascript/commit/de75af62ba57a7cb9512435dd4c494fbfa42c927))
+
+
+
+
+
 ## [1.5.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.5.0...@argos-ci/playwright@1.5.1) (2023-12-26)
 
 

@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/cypress",
   "description": "Visual testing solution to avoid visual regression. Cypress commands and utilities for Argos visual testing.",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
@@ -30,7 +30,7 @@
       "import": "./dist/support.mjs",
       "default": "./dist/support.mjs"
     },
-     "./task": {
+    "./task": {
       "types": "./dist/task.d.ts",
       "import": "./dist/task.mjs",
       "require": "./dist/task.cjs",
@@ -43,8 +43,8 @@
   },
   "dependencies": {
     "@argos-ci/browser": "workspace:*",
-    "@argos-ci/util": "workspace:*",
     "@argos-ci/core": "workspace:*",
+    "@argos-ci/util": "workspace:*",
     "cypress-wait-until": "^1.7.2"
   },
   "peerDependencies": {

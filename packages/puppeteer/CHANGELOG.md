@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.2.2...@argos-ci/puppeteer@1.3.0) (2023-12-27)
+
+
+### Features
+
+* **cypress:** simplify setup ([de75af6](https://github.com/argos-ci/argos-javascript/commit/de75af62ba57a7cb9512435dd4c494fbfa42c927))
+
+
+
+
+
 ## [1.2.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.2.1...@argos-ci/puppeteer@1.2.2) (2023-12-21)
 
 **Note:** Version bump only for package @argos-ci/puppeteer
