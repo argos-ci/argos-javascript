@@ -1,6 +1,7 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["cypress", "@argos-ci/cypress"],
+    "types": ["cypress", "@argos-ci/cypress/support"],
     "paths": {}
   }
 }

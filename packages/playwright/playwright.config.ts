@@ -18,6 +18,7 @@ export default defineConfig({
       "@argos-ci/playwright/reporter",
       {
         buildName: `argos-playwright-e2e-node-${process.env.NODE_VERSION}-${process.env.OS}`,
+        uploadToArgos: process.env.UPLOAD_TO_ARGOS === "true",
       } as ArgosReporterOptions,
     ],
   ],

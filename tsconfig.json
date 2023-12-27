@@ -15,7 +15,7 @@
     "target": "ES2021",
     "importHelpers": true,
     "declaration": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

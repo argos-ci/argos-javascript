@@ -44,7 +44,7 @@ const getParallelFromConfig = (
   const argosConfig = readConfig();
   if (!argosConfig.parallelNonce) {
     throw new Error(
-      "Playwright shard mode detected. Please specify ARGOS_PARALLEL_NONCE env variable. Read https://argos-ci.com/docs/parallel-testing",
+      "Playwright shard mode detected. Please specify ARGOS_PARALLEL_NONCE env variable. Read /parallel-testing",
     );
   }
   return {

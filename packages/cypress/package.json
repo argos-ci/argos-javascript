@@ -23,21 +23,28 @@
     "access": "public"
   },
   "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./support": {
-      "import": "./dist/support.mjs",
       "types": "./dist/support.d.ts",
+      "import": "./dist/support.mjs",
       "default": "./dist/support.mjs"
+    },
+     "./task": {
+      "types": "./dist/task.d.ts",
+      "import": "./dist/task.mjs",
+      "require": "./dist/task.cjs",
+      "default": "./dist/task.cjs"
     },
     "./package.json": "./package.json"
   },
-  "types": "./dist/support.d.ts",
   "engines": {
     "node": ">=16.0.0"
   },
   "dependencies": {
     "@argos-ci/browser": "workspace:*",
     "@argos-ci/util": "workspace:*",
+    "@argos-ci/core": "workspace:*",
     "cypress-wait-until": "^1.7.2"
   },
   "peerDependencies": {
@@ -55,7 +62,6 @@
     "prebuild": "rm -rf dist",
     "build": "rollup -c",
     "test": "pnpm exec cypress run",
-    "argos-upload": "pnpm exec argos upload cypress/screenshots --build-name \"argos-cypress-e2e-node-$NODE_VERSION-$OS\"",
-    "e2e": "pnpm run test && pnpm run argos-upload"
+    "e2e": "UPLOAD_TO_ARGOS=true pnpm run test"
   }
 }
