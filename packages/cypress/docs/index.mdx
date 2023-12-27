@@ -56,21 +56,18 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 ```ts
 // cypress.config.js
 const { defineConfig } = require("cypress");
+const { registerArgosTask } = require("@argos-ci/cypress/task");
 
 module.exports = defineConfig({
   // setupNodeEvents can be defined in either
   // the e2e or component configuration
   e2e: {
     async setupNodeEvents(on, config) {
-      require("@argos-ci/cypress/task")(on, config, {
+      registerArgosTask(on, config, {
         uploadToArgos: !!process.env.CI,
       });
 
       // include any other plugin code...
-
-      // It's IMPORTANT to return the config object
-      // with any changed environment variables
-      return config;
     },
   },
 });
