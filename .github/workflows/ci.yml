@@ -370,11 +370,23 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
+
       - name: Download "@argos-ci/cli" dist
         uses: actions/download-artifact@v3
         with:
           name: cli-dist
           path: packages/cli/dist
+
+      - name: Download "@argos-ci/core" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: core-dist
+          path: packages/core/dist
 
       - name: Download "@argos-ci/webdriverio" dist
         uses: actions/download-artifact@v3
