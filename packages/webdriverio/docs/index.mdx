@@ -7,31 +7,9 @@ slug: /webdriverio
 
 Integrating Argos with your [WebdriverIO](https://webdriver.io) tests to enable visual testing on your application.
 
-## Installation
+## Get started
 
-### 1. Install package
-
-```
-npm install --save-dev @argos-ci/cli @argos-ci/webdriverio
-```
-
-### 2. Use in your tests
-
-`argosScreenshot` command takes a screenshot of the page.
-
-```js
-import { browser } from "@wdio/globals";
-import { argosScreenshot } from "@argos-ci/puppeteer";
-
-describe("Integration test with visual testing", () => {
-  it("covers homepage", async () => {
-    await browser.url("http://localhost:3000");
-    await argosScreenshot(browser, "homepage");
-  });
-});
-```
-
-Screenshots are stored in `screenshots/argos` folder, relative to current directory.
+Please refer to our [Quickstart guide](/quickstart/webdriverio) to get started with Argos and WebdriverIO.
 
 ## API Overview
 
@@ -45,5 +23,6 @@ Screenshots are stored in `screenshots/argos` folder, relative to current direct
 
 ## Additional Resources
 
+- [Quickstart with Argos + WebdriverIO](/quickstart/webdriverio)
 - [@argos-ci/webdriverio on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/webdriverio)
 - [@argos-ci/webdriverio on npm](https://www.npmjs.com/package/@argos-ci/webdriverio)
