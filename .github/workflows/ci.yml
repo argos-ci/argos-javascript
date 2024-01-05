@@ -79,6 +79,12 @@ jobs:
           name: puppeteer-dist
           path: packages/puppeteer/dist
 
+      - name: Upload "@argos-ci/webdriverio" dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: webdriverio-dist
+          path: packages/webdriverio/dist
+
   unit:
     needs: ["build"]
 
@@ -339,6 +345,57 @@ jobs:
 
       - name: Run integration tests
         run: pnpm --filter puppeteer run e2e
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
+
+  e2e-webdriverio:
+    needs: ["build"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [current]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: util-dist
+          path: packages/util/dist
+
+      - name: Download "@argos-ci/cli" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: cli-dist
+          path: packages/cli/dist
+
+      - name: Download "@argos-ci/core" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: core-dist
+          path: packages/core/dist
+
+      - name: Download "@argos-ci/webdriverio" dist
+        uses: actions/download-artifact@v3
+        with:
+          name: webdriverio-dist
+          path: packages/webdriverio/dist
+
+      - name: Run integration tests
+        run: pnpm --filter webdriverio run e2e
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}

@@ -1,0 +1,49 @@
+---
+title: WebdriverIO
+slug: /webdriverio
+---
+
+# Argos WebdriverIO SDK
+
+Integrating Argos with your [WebdriverIO](https://webdriver.io) tests to enable visual testing on your application.
+
+## Installation
+
+### 1. Install package
+
+```
+npm install --save-dev @argos-ci/cli @argos-ci/webdriverio
+```
+
+### 2. Use in your tests
+
+`argosScreenshot` command takes a screenshot of the page.
+
+```js
+import { browser } from "@wdio/globals";
+import { argosScreenshot } from "@argos-ci/puppeteer";
+
+describe("Integration test with visual testing", () => {
+  it("covers homepage", async () => {
+    await browser.url("http://localhost:3000");
+    await argosScreenshot(browser, "homepage");
+  });
+});
+```
+
+Screenshots are stored in `screenshots/argos` folder, relative to current directory.
+
+## API Overview
+
+### argosScreenshot(page, name[, options])
+
+- `browser` - A `WebdriverIO.Browser` instance
+- `name` - The screenshot name; must be unique. If ends by `.png` we treat it as a path.
+- `options` - Options
+- `options.mask` - Specify ares that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink box #FF00FF (customized by `maskColor`) that completely covers its bounding box.
+- `options.maskColor` - Specify the color of the overlay box for masked elements, in CSS color format. Default color is pink #FF00FF.
+
+## Additional Resources
+
+- [@argos-ci/webdriverio on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/webdriverio)
+- [@argos-ci/webdriverio on npm](https://www.npmjs.com/package/@argos-ci/webdriverio)
