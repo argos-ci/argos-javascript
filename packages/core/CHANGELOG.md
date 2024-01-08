@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.4.0...@argos-ci/core@1.4.1) (2024-01-08)
+
+
+### Bug Fixes
+
+* improve error message while optimizing images ([#101](https://github.com/argos-ci/argos-javascript/issues/101)) ([c167d95](https://github.com/argos-ci/argos-javascript/commit/c167d95a9774d8b2ee677cf2d63a8b123b491189))
+
+
+
+
+
 # [1.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.3.0...@argos-ci/core@1.4.0) (2023-12-27)
 
 
