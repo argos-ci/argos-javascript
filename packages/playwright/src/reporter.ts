@@ -72,6 +72,14 @@ class ArgosReporter implements Reporter {
     await writeFile(path, body);
   }
 
+  async copyFile(from: string, to: string) {
+    const dir = dirname(to);
+    if (dir !== this.uploadDir) {
+      await mkdir(dir, { recursive: true });
+    }
+    await copyFile(from, to);
+  }
+
   getAutomaticScreenshotName(test: TestCase, result: TestResult) {
     let name = test.titlePath().join(" ");
     name += result.retry > 0 ? ` #${result.retry + 1}` : "";
@@ -98,7 +106,7 @@ class ArgosReporter implements Reporter {
             this.uploadDir,
             getAttachmentFilename(attachment.name),
           );
-          await copyFile(attachment.path, path);
+          await this.copyFile(attachment.path, path);
           return;
         }
 
@@ -110,8 +118,8 @@ class ArgosReporter implements Reporter {
           const path = join(this.uploadDir, `${name}.png`);
           await Promise.all([
             this.writeFile(path + ".argos.json", JSON.stringify(metadata)),
-            copyFile(attachment.path, path),
-            trace ? copyFile(trace.path, path + ".pw-trace.zip") : null,
+            this.copyFile(attachment.path, path),
+            trace ? this.copyFile(trace.path, path + ".pw-trace.zip") : null,
           ]);
           return;
         }
