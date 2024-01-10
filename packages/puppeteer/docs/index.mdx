@@ -51,7 +51,7 @@ Screenshots are stored in `screenshots/argos` folder, relative to current direct
 ### argosScreenshot(page, name[, options])
 
 - `page` - A `puppeteer` page instance
-- `name` - The screenshot name; must be unique
+- `name` - The screenshot name; must be unique. If ends by `.png` we treat it as a path.
 - `options` - See [Page.screenshot command options](https://pptr.dev/next/api/puppeteer.page.screenshot/)
 - `options.element` - Accept an ElementHandle or a string selector to screenshot an element
 - `options.viewports` - Specifies the viewports for which to capture screenshots. See [viewports configuration](/viewports).
