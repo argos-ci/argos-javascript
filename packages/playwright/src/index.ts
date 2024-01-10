@@ -11,6 +11,7 @@ import { createRequire } from "node:module";
 import { ArgosGlobal } from "@argos-ci/browser/global.js";
 import { ViewportOption, resolveViewport } from "@argos-ci/browser";
 import {
+  getMetadataPath,
   getScreenshotName,
   ScreenshotMetadata,
   writeMetadata,
@@ -181,7 +182,7 @@ export async function argosScreenshot(
       }
     }
 
-    const [screenshot] = await Promise.all([
+    await Promise.all([
       handle.screenshot({
         path: screenshotPath ?? undefined,
         type: "png",
@@ -196,11 +197,11 @@ export async function argosScreenshot(
     if (useArgosReporter) {
       await Promise.all([
         testInfo!.attach(getAttachmentName(name, "metadata"), {
-          body: JSON.stringify(metadata),
+          path: getMetadataPath(screenshotPath),
           contentType: "application/json",
         }),
         testInfo!.attach(getAttachmentName(name, "screenshot"), {
-          body: screenshot,
+          path: screenshotPath,
           contentType: "image/png",
         }),
       ]);
