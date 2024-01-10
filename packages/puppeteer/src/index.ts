@@ -68,6 +68,22 @@ async function getBrowserInfo(page: Page) {
   return { browserName, browserVersion };
 }
 
+async function getScreenshotPath(name: string) {
+  if (name.endsWith(".png")) return name;
+
+  const screenshotFolder = resolve(process.cwd(), "screenshots/argos");
+  await mkdir(screenshotFolder, { recursive: true });
+  return resolve(screenshotFolder, name + ".png");
+}
+
+/**
+ * @param page Puppeteer `page` object.
+ * @param name The name of the screenshot or the full path to the screenshot.
+ * @param options In addition to Puppeteer's `ScreenshotOptions`, you can pass:
+ * @param options.element ElementHandle or string selector of the element to take a screenshot of.
+ * @param options.viewports Viewports to take screenshots of.
+ * @param options.argosCSS Custom CSS evaluated during the screenshot process.
+ */
 export async function argosScreenshot(
   page: Page,
   name: string,
@@ -80,12 +96,8 @@ export async function argosScreenshot(
     throw new Error("The `name` argument is required.");
   }
 
-  const screenshotFolder = resolve(process.cwd(), "screenshots/argos");
-
   const [originalViewport] = await Promise.all([
     getViewport(page),
-    // Create the screenshot folder if it doesn't exist
-    mkdir(screenshotFolder, { recursive: true }),
     // Inject Argos script into the page
     injectArgos(page),
   ]);
@@ -148,9 +160,10 @@ export async function argosScreenshot(
       ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
     );
 
-    const screenshotPath = resolve(screenshotFolder, `${name}.png`);
-
-    const metadata = await collectMetadata();
+    const [screenshotPath, metadata] = await Promise.all([
+      getScreenshotPath(name),
+      collectMetadata(),
+    ]);
 
     await writeMetadata(screenshotPath, metadata);
 

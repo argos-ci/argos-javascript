@@ -67,7 +67,7 @@ async function getImageDimensions(buffer: Buffer): Promise<Size> {
   }
 }
 
-async function getFilePath(name: string) {
+async function getScreenshotPath(name: string) {
   if (name.endsWith(".png")) return name;
 
   const screenshotFolder = resolve(process.cwd(), "screenshots/argos");
@@ -93,8 +93,15 @@ export type ArgosScreenshotOptions = {
 /**
  * Take a screenshot of the current page, optionally masking certain areas.
  * @param browser A WebdriverIO `browser` object.
- * @param filepath The path to save the screenshot to.
- * @param options Options for the screenshot.
+ * @param name The name of the screenshot or the full path to the screenshot.
+ * @param options Options to customize the screenshot.
+ * @param options.mask
+ * Specify ares that should be masked when the screenshot is taken.
+ * Masked elements will be overlaid with a pink box #FF00FF (customized by maskColor)
+ * that completely covers its bounding box.
+ * @param options.maskColor
+ * Specify the color of the overlay box for masked elements, in CSS color format.
+ * Default color is pink #FF00FF.
  */
 export async function argosScreenshot(
   browser: WebdriverIO.Browser,
@@ -108,8 +115,8 @@ export async function argosScreenshot(
     throw new Error("The `name` argument is required.");
   }
 
-  const filepath = await getFilePath(name);
-  const imageBuffer = await browser.saveScreenshot(filepath);
+  const screenshotPath = await getScreenshotPath(name);
+  const imageBuffer = await browser.saveScreenshot(screenshotPath);
 
   if (!mask) {
     return imageBuffer;
@@ -118,6 +125,6 @@ export async function argosScreenshot(
   const dimensions = await getImageDimensions(imageBuffer);
   const maskBuffer = await createMask(dimensions, mask, maskColor);
   const maskedBuffer = await applyMask(imageBuffer, maskBuffer);
-  await sharp(maskedBuffer).toFile(filepath);
+  await sharp(maskedBuffer).toFile(screenshotPath);
   return maskedBuffer;
 }
