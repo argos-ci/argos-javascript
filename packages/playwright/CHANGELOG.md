@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.6.2...@argos-ci/playwright@1.6.3) (2024-01-10)
+
+
+### Bug Fixes
+
+* **playwright:** fix copyFile error ([#104](https://github.com/argos-ci/argos-javascript/issues/104)) ([047b76f](https://github.com/argos-ci/argos-javascript/commit/047b76f137b65476f2c60327ef209d095956c8cd))
+
+
+
+
+
 ## [1.6.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.6.1...@argos-ci/playwright@1.6.2) (2024-01-10)
 
 
