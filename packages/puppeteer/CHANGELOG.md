@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.3.2...@argos-ci/puppeteer@1.4.0) (2024-01-10)
+
+
+### Features
+
+* **puppeteer:** allow to specify the full path of screenshot ([#103](https://github.com/argos-ci/argos-javascript/issues/103)) ([d118088](https://github.com/argos-ci/argos-javascript/commit/d118088fa7284be516b3f9871036e108ed175801))
+
+
+
+
+
 ## [1.3.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.3.1...@argos-ci/puppeteer@1.3.2) (2024-01-08)
 
 **Note:** Version bump only for package @argos-ci/puppeteer
