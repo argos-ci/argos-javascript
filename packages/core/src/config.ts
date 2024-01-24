@@ -148,10 +148,10 @@ const createConfig = () => {
   });
 };
 
-export const readConfig = (options: Partial<Config> = {}) => {
+export async function readConfig(options: Partial<Config> = {}) {
   const config = createConfig();
 
-  const ciEnv = getCiEnvironment();
+  const ciEnv = await getCiEnvironment();
 
   config.load({
     apiBaseUrl: options.apiBaseUrl ?? config.get("apiBaseUrl"),
@@ -183,4 +183,4 @@ export const readConfig = (options: Partial<Config> = {}) => {
   config.validate();
 
   return config.get();
-};
+}

@@ -47,15 +47,17 @@ export interface UploadParameters {
   referenceCommit?: string;
 }
 
-const getConfigFromOptions = ({ parallel, ...options }: UploadParameters) => {
-  const config = readConfig({
+async function getConfigFromOptions({
+  parallel,
+  ...options
+}: UploadParameters) {
+  return readConfig({
     ...options,
     parallel: Boolean(parallel),
     parallelNonce: parallel ? parallel.nonce : null,
     parallelTotal: parallel ? parallel.total : null,
   });
-  return config;
-};
+}
 
 async function uploadFilesToS3(
   files: { url: string; path: string; contentType: string }[],
@@ -86,11 +88,11 @@ async function uploadFilesToS3(
 /**
  * Upload screenshots to argos-ci.com.
  */
-export const upload = async (params: UploadParameters) => {
+export async function upload(params: UploadParameters) {
   debug("Starting upload with params", params);
 
   // Read config
-  const config = getConfigFromOptions(params);
+  const config = await getConfigFromOptions(params);
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
   debug("Using config and files", config, files);
 
@@ -209,4 +211,4 @@ export const upload = async (params: UploadParameters) => {
   });
 
   return { build: result.build, screenshots };
-};
+}
