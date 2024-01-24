@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.7.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.6.3...@argos-ci/playwright@1.7.0) (2024-01-24)
+
+
+### Features
+
+* **ci:** support running on "deployment_status" event ([#105](https://github.com/argos-ci/argos-javascript/issues/105)) ([893636f](https://github.com/argos-ci/argos-javascript/commit/893636f8ea9626a06344dc4cd02771a41527142c))
+
+
+
+
+
 ## [1.6.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.6.2...@argos-ci/playwright@1.6.3) (2024-01-10)
 
 

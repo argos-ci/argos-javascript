@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.4.1...@argos-ci/core@1.5.0) (2024-01-24)
+
+
+### Features
+
+* **ci:** support running on "deployment_status" event ([#105](https://github.com/argos-ci/argos-javascript/issues/105)) ([893636f](https://github.com/argos-ci/argos-javascript/commit/893636f8ea9626a06344dc4cd02771a41527142c))
+
+
+
+
+
 ## [1.4.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@1.4.0...@argos-ci/core@1.4.1) (2024-01-08)
 
 

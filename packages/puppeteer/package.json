@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/puppeteer",
   "description": "Visual testing solution to avoid visual regression. Puppeteer commands and utilities for Argos visual testing.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
