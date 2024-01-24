@@ -36,12 +36,12 @@ export type ArgosReporterOptions = Omit<UploadParameters, "files" | "root"> & {
   uploadToArgos?: boolean;
 };
 
-const getParallelFromConfig = (
+async function getParallelFromConfig(
   config: FullConfig,
-): null | UploadParameters["parallel"] => {
+): Promise<null | UploadParameters["parallel"]> {
   if (!config.shard) return null;
   if (config.shard.total === 1) return null;
-  const argosConfig = readConfig();
+  const argosConfig = await readConfig();
   if (!argosConfig.parallelNonce) {
     throw new Error(
       "Playwright shard mode detected. Please specify ARGOS_PARALLEL_NONCE env variable. Read /parallel-testing",
@@ -51,7 +51,7 @@ const getParallelFromConfig = (
     total: config.shard.total,
     nonce: argosConfig.parallelNonce,
   };
-};
+}
 
 class ArgosReporter implements Reporter {
   uploadDir!: string;
@@ -130,7 +130,7 @@ class ArgosReporter implements Reporter {
   async onEnd(_result: FullResult) {
     if (!this.uploadToArgos) return;
 
-    const parallel = getParallelFromConfig(this.playwrightConfig);
+    const parallel = await getParallelFromConfig(this.playwrightConfig);
 
     try {
       const res = await upload({

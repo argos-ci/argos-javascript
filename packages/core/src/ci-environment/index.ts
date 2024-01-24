@@ -24,9 +24,9 @@ const services = [
   git,
 ];
 
-export const getCiEnvironment = ({
+export async function getCiEnvironment({
   env = process.env,
-}: Options = {}): CiEnvironment | null => {
+}: Options = {}): Promise<CiEnvironment | null> {
   const ctx = { env };
   debug("Detecting CI environment", { env });
   const service = services.find((service) => service.detect(ctx));
@@ -34,11 +34,11 @@ export const getCiEnvironment = ({
   // Service matched
   if (service) {
     debug("Internal service matched", service.name);
-    const variables = service.config(ctx);
+    const variables = await service.config(ctx);
     const ciEnvironment = { name: service.name, ...variables };
     debug("CI environment", ciEnvironment);
     return ciEnvironment;
   }
 
   return null;
-};
+}
