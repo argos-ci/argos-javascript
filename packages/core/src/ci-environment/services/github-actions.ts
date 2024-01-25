@@ -26,8 +26,10 @@ type GitHubPullRequest = {
 };
 
 /**
- * When triggered by a deployment we try to get the pull request number from the
- * deployment sha.
+ * Get a pull request from a head sha.
+ * Fetch the last 30 pull requests sorted by updated date
+ * then try to find the one that matches the head sha.
+ * If no pull request is found, return null.
  */
 async function getPullRequestFromHeadSha({ env }: Context, sha: string) {
   debug("Fetching pull request number from head sha", sha);
@@ -35,6 +37,8 @@ async function getPullRequestFromHeadSha({ env }: Context, sha: string) {
     throw new Error("GITHUB_REPOSITORY is missing");
   }
   if (!env.GITHUB_TOKEN) {
+    // For security reasons, people doesn't want to expose their GITHUB_TOKEN
+    // That's why we allow to disable this warning.
     if (!env.DISABLE_GITHUB_TOKEN_WARNING) {
       console.log(
         `
@@ -54,7 +58,10 @@ To disable this warning, add \`DISABLE_GITHUB_TOKEN_WARNING: true\` as environme
       `https://api.github.com/repos/${env.GITHUB_REPOSITORY}/pulls`,
       {
         params: {
-          head: sha,
+          state: "open",
+          sort: "updated",
+          per_page: 30,
+          page: 1,
         },
         headers: {
           Accept: "application/vnd.github+json",
@@ -67,9 +74,13 @@ To disable this warning, add \`DISABLE_GITHUB_TOKEN_WARNING: true\` as environme
       debug("Aborting because no pull request found");
       return null;
     }
-    const firstPr = result.data[0];
-    debug("PR found", firstPr);
-    return firstPr;
+    const matchingPr = result.data.find((pr) => pr.head.sha === sha);
+    if (matchingPr) {
+      debug("Pull request found", matchingPr);
+      return matchingPr;
+    }
+    debug("Aborting because no pull request found");
+    return null;
   } catch (error) {
     debug("Error while fetching pull request from head sha", error);
     return null;
@@ -82,12 +93,12 @@ const getBranch = ({ env }: Context) => {
   }
 
   const branchRegex = /refs\/heads\/(.*)/;
-  const matches = branchRegex.exec(env.GITHUB_REF || "");
-  if (matches) {
-    return matches[1];
+  if (!env.GITHUB_REF) {
+    return null;
   }
 
-  return null;
+  const matches = branchRegex.exec(env.GITHUB_REF);
+  return matches?.[1] ?? null;
 };
 
 const getRepository = ({ env }: Context) => {
@@ -124,9 +135,12 @@ const service: Service = {
     // If the job is triggered by from a "deployment" or a "deployment_status"
     if (payload?.deployment) {
       debug("Deployment event detected");
+      // Try to find a relevant pull request for the sha
       const pullRequest = await getPullRequestFromHeadSha({ env }, sha);
       return {
         ...commonConfig,
+        // If no pull request is found, we fallback to the deployment environment as branch name
+        // Branch name is required to create a build but has no real impact on the build.
         branch: pullRequest?.head.ref || payload.deployment.environment || null,
         prNumber: pullRequest?.number || null,
         prHeadCommit: pullRequest?.head.sha || null,
