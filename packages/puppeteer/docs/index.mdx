@@ -57,6 +57,8 @@ Screenshots are stored in `screenshots/argos` folder, relative to current direct
 - `options.viewports` - Specifies the viewports for which to capture screenshots. See [viewports configuration](/viewports).
 - `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
 
+Unlike [Puppeteer's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), `argosScreenshot` set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
+
 ## Helper Attributes for Visual Testing
 
 For tailored visual testing, the `data-visual-test` attributes provide control over how elements appear in Argos screenshots. This can be especially useful for obscuring or modifying elements with dynamic content, like dates.

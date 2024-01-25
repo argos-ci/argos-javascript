@@ -42,6 +42,8 @@ Please refer to our [Quickstart guide](/quickstart/playwright) to get started wi
 - `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](/viewports).
 - `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
 
+Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
+
 ### Argos Reporter
 
 The Argos reporter offers extensive configuration options. Specifically, all [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/uploadparameters) are available for customizing the reporter.
