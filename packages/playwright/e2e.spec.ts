@@ -2,7 +2,9 @@
 import { test, chromium, expect, Page } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
-import { argosScreenshot } from "./src/index.js";
+// @ts-ignore
+import { argosScreenshot } from "./dist/index";
+import { argosScreenshot as typedArgosScreenshot } from "./src";
 // @ts-ignore
 import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
 import { checkIsUsingArgosReporter } from "./src/util.js";
@@ -60,7 +62,7 @@ test.describe("#argosScreenshot", () => {
     let error: any;
     try {
       // @ts-expect-error - We want to test the error
-      await argosScreenshot();
+      await typedArgosScreenshot();
     } catch (e: any) {
       error = e;
     }
@@ -71,7 +73,7 @@ test.describe("#argosScreenshot", () => {
     let error: any;
     try {
       // @ts-expect-error - We want to test the error
-      await argosScreenshot(page);
+      await typedArgosScreenshot(page);
     } catch (e: any) {
       error = e;
     }

@@ -25,6 +25,7 @@ export const buildEs = ({
   input = "src/index.ts",
   output = "dist/index.mjs",
   external = ignoreRelative,
+  extraPlugins = [],
 } = {}) => ({
   input,
   external,
@@ -32,7 +33,7 @@ export const buildEs = ({
     file: output,
     format: "es",
   },
-  plugins: [json(), swcPlugin],
+  plugins: [json(), swcPlugin, ...extraPlugins],
 });
 
 export const buildCjs = ({
