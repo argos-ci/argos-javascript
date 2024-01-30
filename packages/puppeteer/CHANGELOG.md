@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.4.2...@argos-ci/puppeteer@1.5.0) (2024-01-30)
+
+
+### Features
+
+* support no node_modules folder ([#109](https://github.com/argos-ci/argos-javascript/issues/109)) ([66aa120](https://github.com/argos-ci/argos-javascript/commit/66aa120b94a8990b3ce549d101ad733ac9bfd929))
+
+
+
+
+
 ## [1.4.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.4.1...@argos-ci/puppeteer@1.4.2) (2024-01-25)
 
 **Note:** Version bump only for package @argos-ci/puppeteer
