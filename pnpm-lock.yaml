@@ -53,6 +53,9 @@ importers:
 
   packages/browser:
     devDependencies:
+      '@rollup/plugin-replace':
+        specifier: ^5.0.5
+        version: 5.0.5(rollup@4.1.4)
       '@types/node':
         specifier: ^16.0.0
         version: 16.18.58
@@ -1918,6 +1921,20 @@ packages:
         optional: true
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@4.1.4)
+      rollup: 4.1.4
+    dev: true
+
+  /@rollup/plugin-replace@5.0.5(rollup@4.1.4):
+    resolution: {integrity: sha512-rYO4fOi8lMaTg/z5Jb+hKnrHHVn8j2lwkqwyS4kTRhKyWOLf2wST2sWXr4WzWiTcoHTp2sTjqUbqIj2E39slKQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 5.1.0(rollup@4.1.4)
+      magic-string: 0.30.5
       rollup: 4.1.4
     dev: true
 

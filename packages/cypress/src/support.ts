@@ -1,7 +1,10 @@
 import "cypress-wait-until";
-import type { ArgosGlobal } from "@argos-ci/browser/global.js";
-import { resolveViewport, type ViewportOption } from "@argos-ci/browser";
-import { getGlobalFilePath } from "@argos-ci/browser/cypress.cjs";
+import {
+  ArgosGlobal,
+  resolveViewport,
+  type ViewportOption,
+} from "@argos-ci/browser";
+import { getGlobalScript } from "@argos-ci/browser";
 import {
   getMetadataPath,
   getScreenshotName,
@@ -42,10 +45,7 @@ declare global {
 function injectArgos() {
   cy.window({ log: false }).then((window) => {
     if (typeof (window as any).__ARGOS__ !== "undefined") return;
-    const fileName = getGlobalFilePath();
-    return cy.readFile<string>(fileName).then((source) => {
-      window.eval(source);
-    });
+    window.eval(getGlobalScript());
   });
 }
 

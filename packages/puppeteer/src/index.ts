@@ -1,9 +1,13 @@
 import { resolve } from "node:path";
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { ElementHandle, Page, ScreenshotOptions } from "puppeteer";
 import { createRequire } from "node:module";
-import { ArgosGlobal } from "@argos-ci/browser/global.js";
-import { ViewportOption, resolveViewport } from "@argos-ci/browser";
+import {
+  ViewportOption,
+  resolveViewport,
+  ArgosGlobal,
+  getGlobalScript,
+} from "@argos-ci/browser";
 import {
   ScreenshotMetadata,
   getScreenshotName,
@@ -21,9 +25,7 @@ async function injectArgos(page: Page) {
     () => typeof (window as any).__ARGOS__ !== "undefined",
   );
   if (injected) return;
-  const fileName = require.resolve("@argos-ci/browser/global.js");
-  const content = await readFile(fileName, "utf-8");
-  await page.addScriptTag({ content });
+  await page.addScriptTag({ content: getGlobalScript() });
 }
 
 export type ArgosScreenshotOptions = Omit<

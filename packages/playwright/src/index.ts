@@ -1,4 +1,4 @@
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import type {
   Page,
@@ -7,9 +7,12 @@ import type {
   ElementHandle,
   TestInfo,
 } from "@playwright/test";
-import { createRequire } from "node:module";
-import { ArgosGlobal } from "@argos-ci/browser/global.js";
-import { ViewportOption, resolveViewport } from "@argos-ci/browser";
+import {
+  ViewportOption,
+  resolveViewport,
+  ArgosGlobal,
+  getGlobalScript,
+} from "@argos-ci/browser";
 import {
   getMetadataPath,
   getScreenshotName,
@@ -19,8 +22,6 @@ import {
 import { getAttachmentName } from "./attachment";
 import { getLibraryMetadata, getTestMetadataFromTestInfo } from "./metadata";
 import { checkIsUsingArgosReporter } from "./util";
-
-const require = createRequire(import.meta.url);
 
 const screenshotFolder = "./screenshots";
 
@@ -55,9 +56,7 @@ async function injectArgos(page: Page) {
     () => typeof (window as any).__ARGOS__ !== "undefined",
   );
   if (injected) return;
-  const fileName = require.resolve("@argos-ci/browser/global.js");
-  const content = await readFile(fileName, "utf-8");
-  await page.addScriptTag({ content });
+  await page.addScriptTag({ content: getGlobalScript() });
 }
 
 async function getTestInfo() {

@@ -3,24 +3,18 @@ import {
   buildTypes,
   ignoreRelative,
   swcPlugin,
-  tsPlugin,
 } from "../../build/rollup.js";
+import { readFileSync } from "node:fs";
+
+import replace from "@rollup/plugin-replace";
 
 const bundleGlobal = (config) => ({
-  input: "src/global.ts",
-  external: ignoreRelative,
-  ...config,
-});
-
-const bundleCypress = (config) => ({
-  input: "src/cypress.ts",
+  input: "src/global/index.ts",
   external: ignoreRelative,
   ...config,
 });
 
 export default [
-  buildEs(),
-  buildTypes(),
   bundleGlobal({
     output: {
       file: `dist/global.js`,
@@ -28,25 +22,17 @@ export default [
     },
     plugins: [swcPlugin],
   }),
-  bundleGlobal({
-    output: {
-      file: `dist/global.d.ts`,
-      format: "es",
-    },
-    plugins: [tsPlugin],
+  buildEs({
+    extraPlugins: [
+      replace({
+        preventAssignment: true,
+        values: {
+          "process.env.GLOBAL_SCRIPT": () =>
+            JSON.stringify(readFileSync("dist/global.js", "utf-8")),
+        },
+      }),
+    ],
+    external: (id) => ignoreRelative(id) && id !== "__GLOBAL__",
   }),
-  bundleCypress({
-    output: {
-      file: `dist/cypress.cjs`,
-      format: "cjs",
-    },
-    plugins: [swcPlugin],
-  }),
-  bundleCypress({
-    output: {
-      file: `dist/cypress.d.ts`,
-      format: "es",
-    },
-    plugins: [tsPlugin],
-  }),
+  buildTypes(),
 ];
