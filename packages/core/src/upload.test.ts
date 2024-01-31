@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { join } from "node:path";
 import { upload } from "./upload";
-import { setupJest } from "../mocks/server";
+import { setupMockServer } from "../mocks/server";
 
-setupJest();
+setupMockServer();
 
 describe("#upload", () => {
   it("uploads", async () => {

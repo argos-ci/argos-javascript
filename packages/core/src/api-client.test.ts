@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeAll } from "vitest";
 
-import { setupJest } from "../mocks/server";
+import { setupMockServer } from "../mocks/server";
 import {
   ArgosApiClient,
   createArgosApiClient,
   getBearerToken,
 } from "./api-client";
 
-setupJest();
+setupMockServer();
 
 let apiClient: ArgosApiClient;
 
