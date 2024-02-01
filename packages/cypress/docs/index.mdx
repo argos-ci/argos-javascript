@@ -53,8 +53,7 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 - `options`: All [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/uploadparameters).
 - `options.uploadToArgos`: Upload results and create a build on Argos, `true` by default.
 
-```ts
-// cypress.config.js
+```ts title="cypress.config.js"
 const { defineConfig } = require("cypress");
 const { registerArgosTask } = require("@argos-ci/cypress/task");
 
