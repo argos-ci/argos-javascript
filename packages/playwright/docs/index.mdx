@@ -7,65 +7,89 @@ slug: /playwright
 
 Improve test debugging and boost your visual testing capabilities by combining Argos with your [Playwright](https://playwright.dev/) tests.
 
-## Features
-
-### Test debugging
-
-The Argos Playwright reporter automatically reports failure screenshots and playwright traces. You can access them directly in Argos UI. If you are tired to download traces from artifact and run a command to see them, it is the solution for you.
-
-- **Failure Screenshots**: View failure screenshots from your CI tests directly in Argos. No extra steps, just immediate clarity where you need it most.
-
-- **Playwright Traces**: “Time travel” through your failing tests with remote Playwright traces. Gain a complete, step-by-step visual journey to the heart of any test issue.
-
-### Visual Testing
-
-Argos presents a significant advantage over traditional Playwright visual tests with its streamlined approach to managing and reviewing test results:
-
-- **Visual Testing on CI**: With Argos, there's no need to run tests locally or commit screenshots to your repository. This not only saves time but also keeps your repository clean and focused on code rather than binary assets.
-
-- **Fluid UI for Comparison**: Argos intuitive interface makes it easy to spot discrepancies and understand visual changes without the need for cumbersome manual checks.
-
-- **Enhanced Stabilization**: The Argos integration with Playwright takes visual testing to the next level by ensuring stability and consistency in the screenshots captured. Fonts, images, animations, loaders, everything is just stable.
-
 ## Get started
 
 Please refer to our [Quickstart guide](/quickstart/playwright) to get started with Argos and Playwright.
 
-## API Overview
+## Setup Visual Testing
 
-### argosScreenshot(page, name[, options])
+Argos presents a significant advantage over traditional Playwright visual tests with its streamlined approach to managing and reviewing test results:
 
-- `page`: Instance of the [Playwright Page](https://playwright.dev/docs/api/class-page).
-- `name`: Unique name for the screenshot.
-- `options`: Explore [Page.screenshot command options](https://playwright.dev/docs/api/class-page#page-screenshot) for details.
-- `options.element`: Use an ElementHandle or string selector to capture a specific element's screenshot.
-- `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](/viewports).
-- `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
+- **Visual Testing on CI**: With Argos, there's no need to run tests locally or commit screenshots to your repository. This not only saves time but also keeps your repository clean and focused on code rather than binary assets.
+- **Fluid UI for Comparison**: Argos intuitive interface makes it easy to spot discrepancies and understand visual changes without the need for cumbersome manual checks.
+- **Enhanced Stabilization**: The Argos integration with Playwright takes visual testing to the next level by ensuring stability and consistency in the screenshots captured. Fonts, images, animations, loaders, everything is just stable.
 
-Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
+To enable Visual Testing with Playwright, first you have to setup the Argos reporter in your Playwright config:
 
-### Argos Reporter
-
-The Argos reporter offers extensive configuration options. Specifically, all [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/uploadparameters) are available for customizing the reporter.
-
-```ts
-// playwright.config.ts
+```ts title="playwright.config.ts"
 import { defineConfig } from "@playwright/test";
-import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
   // ... other configurations
 
+  // Setup Argos reporter to send screenshots and traces to Argos.
   reporter: [
-    // ... other reporters
+    // Use "dot" reporter on CI, "list" otherwise (Playwright default).
+    process.env.CI ? ["dot"] : ["list"],
+
+    // Add Argos reporter.
     [
       "@argos-ci/playwright/reporter",
-      {
-        uploadToArgos: !!process.env.CI,
-        buildName: "custom-build-name",
-      } as ArgosReporterOptions,
+      // Upload only on CI.
+      { uploadToArgos: !!process.env.CI },
     ],
   ],
+});
+```
+
+And use `argosScreenshot` helper to capture stable screenshots in your E2E tests:
+
+```ts title="tests/example.spec.ts"
+import { test } from "@playwright/test";
+import { argosScreenshot } from "@argos-ci/playwright";
+
+test("screenshot homepage", async ({ page }) => {
+  await page.goto("http://localhost:3000");
+  await argosScreenshot(page, "homepage");
+});
+```
+
+## Setup Tests Debugging
+
+The Argos Playwright reporter automatically reports failure screenshots and playwright traces. You can access them directly in Argos UI. If you are tired to download traces from artifact and run a command to see them, it is the solution for you.
+
+- **Failure Screenshots**: View failure screenshots from your CI tests directly in Argos. No extra steps, just immediate clarity where you need it most.
+- **Playwright Traces**: “Time travel” through your failing tests with remote Playwright traces. Gain a complete, step-by-step visual journey to the heart of any test issue.
+
+To enable Test Debugging, you have to add Argos reporter and to turn on [Playwright test use options](https://playwright.dev/docs/test-use-options) in your Playwright config:
+
+```ts title="playwright.config.ts"
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+  // ... other configurations
+
+  // Setup Argos reporter to send screenshots and traces to Argos.
+  reporter: [
+    // Use "dot" reporter on CI, "list" otherwise (Playwright default).
+    process.env.CI ? ["dot"] : ["list"],
+
+    // Add Argos reporter.
+    [
+      "@argos-ci/playwright/reporter",
+      // Upload only on CI.
+      { uploadToArgos: !!process.env.CI },
+    ],
+  ],
+
+  // Setup recording option to enable test debugging features.
+  use: {
+    // Collect trace when retrying the failed test.
+    trace: "on-first-retry",
+
+    // Capture screenshot after each test failure.
+    screenshot: "only-on-failure",
+  },
 });
 ```
 
@@ -86,6 +110,46 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 
 ```html
 <div id="clock" data-visual-test="transparent">...</div>
+```
+
+## API Overview
+
+### argosScreenshot(page, name[, options])
+
+- `page`: Instance of the [Playwright Page](https://playwright.dev/docs/api/class-page).
+- `name`: Unique name for the screenshot.
+- `options`: Explore [Page.screenshot command options](https://playwright.dev/docs/api/class-page#page-screenshot) for details.
+- `options.element`: Use an ElementHandle or string selector to capture a specific element's screenshot.
+- `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](/viewports).
+- `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
+
+Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
+
+### Playwright reporter
+
+The Argos reporter offers extensive configuration options. Specifically, all [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/uploadparameters) are available for customizing the reporter.
+
+```ts title="playwright.config.ts"
+import { defineConfig } from "@playwright/test";
+import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
+
+export default defineConfig({
+  // ... other configurations
+
+  reporter: [
+    // Use "dot" reporter on CI, "list" otherwise (Playwright default).
+    process.env.CI ? ["dot"] : ["list"],
+
+    // Argos reporter
+    [
+      "@argos-ci/playwright/reporter",
+      {
+        uploadToArgos: !!process.env.CI,
+        buildName: "custom-build-name",
+      } as ArgosReporterOptions,
+    ],
+  ],
+});
 ```
 
 ## Upgrading from v0.0.x
