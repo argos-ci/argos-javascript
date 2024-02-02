@@ -44,6 +44,11 @@ export type ArgosScreenshotOptions = Omit<
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+  /**
+   * Disable hover effects by moving the mouse to the top-left corner of the page.
+   * @default true
+   */
+  disableHover?: boolean;
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -78,6 +83,43 @@ async function getScreenshotPath(name: string) {
   return resolve(screenshotFolder, name + ".png");
 }
 
+function checkIsFullPage(options: ArgosScreenshotOptions) {
+  return options.fullPage !== undefined
+    ? options.fullPage
+    : options.element === undefined;
+}
+
+/**
+ * Setup Argos for the screenshot process.
+ * @returns A function to teardown Argos.
+ */
+async function setup(page: Page, options: ArgosScreenshotOptions) {
+  const { disableHover = true, argosCSS } = options;
+
+  const fullPage = checkIsFullPage(options);
+
+  await page.evaluate(
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+    { fullPage, argosCSS },
+  );
+
+  if (disableHover) {
+    await page.mouse.move(0, 0);
+  }
+
+  return async () => {
+    await page.evaluate(
+      ({ fullPage, argosCSS }) =>
+        ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+          fullPage,
+          argosCSS,
+        }),
+      { fullPage, argosCSS },
+    );
+  };
+}
+
 /**
  * @param page Puppeteer `page` object.
  * @param name The name of the screenshot or the full path to the screenshot.
@@ -89,8 +131,9 @@ async function getScreenshotPath(name: string) {
 export async function argosScreenshot(
   page: Page,
   name: string,
-  { element, viewports, argosCSS, ...options }: ArgosScreenshotOptions = {},
+  options: ArgosScreenshotOptions = {},
 ) {
+  const { element, viewports, argosCSS, ...puppeteerOptions } = options;
   if (!page) {
     throw new Error("A Puppeteer `page` object is required.");
   }
@@ -104,14 +147,8 @@ export async function argosScreenshot(
     injectArgos(page),
   ]);
 
-  const fullPage =
-    options.fullPage !== undefined ? options.fullPage : element === undefined;
-
-  await page.evaluate(
-    ({ fullPage, argosCSS }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
-    { fullPage, argosCSS },
-  );
+  const teardown = await setup(page, options);
+  const fullPage = checkIsFullPage(options);
 
   async function collectMetadata(): Promise<ScreenshotMetadata> {
     const [
@@ -173,7 +210,7 @@ export async function argosScreenshot(
       path: screenshotPath,
       type: "png",
       fullPage,
-      ...options,
+      ...puppeteerOptions,
     };
 
     // If no element is specified, take a screenshot of the whole page
@@ -213,13 +250,5 @@ export async function argosScreenshot(
     await stabilizeAndScreenshot(name);
   }
 
-  // Teardown Argos
-  await page.evaluate(
-    ({ fullPage, argosCSS }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
-        fullPage,
-        argosCSS,
-      }),
-    { fullPage, argosCSS },
-  );
+  await teardown();
 }
