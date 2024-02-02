@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 import { UploadParameters, upload } from "@argos-ci/core";
+import { basename, extname, join, dirname } from "node:path";
+import { rename } from "node:fs/promises";
 
 export type RegisterArgosTaskOptions = Omit<
   UploadParameters,
@@ -17,6 +19,24 @@ export function registerArgosTask(
   config: Cypress.Config,
   options?: RegisterArgosTaskOptions,
 ) {
+  on("after:screenshot", async (details) => {
+    // Get the base filename without extension
+    const baseName = basename(details.path, extname(details.path));
+
+    // Remove attempt from the filename
+    const newBaseName = baseName.replace(/ \(attempt \d+\)/, "");
+
+    // Construct a new path with the original file extension
+    const newPath = join(
+      dirname(details.path),
+      newBaseName + extname(details.path),
+    );
+
+    // Rename the file
+    await rename(details.path, newPath);
+
+    return { path: newPath };
+  });
   on("after:run", async () => {
     const { screenshotsFolder } = config;
     if (!screenshotsFolder) return;
