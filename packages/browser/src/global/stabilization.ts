@@ -5,7 +5,7 @@
  * - Support [data-visual-test]
  * - Support [data-visual-test-no-radius]
  */
-export const GLOBAL_CSS: string = `
+const GLOBAL_CSS: string = `
 /* Hide carets */
 * {
   caret-color: transparent !important;
@@ -51,7 +51,7 @@ const SPELL_CHECK_QUERY =
 /**
  * Disable spellcheck to avoid displaying markers.
  */
-export function disableSpellCheck(document: Document) {
+function disableSpellCheck(document: Document) {
   const inputs = document.querySelectorAll(SPELL_CHECK_QUERY);
   inputs.forEach((element) => {
     if (!checkIsHTMLElement(element)) return;
@@ -62,7 +62,7 @@ export function disableSpellCheck(document: Document) {
 /**
  * Restore spellcheck attribute.
  */
-export function restoreSpellCheck(document: Document) {
+function restoreSpellCheck(document: Document) {
   const inputs = document.querySelectorAll(SPELL_CHECK_QUERY);
   inputs.forEach((input) => {
     const spellcheck = input.getAttribute("data-argos-bck-spellcheck");
@@ -77,11 +77,7 @@ export function restoreSpellCheck(document: Document) {
 /**
  * Inject global styles in the DOM.
  */
-export function injectGlobalStyles(
-  document: Document,
-  css: string,
-  id: string,
-) {
+function injectGlobalStyles(document: Document, css: string, id: string) {
   const style = document.createElement("style");
   style.textContent = css;
   style.id = id;
@@ -91,7 +87,7 @@ export function injectGlobalStyles(
 /**
  * Remove global styles from the DOM.
  */
-export function removeGlobalStyles(document: Document, id: string) {
+function removeGlobalStyles(document: Document, id: string) {
   const style = document.getElementById(id);
   if (style) {
     style.remove();
@@ -116,7 +112,7 @@ function setAndBackupPosition(element: HTMLElement, position: string) {
 /**
  * Stabilize sticky and fixed elements.
  */
-export function stabilizeElementPositions(document: Document) {
+function stabilizeElementPositions(document: Document) {
   const window = document.defaultView;
   if (!window) return;
   const elements = Array.from(document.querySelectorAll("*"));
@@ -135,7 +131,7 @@ export function stabilizeElementPositions(document: Document) {
 /**
  * Restore the position of elements.
  */
-export function restoreElementPositions(document: Document) {
+function restoreElementPositions(document: Document) {
   const window = document.defaultView;
   if (!window) return;
   const elements = Array.from(document.querySelectorAll("*"));
@@ -150,11 +146,11 @@ export function restoreElementPositions(document: Document) {
   });
 }
 
-export function addGlobalClass(document: Document, className: string) {
+function addGlobalClass(document: Document, className: string) {
   document.documentElement.classList.add(className);
 }
 
-export function removeGlobalClass(document: Document, className: string) {
+function removeGlobalClass(document: Document, className: string) {
   document.documentElement.classList.remove(className);
 }
 
@@ -201,14 +197,14 @@ export function teardown(
 /**
  * Wait for the fonts to be loaded.
  */
-export function waitForFontsToLoad(document: Document) {
+function waitForFontsToLoad(document: Document) {
   return document.fonts.status === "loaded";
 }
 
 /**
  * Wait for the images to be loaded.
  */
-export function waitForImagesToLoad(document: Document) {
+function waitForImagesToLoad(document: Document) {
   const images = Array.from(document.images);
 
   // Force eager loading
@@ -224,7 +220,7 @@ export function waitForImagesToLoad(document: Document) {
 /**
  * Wait for all [aria-busy="true"] elements to invisible.
  */
-export function waitForNoBusy(document: Document) {
+function waitForNoBusy(document: Document) {
   const checkIsVisible = (element: Element) => {
     // Basic check for HTMLElement
     if (

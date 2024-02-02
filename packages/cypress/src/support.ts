@@ -13,6 +13,19 @@ import {
 // @ts-ignore
 import { version } from "../package.json";
 
+type ArgosScreenshotOptions = Partial<
+  Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions
+> & {
+  /**
+   * Viewports to take screenshots of.
+   */
+  viewports?: ViewportOption[];
+  /**
+   * Custom CSS evaluated during the screenshot process.
+   */
+  argosCSS?: string;
+};
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -27,16 +40,7 @@ declare global {
        */
       argosScreenshot: (
         name: string,
-        options?: Partial<Loggable & Timeoutable & ScreenshotOptions> & {
-          /**
-           * Viewports to take screenshots of.
-           */
-          viewports?: ViewportOption[];
-          /**
-           * Custom CSS evaluated during the screenshot process.
-           */
-          argosCSS?: string;
-        },
+        options?: ArgosScreenshotOptions,
       ) => Chainable<null>;
     }
   }
@@ -49,10 +53,29 @@ function injectArgos() {
   });
 }
 
+function setup(options: ArgosScreenshotOptions) {
+  const { argosCSS } = options;
+  const fullPage = !options.capture || options.capture === "fullPage";
+
+  cy.window({ log: false }).then((window) =>
+    ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+  );
+
+  return () => {
+    cy.window({ log: false }).then((window) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+        fullPage,
+        argosCSS,
+      }),
+    );
+  };
+}
+
 Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
-  (subject, name, { viewports, argosCSS, ...options } = {}) => {
+  (subject, name, options = {}) => {
+    const { viewports, argosCSS, ...cypressOptions } = options;
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -65,11 +88,7 @@ Cypress.Commands.add(
 
     injectArgos();
 
-    const fullPage = !options.capture || options.capture === "fullPage";
-
-    cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
-    );
+    const teardown = setup(options);
 
     function stabilizeAndScreenshot(name: string) {
       cy.waitUntil(() =>
@@ -89,7 +108,7 @@ Cypress.Commands.add(
         onAfterScreenshot: (_$el, props) => {
           ref.props = props;
         },
-        ...options,
+        ...cypressOptions,
       });
 
       cy.window({ log: false }).then((window) => {
@@ -148,12 +167,6 @@ Cypress.Commands.add(
       stabilizeAndScreenshot(name);
     }
 
-    // Teardown Argos
-    cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
-        fullPage,
-        argosCSS,
-      }),
-    );
+    teardown();
   },
 );
