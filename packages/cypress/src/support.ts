@@ -130,6 +130,9 @@ Cypress.Commands.add(
           test: {
             title: Cypress.currentTest.title,
             titlePath: Cypress.currentTest.titlePath,
+            retry: Cypress.currentRetry,
+            // @ts-ignore
+            retries: cy.state("runnable")._retries,
           },
           browser: {
             name: Cypress.browser.name,
