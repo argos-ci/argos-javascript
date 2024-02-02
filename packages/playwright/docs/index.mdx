@@ -122,6 +122,7 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 - `options.element`: Use an ElementHandle or string selector to capture a specific element's screenshot.
 - `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](/viewports).
 - `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
+- `options.disableHover`: Disable hover effects by moving the mouse to the top-left corner of the page. Default to `true`.
 
 Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
 

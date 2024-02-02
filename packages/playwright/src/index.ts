@@ -44,6 +44,11 @@ export type ArgosScreenshotOptions = {
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+  /**
+   * Disable hover effects by moving the mouse to the top-left corner of the page.
+   * @default true
+   */
+  disableHover?: boolean;
 } & LocatorOptions &
   ScreenshotOptions<LocatorScreenshotOptions> &
   ScreenshotOptions<PageScreenshotOptions>;
@@ -76,18 +81,40 @@ function getViewportSize(page: Page) {
   return viewportSize;
 }
 
+/**
+ * Setup Argos for the screenshot process.
+ * @returns A function to teardown Argos.
+ */
+async function setup(page: Page, options: ArgosScreenshotOptions) {
+  const { disableHover = true, fullPage, argosCSS } = options;
+  await page.evaluate(
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+    { fullPage, argosCSS },
+  );
+  if (disableHover) {
+    await page.mouse.move(0, 0);
+  }
+
+  return async () => {
+    await page.evaluate(
+      ({ fullPage, argosCSS }) =>
+        ((window as any).__ARGOS__ as ArgosGlobal).teardown({
+          fullPage,
+          argosCSS,
+        }),
+      { fullPage, argosCSS },
+    );
+  };
+}
+
 export async function argosScreenshot(
   page: Page,
   name: string,
-  {
-    element,
-    has,
-    hasText,
-    viewports,
-    argosCSS,
-    ...options
-  }: ArgosScreenshotOptions = {},
+  options: ArgosScreenshotOptions = {},
 ) {
+  const { element, has, hasText, viewports, argosCSS, ...playwrightOptions } =
+    options;
   if (!page) {
     throw new Error("A Playwright `page` object is required.");
   }
@@ -118,11 +145,7 @@ export async function argosScreenshot(
   const fullPage =
     options.fullPage !== undefined ? options.fullPage : handle === page;
 
-  await page.evaluate(
-    ({ fullPage, argosCSS }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
-    { fullPage, argosCSS },
-  );
+  const teardown = await setup(page, options);
 
   async function collectMetadata(
     testInfo: TestInfo | null,
@@ -188,7 +211,7 @@ export async function argosScreenshot(
         fullPage,
         mask: [page.locator('[data-visual-test="blackout"]')],
         animations: "disabled",
-        ...options,
+        ...playwrightOptions,
       }),
       screenshotPath ? writeMetadata(screenshotPath, metadata) : null,
     ]);
@@ -226,13 +249,5 @@ export async function argosScreenshot(
     await stabilizeAndScreenshot(name);
   }
 
-  // Teardown Argos
-  await page.evaluate(
-    ({ fullPage, argosCSS }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
-        fullPage,
-        argosCSS,
-      }),
-    { fullPage, argosCSS },
-  );
+  await teardown();
 }
