@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.5.0...@argos-ci/puppeteer@1.6.0) (2024-02-02)
+
+
+### Features
+
+* **puppeteer:** add `disableHover` option by default ([d285fb9](https://github.com/argos-ci/argos-javascript/commit/d285fb914665f38683a9149bf65b8ddf4f39595f))
+
+
+
+
+
 # [1.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@1.4.2...@argos-ci/puppeteer@1.5.0) (2024-01-30)
 
 

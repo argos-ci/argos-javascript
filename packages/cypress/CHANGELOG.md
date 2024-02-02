@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.4.0...@argos-ci/cypress@1.5.0) (2024-02-02)
+
+
+### Bug Fixes
+
+* **cypress:** rename screenshots with retries ([0bf532b](https://github.com/argos-ci/argos-javascript/commit/0bf532bde63a4972a2bcd5158c946e6e2c4e1445))
+
+
+### Features
+
+* **cypress:** track retries ([070d380](https://github.com/argos-ci/argos-javascript/commit/070d38094f3e20afa7ef7c0a28c94364f51a4eac))
+
+
+
+
+
 # [1.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.3.4...@argos-ci/cypress@1.4.0) (2024-01-30)
 
 

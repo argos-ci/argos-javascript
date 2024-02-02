@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.9.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.8.0...@argos-ci/playwright@1.9.0) (2024-02-02)
+
+
+### Features
+
+* **playwright:** add `disableHover` option by default ([ed941ea](https://github.com/argos-ci/argos-javascript/commit/ed941eadc54773352a874da9ff14cecf9864994c))
+
+
+
+
+
 # [1.8.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.7.1...@argos-ci/playwright@1.8.0) (2024-01-30)
 
 
