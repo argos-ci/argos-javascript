@@ -1,21 +1,19 @@
 import { exec } from "node:child_process";
 
-let cached: Promise<string>;
+let cached: Promise<string | null>;
 
 /**
  * Get the top level of the git repository.
  */
 export function getGitRepositoryPath() {
   if (!cached) {
-    cached = new Promise<string>((resolve, reject) => {
+    cached = new Promise<string | null>((resolve) => {
       exec("git rev-parse --show-toplevel", (error, stdout, stderr) => {
         if (error) {
-          reject(error);
-          return;
+          resolve(null);
         }
         if (stderr) {
-          reject(stderr);
-          return;
+          resolve(null);
         }
         resolve(stdout.trim());
       });
