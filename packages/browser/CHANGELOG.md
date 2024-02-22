@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@1.4.1...@argos-ci/browser@1.5.0) (2024-02-22)
+
+
+### Features
+
+* **stability:** handle img with decoding="async" ([871ff56](https://github.com/argos-ci/argos-javascript/commit/871ff564a907ee737a3c1a75a5541ffa87b395fc))
+
+
+
+
+
 ## [1.4.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@1.4.0...@argos-ci/browser@1.4.1) (2024-02-02)
 
 **Note:** Version bump only for package @argos-ci/browser
