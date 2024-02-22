@@ -209,6 +209,12 @@ function waitForImagesToLoad(document: Document) {
 
   // Force eager loading
   images.forEach((img) => {
+    // Force sync decoding
+    if (img.decoding !== "sync") {
+      img.decoding = "sync";
+    }
+
+    // Force eager loading
     if (img.loading !== "eager") {
       img.loading = "eager";
     }
