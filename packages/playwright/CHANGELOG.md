@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.9.3...@argos-ci/playwright@2.0.0) (2024-03-15)
+
+
+### Bug Fixes
+
+* **playwright:** fix upload dir creation ([507a833](https://github.com/argos-ci/argos-javascript/commit/507a833f5896421f24fa83a6b1338ca565b06da8))
+* **playwright:** prepend the project name in the screenshot name ([533802c](https://github.com/argos-ci/argos-javascript/commit/533802c483a477635aa0b7332cda1a137cc49563))
+
+
+### BREAKING CHANGES
+
+* **playwright:** All screenshots taken with `argosScreenshot` from `@argos-ci/playwright` will
+get a new name that prepends the Playwright project.
+
+It allows to support multiple Playwright projects.
+
+
+
+
+
 ## [1.9.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.9.2...@argos-ci/playwright@1.9.3) (2024-02-22)
 
 **Note:** Version bump only for package @argos-ci/playwright
