@@ -147,9 +147,9 @@ export async function argosScreenshot(
 
   const teardown = await setup(page, options);
 
-  async function collectMetadata(
+  const collectMetadata = async (
     testInfo: TestInfo | null,
-  ): Promise<ScreenshotMetadata> {
+  ): Promise<ScreenshotMetadata> => {
     const [colorScheme, mediaType, libMetadata, testMetadata] =
       await Promise.all([
         page.evaluate(() =>
@@ -185,50 +185,53 @@ export async function argosScreenshot(
     };
 
     return metadata;
-  }
+  };
 
-  async function stabilizeAndScreenshot(name: string) {
+  const stabilizeAndScreenshot = async (name: string) => {
     await page.waitForFunction(() =>
       ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
     );
 
     const metadata = await collectMetadata(testInfo);
-    const screenshotPath = useArgosReporter
-      ? testInfo!.outputPath("argos", `${name}.png`)
-      : resolve(screenshotFolder, `${name}.png`);
+    const nameInProject = testInfo?.project.name
+      ? `${testInfo.project.name}/${name}`
+      : name;
 
-    if (screenshotPath) {
-      const dir = dirname(screenshotPath);
-      if (dir !== screenshotFolder) {
-        await mkdir(dirname(screenshotPath), { recursive: true });
-      }
+    const screenshotPath =
+      useArgosReporter && testInfo
+        ? testInfo.outputPath("argos", `${nameInProject}.png`)
+        : resolve(screenshotFolder, `${nameInProject}.png`);
+
+    const dir = dirname(screenshotPath);
+    if (dir !== screenshotFolder) {
+      await mkdir(dirname(screenshotPath), { recursive: true });
     }
 
     await Promise.all([
       handle.screenshot({
-        path: screenshotPath ?? undefined,
+        path: screenshotPath,
         type: "png",
         fullPage,
         mask: [page.locator('[data-visual-test="blackout"]')],
         animations: "disabled",
         ...playwrightOptions,
       }),
-      screenshotPath ? writeMetadata(screenshotPath, metadata) : null,
+      writeMetadata(screenshotPath, metadata),
     ]);
 
-    if (useArgosReporter) {
+    if (useArgosReporter && testInfo) {
       await Promise.all([
-        testInfo!.attach(getAttachmentName(name, "metadata"), {
+        testInfo.attach(getAttachmentName(nameInProject, "metadata"), {
           path: getMetadataPath(screenshotPath),
           contentType: "application/json",
         }),
-        testInfo!.attach(getAttachmentName(name, "screenshot"), {
+        testInfo.attach(getAttachmentName(nameInProject, "screenshot"), {
           path: screenshotPath,
           contentType: "image/png",
         }),
       ]);
     }
-  }
+  };
 
   // If no viewports are specified, take a single screenshot
   if (viewports) {
