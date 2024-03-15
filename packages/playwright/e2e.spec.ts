@@ -88,7 +88,7 @@ test.describe("#argosScreenshot", () => {
     expect(loaderContainer.trim()).toBe("");
   });
 
-  test("waits for image loading", async () => {
+  test("waits for image loading @visual", async () => {
     const loaderContainer = await page.$eval("#image", (div) => div.innerHTML);
     expect(loaderContainer.trim()).toBe("");
   });

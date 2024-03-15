@@ -20,11 +20,14 @@ import {
   getAttachmentFilename,
 } from "./attachment";
 import { getMetadataFromTestCase } from "./metadata";
+import { debug } from "./debug";
 
-async function createTempDirectory() {
+async function createUploadDirectory() {
+  debug("Creating temporary directory for screenshots");
   const osTmpDirectory = tmpdir();
   const path = join(osTmpDirectory, "argos." + randomBytes(16).toString("hex"));
   await mkdir(path, { recursive: true });
+  debug(`Temporary directory created: ${path}`);
   return path;
 }
 
@@ -54,7 +57,7 @@ async function getParallelFromConfig(
 }
 
 class ArgosReporter implements Reporter {
-  uploadDir!: string;
+  createUploadDirPromise: null | Promise<string>;
   config: ArgosReporterOptions;
   playwrightConfig!: FullConfig;
   uploadToArgos: boolean;
@@ -62,22 +65,29 @@ class ArgosReporter implements Reporter {
   constructor(config: ArgosReporterOptions) {
     this.config = config;
     this.uploadToArgos = config.uploadToArgos ?? true;
+    this.createUploadDirPromise = null;
   }
 
   async writeFile(path: string, body: Buffer | string) {
+    const uploadDir = await this.getUploadDir();
     const dir = dirname(path);
-    if (dir !== this.uploadDir) {
+    if (dir !== uploadDir) {
       await mkdir(dir, { recursive: true });
     }
+    debug(`Writing file to ${path}`);
     await writeFile(path, body);
+    debug(`File written to ${path}`);
   }
 
   async copyFile(from: string, to: string) {
+    const uploadDir = await this.getUploadDir();
     const dir = dirname(to);
-    if (dir !== this.uploadDir) {
+    if (dir !== uploadDir) {
       await mkdir(dir, { recursive: true });
     }
+    debug(`Copying file from ${from} to ${to}`);
     await copyFile(from, to);
+    debug(`File copied from ${from} to ${to}`);
   }
 
   getAutomaticScreenshotName(test: TestCase, result: TestResult) {
@@ -90,22 +100,28 @@ class ArgosReporter implements Reporter {
     return name;
   }
 
-  async onBegin(config: FullConfig, _suite: Suite) {
+  getUploadDir() {
+    if (!this.createUploadDirPromise) {
+      this.createUploadDirPromise = createUploadDirectory();
+    }
+    return this.createUploadDirPromise;
+  }
+
+  onBegin(config: FullConfig, _suite: Suite) {
+    debug("ArgosReporter:onBegin");
     this.playwrightConfig = config;
-    this.uploadDir = await createTempDirectory();
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
+    const uploadDir = await this.getUploadDir();
+    debug("ArgosReporter:onTestEnd");
     await Promise.all(
       result.attachments.map(async (attachment) => {
         if (
           checkIsArgosScreenshot(attachment) ||
           checkIsArgosScreenshotMetadata(attachment)
         ) {
-          const path = join(
-            this.uploadDir,
-            getAttachmentFilename(attachment.name),
-          );
+          const path = join(uploadDir, getAttachmentFilename(attachment.name));
           await this.copyFile(attachment.path, path);
           return;
         }
@@ -115,7 +131,7 @@ class ArgosReporter implements Reporter {
           const trace = result.attachments.find(checkIsTrace) ?? null;
           const metadata = await getMetadataFromTestCase(test, result);
           const name = this.getAutomaticScreenshotName(test, result);
-          const path = join(this.uploadDir, `${name}.png`);
+          const path = join(uploadDir, `${name}.png`);
           await Promise.all([
             this.writeFile(path + ".argos.json", JSON.stringify(metadata)),
             this.copyFile(attachment.path, path),
@@ -128,17 +144,33 @@ class ArgosReporter implements Reporter {
   }
 
   async onEnd(_result: FullResult) {
-    if (!this.uploadToArgos) return;
+    debug("ArgosReporter:onEnd");
+    const uploadDir = await this.getUploadDir();
+    if (!this.uploadToArgos) {
+      debug("Not uploading to Argos because uploadToArgos is false.");
+      debug(`Upload directory: ${uploadDir}`);
+      return;
+    }
 
+    debug("Getting parallel from config");
     const parallel = await getParallelFromConfig(this.playwrightConfig);
+    if (parallel) {
+      debug(
+        `Using parallel config — total: ${parallel.total}, nonce: "${parallel.nonce}"`,
+      );
+    } else {
+      debug("Non-parallel mode");
+    }
 
     try {
+      debug("Uploading to Argos");
       const res = await upload({
         files: ["**/*.png"],
-        root: this.uploadDir,
+        root: uploadDir,
         parallel: parallel ?? undefined,
         ...this.config,
       });
+
       console.log(chalk.green(`✅ Argos build created: ${res.build.url}`));
     } catch (error) {
       console.error(error);

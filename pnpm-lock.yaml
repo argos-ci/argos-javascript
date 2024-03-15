@@ -103,8 +103,8 @@ importers:
         specifier: ^6.1.4
         version: 6.1.4
       '@types/debug':
-        specifier: ^4.1.9
-        version: 4.1.9
+        specifier: ^4.1.12
+        version: 4.1.12
       '@types/tmp':
         specifier: ^0.2.3
         version: 0.2.4
@@ -160,6 +160,9 @@ importers:
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
+      debug:
+        specifier: ^4.3.4
+        version: 4.3.4(supports-color@9.4.0)
     devDependencies:
       '@argos-ci/cli':
         specifier: workspace:*
@@ -168,8 +171,11 @@ importers:
         specifier: workspace:.
         version: 'link:'
       '@playwright/test':
-        specifier: ^1.38.1
-        version: 1.39.0
+        specifier: ^1.42.1
+        version: 1.42.1
+      '@types/debug':
+        specifier: ^4.1.12
+        version: 4.1.12
       '@types/node':
         specifier: ^16.0.0
         version: 16.18.58
@@ -251,14 +257,14 @@ importers:
         specifier: ^8.27.0
         version: 8.27.0
       chromedriver:
-        specifier: ^120.0.1
-        version: 120.0.1
+        specifier: ^122.0.6
+        version: 122.0.6
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.3.93)(@types/node@16.18.58)(typescript@5.2.2)
       wdio-chromedriver-service:
         specifier: ^8.1.1
-        version: 8.1.1(@wdio/types@8.27.0)(chromedriver@120.0.1)(webdriverio@8.27.0)
+        version: 8.1.1(@wdio/types@8.27.0)(chromedriver@122.0.6)(webdriverio@8.27.0)
       webdriverio:
         specifier: ^8.27.0
         version: 8.27.0(typescript@5.2.2)
@@ -1349,7 +1355,7 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       '@open-draft/until': 1.0.3
-      '@types/debug': 4.1.9
+      '@types/debug': 4.1.12
       '@xmldom/xmldom': 0.8.10
       debug: 4.3.4(supports-color@9.4.0)
       headers-polyfill: 3.2.5
@@ -1844,12 +1850,12 @@ packages:
     dev: true
     optional: true
 
-  /@playwright/test@1.39.0:
-    resolution: {integrity: sha512-3u1iFqgzl7zr004bGPYiN/5EZpRUSFddQBra8Rqll5N0/vfpqlP9I9EXqAoGacuAbX6c9Ulg/Cjqglp5VkK6UQ==}
+  /@playwright/test@1.42.1:
+    resolution: {integrity: sha512-Gq9rmS54mjBL/7/MvBaNOBwbfnh7beHvS6oS4srqXFcQHpQCV1+c8JXWE8VLPyRDhgS3H8x8A7hztqI9VnwrAQ==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright: 1.39.0
+      playwright: 1.42.1
     dev: true
 
   /@pnpm/config.env-replace@1.1.0:
@@ -2398,8 +2404,8 @@ packages:
     resolution: {integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==}
     dev: true
 
-  /@types/debug@4.1.9:
-    resolution: {integrity: sha512-8Hz50m2eoS56ldRlepxSBa6PWEVCtzUo/92HgLc2qTMnotJNIm7xP+UZhyWoYsyOdd5dxZ+NZLb24rsKyFs2ow==}
+  /@types/debug@4.1.12:
+    resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
     dependencies:
       '@types/ms': 0.7.32
     dev: true
@@ -3108,7 +3114,7 @@ packages:
   /axios@0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.3(debug@4.3.4)
+      follow-redirects: 1.15.4
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
@@ -3122,9 +3128,20 @@ packages:
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
+    dev: false
 
   /axios@1.6.4:
     resolution: {integrity: sha512-heJnIs6N4aa1eSthhN9M5ioILu8Wi8vmQW9iHQ9NUvfkJb0lEEDUiIdQNAuBtfUt3FxReaKdpQA5DbmMOqzF/A==}
+    dependencies:
+      follow-redirects: 1.15.4
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: true
+
+  /axios@1.6.7:
+    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
     dependencies:
       follow-redirects: 1.15.4
       form-data: 4.0.0
@@ -3572,17 +3589,17 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /chromedriver@120.0.1:
-    resolution: {integrity: sha512-ETTJlkibcAmvoKsaEoq2TFqEsJw18N0O9gOQZX6Uv/XoEiOV8p+IZdidMeIRYELWJIgCZESvlOx5d1QVnB4v0w==}
+  /chromedriver@122.0.6:
+    resolution: {integrity: sha512-Q0r+QlUtiJWMQ5HdYaFa0CtBmLFq3n5JWfmq9mOC00UMBvWxku09gUkvBt457QnYfTM/XHqY/HTFOxHvATnTmA==}
     engines: {node: '>=18'}
     hasBin: true
     requiresBuild: true
     dependencies:
       '@testim/chrome-version': 1.1.4
-      axios: 1.6.4
+      axios: 1.6.7
       compare-versions: 6.1.0
       extract-zip: 2.0.1
-      https-proxy-agent: 5.0.1
+      proxy-agent: 6.4.0
       proxy-from-env: 1.1.0
       tcp-port-used: 1.0.2
     transitivePeerDependencies:
@@ -5130,6 +5147,7 @@ packages:
         optional: true
     dependencies:
       debug: 4.3.4(supports-color@9.4.0)
+    dev: false
 
   /follow-redirects@1.15.4:
     resolution: {integrity: sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==}
@@ -5797,6 +5815,16 @@ packages:
       - supports-color
     dev: true
 
+  /http-proxy-agent@7.0.2:
+    resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
+    engines: {node: '>= 14'}
+    dependencies:
+      agent-base: 7.1.0
+      debug: 4.3.4(supports-color@9.4.0)
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /http-signature@1.3.6:
     resolution: {integrity: sha512-3adrsD6zqo4GsTqtO7FyrejHNv+NgiIfAfv68+jVlFmSr9OGy7zrxONceFRLKvnnZA5jbxQBX1u9PpB6Wi32Gw==}
     engines: {node: '>=0.10'}
@@ -5825,6 +5853,16 @@ packages:
 
   /https-proxy-agent@7.0.2:
     resolution: {integrity: sha512-NmLNjm6ucYwtcUmL7JQC1ZQ57LmHP4lT15FQ8D61nak1rO6DH+fz5qNK2Ap5UN4ZapYICE3/0KodcLYSPsPbaA==}
+    engines: {node: '>= 14'}
+    dependencies:
+      agent-base: 7.1.0
+      debug: 4.3.4(supports-color@9.4.0)
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /https-proxy-agent@7.0.4:
+    resolution: {integrity: sha512-wlwpilI7YdjSkWaQ/7omYBMTliDcmCN8OLihO6I9B86g06lMyAoqgoDpV0XqoaPOKj+0DIdAvnsWfyAAhmimcg==}
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.0
@@ -7306,11 +7344,13 @@ packages:
 
   /loglevel-plugin-prefix@0.8.4:
     resolution: {integrity: sha512-WpG9CcFAOjz/FtNht+QJeGpvVl/cdR6P0z6OcXSkr8wFJOsV2GRj2j10JLfjuA4aYkcKCNIEqRGCyTife9R8/g==}
+    requiresBuild: true
     dev: true
 
   /loglevel@1.8.1:
     resolution: {integrity: sha512-tCRIJM51SHjAayKwC+QAg8hT8vg6z7GSgLJKGvzuPb1Wc+hLzqtuVLxp6/HzSPOozuK+8ErAhy7U/sVzw8Dgfg==}
     engines: {node: '>= 0.6.0'}
+    requiresBuild: true
     dev: true
 
   /loupe@2.3.7:
@@ -8068,7 +8108,7 @@ packages:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
-      axios: 1.5.1(debug@4.3.4)
+      axios: 1.6.4
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -8337,8 +8377,8 @@ packages:
       agent-base: 7.1.0
       debug: 4.3.4(supports-color@9.4.0)
       get-uri: 6.0.2
-      http-proxy-agent: 7.0.0
-      https-proxy-agent: 7.0.2
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.4
       pac-resolver: 7.0.0
       socks-proxy-agent: 8.0.2
     transitivePeerDependencies:
@@ -8585,18 +8625,18 @@ packages:
       pathe: 1.1.1
     dev: true
 
-  /playwright-core@1.39.0:
-    resolution: {integrity: sha512-+k4pdZgs1qiM+OUkSjx96YiKsXsmb59evFoqv8SKO067qBA+Z2s/dCzJij/ZhdQcs2zlTAgRKfeiiLm8PQ2qvw==}
+  /playwright-core@1.42.1:
+    resolution: {integrity: sha512-mxz6zclokgrke9p1vtdy/COWBH+eOZgYUVVU34C73M+4j4HLlQJHtfcqiqqxpP0o8HhMkflvfbquLX5dg6wlfA==}
     engines: {node: '>=16'}
     hasBin: true
     dev: true
 
-  /playwright@1.39.0:
-    resolution: {integrity: sha512-naE5QT11uC/Oiq0BwZ50gDmy8c8WLPRTEWuSSFVG2egBka/1qMoSqYQcROMT9zLwJ86oPofcTH2jBY/5wWOgIw==}
+  /playwright@1.42.1:
+    resolution: {integrity: sha512-PgwB03s2DZBcNRoW+1w9E+VkLBxweib6KTXM0M3tkiT4jVxKSi6PmVJ591J+0u10LUrgxB7dLRbiJqO5s2QPMg==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright-core: 1.39.0
+      playwright-core: 1.42.1
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
@@ -8754,6 +8794,22 @@ packages:
       debug: 4.3.4(supports-color@9.4.0)
       http-proxy-agent: 7.0.0
       https-proxy-agent: 7.0.2
+      lru-cache: 7.18.3
+      pac-proxy-agent: 7.0.1
+      proxy-from-env: 1.1.0
+      socks-proxy-agent: 8.0.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /proxy-agent@6.4.0:
+    resolution: {integrity: sha512-u0piLU+nCOHMgGjRbimiXmA9kM/L9EHh3zL81xCdp7m+Y2pHIsnmbdDoEDoAz5geaonNR6q6+yOPQs6n4T6sBQ==}
+    engines: {node: '>= 14'}
+    dependencies:
+      agent-base: 7.1.0
+      debug: 4.3.4(supports-color@9.4.0)
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.4
       lru-cache: 7.18.3
       pac-proxy-agent: 7.0.1
       proxy-from-env: 1.1.0
@@ -10530,7 +10586,7 @@ packages:
       defaults: 1.0.4
     dev: true
 
-  /wdio-chromedriver-service@8.1.1(@wdio/types@8.27.0)(chromedriver@120.0.1)(webdriverio@8.27.0):
+  /wdio-chromedriver-service@8.1.1(@wdio/types@8.27.0)(chromedriver@122.0.6)(webdriverio@8.27.0):
     resolution: {integrity: sha512-pN3GiOkTIMnalfq4PJAHdX95pDp1orHnTY8W1fIbd6ok81ba97UjerTgS7lUDRUh1p0MAm35Ww0uc0/9wzB7SA==}
     engines: {node: ^16.13 || >=18}
     peerDependencies:
@@ -10545,7 +10601,7 @@ packages:
     dependencies:
       '@wdio/logger': 8.24.12
       '@wdio/types': 8.27.0
-      chromedriver: 120.0.1
+      chromedriver: 122.0.6
       fs-extra: 11.1.1
       split2: 4.2.0
       tcp-port-used: 1.0.2
