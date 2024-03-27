@@ -72,6 +72,18 @@ module.exports = defineConfig({
 });
 ```
 
+## Troubleshooting
+
+### Error while importing `@argos-ci/cypress/task` in `cypress.config.ts`
+
+To address the `ts(1479)` error when importing `@argos-ci/cypress/task` in your `cypress.config.ts`, you have two main strategies:
+
+1. Update your `tsconfig.json` by setting `moduleResolution` to `"Bundler"`. This method leverages TypeScript's support for newer module resolution strategies, aligning with Node.js's `exports` feature used by Argos to distribute optimized SDKs.
+
+2. Alternatively, suppress the error in `cypress.config.ts` by adding the line `// @ts-expect-error moduleResolution` right above the import statement. This tells TypeScript to expect an error at this line and ignore it, offering a quick workaround without adjusting your project's module resolution strategy.
+
+The first option is a more comprehensive solution, dealing with the TypeScript bug through adopting the new `moduleResolution: "Bundler"` setting, which is designed for such cases. The second option is simpler and quicker but bypasses the issue rather than solving it at its core.
+
 ## Additional Resources
 
 - [Quickstart with Argos + Cypress](/quickstart/cypress)
