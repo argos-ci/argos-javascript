@@ -16,7 +16,7 @@ export type RegisterArgosTaskOptions = Omit<
 
 export function registerArgosTask(
   on: Cypress.PluginEvents,
-  config: Cypress.Config,
+  config: Cypress.PluginConfigOptions,
   options?: RegisterArgosTaskOptions,
 ) {
   on("after:screenshot", async (details) => {
