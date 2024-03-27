@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.5.4...@argos-ci/cypress@1.5.5) (2024-03-27)
+
+
+### Bug Fixes
+
+* **cypress:** fix types ([640fc63](https://github.com/argos-ci/argos-javascript/commit/640fc6339f64f9d31a8ae161e5d5d4f4bcf2763a))
+
+
+
+
+
 ## [1.5.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@1.5.3...@argos-ci/cypress@1.5.4) (2024-03-15)
 
 **Note:** Version bump only for package @argos-ci/cypress
