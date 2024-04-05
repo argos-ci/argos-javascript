@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@2.0.0...@argos-ci/playwright@3.0.0) (2024-04-05)
+
+
+### Features
+
+* upgrade dependencies ([dd66e29](https://github.com/argos-ci/argos-javascript/commit/dd66e29986fab384557e9be74ee5c8e8aad72d82))
+
+
+### BREAKING CHANGES
+
+* Node.js v18 or higher is required.
+
+
+
+
+
 # [2.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@1.9.3...@argos-ci/playwright@2.0.0) (2024-03-15)
 
 

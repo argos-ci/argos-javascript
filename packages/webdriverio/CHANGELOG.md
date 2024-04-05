@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.2.6...@argos-ci/webdriverio@0.3.0) (2024-04-05)
+
+
+### Features
+
+* upgrade dependencies ([dd66e29](https://github.com/argos-ci/argos-javascript/commit/dd66e29986fab384557e9be74ee5c8e8aad72d82))
+
+
+### BREAKING CHANGES
+
+* Node.js v18 or higher is required.
+
+
+
+
+
 ## [0.2.6](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.2.5...@argos-ci/webdriverio@0.2.6) (2024-03-15)
 
 **Note:** Version bump only for package @argos-ci/webdriverio

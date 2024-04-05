@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@1.2.1...@argos-ci/util@2.0.0) (2024-04-05)
+
+
+### Features
+
+* upgrade dependencies ([dd66e29](https://github.com/argos-ci/argos-javascript/commit/dd66e29986fab384557e9be74ee5c8e8aad72d82))
+
+
+### BREAKING CHANGES
+
+* Node.js v18 or higher is required.
+
+
+
+
+
 ## [1.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@1.2.0...@argos-ci/util@1.2.1) (2024-02-15)
 
 
