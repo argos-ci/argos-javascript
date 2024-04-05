@@ -39,7 +39,7 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "@argos-ci/browser": "workspace:*",
@@ -51,9 +51,9 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/playwright": "workspace:.",
-    "@playwright/test": "^1.42.1",
+    "@playwright/test": "^1.43.0",
     "@types/debug": "^4.1.12",
-    "@types/node": "^16.0.0"
+    "@types/node": "^18.0.0"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
