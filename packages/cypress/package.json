@@ -39,13 +39,13 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "@argos-ci/browser": "workspace:*",
     "@argos-ci/core": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "cypress-wait-until": "^1.7.2"
+    "cypress-wait-until": "^3.0.1"
   },
   "peerDependencies": {
     "cypress": "^12.0.0 || ^13.0.0"
@@ -53,10 +53,10 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/cypress": "workspace:.",
-    "@types/node": "^16.0.0",
-    "cypress": "^13.3.0",
+    "@types/node": "^18.0.0",
+    "cypress": "^13.7.2",
     "eslint-plugin-cypress": "^2.15.1",
-    "eslint-plugin-html": "^7.1.0"
+    "eslint-plugin-html": "^8.0.0"
   },
   "scripts": {
     "prebuild": "rm -rf dist",

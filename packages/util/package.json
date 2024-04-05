@@ -27,13 +27,13 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c"
   },
   "devDependencies": {
-    "@types/node": "^16.0.0"
+    "@types/node": "^18.0.0"
   }
 }

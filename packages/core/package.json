@@ -24,7 +24,7 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "license": "MIT",
   "keywords": [
@@ -41,18 +41,18 @@
   },
   "dependencies": {
     "@argos-ci/util": "workspace:*",
-    "axios": "^1.5.0",
+    "axios": "^1.6.8",
     "convict": "^6.2.4",
     "debug": "^4.3.4",
-    "fast-glob": "^3.3.1",
-    "sharp": "^0.32.5",
-    "tmp": "^0.2.1"
+    "fast-glob": "^3.3.2",
+    "sharp": "^0.33.3",
+    "tmp": "^0.2.3"
   },
   "devDependencies": {
-    "@types/convict": "^6.1.4",
+    "@types/convict": "^6.1.6",
     "@types/debug": "^4.1.12",
-    "@types/tmp": "^0.2.3",
-    "msw": "^1.3.0"
+    "@types/tmp": "^0.2.6",
+    "msw": "^2.2.13"
   },
   "scripts": {
     "prebuild": "rm -rf dist",

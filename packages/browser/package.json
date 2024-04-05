@@ -33,7 +33,7 @@
   },
   "types": "./dist/index.d.ts",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
@@ -41,6 +41,6 @@
   },
   "devDependencies": {
     "@rollup/plugin-replace": "^5.0.5",
-    "@types/node": "^16.0.0"
+    "@types/node": "^18.0.0"
   }
 }

@@ -12,7 +12,7 @@ export const swcPlugin = swc({
   },
   env: {
     targets: {
-      node: "16",
+      node: "18",
     },
   },
 });

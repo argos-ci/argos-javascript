@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -38,49 +38,49 @@ jobs:
         run: npm run build
 
       - name: Upload "@argos-ci/util" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: util-dist
           path: packages/util/dist
 
       - name: Upload "@argos-ci/cli" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cli-dist
           path: packages/cli/dist
 
       - name: Upload "@argos-ci/core" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: core-dist
           path: packages/core/dist
 
       - name: Upload "@argos-ci/browser" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: browser-dist
           path: packages/browser/dist
 
       - name: Upload "@argos-ci/playwright" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-dist
           path: packages/playwright/dist
 
       - name: Upload "@argos-ci/cypress" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-dist
           path: packages/cypress/dist
 
       - name: Upload "@argos-ci/puppeteer" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: puppeteer-dist
           path: packages/puppeteer/dist
 
       - name: Upload "@argos-ci/webdriverio" dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: webdriverio-dist
           path: packages/webdriverio/dist
@@ -91,13 +91,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [16, 18, 20]
+        node-version: [18, 20, current]
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -105,19 +105,19 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: util-dist
           path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cli-dist
           path: packages/cli/dist
 
       - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core-dist
           path: packages/core/dist
@@ -131,14 +131,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [16, 18, 20]
+        node-version: [18, 20, current]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -146,19 +146,19 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: util-dist
           path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cli-dist
           path: packages/cli/dist
 
       - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core-dist
           path: packages/core/dist
@@ -183,7 +183,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -194,31 +194,31 @@ jobs:
         run: pnpm --filter cypress exec cypress install
 
       - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: util-dist
           path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cli-dist
           path: packages/cli/dist
 
       - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core-dist
           path: packages/core/dist
 
       - name: Download "@argos-ci/browser" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: browser-dist
           path: packages/browser/dist
 
       - name: Download "@argos-ci/cypress" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cypress-dist
           path: packages/cypress/dist
@@ -243,7 +243,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -254,31 +254,31 @@ jobs:
         run: pnpm --filter playwright exec playwright install chromium --with-deps
 
       - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: util-dist
           path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cli-dist
           path: packages/cli/dist
 
       - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core-dist
           path: packages/core/dist
 
       - name: Download "@argos-ci/browser" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: browser-dist
           path: packages/browser/dist
 
       - name: Download "@argos-ci/playwright" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: playwright-dist
           path: packages/playwright/dist
@@ -303,7 +303,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -314,31 +314,31 @@ jobs:
         run: node packages/puppeteer/node_modules/puppeteer/install.mjs
 
       - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: util-dist
           path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cli-dist
           path: packages/cli/dist
 
       - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core-dist
           path: packages/core/dist
 
       - name: Download "@argos-ci/browser" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: browser-dist
           path: packages/browser/dist
 
       - name: Download "@argos-ci/puppeteer" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: puppeteer-dist
           path: packages/puppeteer/dist
@@ -363,7 +363,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
@@ -371,25 +371,25 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: util-dist
           path: packages/util/dist
 
       - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cli-dist
           path: packages/cli/dist
 
       - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core-dist
           path: packages/core/dist
 
       - name: Download "@argos-ci/webdriverio" dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: webdriverio-dist
           path: packages/webdriverio/dist
