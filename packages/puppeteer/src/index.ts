@@ -177,10 +177,13 @@ export async function argosScreenshot(
       colorScheme,
       mediaType,
       test: null,
-      browser: {
-        name: browserName,
-        version: browserVersion,
-      },
+      browser:
+        browserName || browserVersion
+          ? {
+              name: browserName || "unknown",
+              version: browserVersion || "unknown",
+            }
+          : undefined,
       automationLibrary: {
         name: "puppeteer",
         version: puppeteerVersion,

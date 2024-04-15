@@ -72,8 +72,12 @@ async function uploadFilesToS3(
     debug(`Uploading chunk ${i + 1}/${chunks.length}`);
     const timeLabel = `Chunk ${i + 1}/${chunks.length}`;
     debugTime(timeLabel);
+    const chunk = chunks[i];
+    if (!chunk) {
+      throw new Error(`Invariant: chunk ${i} is empty`);
+    }
     await Promise.all(
-      chunks[i].map(async ({ url, path, contentType }) => {
+      chunk.map(async ({ url, path, contentType }) => {
         await uploadToS3({
           url,
           path,
