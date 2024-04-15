@@ -1,13 +1,13 @@
 {
-  "name": "@argos-ci/browser",
-  "description": "Browser utilities to stabilize visual testing.",
-  "version": "2.0.0",
+  "name": "@argos-ci/api-client",
+  "description": "Argos API client.",
+  "version": "0.0.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/argos-ci/argos-javascript.git",
-    "directory": "packages/browser"
+    "directory": "packages/api-client"
   },
   "keywords": [
     "browser",
@@ -37,12 +37,14 @@
   },
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build-schema-types": "openapi-typescript https://api.argos-ci.dev:4001/v2/openapi.yaml -o dist/schema.ts",
+    "build-schema-types": "openapi-typescript https://api.argos-ci.com/v2/openapi.yaml -o src/schema.ts",
     "build": "rollup -c"
   },
   "devDependencies": {
-    "@rollup/plugin-replace": "^5.0.5",
     "@types/node": "^18.0.0",
     "openapi-typescript": "^6.7.5"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.9.3"
   }
 }

@@ -1,13 +1,13 @@
 {
-  "name": "@argos-ci/browser",
-  "description": "Browser utilities to stabilize visual testing.",
-  "version": "2.0.0",
+  "name": "@argos-ci/gitlab",
+  "description": "GitLab utilities for Argos.",
+  "version": "0.0.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/argos-ci/argos-javascript.git",
-    "directory": "packages/browser"
+    "directory": "packages/gitlab"
   },
   "keywords": [
     "browser",
@@ -23,6 +23,9 @@
     "access": "public"
   },
   "type": "module",
+  "bin": {
+    "argos": "./bin/argos-gitlab.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -37,12 +40,14 @@
   },
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build-schema-types": "openapi-typescript https://api.argos-ci.dev:4001/v2/openapi.yaml -o dist/schema.ts",
     "build": "rollup -c"
   },
+  "dependencies": {
+    "@argos-ci/api-client": "workspace:*",
+    "@gitbeaker/rest": "^40.0.3",
+    "commander": "^12.0.0"
+  },
   "devDependencies": {
-    "@rollup/plugin-replace": "^5.0.5",
-    "@types/node": "^18.0.0",
-    "openapi-typescript": "^6.7.5"
+    "@types/node": "^18.0.0"
   }
 }

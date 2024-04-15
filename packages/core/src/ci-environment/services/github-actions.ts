@@ -103,7 +103,7 @@ const getBranch = ({ env }: Context) => {
 
 const getRepository = ({ env }: Context) => {
   if (!env.GITHUB_REPOSITORY) return null;
-  return env.GITHUB_REPOSITORY.split("/")[1];
+  return env.GITHUB_REPOSITORY.split("/")[1] || null;
 };
 
 const readEventPayload = ({ env }: Context): EventPayload | null => {
