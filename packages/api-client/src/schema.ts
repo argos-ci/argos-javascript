@@ -3,7 +3,6 @@
  * Do not make direct changes to the file.
  */
 
-
 export interface paths {
   "/project/builds": {
     get: operations["getAuthProjectBuilds"];
@@ -18,10 +17,13 @@ export interface components {
     Build: {
       id: string;
       number: number;
-      status: ("accepted" | "rejected") | ("stable" | "diffDetected") | ("expired" | "pending" | "progress" | "error" | "aborted");
+      status:
+        | ("accepted" | "rejected")
+        | ("stable" | "diffDetected")
+        | ("expired" | "pending" | "progress" | "error" | "aborted");
       /** Format: uri */
       url: string;
-      notification: ({
+      notification: {
         description: string;
         context: string;
         github: {
@@ -32,14 +34,14 @@ export interface components {
           /** @enum {string} */
           state: "pending" | "running" | "success" | "failed" | "canceled";
         };
-      }) | null;
+      } | null;
     };
     /** @description Error response */
     Error: {
       error: string;
       details: {
-          message: string;
-        }[];
+        message: string;
+      }[];
     };
   };
   responses: never;
@@ -54,7 +56,6 @@ export type $defs = Record<string, never>;
 export type external = Record<string, never>;
 
 export interface operations {
-
   getAuthProjectBuilds: {
     parameters: {
       query?: {
