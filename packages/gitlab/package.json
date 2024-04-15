@@ -23,6 +23,9 @@
     "access": "public"
   },
   "type": "module",
+  "bin": {
+    "argos": "./bin/argos-gitlab.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
