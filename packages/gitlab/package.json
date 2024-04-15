@@ -24,7 +24,7 @@
   },
   "type": "module",
   "bin": {
-    "argos": "./bin/argos-gitlab.js"
+    "argos-gitlab": "./bin/argos-gitlab.js"
   },
   "exports": {
     ".": {
