@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/gitlab@0.1.0...@argos-ci/gitlab@0.1.1) (2024-04-15)
+
+
+### Bug Fixes
+
+* **gitlab:** fix binary name ([f61d721](https://github.com/argos-ci/argos-javascript/commit/f61d721156f1c33ab0059e6d81d281c633f3468e))
+
+
+
+
+
 # 0.1.0 (2024-04-15)
 
 
