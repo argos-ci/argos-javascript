@@ -65,9 +65,9 @@ async function run(input: {
 }
 
 /**
- * Create Gitlab commit statuses based on Argos CI builds.
+ * Upate GitLab commit statuses based on Argos builds.
  */
-export async function createGitlabCommitStatuses(input: {
+export async function updateGitLabCommitStatuses(input: {
   commit: string;
   pullInterval?: number;
   argosToken: string;

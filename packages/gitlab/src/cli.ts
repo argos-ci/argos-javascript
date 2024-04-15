@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { program } from "commander";
-import { createGitlabCommitStatuses } from ".";
+import { updateGitLabCommitStatuses } from ".";
 import { getConfig } from "./config";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -17,11 +17,11 @@ program
 
 program
   .command("update-statuses")
-  .description("Update GitLab commit statuses based on Argos CI builds")
+  .description("Update GitLab commit statuses based on Argos builds.")
   .action(async () => {
     const config = getConfig();
     try {
-      await createGitlabCommitStatuses(config);
+      await updateGitLabCommitStatuses(config);
     } catch (error: any) {
       console.error(error.stack);
       process.exit(1);
