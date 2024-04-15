@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/gitlab@0.1.1...@argos-ci/gitlab@0.1.2) (2024-04-15)
+
+
+### Bug Fixes
+
+* **gitlab:** rename token to ARGOS_GITLAB_TOKEN ([99ace50](https://github.com/argos-ci/argos-javascript/commit/99ace505c7cd5be652afcf972ef839a86bd9bd57))
+
+
+
+
+
 ## [0.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/gitlab@0.1.0...@argos-ci/gitlab@0.1.1) (2024-04-15)
 
 
