@@ -15,6 +15,8 @@ jobs:
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
+        with:
+          node-version: 20
 
       - name: Lint
         run: npm run lint
@@ -33,6 +35,8 @@ jobs:
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
+        with:
+          node-version: 20
 
       - name: Build
         run: npm run build
@@ -91,7 +95,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, current]
+        node-version: [18, 20, 22]
 
     runs-on: ubuntu-latest
 
@@ -131,7 +135,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, current]
+        node-version: [18, 20, 22]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}

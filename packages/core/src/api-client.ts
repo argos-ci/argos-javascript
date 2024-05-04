@@ -19,6 +19,7 @@ export interface CreateBuildInput {
   prHeadCommit?: string | null;
   referenceBranch?: string | null;
   referenceCommit?: string | null;
+  mode?: "ci" | "monitoring" | null;
 }
 
 export interface CreateBuildOutput {
