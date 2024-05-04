@@ -5,17 +5,17 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-swc": "^0.3.0",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@swc/core": "^1.4.12",
+    "@swc/core": "^1.4.17",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "lerna": "^8.1.2",
     "prettier": "^3.2.5",
-    "rollup": "^4.14.0",
-    "rollup-plugin-swc3": "^0.11.0",
+    "rollup": "^4.17.2",
+    "rollup-plugin-swc3": "^0.11.1",
     "rollup-plugin-ts": "^3.4.5",
-    "typedoc": "^0.25.12",
-    "typescript": "^5.4.4",
-    "vitest": "^1.4.0"
+    "typedoc": "^0.25.13",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   },
   "scripts": {
     "build": "pnpm run -r prebuild && cross-env NODE_ENV=production pnpm -r run build",
