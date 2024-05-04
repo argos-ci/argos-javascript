@@ -29,7 +29,7 @@
     "release-canary": "npm run build && lerna publish --canary --dist-tag canary"
   },
   "engines": {
-    "node": ">=18",
-    "pnpm": ">=9"
+    "node": "20",
+    "pnpm": "9"
   }
 }
