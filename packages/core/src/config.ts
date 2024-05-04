@@ -55,6 +55,12 @@ const schema = {
     format: String,
     nullable: true,
   },
+  mode: {
+    env: "ARGOS_MODE",
+    format: ["ci", "monitoring"],
+    default: null,
+    nullable: true,
+  },
   prNumber: {
     env: "ARGOS_PR_NUMBER",
     format: Number,
@@ -140,6 +146,7 @@ export interface Config {
   runId: string | null;
   prNumber: number | null;
   prHeadCommit: string | null;
+  mode: "ci" | "monitoring" | null;
 }
 
 const createConfig = () => {
@@ -178,6 +185,7 @@ export async function readConfig(options: Partial<Config> = {}) {
       ciEnv?.nonce ||
       null,
     parallelTotal: options.parallelTotal || config.get("parallelTotal") || null,
+    mode: options.mode || config.get("mode") || null,
   });
 
   config.validate();

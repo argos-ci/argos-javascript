@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
-import { program } from "commander";
+import { Option, program } from "commander";
 import { upload } from "@argos-ci/core";
 import ora from "ora";
 
@@ -30,24 +30,53 @@ program
     "-i, --ignore <patterns...>",
     'One or more globs matching image file paths to ignore (ex: "**/*.png **/diff.jpg")',
   )
-  .option("--token <token>", "Repository token")
-  .option(
-    "--build-name <string>",
-    "Name of the build, in case you want to run multiple Argos builds in a single CI job",
+  .addOption(
+    new Option("--token <token>", "Repository token").env("ARGOS_TOKEN"),
   )
-  .option(
-    "--parallel",
-    "Enable parallel mode. Run multiple Argos builds and combine them at the end",
+  .addOption(
+    new Option(
+      "--build-name <string>",
+      "Name of the build, in case you want to run multiple Argos builds in a single CI job",
+    ).env("ARGOS_BUILD_NAME"),
   )
-  .option("--parallel-total <number>", "The number of parallel nodes being ran")
-  .option("--parallel-nonce <string>", "A unique ID for this parallel build")
-  .option(
-    "--reference-branch <string>",
-    "Branch used as baseline for screenshot comparison",
+  .addOption(
+    new Option(
+      "--mode <string>",
+      "Mode of comparison applied. CI for visual regression testing, monitoring for visual monitoring.",
+    )
+      .default("ci")
+      .choices(["ci", "monitoring"])
+      .env("ARGOS_MODE"),
   )
-  .option(
-    "--reference-commit <string>",
-    "Commit used as baseline for screenshot comparison",
+  .addOption(
+    new Option(
+      "--parallel",
+      "Enable parallel mode. Run multiple Argos builds and combine them at the end",
+    ).env("ARGOS_PARALLEL"),
+  )
+  .addOption(
+    new Option(
+      "--parallel-total <number>",
+      "The number of parallel nodes being ran",
+    ).env("ARGOS_PARALLEL_TOTAL"),
+  )
+  .addOption(
+    new Option(
+      "--parallel-nonce <string>",
+      "A unique ID for this parallel build",
+    ).env("ARGOS_PARALLEL_NONCE"),
+  )
+  .addOption(
+    new Option(
+      "--reference-branch <string>",
+      "Branch used as baseline for screenshot comparison",
+    ).env("ARGOS_REFERENCE_BRANCH"),
+  )
+  .addOption(
+    new Option(
+      "--reference-commit <string>",
+      "Commit used as baseline for screenshot comparison",
+    ).env("ARGOS_REFERENCE_COMMIT"),
   )
   .action(async (directory, options) => {
     const spinner = ora("Uploading screenshots").start();
@@ -64,6 +93,7 @@ program
           : false,
         referenceBranch: options.referenceBranch,
         referenceCommit: options.referenceCommit,
+        mode: options.mode,
       });
       spinner.succeed(`Build created: ${result.build.url}`);
     } catch (error: any) {

@@ -32,6 +32,8 @@ export interface UploadParameters {
   prNumber?: number;
   /** Name of the build used to trigger multiple Argos builds on one commit */
   buildName?: string;
+  /** Mode of comparison applied */
+  mode?: "ci" | "monitoring";
   /** Parallel test suite mode */
   parallel?:
     | {
@@ -159,6 +161,7 @@ export async function upload(params: UploadParameters) {
     commit: config.commit,
     branch: config.branch,
     name: config.buildName,
+    mode: config.mode,
     parallel: config.parallel,
     parallelNonce: config.parallelNonce,
     screenshotKeys,
