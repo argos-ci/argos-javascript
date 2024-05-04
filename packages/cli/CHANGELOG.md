@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@2.0.1...@argos-ci/cli@2.1.0) (2024-05-04)
+
+
+### Features
+
+* **mode:** add "mode" support ([#126](https://github.com/argos-ci/argos-javascript/issues/126)) ([91a53b6](https://github.com/argos-ci/argos-javascript/commit/91a53b6732d99eb95807b1b8d20c061e45a87951))
+
+
+
+
+
 ## [2.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@2.0.0...@argos-ci/cli@2.0.1) (2024-04-15)
 
 **Note:** Version bump only for package @argos-ci/cli
