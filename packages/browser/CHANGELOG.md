@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@2.1.0...@argos-ci/browser@2.1.1) (2024-05-25)
+
+
+### Bug Fixes
+
+* **stabilization:** safer positionning stabilization ([#127](https://github.com/argos-ci/argos-javascript/issues/127)) ([2d051d5](https://github.com/argos-ci/argos-javascript/commit/2d051d518c1cb0c878b21eb39820917d5a839d3e))
+
+
+
+
+
 # [2.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@2.0.0...@argos-ci/browser@2.1.0) (2024-04-15)
 
 
