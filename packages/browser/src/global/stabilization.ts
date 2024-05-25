@@ -102,11 +102,20 @@ const checkIsHTMLElement = (element: Element): element is HTMLElement => {
  * Set the position of an element and backup the previous one.
  */
 function setAndBackupPosition(element: HTMLElement, position: string) {
-  element.setAttribute(
-    "data-argos-bck-position",
-    element.style.position ?? "unset",
-  );
+  // Check if position is equivalent by comparing the coords before and after setting it
+  const previousPosition = element.style.position;
+  const previousRect = element.getBoundingClientRect();
   element.style.position = position;
+  const currentRect = element.getBoundingClientRect();
+
+  // If the position is not equivalent, restore the previous one
+  if (previousRect.x !== currentRect.x || previousRect.y !== currentRect.y) {
+    element.style.position = previousPosition;
+    return;
+  }
+
+  // If the position is equivalent, keep the new position and backup the previous one
+  element.setAttribute("data-argos-bck-position", previousPosition ?? "unset");
 }
 
 /**
