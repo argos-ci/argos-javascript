@@ -51,11 +51,22 @@
       .blue-fill circle {
         fill: blue;
       }
+      .hoverable {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+
+        &:hover {
+          background-color: green;
+        }
+      }
     </style>
   </head>
   <body>
     <main>
       <h1>Dummy page</h1>
+
+      <div class="hoverable" data-testid="hoverable"></div>
 
       <h3>Transparent</h3>
       <div class="hint">Hint: the following div should be empty.</div>
