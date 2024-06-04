@@ -39,7 +39,7 @@ const GLOBAL_CSS: string = `
  */
 function setAndBackupSpellcheck(element: HTMLElement, spellcheck: string) {
   element.setAttribute(
-    "data-argos-bck-position",
+    "data-argos-bck-spellcheck",
     element.getAttribute("spellcheck") ?? "unset",
   );
   element.setAttribute("spellcheck", spellcheck);
@@ -71,6 +71,7 @@ function restoreSpellCheck(document: Document) {
     } else if (spellcheck) {
       input.setAttribute("spellcheck", spellcheck);
     }
+    input.removeAttribute("data-argos-bck-spellcheck");
   });
 }
 
@@ -152,6 +153,7 @@ function restoreElementPositions(document: Document) {
     } else if (position) {
       element.style.position = position;
     }
+    element.removeAttribute("data-argos-bck-position");
   });
 }
 
