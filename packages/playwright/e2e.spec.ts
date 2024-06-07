@@ -60,19 +60,6 @@ test.describe("#argosScreenshot", () => {
     expect(error.message).toBe("The `name` argument is required.");
   });
 
-  test("waits for loader hiding", async ({ page }) => {
-    const loaderContainer = await page.$eval(
-      "#loader-container",
-      (div) => div.innerHTML,
-    );
-    expect(loaderContainer.trim()).toBe("");
-  });
-
-  test("waits for image loading @visual", async ({ page }) => {
-    const loaderContainer = await page.$eval("#image", (div) => div.innerHTML);
-    expect(loaderContainer.trim()).toBe("");
-  });
-
   test.describe("with `fullPage` set to false", () => {
     test("does not take a screenshot of full page", async ({ page }) => {
       await page.getByTestId("hoverable").hover();
@@ -81,6 +68,13 @@ test.describe("#argosScreenshot", () => {
         disableHover: false,
       });
       await expectScreenshotToExists("full-page");
+      // Check that the loader is not visible
+      // because we should wait for it to disappear in `argosScreenshot`
+      const loaderContainer = await page.$eval(
+        "#loader-container",
+        (div) => div.innerHTML,
+      );
+      expect(loaderContainer.trim()).toBe("");
     });
   });
 
