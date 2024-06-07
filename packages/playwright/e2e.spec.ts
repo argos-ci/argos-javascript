@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { test, chromium, expect, Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
 // @ts-ignore
@@ -34,28 +34,8 @@ async function expectScreenshotToExists(screenshotName: string) {
 
 const url = new URL("fixtures/dummy.html", import.meta.url).href;
 test.describe("#argosScreenshot", () => {
-  let page: Page;
-  const screenshotName = "dummy-page";
-
-  test.beforeAll(async () => {
-    const browser = await chromium.launch();
-    const context = await browser.newContext();
-    page = await context.newPage();
-    const client = await page.context().newCDPSession(page);
-    await client.send("Network.enable");
-    await client.send("Network.emulateNetworkConditions", {
-      offline: false,
-      downloadThroughput: (0.4 * 1024 * 1024) / 8,
-      uploadThroughput: (0.4 * 1024 * 1024) / 8,
-      latency: 70,
-    });
-    page.on("console", (msg) => console.log(msg.text()));
+  test.beforeEach(async ({ page }) => {
     await page.goto(url);
-    await argosScreenshot(page, screenshotName, {});
-  });
-
-  test.afterAll(async () => {
-    await page.close();
   });
 
   test("throws without page", async () => {
@@ -69,7 +49,7 @@ test.describe("#argosScreenshot", () => {
     expect(error.message).toBe("A Playwright `page` object is required.");
   });
 
-  test("throws without name", async () => {
+  test("throws without name", async ({ page }) => {
     let error: any;
     try {
       // @ts-expect-error - We want to test the error
@@ -80,37 +60,42 @@ test.describe("#argosScreenshot", () => {
     expect(error.message).toBe("The `name` argument is required.");
   });
 
-  test("waits for loader hiding", async () => {
-    const loaderContainer = await page.$eval(
-      "#loader-container",
-      (div) => div.innerHTML,
-    );
-    expect(loaderContainer.trim()).toBe("");
+  test.describe("with `fullPage` set to false", () => {
+    test("does not take a screenshot of full page", async ({ page }) => {
+      await page.getByTestId("hoverable").hover();
+      await argosScreenshot(page, "full-page", {
+        fullPage: false,
+        disableHover: false,
+      });
+      await expectScreenshotToExists("full-page");
+      // Check that the loader is not visible
+      // because we should wait for it to disappear in `argosScreenshot`
+      const loaderContainer = await page.$eval(
+        "#loader-container",
+        (div) => div.innerHTML,
+      );
+      expect(loaderContainer.trim()).toBe("");
+    });
   });
 
-  test("waits for image loading @visual", async () => {
-    const loaderContainer = await page.$eval("#image", (div) => div.innerHTML);
-    expect(loaderContainer.trim()).toBe("");
-  });
-
-  test("takes a screenshot", async () => {
-    await expectScreenshotToExists(screenshotName);
-  });
-
-  test.describe("with fullPage option false", () => {
-    test("does not take a screenshot of full page", async () => {
-      await argosScreenshot(page, "full-page", { fullPage: false });
+  test.describe("with `disabledHover` set to false", () => {
+    test("it does not disable hover", async ({ page }) => {
+      await page.getByTestId("hoverable").hover();
+      await argosScreenshot(page, "with-hover", {
+        fullPage: false,
+        disableHover: false,
+      });
     });
   });
 
   test.describe("screenshot element", () => {
-    test("takes a screenshot of an element", async () => {
+    test("takes a screenshot of an element", async ({ page }) => {
       await argosScreenshot(page, "red-square", { element: ".red-square" });
     });
   });
 
   test.describe("viewports", () => {
-    test("takes screenshots on different viewports", async () => {
+    test("takes screenshots on different viewports", async ({ page }) => {
       await argosScreenshot(page, "viewport", {
         viewports: [
           "iphone-4",
@@ -134,7 +119,7 @@ test.describe("#argosScreenshot", () => {
   });
 
   test.describe("with argosCSS", () => {
-    test("works", async () => {
+    test("works", async ({ page }) => {
       await argosScreenshot(page, "argosCSS-option", {
         argosCSS: "body { background: blue; }",
       });
@@ -142,7 +127,7 @@ test.describe("#argosScreenshot", () => {
   });
 
   test.describe("with cjs version", () => {
-    test("works", async () => {
+    test("works", async ({ page }) => {
       await argosScreenshotCjs(page, "full-page-cjs");
     });
   });
