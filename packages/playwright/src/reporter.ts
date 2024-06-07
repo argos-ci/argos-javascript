@@ -68,6 +68,9 @@ class ArgosReporter implements Reporter {
     this.createUploadDirPromise = null;
   }
 
+  /**
+   * Write a file to the temporary directory.
+   */
   async writeFile(path: string, body: Buffer | string) {
     const uploadDir = await this.getUploadDir();
     const dir = dirname(path);
@@ -79,6 +82,9 @@ class ArgosReporter implements Reporter {
     debug(`File written to ${path}`);
   }
 
+  /**
+   * Copy a file to the temporary directory.
+   */
   async copyFile(from: string, to: string) {
     const uploadDir = await this.getUploadDir();
     const dir = dirname(to);
@@ -88,6 +94,16 @@ class ArgosReporter implements Reporter {
     debug(`Copying file from ${from} to ${to}`);
     await copyFile(from, to);
     debug(`File copied from ${from} to ${to}`);
+  }
+
+  /**
+   * Copy the trace file if found in the result.
+   */
+  async copyTraceIfFound(result: TestResult, path: string) {
+    const trace = result.attachments.find(checkIsTrace) ?? null;
+    if (trace) {
+      await this.copyFile(trace.path, path + ".pw-trace.zip");
+    }
   }
 
   getAutomaticScreenshotName(test: TestCase, result: TestResult) {
@@ -122,20 +138,22 @@ class ArgosReporter implements Reporter {
           checkIsArgosScreenshotMetadata(attachment)
         ) {
           const path = join(uploadDir, getAttachmentFilename(attachment.name));
-          await this.copyFile(attachment.path, path);
+          await Promise.all([
+            this.copyFile(attachment.path, path),
+            this.copyTraceIfFound(result, path),
+          ]);
           return;
         }
 
         // Error screenshots are sent to Argos
         if (checkIsAutomaticScreenshot(attachment)) {
-          const trace = result.attachments.find(checkIsTrace) ?? null;
           const metadata = await getMetadataFromTestCase(test, result);
           const name = this.getAutomaticScreenshotName(test, result);
           const path = join(uploadDir, `${name}.png`);
           await Promise.all([
             this.writeFile(path + ".argos.json", JSON.stringify(metadata)),
             this.copyFile(attachment.path, path),
-            trace ? this.copyFile(trace.path, path + ".pw-trace.zip") : null,
+            this.copyTraceIfFound(result, path),
           ]);
           return;
         }
