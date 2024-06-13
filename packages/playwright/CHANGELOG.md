@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.0.4...@argos-ci/playwright@3.1.0) (2024-06-13)
+
+
+### Features
+
+* enable traces for non-failure screenshots ([fcad44c](https://github.com/argos-ci/argos-javascript/commit/fcad44cee3cfb39f865d352b63e1e2f8cdcb6939))
+
+
+
+
+
 ## [3.0.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.0.3...@argos-ci/playwright@3.0.4) (2024-06-04)
 
 **Note:** Version bump only for package @argos-ci/playwright
