@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.2.0...@argos-ci/core@2.3.0) (2024-06-16)
+
+
+### Features
+
+* compatibility to granular GitHub Actions jobs retries ([ac954dc](https://github.com/argos-ci/argos-javascript/commit/ac954dc896b538efe4a73db70a5320de9fed0a4a))
+
+
+
+
+
 # [2.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.1.0...@argos-ci/core@2.2.0) (2024-05-04)
 
 
