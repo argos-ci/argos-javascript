@@ -94,7 +94,7 @@ describe("#getBearerToken", () => {
   });
 
   describe("with unknown CI", () => {
-    const configProps = { ciService: "unknownCI" };
+    const configProps = { ciProvider: "unknown" };
 
     describe("without token", () => {
       it("should throw", () => {
@@ -114,7 +114,7 @@ describe("#getBearerToken", () => {
   });
 
   describe("with Github Actions CI", () => {
-    const configProps = { ciService: "GitHub Actions" };
+    const configProps = { ciProvider: "github-actions" };
 
     describe("with token", () => {
       it("should return bearer token", () => {

@@ -69,9 +69,9 @@ export interface ArgosApiClient {
 const base64Encode = (obj: any) =>
   Buffer.from(JSON.stringify(obj), "utf8").toString("base64");
 
-export const getBearerToken = ({
+export function getBearerToken({
   token,
-  ciService,
+  ciProvider,
   owner,
   repository,
   jobId,
@@ -79,20 +79,20 @@ export const getBearerToken = ({
   prNumber,
 }: {
   token?: string | null;
-  ciService?: string | null;
+  ciProvider?: string | null;
   owner?: string | null;
   repository?: string | null;
   jobId?: string | null;
   runId?: string | null;
   prNumber?: number | null;
-}) => {
+}) {
   if (token) return `Bearer ${token}`;
 
-  switch (ciService) {
-    case "GitHub Actions": {
+  switch (ciProvider) {
+    case "github-actions": {
       if (!owner || !repository || !jobId || !runId) {
         throw new Error(
-          `Automatic ${ciService} variables detection failed. Please add the 'ARGOS_TOKEN'`,
+          `Automatic ${ciProvider} variables detection failed. Please add the 'ARGOS_TOKEN'`,
         );
       }
 
@@ -108,7 +108,7 @@ export const getBearerToken = ({
     default:
       throw new Error("Missing Argos repository token 'ARGOS_TOKEN'");
   }
-};
+}
 
 export const createArgosApiClient = (
   options: ApiClientOptions,

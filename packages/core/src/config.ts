@@ -108,11 +108,6 @@ const schema = {
     default: null,
     nullable: true,
   },
-  ciService: {
-    format: String,
-    default: null,
-    nullable: true,
-  },
   jobId: {
     format: String,
     default: null,
@@ -192,7 +187,6 @@ export async function readConfig(options: Partial<Config> = {}) {
       options.referenceBranch || config.get("referenceBranch") || null,
     referenceCommit:
       options.referenceCommit || config.get("referenceCommit") || null,
-    ciService: ciEnv?.name || null,
     owner: ciEnv?.owner || null,
     repository: ciEnv?.repository || null,
     jobId: ciEnv?.jobId || null,
