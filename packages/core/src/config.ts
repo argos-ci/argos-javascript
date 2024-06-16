@@ -119,7 +119,7 @@ const schema = {
     nullable: true,
   },
   runAttempt: {
-    format: String,
+    format: "nat",
     default: null,
     nullable: true,
   },
