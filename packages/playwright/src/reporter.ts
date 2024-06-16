@@ -53,6 +53,7 @@ async function getParallelFromConfig(
   return {
     total: config.shard.total,
     nonce: argosConfig.parallelNonce,
+    index: config.shard.current,
   };
 }
 

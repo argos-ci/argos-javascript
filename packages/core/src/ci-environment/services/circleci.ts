@@ -12,6 +12,7 @@ const getPrNumber = ({ env }: Context) => {
 
 const service: Service = {
   name: "CircleCI",
+  key: "circleci",
   detect: ({ env }) => Boolean(env.CIRCLECI),
   config: ({ env }) => {
     return {
@@ -21,6 +22,7 @@ const service: Service = {
       repository: env.CIRCLE_PROJECT_REPONAME || null,
       jobId: null,
       runId: null,
+      runAttempt: null,
       prNumber: getPrNumber({ env }),
       prHeadCommit: null,
       nonce: env.CIRCLE_WORKFLOW_ID || env.CIRCLE_BUILD_NUM || null,

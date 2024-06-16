@@ -20,6 +20,10 @@ export interface CreateBuildInput {
   referenceBranch?: string | null;
   referenceCommit?: string | null;
   mode?: "ci" | "monitoring" | null;
+  ciProvider?: string | null;
+  argosSdk?: string | null;
+  runId?: string | null;
+  runAttempt?: number | null;
 }
 
 export interface CreateBuildOutput {
@@ -47,6 +51,7 @@ export interface UpdateBuildInput {
   }[];
   parallel?: boolean | null;
   parallelTotal?: number | null;
+  parallelIndex?: number | null;
 }
 
 export interface UpdateBuildOutput {

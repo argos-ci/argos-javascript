@@ -35,7 +35,11 @@ export async function getCiEnvironment({
   if (service) {
     debug("Internal service matched", service.name);
     const variables = await service.config(ctx);
-    const ciEnvironment = { name: service.name, ...variables };
+    const ciEnvironment = {
+      name: service.name,
+      key: service.key,
+      ...variables,
+    };
     debug("CI environment", ciEnvironment);
     return ciEnvironment;
   }

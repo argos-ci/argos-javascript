@@ -6,6 +6,7 @@ const getPrNumber = ({ env }: Context) => {
 
 const service: Service = {
   name: "Bitrise",
+  key: "bitrise",
   detect: ({ env }) => Boolean(env.BITRISE_IO),
   config: ({ env }) => {
     return {
@@ -15,6 +16,7 @@ const service: Service = {
       repository: env.BITRISEIO_GIT_REPOSITORY_SLUG || null,
       jobId: null,
       runId: null,
+      runAttempt: null,
       prNumber: getPrNumber({ env }),
       prHeadCommit: null,
       nonce: env.BITRISEIO_PIPELINE_ID || null,

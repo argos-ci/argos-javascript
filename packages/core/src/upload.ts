@@ -7,6 +7,7 @@ import { upload as uploadToS3 } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
 import { getPlaywrightTracePath, readMetadata } from "@argos-ci/util";
+import { getArgosCoreSDKIdentifier } from "./version";
 
 /**
  * Size of the chunks used to upload screenshots to Argos.
@@ -41,6 +42,8 @@ export interface UploadParameters {
         nonce: string;
         /** The number of parallel nodes being ran */
         total: number;
+        /** The index of the parallel node */
+        index?: number;
       }
     | false;
   /** Branch used as baseline for screenshot comparison */
@@ -58,6 +61,7 @@ async function getConfigFromOptions({
     parallel: Boolean(parallel),
     parallelNonce: parallel ? parallel.nonce : null,
     parallelTotal: parallel ? parallel.total : null,
+    parallelIndex: parallel ? parallel.index : null,
   });
 }
 
@@ -98,7 +102,10 @@ export async function upload(params: UploadParameters) {
   debug("Starting upload with params", params);
 
   // Read config
-  const config = await getConfigFromOptions(params);
+  const [config, argosSdk] = await Promise.all([
+    getConfigFromOptions(params),
+    getArgosCoreSDKIdentifier(),
+  ]);
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
   debug("Using config and files", config, files);
 
@@ -170,6 +177,10 @@ export async function upload(params: UploadParameters) {
     prHeadCommit: config.prHeadCommit,
     referenceBranch: config.referenceBranch,
     referenceCommit: config.referenceCommit,
+    argosSdk,
+    ciProvider: config.ciProvider,
+    runId: config.runId,
+    runAttempt: config.runAttempt,
   });
 
   debug("Got uploads url", result);
@@ -215,6 +226,7 @@ export async function upload(params: UploadParameters) {
     })),
     parallel: config.parallel,
     parallelTotal: config.parallelTotal,
+    parallelIndex: config.parallelIndex,
   });
 
   return { build: result.build, screenshots };

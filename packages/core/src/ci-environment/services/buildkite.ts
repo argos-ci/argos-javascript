@@ -3,6 +3,7 @@ import { head, branch } from "../git";
 
 const service: Service = {
   name: "Buildkite",
+  key: "buildkite",
   detect: ({ env }) => Boolean(env.BUILDKITE),
   config: ({ env }) => {
     return {
@@ -13,6 +14,7 @@ const service: Service = {
       repository: env.BUILDKITE_PROJECT_SLUG || null,
       jobId: null,
       runId: null,
+      runAttempt: null,
       prNumber: env.BUILDKITE_PULL_REQUEST
         ? Number(env.BUILDKITE_PULL_REQUEST)
         : null,
