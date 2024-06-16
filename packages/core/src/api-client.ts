@@ -92,7 +92,7 @@ export function getBearerToken({
     case "github-actions": {
       if (!owner || !repository || !jobId || !runId) {
         throw new Error(
-          `Automatic ${ciProvider} variables detection failed. Please add the 'ARGOS_TOKEN'`,
+          `Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'`,
         );
       }
 
