@@ -2,6 +2,7 @@ import type { Service } from "../types";
 
 const service: Service = {
   name: "GitLab",
+  key: "gitlab",
   detect: ({ env }) => env.GITLAB_CI === "true",
   config: ({ env }) => {
     return {
@@ -11,6 +12,7 @@ const service: Service = {
       repository: null,
       jobId: null,
       runId: null,
+      runAttempt: null,
       prNumber: null,
       prHeadCommit: null,
       nonce: env.CI_PIPELINE_ID || null,

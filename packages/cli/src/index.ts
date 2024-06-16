@@ -68,6 +68,12 @@ program
   )
   .addOption(
     new Option(
+      "--parallel-index <number>",
+      "The index of the parallel node being ran",
+    ).env("ARGOS_PARALLEL_INDEX"),
+  )
+  .addOption(
+    new Option(
       "--reference-branch <string>",
       "Branch used as baseline for screenshot comparison",
     ).env("ARGOS_REFERENCE_BRANCH"),
@@ -89,7 +95,11 @@ program
         ignore: options.ignore,
         prNumber: options.pullRequest ? Number(options.pullRequest) : undefined,
         parallel: options.parallel
-          ? { nonce: options.parallelNonce, total: options.parallelTotal }
+          ? {
+              nonce: options.parallelNonce,
+              total: options.parallelTotal,
+              index: options.parallelIndex,
+            }
           : false,
         referenceBranch: options.referenceBranch,
         referenceCommit: options.referenceCommit,

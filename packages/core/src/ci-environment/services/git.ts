@@ -3,6 +3,7 @@ import { head, branch, checkIsGitRepository } from "../git";
 
 const service: Service = {
   name: "Git",
+  key: "git",
   detect: () => checkIsGitRepository(),
   config: () => {
     return {
@@ -12,6 +13,7 @@ const service: Service = {
       repository: null,
       jobId: null,
       runId: null,
+      runAttempt: null,
       prNumber: null,
       prHeadCommit: null,
       nonce: null,

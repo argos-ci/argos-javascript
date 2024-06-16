@@ -114,6 +114,7 @@ const readEventPayload = ({ env }: Context): EventPayload | null => {
 
 const service: Service = {
   name: "GitHub Actions",
+  key: "github-actions",
   detect: ({ env }) => Boolean(env.GITHUB_ACTIONS),
   config: async ({ env }) => {
     const payload = readEventPayload({ env });
@@ -129,6 +130,9 @@ const service: Service = {
       repository: getRepository({ env }),
       jobId: env.GITHUB_JOB || null,
       runId: env.GITHUB_RUN_ID || null,
+      runAttempt: env.GITHUB_RUN_ATTEMPT
+        ? Number(env.GITHUB_RUN_ATTEMPT)
+        : null,
       nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}` || null,
     };
 

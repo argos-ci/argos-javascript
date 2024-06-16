@@ -17,6 +17,7 @@ const getPrNumber = ({ env }: Context) => {
 
 const service: Service = {
   name: "Travis CI",
+  key: "travis",
   detect: ({ env }) => Boolean(env.TRAVIS),
   config: (ctx) => {
     const { env } = ctx;
@@ -28,6 +29,7 @@ const service: Service = {
       repository: getRepository(ctx),
       jobId: null,
       runId: null,
+      runAttempt: null,
       prNumber: getPrNumber(ctx),
       prHeadCommit: null,
       nonce: env.TRAVIS_BUILD_ID || null,

@@ -20,6 +20,10 @@ export interface CreateBuildInput {
   referenceBranch?: string | null;
   referenceCommit?: string | null;
   mode?: "ci" | "monitoring" | null;
+  ciProvider?: string | null;
+  argosSdk?: string | null;
+  runId?: string | null;
+  runAttempt?: number | null;
 }
 
 export interface CreateBuildOutput {
@@ -47,6 +51,7 @@ export interface UpdateBuildInput {
   }[];
   parallel?: boolean | null;
   parallelTotal?: number | null;
+  parallelIndex?: number | null;
 }
 
 export interface UpdateBuildOutput {
@@ -64,9 +69,9 @@ export interface ArgosApiClient {
 const base64Encode = (obj: any) =>
   Buffer.from(JSON.stringify(obj), "utf8").toString("base64");
 
-export const getBearerToken = ({
+export function getBearerToken({
   token,
-  ciService,
+  ciProvider,
   owner,
   repository,
   jobId,
@@ -74,20 +79,20 @@ export const getBearerToken = ({
   prNumber,
 }: {
   token?: string | null;
-  ciService?: string | null;
+  ciProvider?: string | null;
   owner?: string | null;
   repository?: string | null;
   jobId?: string | null;
   runId?: string | null;
   prNumber?: number | null;
-}) => {
+}) {
   if (token) return `Bearer ${token}`;
 
-  switch (ciService) {
-    case "GitHub Actions": {
+  switch (ciProvider) {
+    case "github-actions": {
       if (!owner || !repository || !jobId || !runId) {
         throw new Error(
-          `Automatic ${ciService} variables detection failed. Please add the 'ARGOS_TOKEN'`,
+          `Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'`,
         );
       }
 
@@ -103,7 +108,7 @@ export const getBearerToken = ({
     default:
       throw new Error("Missing Argos repository token 'ARGOS_TOKEN'");
   }
-};
+}
 
 export const createArgosApiClient = (
   options: ApiClientOptions,

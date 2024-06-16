@@ -84,6 +84,12 @@ const schema = {
     default: null,
     nullable: true,
   },
+  parallelIndex: {
+    env: "ARGOS_PARALLEL_INDEX",
+    format: "nat",
+    default: null,
+    nullable: true,
+  },
   parallelTotal: {
     env: "ARGOS_PARALLEL_TOTAL",
     format: "nat",
@@ -102,11 +108,6 @@ const schema = {
     default: null,
     nullable: true,
   },
-  ciService: {
-    format: String,
-    default: null,
-    nullable: true,
-  },
   jobId: {
     format: String,
     default: null,
@@ -117,12 +118,22 @@ const schema = {
     default: null,
     nullable: true,
   },
+  runAttempt: {
+    format: "nat",
+    default: null,
+    nullable: true,
+  },
   owner: {
     format: String,
     default: null,
     nullable: true,
   },
   repository: {
+    format: String,
+    default: null,
+    nullable: true,
+  },
+  ciProvider: {
     format: String,
     default: null,
     nullable: true,
@@ -137,6 +148,7 @@ export interface Config {
   buildName: string | null;
   parallel: boolean;
   parallelNonce: string | null;
+  parallelIndex: number | null;
   parallelTotal: number | null;
   referenceBranch: string | null;
   referenceCommit: string | null;
@@ -144,9 +156,11 @@ export interface Config {
   repository: string | null;
   jobId: string | null;
   runId: string | null;
+  runAttempt: number | null;
   prNumber: number | null;
   prHeadCommit: string | null;
   mode: "ci" | "monitoring" | null;
+  ciProvider: string | null;
 }
 
 const createConfig = () => {
@@ -173,11 +187,11 @@ export async function readConfig(options: Partial<Config> = {}) {
       options.referenceBranch || config.get("referenceBranch") || null,
     referenceCommit:
       options.referenceCommit || config.get("referenceCommit") || null,
-    ciService: ciEnv?.name || null,
     owner: ciEnv?.owner || null,
     repository: ciEnv?.repository || null,
     jobId: ciEnv?.jobId || null,
     runId: ciEnv?.runId || null,
+    runAttempt: ciEnv?.runAttempt || null,
     parallel: options.parallel ?? config.get("parallel") ?? false,
     parallelNonce:
       options.parallelNonce ||
@@ -185,7 +199,9 @@ export async function readConfig(options: Partial<Config> = {}) {
       ciEnv?.nonce ||
       null,
     parallelTotal: options.parallelTotal || config.get("parallelTotal") || null,
+    parallelIndex: options.parallelIndex || config.get("parallelIndex") || null,
     mode: options.mode || config.get("mode") || null,
+    ciProvider: ciEnv?.key || null,
   });
 
   config.validate();
