@@ -9,7 +9,7 @@ import type {
 import chalk from "chalk";
 import { readConfig, upload, UploadParameters } from "@argos-ci/core";
 import { randomBytes } from "node:crypto";
-import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
@@ -22,22 +22,83 @@ import {
 import { getMetadataFromTestCase } from "./metadata";
 import { debug } from "./debug";
 
-async function createUploadDirectory() {
-  debug("Creating temporary directory for screenshots");
+const createDirectoryPromises = new Map<string, Promise<void>>();
+
+/**
+ * Create a directory if it doesn't exist.
+ */
+async function createDirectory(pathname: string) {
+  let promise = createDirectoryPromises.get(pathname);
+  if (promise) {
+    return promise;
+  }
+
+  promise = mkdir(pathname, { recursive: true }).then(() => {});
+  createDirectoryPromises.set(pathname, promise);
+  return promise;
+}
+
+/**
+ * Create temporary directory.
+ */
+async function createTemporaryDirectory() {
+  debug("Creating temporary directory");
   const osTmpDirectory = tmpdir();
   const path = join(osTmpDirectory, "argos." + randomBytes(16).toString("hex"));
-  await mkdir(path, { recursive: true });
+  await createDirectory(path);
   debug(`Temporary directory created: ${path}`);
   return path;
 }
 
-export type ArgosReporterOptions = Omit<UploadParameters, "files" | "root"> & {
+/**
+ * Dynamic build name.
+ * We require all values in order to ensure it works correctly in parallel mode.
+ */
+type DynamicBuildName<T extends readonly string[]> = {
+  /**
+   * The values that the build name can take.
+   * It is required to ensure Argos will always upload
+   * for each build name in order to work in sharding mode.
+   */
+  values: readonly [...T];
+  /**
+   * Get the build name for a test case.
+   * Returns any of the values in `values`.
+   */
+  get: (test: TestCase) => T[number];
+};
+
+export type ArgosReporterOptions<T extends string[] = string[]> = Omit<
+  UploadParameters,
+  "files" | "root" | "buildName"
+> & {
   /**
    * Upload the report to Argos.
    * @default true
    */
   uploadToArgos?: boolean;
+
+  /**
+   * The name of the build in Argos.
+   * Can be a string or a function that receives the test case and returns the build name.
+   */
+  buildName?: string | DynamicBuildName<T> | null;
 };
+
+/**
+ * Check if the build name is dynamic.
+ */
+function checkIsDynamicBuildName(
+  buildName: ArgosReporterOptions["buildName"],
+): buildName is DynamicBuildName<string[]> {
+  return Boolean(typeof buildName === "object" && buildName);
+}
+
+export function createArgosReporterOptions<T extends string[]>(
+  options: ArgosReporterOptions<T>,
+): ArgosReporterOptions<T> {
+  return options;
+}
 
 async function getParallelFromConfig(
   config: FullConfig,
@@ -58,7 +119,8 @@ async function getParallelFromConfig(
 }
 
 class ArgosReporter implements Reporter {
-  createUploadDirPromise: null | Promise<string>;
+  rootUploadDirectoryPromise: null | Promise<string>;
+  uploadDirectoryPromises: Map<string, Promise<string>>;
   config: ArgosReporterOptions;
   playwrightConfig!: FullConfig;
   uploadToArgos: boolean;
@@ -66,18 +128,15 @@ class ArgosReporter implements Reporter {
   constructor(config: ArgosReporterOptions) {
     this.config = config;
     this.uploadToArgos = config.uploadToArgos ?? true;
-    this.createUploadDirPromise = null;
+    this.rootUploadDirectoryPromise = null;
+    this.uploadDirectoryPromises = new Map();
   }
 
   /**
    * Write a file to the temporary directory.
    */
   async writeFile(path: string, body: Buffer | string) {
-    const uploadDir = await this.getUploadDir();
-    const dir = dirname(path);
-    if (dir !== uploadDir) {
-      await mkdir(dir, { recursive: true });
-    }
+    await createDirectory(dirname(path));
     debug(`Writing file to ${path}`);
     await writeFile(path, body);
     debug(`File written to ${path}`);
@@ -87,11 +146,7 @@ class ArgosReporter implements Reporter {
    * Copy a file to the temporary directory.
    */
   async copyFile(from: string, to: string) {
-    const uploadDir = await this.getUploadDir();
-    const dir = dirname(to);
-    if (dir !== uploadDir) {
-      await mkdir(dir, { recursive: true });
-    }
+    await createDirectory(dirname(to));
     debug(`Copying file from ${from} to ${to}`);
     await copyFile(from, to);
     debug(`File copied from ${from} to ${to}`);
@@ -117,11 +172,14 @@ class ArgosReporter implements Reporter {
     return name;
   }
 
-  getUploadDir() {
-    if (!this.createUploadDirPromise) {
-      this.createUploadDirPromise = createUploadDirectory();
+  /**
+   * Get the root upload directory (cached).
+   */
+  getRootUploadDirectory() {
+    if (!this.rootUploadDirectoryPromise) {
+      this.rootUploadDirectoryPromise = createTemporaryDirectory();
     }
-    return this.createUploadDirPromise;
+    return this.rootUploadDirectoryPromise;
   }
 
   onBegin(config: FullConfig, _suite: Suite) {
@@ -130,7 +188,18 @@ class ArgosReporter implements Reporter {
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
-    const uploadDir = await this.getUploadDir();
+    const buildName = checkIsDynamicBuildName(this.config.buildName)
+      ? this.config.buildName.get(test)
+      : this.config.buildName;
+
+    if (buildName === "") {
+      throw new Error('Argos "buildName" cannot be an empty string.');
+    }
+
+    const rootUploadDir = await this.getRootUploadDirectory();
+    const uploadDir = buildName
+      ? join(rootUploadDir, buildName)
+      : rootUploadDir;
     debug("ArgosReporter:onTestEnd");
     await Promise.all(
       result.attachments.map(async (attachment) => {
@@ -164,10 +233,10 @@ class ArgosReporter implements Reporter {
 
   async onEnd(_result: FullResult) {
     debug("ArgosReporter:onEnd");
-    const uploadDir = await this.getUploadDir();
+    const rootUploadDir = await this.getRootUploadDirectory();
     if (!this.uploadToArgos) {
       debug("Not uploading to Argos because uploadToArgos is false.");
-      debug(`Upload directory: ${uploadDir}`);
+      debug(`Upload directory: ${rootUploadDir}`);
       return;
     }
 
@@ -181,16 +250,56 @@ class ArgosReporter implements Reporter {
       debug("Non-parallel mode");
     }
 
+    const buildNameConfig = this.config.buildName;
+    const uploadOptions = {
+      files: ["**/*.png"],
+      parallel: parallel ?? undefined,
+      ...this.config,
+    };
     try {
-      debug("Uploading to Argos");
-      const res = await upload({
-        files: ["**/*.png"],
-        root: uploadDir,
-        parallel: parallel ?? undefined,
-        ...this.config,
-      });
-
-      console.log(chalk.green(`✅ Argos build created: ${res.build.url}`));
+      if (checkIsDynamicBuildName(buildNameConfig)) {
+        debug(
+          `Dynamic build names, uploading to Argos for each build name: ${buildNameConfig.values.join()}`,
+        );
+        const directories = await readdir(rootUploadDir);
+        // Check if the buildName.values are consistent with the directories created
+        if (directories.some((dir) => !buildNameConfig.values.includes(dir))) {
+          throw new Error(
+            `The \`buildName.values\` (${buildNameConfig.values.join(", ")}) are inconsistent with the \`buildName.get\` returns values (${directories.join(", ")}). Please fix the configuration.`,
+          );
+        }
+        // In non-parallel mode, we iterate over the directories to avoid creating useless builds
+        const iteratesOnBuildNames = parallel
+          ? buildNameConfig.values
+          : directories;
+        // Iterate over each build name and upload the screenshots
+        for (const buildName of iteratesOnBuildNames) {
+          const uploadDir = join(rootUploadDir, buildName);
+          await createDirectory(uploadDir);
+          debug(`Uploading to Argos for build: ${buildName}`);
+          const res = await upload({
+            ...uploadOptions,
+            root: uploadDir,
+            buildName,
+          });
+          console.log(
+            chalk.green(
+              `✅ Argos "${buildName}" build created: ${res.build.url}`,
+            ),
+          );
+        }
+      } else {
+        debug("Uploading to Argos");
+        const uploadDir = buildNameConfig
+          ? join(rootUploadDir, buildNameConfig)
+          : rootUploadDir;
+        const res = await upload({
+          ...uploadOptions,
+          root: uploadDir,
+          buildName: buildNameConfig ?? undefined,
+        });
+        console.log(chalk.green(`✅ Argos build created: ${res.build.url}`));
+      }
     } catch (error) {
       console.error(error);
       return { status: "failed" as const };

@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
+import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
   use: {
@@ -16,10 +16,10 @@ export default defineConfig({
     ["list"],
     [
       "@argos-ci/playwright/reporter",
-      {
+      createArgosReporterOptions({
         buildName: `argos-playwright-e2e-node-${process.env.NODE_VERSION}-${process.env.OS}`,
         uploadToArgos: process.env.UPLOAD_TO_ARGOS === "true",
-      } as ArgosReporterOptions,
+      }),
     ],
   ],
 });

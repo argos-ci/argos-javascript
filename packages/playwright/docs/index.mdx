@@ -23,6 +23,7 @@ To enable Visual Testing with Playwright, first you have to setup the Argos repo
 
 ```ts title="playwright.config.ts"
 import { defineConfig } from "@playwright/test";
+import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
   // ... other configurations
@@ -36,7 +37,7 @@ export default defineConfig({
     [
       "@argos-ci/playwright/reporter",
       // Upload only on CI.
-      { uploadToArgos: !!process.env.CI },
+      createArgosReporterOptions({ uploadToArgos: !!process.env.CI }),
     ],
   ],
 });
@@ -65,6 +66,7 @@ To enable Test Debugging, you have to add Argos reporter and to turn on [Playwri
 
 ```ts title="playwright.config.ts"
 import { defineConfig } from "@playwright/test";
+import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
   // ... other configurations
@@ -78,7 +80,7 @@ export default defineConfig({
     [
       "@argos-ci/playwright/reporter",
       // Upload only on CI.
-      { uploadToArgos: !!process.env.CI },
+      createArgosReporterOptions({ uploadToArgos: !!process.env.CI }),
     ],
   ],
 
@@ -112,6 +114,41 @@ For tailored visual testing, the `data-visual-test` attributes provide control o
 <div id="clock" data-visual-test="transparent">...</div>
 ```
 
+## Create multiple Argos builds from a single suite of tests
+
+To generate multiple Argos builds from a single suite of Playwright tests, use a dynamic `buildName`. This object contains two properties:
+
+- `values`: An array of possible values returned by the `get` function.
+- `get`: A function that takes a [test case](https://playwright.dev/docs/api/class-testcase) as an argument and returns the build name.
+
+```ts title="playwright.config.ts"
+import { defineConfig } from "@playwright/test";
+import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
+
+export default defineConfig({
+  // ... other configurations
+
+  reporter: [
+    // Use "dot" reporter on CI, "list" otherwise (Playwright default).
+    process.env.CI ? ["dot"] : ["list"],
+
+    // Argos reporter
+    [
+      "@argos-ci/playwright/reporter",
+      createArgosReporterOptions({
+        uploadToArgos: !!process.env.CI,
+        buildName: {
+          values: ["app", "website"],
+          // Split Argos build based on Playwright tags
+          // Learn more about Playwright tags: https://playwright.dev/docs/test-annotations#tag-tests
+          get: (test) => (test.tags.includes("@website") ? "website" : "app"),
+        },
+      }),
+    ],
+  ],
+});
+```
+
 ## API Overview
 
 ### argosScreenshot(page, name[, options])
@@ -130,9 +167,11 @@ Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-
 
 The Argos reporter offers extensive configuration options. Specifically, all [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/uploadparameters) are available for customizing the reporter.
 
+The `createArgosReporterOptions` ensures that your options are correctly typed.
+
 ```ts title="playwright.config.ts"
 import { defineConfig } from "@playwright/test";
-import type { ArgosReporterOptions } from "@argos-ci/playwright/reporter";
+import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
   // ... other configurations
@@ -144,10 +183,10 @@ export default defineConfig({
     // Argos reporter
     [
       "@argos-ci/playwright/reporter",
-      {
+      createArgosReporterOptions({
         uploadToArgos: !!process.env.CI,
         buildName: "custom-build-name",
-      } as ArgosReporterOptions,
+      }),
     ],
   ],
 });
