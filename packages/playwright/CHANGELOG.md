@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.2.0...@argos-ci/playwright@3.3.0) (2024-06-23)
+
+
+### Features
+
+* **playwright:** dynamic build names ([6166051](https://github.com/argos-ci/argos-javascript/commit/6166051d9348bb19513a6ef4afa5e9e4c69236e1))
+
+
+
+
+
 # [3.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.1.0...@argos-ci/playwright@3.2.0) (2024-06-16)
 
 
