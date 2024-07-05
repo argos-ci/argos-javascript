@@ -121,6 +121,12 @@ describe("argosScreenshot", () => {
     });
   });
 
+  it("supports threshold option", async () => {
+    await argosScreenshot(page, "threshold-option", {
+      threshold: 0.3,
+    });
+  });
+
   describe("with cjs version", () => {
     it("works", async () => {
       await argosScreenshotCjs(page, "cjs");

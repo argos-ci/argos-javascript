@@ -12,6 +12,7 @@ import {
   ScreenshotMetadata,
   getScreenshotName,
   readVersionFromPackage,
+  validateThreshold,
   writeMetadata,
 } from "@argos-ci/util";
 
@@ -28,6 +29,9 @@ async function injectArgos(page: Page) {
   await page.addScriptTag({ content: getGlobalScript() });
 }
 
+/**
+ * Accepts all Puppeteer screenshot options and adds Argos-specific options.
+ */
 export type ArgosScreenshotOptions = Omit<
   ScreenshotOptions,
   "encoding" | "type" | "omitBackground" | "path"
@@ -49,6 +53,12 @@ export type ArgosScreenshotOptions = Omit<
    * @default true
    */
   disableHover?: boolean;
+  /**
+   * Sensitivity threshold between 0 and 1.
+   * The higher the threshold, the less sensitive the diff will be.
+   * @default 0.5
+   */
+  threshold?: number;
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -121,16 +131,24 @@ async function setup(page: Page, options: ArgosScreenshotOptions) {
 }
 
 /**
- * @param page Puppeteer `page` object.
- * @param name The name of the screenshot or the full path to the screenshot.
- * @param options In addition to Puppeteer's `ScreenshotOptions`, you can pass:
- * @param options.element ElementHandle or string selector of the element to take a screenshot of.
- * @param options.viewports Viewports to take screenshots of.
- * @param options.argosCSS Custom CSS evaluated during the screenshot process.
+ * Stabilize the UI and takes a screenshot of the application under test.
+ *
+ * @example
+ *    argosScreenshot(page, "my-screenshot")
+ * @see https://argos-ci.com/docs/puppeteer#api-overview
  */
 export async function argosScreenshot(
+  /**
+   * Puppeteer `page` object.
+   */
   page: Page,
+  /**
+   * Name of the screenshot. Must be unique.
+   */
   name: string,
+  /**
+   * Options for the screenshot.
+   */
   options: ArgosScreenshotOptions = {},
 ) {
   const { element, viewports, argosCSS, ...puppeteerOptions } = options;
@@ -193,6 +211,11 @@ export async function argosScreenshot(
         version: argosPuppeteerVersion,
       },
     };
+
+    if (options?.threshold !== undefined) {
+      validateThreshold(options.threshold);
+      metadata.threshold = options.threshold;
+    }
 
     return metadata;
   }

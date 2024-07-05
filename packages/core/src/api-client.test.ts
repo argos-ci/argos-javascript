@@ -55,12 +55,14 @@ describe("#createArgosApiClient", () => {
             name: "screenshot 1",
             metadata: null,
             pwTraceKey: null,
+            threshold: null,
           },
           {
             key: "456",
             name: "screenshot 2",
             metadata: null,
             pwTraceKey: null,
+            threshold: null,
           },
         ],
       });

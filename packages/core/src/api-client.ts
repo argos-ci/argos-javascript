@@ -48,6 +48,7 @@ export interface UpdateBuildInput {
     name: string;
     metadata: ScreenshotMetadata | null;
     pwTraceKey: string | null;
+    threshold: number | null;
   }[];
   parallel?: boolean | null;
   parallelTotal?: number | null;
