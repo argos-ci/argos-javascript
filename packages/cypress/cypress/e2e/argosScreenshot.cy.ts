@@ -32,4 +32,11 @@ describe("argosScreenshot", () => {
       argosCSS: "body { background: blue; }",
     });
   });
+
+  it("supports threshold option", () => {
+    cy.visit("cypress/pages/index.html");
+    cy.argosScreenshot("threshold-option", {
+      threshold: 0.2,
+    });
+  });
 });

@@ -28,6 +28,18 @@ const mustBeArgosToken = (value: any) => {
   }
 };
 
+convict.addFormat({
+  name: "float-percent",
+  validate: function (val) {
+    if (val !== 0 && (!val || val > 1 || val < 0)) {
+      throw new Error("Must be a float between 0 and 1, inclusive.");
+    }
+  },
+  coerce: function (val) {
+    return parseFloat(val);
+  },
+});
+
 const schema = {
   apiBaseUrl: {
     env: "ARGOS_API_BASE_URL",
@@ -138,6 +150,12 @@ const schema = {
     default: null,
     nullable: true,
   },
+  threshold: {
+    env: "ARGOS_THRESHOLD",
+    format: "float-percent",
+    default: null,
+    nullable: true,
+  },
 };
 
 export interface Config {
@@ -161,6 +179,7 @@ export interface Config {
   prHeadCommit: string | null;
   mode: "ci" | "monitoring" | null;
   ciProvider: string | null;
+  threshold: number | null;
 }
 
 const createConfig = () => {

@@ -126,6 +126,14 @@ test.describe("#argosScreenshot", () => {
     });
   });
 
+  test.describe("with custom threshold", () => {
+    test("works", async ({ page }) => {
+      await argosScreenshot(page, "threshold-option", {
+        threshold: 0.2,
+      });
+    });
+  });
+
   test.describe("with cjs version", () => {
     test("works", async ({ page }) => {
       await argosScreenshotCjs(page, "full-page-cjs");

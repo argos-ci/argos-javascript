@@ -26,6 +26,7 @@ describe("#upload", () => {
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
           metadata: null,
+          threshold: null,
         },
         {
           name: "penelope.png",
@@ -56,6 +57,7 @@ describe("#upload", () => {
               width: 1024,
             },
           },
+          threshold: 0.2,
         },
         {
           name: "nested/alicia.jpg",
@@ -66,6 +68,7 @@ describe("#upload", () => {
           optimizedPath: expect.any(String),
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
           metadata: null,
+          threshold: null,
         },
       ],
     });

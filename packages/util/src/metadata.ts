@@ -30,6 +30,7 @@ export type ScreenshotMetadata = {
     name: string;
     version: string;
   };
+  threshold?: number;
 };
 
 /**

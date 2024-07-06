@@ -17,6 +17,7 @@ import {
   getMetadataPath,
   getScreenshotName,
   ScreenshotMetadata,
+  validateThreshold,
   writeMetadata,
 } from "@argos-ci/util";
 import { getAttachmentName } from "./attachment";
@@ -49,6 +50,12 @@ export type ArgosScreenshotOptions = {
    * @default true
    */
   disableHover?: boolean;
+  /**
+   * Sensitivity threshold between 0 and 1.
+   * The higher the threshold, the less sensitive the diff will be.
+   * @default 0.5
+   */
+  threshold?: number;
 } & LocatorOptions &
   ScreenshotOptions<LocatorScreenshotOptions> &
   ScreenshotOptions<PageScreenshotOptions>;
@@ -108,9 +115,25 @@ async function setup(page: Page, options: ArgosScreenshotOptions) {
   };
 }
 
+/**
+ * Stabilize the UI and takes a screenshot of the application under test.
+ *
+ * @example
+ *    argosScreenshot(page, "my-screenshot")
+ * @see https://argos-ci.com/docs/playwright#api-overview
+ */
 export async function argosScreenshot(
+  /**
+   * Playwright `page` object.
+   */
   page: Page,
+  /**
+   * Name of the screenshot. Must be unique.
+   */
   name: string,
+  /**
+   * Options for the screenshot.
+   */
   options: ArgosScreenshotOptions = {},
 ) {
   const { element, has, hasText, viewports, argosCSS, ...playwrightOptions } =
@@ -193,6 +216,10 @@ export async function argosScreenshot(
     );
 
     const metadata = await collectMetadata(testInfo);
+    if (options.threshold !== undefined) {
+      validateThreshold(options.threshold);
+      metadata.threshold = options.threshold;
+    }
     const nameInProject = testInfo?.project.name
       ? `${testInfo.project.name}/${name}`
       : name;

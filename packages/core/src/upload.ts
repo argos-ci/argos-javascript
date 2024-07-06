@@ -50,6 +50,12 @@ export interface UploadParameters {
   referenceBranch?: string;
   /** Commit used as baseline for screenshot comparison */
   referenceCommit?: string;
+  /**
+   * Sensitivity threshold between 0 and 1.
+   * The higher the threshold, the less sensitive the diff will be.
+   * @default 0.5
+   */
+  threshold?: number;
 }
 
 async function getConfigFromOptions({
@@ -130,15 +136,23 @@ export async function upload(params: UploadParameters) {
         getPlaywrightTracePath(screenshot.path),
         optimizeScreenshot(screenshot.path),
       ]);
+
       const [hash, pwTraceHash] = await Promise.all([
         hashFile(optimizedPath),
         pwTracePath ? hashFile(pwTracePath) : null,
       ]);
+
+      const threshold = metadata?.threshold ?? null;
+      if (metadata) {
+        delete metadata.threshold;
+      }
+
       return {
         ...screenshot,
         hash,
         optimizedPath,
         metadata,
+        threshold,
         pwTrace:
           pwTracePath && pwTraceHash
             ? { path: pwTracePath, hash: pwTraceHash }
@@ -216,6 +230,7 @@ export async function upload(params: UploadParameters) {
 
   // Update build
   debug("Updating build");
+
   await apiClient.updateBuild({
     buildId: result.build.id,
     screenshots: screenshots.map((screenshot) => ({
@@ -223,6 +238,7 @@ export async function upload(params: UploadParameters) {
       name: screenshot.name,
       metadata: screenshot.metadata,
       pwTraceKey: screenshot.pwTrace?.hash ?? null,
+      threshold: screenshot.threshold ?? config?.threshold ?? null,
     })),
     parallel: config.parallel,
     parallelTotal: config.parallelTotal,

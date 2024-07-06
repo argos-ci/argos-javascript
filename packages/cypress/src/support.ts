@@ -9,6 +9,7 @@ import {
   getMetadataPath,
   getScreenshotName,
   ScreenshotMetadata,
+  validateThreshold,
 } from "@argos-ci/util/browser";
 // @ts-ignore
 import { version } from "../package.json";
@@ -24,6 +25,12 @@ type ArgosScreenshotOptions = Partial<
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+  /**
+   * Sensitivity threshold between 0 and 1.
+   * The higher the threshold, the less sensitive the diff will be.
+   * @default 0.5
+   */
+  threshold?: number;
 };
 
 declare global {
@@ -33,13 +40,19 @@ declare global {
       /**
        * Stabilize the UI and takes a screenshot of the application under test.
        *
-       * @see https://on.cypress.io/screenshot
+       * @see https://argos-ci.com/docs/cypress#api-overview
        * @example
        *    cy.argosScreenshot("my-screenshot")
        *    cy.get(".post").argosScreenshot()
        */
       argosScreenshot: (
+        /**
+         * Name of the screenshot. Must be unique.
+         */
         name: string,
+        /**
+         * Options for the screenshot.
+         */
         options?: ArgosScreenshotOptions,
       ) => Chainable<null>;
     }
@@ -147,6 +160,11 @@ Cypress.Commands.add(
             version,
           },
         };
+
+        if (options.threshold !== undefined) {
+          validateThreshold(options.threshold);
+          metadata.threshold = options.threshold;
+        }
 
         cy.writeFile(getMetadataPath(ref.props.path), JSON.stringify(metadata));
       });

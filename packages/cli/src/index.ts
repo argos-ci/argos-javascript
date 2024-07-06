@@ -84,6 +84,12 @@ program
       "Commit used as baseline for screenshot comparison",
     ).env("ARGOS_REFERENCE_COMMIT"),
   )
+  .addOption(
+    new Option(
+      "--threshold <number>",
+      "Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to 0.5",
+    ).env("ARGOS_THRESHOLD"),
+  )
   .action(async (directory, options) => {
     const spinner = ora("Uploading screenshots").start();
     try {
@@ -104,6 +110,7 @@ program
         referenceBranch: options.referenceBranch,
         referenceCommit: options.referenceCommit,
         mode: options.mode,
+        threshold: options.threshold,
       });
       spinner.succeed(`Build created: ${result.build.url}`);
     } catch (error: any) {
