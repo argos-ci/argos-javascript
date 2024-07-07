@@ -116,6 +116,26 @@ async function setup(page: Page, options: ArgosScreenshotOptions) {
 }
 
 /**
+ * Get the screenshot names based on the test info.
+ */
+function getScreenshotNames(name: string, testInfo: TestInfo | null) {
+  if (testInfo) {
+    const projectName = `${testInfo.project.name}/${name}`;
+
+    if (testInfo.repeatEachIndex > 0) {
+      return {
+        name: `${projectName} repeat-${testInfo.repeatEachIndex}`,
+        baseName: projectName,
+      };
+    }
+
+    return { name: projectName, baseName: null };
+  }
+
+  return { name, baseName: null };
+}
+
+/**
  * Stabilize the UI and takes a screenshot of the application under test.
  *
  * @example
@@ -215,19 +235,24 @@ export async function argosScreenshot(
       ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
     );
 
+    const names = getScreenshotNames(name, testInfo);
+
     const metadata = await collectMetadata(testInfo);
+    metadata.transient = {};
+
     if (options.threshold !== undefined) {
       validateThreshold(options.threshold);
-      metadata.threshold = options.threshold;
+      metadata.transient.threshold = options.threshold;
     }
-    const nameInProject = testInfo?.project.name
-      ? `${testInfo.project.name}/${name}`
-      : name;
+
+    if (names.baseName) {
+      metadata.transient.baseName = `${names.baseName}.png`;
+    }
 
     const screenshotPath =
       useArgosReporter && testInfo
-        ? testInfo.outputPath("argos", `${nameInProject}.png`)
-        : resolve(screenshotFolder, `${nameInProject}.png`);
+        ? testInfo.outputPath("argos", `${names.name}.png`)
+        : resolve(screenshotFolder, `${names.name}.png`);
 
     const dir = dirname(screenshotPath);
     if (dir !== screenshotFolder) {
@@ -248,11 +273,11 @@ export async function argosScreenshot(
 
     if (useArgosReporter && testInfo) {
       await Promise.all([
-        testInfo.attach(getAttachmentName(nameInProject, "metadata"), {
+        testInfo.attach(getAttachmentName(names.name, "metadata"), {
           path: getMetadataPath(screenshotPath),
           contentType: "application/json",
         }),
-        testInfo.attach(getAttachmentName(nameInProject, "screenshot"), {
+        testInfo.attach(getAttachmentName(names.name, "screenshot"), {
           path: screenshotPath,
           contentType: "image/png",
         }),
@@ -267,9 +292,7 @@ export async function argosScreenshot(
       const viewportSize = resolveViewport(viewport);
       await page.setViewportSize(viewportSize);
       await stabilizeAndScreenshot(
-        getScreenshotName(name, {
-          viewportWidth: viewportSize.width,
-        }),
+        getScreenshotName(name, { viewportWidth: viewportSize.width }),
       );
     }
 

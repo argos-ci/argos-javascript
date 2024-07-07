@@ -12,6 +12,7 @@ export type ScreenshotMetadata = {
     titlePath: string[];
     retries?: number;
     retry?: number;
+    repeat?: number;
     location?: {
       file: string;
       line: number;
@@ -30,7 +31,11 @@ export type ScreenshotMetadata = {
     name: string;
     version: string;
   };
-  threshold?: number;
+  // Metdata used to pass informations later removed from metadata.
+  transient?: {
+    threshold?: number;
+    baseName?: string;
+  };
 };
 
 /**

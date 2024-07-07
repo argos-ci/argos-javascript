@@ -65,6 +65,7 @@ export async function getTestMetadataFromTestInfo(testInfo: TestInfo) {
     titlePath: testInfo.titlePath,
     retry: testInfo.retry,
     retries: testInfo.project.retries,
+    repeat: testInfo.repeatEachIndex,
     location: {
       file: repositoryPath
         ? relative(repositoryPath, testInfo.file)
@@ -86,6 +87,7 @@ export async function getTestMetadataFromTestCase(
     titlePath: testCase.titlePath(),
     retry: testResult.retry,
     retries: testCase.retries,
+    repeat: testCase.repeatEachIndex,
     location: {
       file: repositoryPath
         ? relative(repositoryPath, testCase.location.file)

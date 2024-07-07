@@ -27,6 +27,7 @@ describe("#upload", () => {
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
           metadata: null,
           threshold: null,
+          baseName: null,
         },
         {
           name: "penelope.png",
@@ -58,6 +59,7 @@ describe("#upload", () => {
             },
           },
           threshold: 0.2,
+          baseName: null,
         },
         {
           name: "nested/alicia.jpg",
@@ -69,6 +71,7 @@ describe("#upload", () => {
           hash: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
           metadata: null,
           threshold: null,
+          baseName: null,
         },
       ],
     });
