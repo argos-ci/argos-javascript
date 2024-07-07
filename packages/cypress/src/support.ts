@@ -161,9 +161,11 @@ Cypress.Commands.add(
           },
         };
 
+        metadata.transient = {};
+
         if (options.threshold !== undefined) {
           validateThreshold(options.threshold);
-          metadata.threshold = options.threshold;
+          metadata.transient.threshold = options.threshold;
         }
 
         cy.writeFile(getMetadataPath(ref.props.path), JSON.stringify(metadata));

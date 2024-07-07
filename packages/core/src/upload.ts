@@ -142,9 +142,11 @@ export async function upload(params: UploadParameters) {
         pwTracePath ? hashFile(pwTracePath) : null,
       ]);
 
-      const threshold = metadata?.threshold ?? null;
+      const threshold = metadata?.transient?.threshold ?? null;
+      const baseName = metadata?.transient?.baseName ?? null;
+
       if (metadata) {
-        delete metadata.threshold;
+        delete metadata.transient;
       }
 
       return {
@@ -153,6 +155,7 @@ export async function upload(params: UploadParameters) {
         optimizedPath,
         metadata,
         threshold,
+        baseName,
         pwTrace:
           pwTracePath && pwTraceHash
             ? { path: pwTracePath, hash: pwTraceHash }
@@ -239,6 +242,7 @@ export async function upload(params: UploadParameters) {
       metadata: screenshot.metadata,
       pwTraceKey: screenshot.pwTrace?.hash ?? null,
       threshold: screenshot.threshold ?? config?.threshold ?? null,
+      baseName: screenshot.baseName,
     })),
     parallel: config.parallel,
     parallelTotal: config.parallelTotal,

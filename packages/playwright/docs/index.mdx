@@ -149,6 +149,14 @@ export default defineConfig({
 });
 ```
 
+## Debug flaky tests
+
+To debug flaky tests, Argos supports using the [Playwright --repeat-each option](https://playwright.dev/docs/test-cli#reference). This runs each test multiple times to detect discrepancies.
+
+```sh
+npm exec -- playwright test --repeat-each 5
+```
+
 ## API Overview
 
 ### argosScreenshot(page, name[, options])
@@ -160,6 +168,7 @@ export default defineConfig({
 - `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](/viewports).
 - `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
 - `options.disableHover`: Disable hover effects by moving the mouse to the top-left corner of the page. Default to `true`.
+- `options.threshold`: Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to `0.5`.
 
 Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
 

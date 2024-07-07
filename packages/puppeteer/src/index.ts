@@ -212,9 +212,11 @@ export async function argosScreenshot(
       },
     };
 
+    metadata.transient = {};
+
     if (options?.threshold !== undefined) {
       validateThreshold(options.threshold);
-      metadata.threshold = options.threshold;
+      metadata.transient.threshold = options.threshold;
     }
 
     return metadata;

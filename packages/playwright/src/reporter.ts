@@ -118,6 +118,19 @@ async function getParallelFromConfig(
   };
 }
 
+/**
+ * Get the automatic screenshot name.
+ */
+function getAutomaticScreenshotName(test: TestCase, result: TestResult) {
+  let name = test.titlePath().join(" ");
+  name += result.retry > 0 ? ` #${result.retry + 1}` : "";
+  name +=
+    result.status === "failed" || result.status === "timedOut"
+      ? " (failed)"
+      : "";
+  return name;
+}
+
 class ArgosReporter implements Reporter {
   rootUploadDirectoryPromise: null | Promise<string>;
   uploadDirectoryPromises: Map<string, Promise<string>>;
@@ -160,16 +173,6 @@ class ArgosReporter implements Reporter {
     if (trace) {
       await this.copyFile(trace.path, path + ".pw-trace.zip");
     }
-  }
-
-  getAutomaticScreenshotName(test: TestCase, result: TestResult) {
-    let name = test.titlePath().join(" ");
-    name += result.retry > 0 ? ` #${result.retry + 1}` : "";
-    name +=
-      result.status === "failed" || result.status === "timedOut"
-        ? " (failed)"
-        : "";
-    return name;
   }
 
   /**
@@ -218,7 +221,7 @@ class ArgosReporter implements Reporter {
         // Error screenshots are sent to Argos
         if (checkIsAutomaticScreenshot(attachment)) {
           const metadata = await getMetadataFromTestCase(test, result);
-          const name = this.getAutomaticScreenshotName(test, result);
+          const name = getAutomaticScreenshotName(test, result);
           const path = join(uploadDir, `${name}.png`);
           await Promise.all([
             this.writeFile(path + ".argos.json", JSON.stringify(metadata)),
