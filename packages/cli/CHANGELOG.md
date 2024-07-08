@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@2.2.0...@argos-ci/cli@2.3.0) (2024-07-08)
+
+
+### Features
+
+* allow to specify a threshold to control diff sensitivity ([820bb30](https://github.com/argos-ci/argos-javascript/commit/820bb3090c72607588d2f5c0829aa50f9a947de3))
+
+
+
+
+
 # [2.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@2.1.0...@argos-ci/cli@2.2.0) (2024-06-16)
 
 

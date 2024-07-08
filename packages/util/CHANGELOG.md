@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@2.0.0...@argos-ci/util@2.1.0) (2024-07-08)
+
+
+### Features
+
+* allow to specify a threshold to control diff sensitivity ([820bb30](https://github.com/argos-ci/argos-javascript/commit/820bb3090c72607588d2f5c0829aa50f9a947de3))
+* support Playwright --repeat-each option ([3a7087f](https://github.com/argos-ci/argos-javascript/commit/3a7087f5ff208e5d8a7e503005352cc0f5210ee7))
+
+
+
+
+
 # [2.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@1.2.1...@argos-ci/util@2.0.0) (2024-04-05)
 
 
