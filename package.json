@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "pnpm run -r prebuild && cross-env NODE_ENV=production pnpm -r run build",
-    "build-docs": "typedoc",
+    "build-docs": "typedoc --sitemapBaseUrl https://js-sdk-reference.argos-ci.com/",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "lint": "eslint .",
