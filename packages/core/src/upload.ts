@@ -15,27 +15,53 @@ import { getArgosCoreSDKIdentifier } from "./version";
 const CHUNK_SIZE = 10;
 
 export interface UploadParameters {
-  /** Globs matching image file paths to upload */
+  /**
+   * Globs matching image file paths to upload
+   */
   files?: string[];
-  /** Root directory to look for image to upload (default to current directory) */
+  /**
+   * Root directory to look for image to upload
+   * @default process.cwd()
+   */
   root?: string;
-  /** Globs matching image file paths to ignore (default to "**\/*.\{png,jpg,jpeg\}") */
+  /**
+   * Globs matching image file paths to ignore
+   * @default ["**\/*.\{png,jpg,jpeg\}"]
+   */
   ignore?: string[];
-  /** Base URL of Argos API (default to "https://api.argos-ci.com/v2/") */
+  /**
+   * Base URL of Argos API
+   * @default "https://api.argos-ci.com/v2/"
+   */
   apiBaseUrl?: string;
-  /** Git commit */
+  /**
+   * Git commit
+   */
   commit?: string;
-  /** Git branch */
+  /**
+   * Git branch
+   */
   branch?: string;
-  /** Argos repository token */
+  /**
+   * Argos repository token
+   */
   token?: string;
-  /** Pull-request number */
+  /**
+   * Pull-request number
+   */
   prNumber?: number;
-  /** Name of the build used to trigger multiple Argos builds on one commit */
+  /**
+   * Name of the build used to trigger multiple Argos builds on one commit
+   */
   buildName?: string;
-  /** Mode of comparison applied */
+  /**
+   * Mode of comparison applied
+   * @default "ci"
+   */
   mode?: "ci" | "monitoring";
-  /** Parallel test suite mode */
+  /**
+   Parallel test suite mode
+   */
   parallel?:
     | {
         /** Unique build ID for this parallel build */
@@ -46,9 +72,13 @@ export interface UploadParameters {
         index?: number;
       }
     | false;
-  /** Branch used as baseline for screenshot comparison */
+  /**
+   * Branch used as baseline for screenshot comparison
+   */
   referenceBranch?: string;
-  /** Commit used as baseline for screenshot comparison */
+  /**
+   * Commit used as baseline for screenshot comparison
+   */
   referenceCommit?: string;
   /**
    * Sensitivity threshold between 0 and 1.
