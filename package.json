@@ -13,13 +13,13 @@
     "rollup": "^4.17.2",
     "rollup-plugin-swc3": "^0.11.1",
     "rollup-plugin-ts": "^3.4.5",
-    "typedoc": "^0.25.13",
+    "typedoc": "^0.26.5",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },
   "scripts": {
     "build": "pnpm run -r prebuild && cross-env NODE_ENV=production pnpm -r run build",
-    "build-docs": "typedoc --sitemapBaseUrl https://js-sdk-reference.argos-ci.com/",
+    "build-docs": "typedoc",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "lint": "eslint .",

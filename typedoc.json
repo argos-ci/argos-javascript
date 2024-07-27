@@ -1,4 +1,5 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["./packages/core/src/index.ts"]
+  "entryPoints": ["./packages/core/src/index.ts"],
+  "hostedBaseUrl": "https://js-sdk-reference.argos-ci.com"
 }
