@@ -13,14 +13,14 @@ const pkg = JSON.parse(rawPkg);
 program
   .name(pkg.name)
   .description(
-    "Interact with and upload screenshots to argos-ci.com via command line.",
+    "Interact with and upload screenshots to Argos via command line.",
   )
   .version(pkg.version);
 
 program
   .command("upload")
   .argument("<directory>", "Directory to upload")
-  .description("Upload screenshots to argos-ci.com")
+  .description("Upload screenshots to Argos")
   .option(
     "-f, --files <patterns...>",
     "One or more globs matching image file paths to upload",

@@ -132,7 +132,7 @@ async function uploadFilesToS3(
 }
 
 /**
- * Upload screenshots to argos-ci.com.
+ * Upload screenshots to Argos.
  */
 export async function upload(params: UploadParameters) {
   debug("Starting upload with params", params);
