@@ -163,8 +163,8 @@ npm exec -- playwright test --repeat-each 5
 
 - `page`: Instance of the [Playwright Page](https://playwright.dev/docs/api/class-page).
 - `name`: Unique name for the screenshot.
-- `options`: Explore [Page.screenshot command options](https://playwright.dev/docs/api/class-page#page-screenshot) for details.
-- `options.element`: Use an ElementHandle or string selector to capture a specific element's screenshot.
+- `options`: Explore [`Page.screenshot` command options](https://playwright.dev/docs/api/class-page#page-screenshot) for details.
+- `options.element`: Use a [`Locator`](https://playwright.dev/docs/api/class-locator) or a string selector to capture a specific element's screenshot.
 - `options.viewports`: Define specific viewports for capturing screenshots. More on [viewports configuration](/viewports).
 - `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
 - `options.disableHover`: Disable hover effects by moving the mouse to the top-left corner of the page. Default to `true`.
