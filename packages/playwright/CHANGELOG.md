@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.4.0...@argos-ci/playwright@3.4.1) (2024-07-31)
+
+
+### Bug Fixes
+
+* **playwright:** fix types to accept a locator ([d434f05](https://github.com/argos-ci/argos-javascript/commit/d434f05414fec00e1cc35ca8d008ad5643a431d0))
+
+
+
+
+
 # [3.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.3.0...@argos-ci/playwright@3.4.0) (2024-07-08)
 
 
