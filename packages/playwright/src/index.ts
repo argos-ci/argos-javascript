@@ -6,6 +6,7 @@ import type {
   LocatorScreenshotOptions,
   ElementHandle,
   TestInfo,
+  Locator,
 } from "@playwright/test";
 import {
   ViewportOption,
@@ -34,22 +35,27 @@ type ScreenshotOptions<
 
 export type ArgosScreenshotOptions = {
   /**
-   * ElementHandle or string selector of the element to take a screenshot of.
+   * `Locator` or string selector of the element to take a screenshot of.
+   * Passing an `ElementHandle` is discouraged, use a `Locator` instead.
    */
-  element?: string | ElementHandle;
+  element?: string | ElementHandle | Locator;
+
   /**
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+
   /**
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
   /**
    * Disable hover effects by moving the mouse to the top-left corner of the page.
    * @default true
    */
   disableHover?: boolean;
+
   /**
    * Sensitivity threshold between 0 and 1.
    * The higher the threshold, the less sensitive the diff will be.
