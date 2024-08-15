@@ -97,8 +97,8 @@ importers:
         specifier: workspace:*
         version: link:../util
       axios:
-        specifier: ^1.6.8
-        version: 1.6.8(debug@4.3.4)
+        specifier: ^1.7.4
+        version: 1.7.4(debug@4.3.4)
       convict:
         specifier: ^6.2.4
         version: 6.2.4
@@ -2114,8 +2114,8 @@ packages:
   aws4@1.12.0:
     resolution: {integrity: sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==}
 
-  axios@1.6.8:
-    resolution: {integrity: sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==}
+  axios@1.7.4:
+    resolution: {integrity: sha512-DukmaFRnY6AzAALSH4J2M3k6PkaC+MfaAGdEERRWcC9q3/TWQwLpHR8ZRLKTdQ3aBDL64EdluRDjJqKw+BPZEw==}
 
   b4a@1.6.6:
     resolution: {integrity: sha512-5Tk1HLk6b6ctmjIkAcU/Ujv/1WqiDl0F0JdRCR80VsOcUlHcu7pWeWRlOqQLHfDEsVx9YH/aif5AG4ehoCtTmg==}
@@ -6480,33 +6480,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/core@7.24.4':
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@babel/code-frame': 7.24.2
-      '@babel/generator': 7.24.4
-      '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4)
-      '@babel/helpers': 7.24.4(supports-color@9.4.0)
-      '@babel/parser': 7.24.4
-      '@babel/template': 7.24.0
-      '@babel/traverse': 7.24.1(supports-color@9.4.0)
-      '@babel/types': 7.24.0
-      convert-source-map: 2.0.0
-      debug: 4.3.4(supports-color@9.4.0)
-      gensync: 1.0.0-beta.2
-      json5: 2.2.3
-      semver: 6.3.1
-    transitivePeerDependencies:
-      - supports-color
-
   '@babel/core@7.24.4(supports-color@9.4.0)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@babel/code-frame': 7.24.2
       '@babel/generator': 7.24.4
       '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4(supports-color@9.4.0))
+      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4)
       '@babel/helpers': 7.24.4(supports-color@9.4.0)
       '@babel/parser': 7.24.4
       '@babel/template': 7.24.0
@@ -6616,18 +6596,9 @@ snapshots:
       '@babel/helper-split-export-declaration': 7.22.6
       '@babel/helper-validator-identifier': 7.22.20
 
-  '@babel/helper-module-transforms@7.23.3(@babel/core@7.24.4(supports-color@9.4.0))':
-    dependencies:
-      '@babel/core': 7.24.4(supports-color@9.4.0)
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-module-imports': 7.24.3
-      '@babel/helper-simple-access': 7.22.5
-      '@babel/helper-split-export-declaration': 7.22.6
-      '@babel/helper-validator-identifier': 7.22.20
-
   '@babel/helper-module-transforms@7.23.3(@babel/core@7.24.4)':
     dependencies:
-      '@babel/core': 7.24.4
+      '@babel/core': 7.24.4(supports-color@9.4.0)
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-module-imports': 7.24.3
       '@babel/helper-simple-access': 7.22.5
@@ -8710,7 +8681,7 @@ snapshots:
 
   aws4@1.12.0: {}
 
-  axios@1.6.8(debug@4.3.4):
+  axios@1.7.4(debug@4.3.4):
     dependencies:
       follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
@@ -9081,7 +9052,7 @@ snapshots:
   chromedriver@125.0.3:
     dependencies:
       '@testim/chrome-version': 1.1.4
-      axios: 1.6.8(debug@4.3.4)
+      axios: 1.7.4(debug@4.3.4)
       compare-versions: 6.1.0
       extract-zip: 2.0.1
       proxy-agent: 6.4.0
@@ -10788,7 +10759,7 @@ snapshots:
 
   istanbul-lib-instrument@6.0.1:
     dependencies:
-      '@babel/core': 7.24.4
+      '@babel/core': 7.24.4(supports-color@9.4.0)
       '@babel/parser': 7.23.0
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.0
@@ -12180,7 +12151,7 @@ snapshots:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
-      axios: 1.6.8(debug@4.3.4)
+      axios: 1.7.4(debug@4.3.4)
       chalk: 4.1.0
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -13741,7 +13712,7 @@ snapshots:
 
   wait-on@7.2.0:
     dependencies:
-      axios: 1.6.8(debug@4.3.4)
+      axios: 1.7.4(debug@4.3.4)
       joi: 17.12.3
       lodash: 4.17.21
       minimist: 1.2.8

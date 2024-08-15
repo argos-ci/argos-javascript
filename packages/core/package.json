@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@argos-ci/util": "workspace:*",
-    "axios": "^1.6.8",
+    "axios": "^1.7.4",
     "convict": "^6.2.4",
     "debug": "^4.3.4",
     "fast-glob": "^3.3.2",
