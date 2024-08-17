@@ -45,7 +45,7 @@
     "@argos-ci/browser": "workspace:*",
     "@argos-ci/core": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "cypress-wait-until": "^3.0.1"
+    "cypress-wait-until": "^3.0.2"
   },
   "peerDependencies": {
     "cypress": "^12.0.0 || ^13.0.0"
@@ -53,10 +53,10 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/cypress": "workspace:.",
-    "@types/node": "^18.0.0",
-    "cypress": "^13.7.2",
-    "eslint-plugin-cypress": "^2.15.1",
-    "eslint-plugin-html": "^8.0.0"
+    "@types/node": "^18.19.44",
+    "cypress": "^13.13.3",
+    "eslint-plugin-cypress": "^2.15.2",
+    "eslint-plugin-html": "^8.1.1"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
