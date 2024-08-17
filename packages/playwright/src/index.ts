@@ -174,7 +174,7 @@ export async function argosScreenshot(
   const handle =
     typeof element === "string"
       ? page.locator(element, { has, hasText })
-      : element ?? page;
+      : (element ?? page);
 
   const testInfo = await getTestInfo();
 
