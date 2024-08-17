@@ -55,7 +55,7 @@
     "@argos-ci/cypress": "workspace:.",
     "@types/node": "^18.19.44",
     "cypress": "^13.13.3",
-    "eslint-plugin-cypress": "^2.15.2",
+    "eslint-plugin-cypress": "^3.5.0",
     "eslint-plugin-html": "^8.1.1"
   },
   "scripts": {
