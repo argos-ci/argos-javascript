@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["@wdio/globals/types", "@types/mocha"]
+    "types": ["@wdio/globals/types", "@wdio/mocha-framework"]
   }
 }

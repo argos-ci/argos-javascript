@@ -41,18 +41,18 @@
   },
   "dependencies": {
     "@argos-ci/util": "workspace:*",
-    "axios": "^1.6.8",
+    "axios": "^1.7.4",
     "convict": "^6.2.4",
-    "debug": "^4.3.4",
+    "debug": "^4.3.6",
     "fast-glob": "^3.3.2",
-    "sharp": "^0.33.3",
+    "sharp": "^0.33.5",
     "tmp": "^0.2.3"
   },
   "devDependencies": {
     "@types/convict": "^6.1.6",
     "@types/debug": "^4.1.12",
     "@types/tmp": "^0.2.6",
-    "msw": "^2.2.13"
+    "msw": "^2.3.5"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
