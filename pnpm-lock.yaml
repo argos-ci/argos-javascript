@@ -267,9 +267,6 @@ importers:
       '@argos-ci/cli':
         specifier: workspace:*
         version: link:../cli
-      '@types/mocha':
-        specifier: ^10.0.7
-        version: 10.0.7
       '@wdio/cli':
         specifier: ^9.0.3
         version: 9.0.3
