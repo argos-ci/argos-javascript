@@ -1,18 +1,13 @@
 import type { Options } from "@wdio/types";
-export const config: Options.Testrunner = {
+export const config: Options.Testrunner & {
+  capabilities: Options.RunnerStart["capabilities"][];
+} = {
   //
   // ====================
   // Runner Configuration
   // ====================
   // WebdriverIO supports running e2e tests as well as unit and component tests.
   runner: "local",
-  autoCompileOpts: {
-    autoCompile: true,
-    tsNodeOpts: {
-      project: "./test/tsconfig.json",
-      transpileOnly: true,
-    },
-  },
 
   //
   // ==================
@@ -58,7 +53,6 @@ export const config: Options.Testrunner = {
   //
   capabilities: [
     {
-      maxInstances: 5,
       browserName: "chrome",
       acceptInsecureCerts: true,
       // We need to extends some Chrome flags in order to tell Chrome to run headless
