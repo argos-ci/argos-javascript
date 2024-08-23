@@ -26,7 +26,7 @@
     "check-types": "pnpm -r exec tsc",
     "test": "vitest",
     "release": "npm run build && lerna publish --conventional-commits --create-release=github",
-    "release-canary": "npm run build && lerna publish --canary --dist-tag canary"
+    "release-canary": "npm run build && lerna publish --force-publish --canary --dist-tag canary"
   },
   "engines": {
     "node": "20",
