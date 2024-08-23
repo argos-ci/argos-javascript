@@ -111,7 +111,7 @@ export function getBearerToken({
   }
 }
 
-export const createArgosApiClient = (
+export const createArgosLegacyAPIClient = (
   options: ApiClientOptions,
 ): ArgosApiClient => {
   const axiosInstance = axios.create({

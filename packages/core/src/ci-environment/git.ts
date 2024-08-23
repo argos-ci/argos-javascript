@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 /**
  * Check if the current directory is a git repository.
  */
-export const checkIsGitRepository = () => {
+export function checkIsGitRepository() {
   try {
     return (
       execSync("git rev-parse --is-inside-work-tree").toString().trim() ===
@@ -12,23 +12,23 @@ export const checkIsGitRepository = () => {
   } catch {
     return false;
   }
-};
+}
 
 /**
  * Returns the head commit.
  */
-export const head = () => {
+export function head() {
   try {
     return execSync("git rev-parse HEAD").toString().trim();
   } catch {
     return null;
   }
-};
+}
 
 /**
  * Returns the current branch.
  */
-export const branch = () => {
+export function branch() {
   try {
     const headRef = execSync("git rev-parse --abbrev-ref HEAD")
       .toString()
@@ -42,4 +42,39 @@ export const branch = () => {
   } catch {
     return null;
   }
-};
+}
+
+function getMergeBaseCommitShaWithDepth(input: {
+  base: string;
+  head?: string | null;
+  depth: number;
+}): string | null {
+  const head = input.head || `HEAD`;
+  try {
+    execSync(`git fetch origin ${head} --depth ${input.depth}`);
+    execSync(
+      `git fetch origin ${input.base}:${input.base} --depth ${input.depth}`,
+    );
+    const mergeBase = execSync(`git merge-base ${head} ${input.base}`)
+      .toString()
+      .trim();
+    return mergeBase || null;
+  } catch {
+    return null;
+  }
+}
+
+export function getMergeBaseCommitSha(input: {
+  base: string;
+  head?: string | null;
+}): string | null {
+  let depth = 50;
+  while (depth < 1000) {
+    const mergeBase = getMergeBaseCommitShaWithDepth({ ...input, depth });
+    if (mergeBase) {
+      return mergeBase;
+    }
+    depth += 50;
+  }
+  return null;
+}

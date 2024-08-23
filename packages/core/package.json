@@ -40,6 +40,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@argos-ci/api-client": "workspace:*",
     "@argos-ci/util": "workspace:*",
     "axios": "^1.7.4",
     "convict": "^6.2.4",

@@ -1,7 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import type { Service, Context } from "../types";
 import axios from "axios";
 import { debug } from "../../debug";
+import { getMergeBaseCommitSha } from "../git";
 
 type EventPayload = {
   pull_request?: {
@@ -87,37 +89,47 @@ To disable this warning, add \`DISABLE_GITHUB_TOKEN_WARNING: true\` as environme
   }
 }
 
-const getBranch = ({ env }: Context) => {
+function getBranch(
+  context: Context,
+  eventPayload: EventPayload | null,
+): string | null {
+  if (eventPayload?.pull_request?.head.ref) {
+    return eventPayload.pull_request.head.ref;
+  }
+
+  const { env } = context;
+
   if (env.GITHUB_HEAD_REF) {
     return env.GITHUB_HEAD_REF;
   }
 
-  const branchRegex = /refs\/heads\/(.*)/;
   if (!env.GITHUB_REF) {
     return null;
   }
 
+  const branchRegex = /refs\/heads\/(.*)/;
   const matches = branchRegex.exec(env.GITHUB_REF);
   return matches?.[1] ?? null;
-};
+}
 
-const getRepository = ({ env }: Context) => {
+function getRepository({ env }: Context): string | null {
   if (!env.GITHUB_REPOSITORY) return null;
   return env.GITHUB_REPOSITORY.split("/")[1] || null;
-};
+}
 
-const readEventPayload = ({ env }: Context): EventPayload | null => {
+function readEventPayload({ env }: Context): EventPayload | null {
   if (!env.GITHUB_EVENT_PATH) return null;
   if (!existsSync(env.GITHUB_EVENT_PATH)) return null;
   return JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf-8"));
-};
+}
 
 const service: Service = {
   name: "GitHub Actions",
   key: "github-actions",
-  detect: ({ env }) => Boolean(env.GITHUB_ACTIONS),
-  config: async ({ env }) => {
-    const payload = readEventPayload({ env });
+  detect: (context) => Boolean(context.env.GITHUB_ACTIONS),
+  config: async (context) => {
+    const { env } = context;
+    const payload = readEventPayload(context);
     const sha = process.env.GITHUB_SHA || null;
 
     if (!sha) {
@@ -127,7 +139,7 @@ const service: Service = {
     const commonConfig = {
       commit: sha,
       owner: env.GITHUB_REPOSITORY_OWNER || null,
-      repository: getRepository({ env }),
+      repository: getRepository(context),
       jobId: env.GITHUB_JOB || null,
       runId: env.GITHUB_RUN_ID || null,
       runAttempt: env.GITHUB_RUN_ATTEMPT
@@ -140,7 +152,7 @@ const service: Service = {
     if (payload?.deployment) {
       debug("Deployment event detected");
       // Try to find a relevant pull request for the sha
-      const pullRequest = await getPullRequestFromHeadSha({ env }, sha);
+      const pullRequest = await getPullRequestFromHeadSha(context, sha);
       return {
         ...commonConfig,
         // If no pull request is found, we fallback to the deployment environment as branch name
@@ -153,10 +165,23 @@ const service: Service = {
 
     return {
       ...commonConfig,
-      branch: payload?.pull_request?.head.ref || getBranch({ env }) || null,
+      branch:
+        payload?.pull_request?.head.ref || getBranch(context, payload) || null,
       prNumber: payload?.pull_request?.number || null,
       prHeadCommit: payload?.pull_request?.head.sha ?? null,
     };
+  },
+  getMergeBaseCommitSha: (input, ctx) => {
+    const payload = readEventPayload(ctx);
+    const branch = getBranch(ctx, payload);
+    // Unshallow the repository to get the merge base commit
+    execSync(
+      `git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"`,
+    );
+    return getMergeBaseCommitSha({
+      base: input.base,
+      head: branch,
+    });
   },
 };
 

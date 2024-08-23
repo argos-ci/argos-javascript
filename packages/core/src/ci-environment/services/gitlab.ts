@@ -1,3 +1,4 @@
+import { getMergeBaseCommitSha } from "../git";
 import type { Service } from "../types";
 
 const service: Service = {
@@ -18,6 +19,7 @@ const service: Service = {
       nonce: env.CI_PIPELINE_ID || null,
     };
   },
+  getMergeBaseCommitSha,
 };
 
 export default service;

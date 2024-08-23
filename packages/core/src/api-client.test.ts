@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { setupMockServer } from "../mocks/server";
 import {
   ArgosApiClient,
-  createArgosApiClient,
+  createArgosLegacyAPIClient,
   getBearerToken,
 } from "./api-client";
 
@@ -11,9 +11,9 @@ setupMockServer();
 
 let apiClient: ArgosApiClient;
 
-describe("#createArgosApiClient", () => {
+describe("#createArgosLegacyAPIClient", () => {
   beforeAll(() => {
-    apiClient = createArgosApiClient({
+    apiClient = createArgosLegacyAPIClient({
       baseUrl: "https://api.argos-ci.dev",
       bearerToken: "Bearer 92d832e0d22ab113c8979d73a87a11130eaa24a9",
     });
