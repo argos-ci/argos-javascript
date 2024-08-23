@@ -4,7 +4,7 @@ import { setupMockServer } from "../mocks/server";
 import {
   ArgosApiClient,
   createArgosLegacyAPIClient,
-  getBearerToken,
+  getAuthToken,
 } from "./api-client";
 
 setupMockServer();
@@ -76,12 +76,12 @@ describe("#createArgosLegacyAPIClient", () => {
   });
 });
 
-describe("#getBearerToken", () => {
+describe("#getAuthToken", () => {
   describe("without CI", () => {
     describe("without token", () => {
       it("should throw", () => {
         const config = {};
-        expect(() => getBearerToken(config)).toThrow(
+        expect(() => getAuthToken(config)).toThrow(
           "Missing Argos repository token 'ARGOS_TOKEN'",
         );
       });
@@ -90,7 +90,7 @@ describe("#getBearerToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { token: "this-token" };
-        expect(getBearerToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`Bearer this-token`);
       });
     });
   });
@@ -101,7 +101,7 @@ describe("#getBearerToken", () => {
     describe("without token", () => {
       it("should throw", () => {
         const config = { ...configProps };
-        expect(() => getBearerToken(config)).toThrow(
+        expect(() => getAuthToken(config)).toThrow(
           "Missing Argos repository token 'ARGOS_TOKEN'",
         );
       });
@@ -110,7 +110,7 @@ describe("#getBearerToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { ...configProps, token: "this-token" };
-        expect(getBearerToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`Bearer this-token`);
       });
     });
   });
@@ -121,7 +121,7 @@ describe("#getBearerToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { ...configProps, token: "this-token" };
-        expect(getBearerToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`Bearer this-token`);
       });
     });
 
@@ -145,7 +145,7 @@ describe("#getBearerToken", () => {
           "utf8",
         ).toString("base64");
 
-        const bearerToken = getBearerToken(config);
+        const bearerToken = getAuthToken(config);
 
         expect(bearerToken).toBe(`Bearer tokenless-github-${base64}`);
         expect(bearerToken).toBe(
@@ -157,7 +157,7 @@ describe("#getBearerToken", () => {
     describe("without token and without CI env variables", () => {
       it("should throw", () => {
         const config = { ...configProps };
-        expect(() => getBearerToken(config)).toThrow(
+        expect(() => getAuthToken(config)).toThrow(
           "Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'",
         );
       });

@@ -70,7 +70,7 @@ export interface ArgosApiClient {
 const base64Encode = (obj: any) =>
   Buffer.from(JSON.stringify(obj), "utf8").toString("base64");
 
-export function getBearerToken({
+export function getAuthToken({
   token,
   ciProvider,
   owner,
@@ -87,7 +87,9 @@ export function getBearerToken({
   runId?: string | null;
   prNumber?: number | null;
 }) {
-  if (token) return `Bearer ${token}`;
+  if (token) {
+    return token;
+  }
 
   switch (ciProvider) {
     case "github-actions": {
@@ -97,7 +99,7 @@ export function getBearerToken({
         );
       }
 
-      return `Bearer tokenless-github-${base64Encode({
+      return `tokenless-github-${base64Encode({
         owner,
         repository,
         jobId,

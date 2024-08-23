@@ -3,7 +3,7 @@ import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
-import { createArgosLegacyAPIClient, getBearerToken } from "./api-client";
+import { createArgosLegacyAPIClient, getAuthToken } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
@@ -147,16 +147,16 @@ export async function upload(params: UploadParameters) {
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
   debug("Using config and files", config, files);
 
-  const authToken = getBearerToken(config);
+  const authToken = getAuthToken(config);
 
   const apiClient = createClient({
     baseUrl: config.apiBaseUrl,
-    authToken: authToken,
+    authToken,
   });
 
   const legacyApiClient = createArgosLegacyAPIClient({
     baseUrl: config.apiBaseUrl,
-    bearerToken: authToken,
+    bearerToken: `Bearer ${authToken}`,
   });
 
   // Collect screenshots
