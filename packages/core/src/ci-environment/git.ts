@@ -46,12 +46,12 @@ export function branch() {
 
 function getMergeBaseCommitShaWithDepth(input: {
   base: string;
-  head?: string | null;
+  head: string;
   depth: number;
 }): string | null {
   const head = input.head || `HEAD`;
   try {
-    execSync(`git fetch origin ${head} --depth ${input.depth}`);
+    execSync(`git fetch origin ${head}:${head} --depth ${input.depth}`);
     execSync(
       `git fetch origin ${input.base}:${input.base} --depth ${input.depth}`,
     );
@@ -66,11 +66,14 @@ function getMergeBaseCommitShaWithDepth(input: {
 
 export function getMergeBaseCommitSha(input: {
   base: string;
-  head?: string | null;
+  head: string;
 }): string | null {
   let depth = 50;
   while (depth < 1000) {
-    const mergeBase = getMergeBaseCommitShaWithDepth({ ...input, depth });
+    const mergeBase = getMergeBaseCommitShaWithDepth({
+      depth,
+      ...input,
+    });
     if (mergeBase) {
       return mergeBase;
     }

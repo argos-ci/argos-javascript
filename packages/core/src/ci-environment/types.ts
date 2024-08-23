@@ -78,6 +78,7 @@ export interface Service {
   getMergeBaseCommitSha(
     input: {
       base: string;
+      head: string;
     },
     ctx: Context,
   ): string | null;

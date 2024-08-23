@@ -41,7 +41,10 @@ function getCiService(context: Context) {
 /**
  * Get the merge base commit.
  */
-export function getMergeBaseCommitSha(input: { base: string }): string | null {
+export function getMergeBaseCommitSha(input: {
+  base: string;
+  head: string;
+}): string | null {
   const context = createContext();
   const service = getCiService(context);
   if (!service) {

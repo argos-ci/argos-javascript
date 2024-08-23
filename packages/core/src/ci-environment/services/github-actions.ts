@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from "node:fs";
-import { execSync } from "node:child_process";
 import type { Service, Context } from "../types";
 import axios from "axios";
 import { debug } from "../../debug";
@@ -171,18 +170,7 @@ const service: Service = {
       prHeadCommit: payload?.pull_request?.head.sha ?? null,
     };
   },
-  getMergeBaseCommitSha: (input, ctx) => {
-    const payload = readEventPayload(ctx);
-    const branch = getBranch(ctx, payload);
-    // Unshallow the repository to get the merge base commit
-    execSync(
-      `git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"`,
-    );
-    return getMergeBaseCommitSha({
-      base: input.base,
-      head: branch,
-    });
-  },
+  getMergeBaseCommitSha,
 };
 
 export default service;
