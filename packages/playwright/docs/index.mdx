@@ -157,6 +157,45 @@ To debug flaky tests, Argos supports using the [Playwright --repeat-each option]
 npm exec -- playwright test --repeat-each 5
 ```
 
+## Configure Content-Security-Policy (CSP)
+
+To stabilize tests, Argos injects a script before taking screenshots. This script may conflict with your CSP settings. To resolve this issue, you have two options:
+
+### 1. Allow the Argos script in your CSP
+
+The `@argos-ci/playwright` package provides a `getCSPScriptHash` method to retrieve the hash of the script injected by Argos. Additionally, Argos requires the `'unsafe-eval'` directive to function properly.
+
+To use this method, you need to be able to inject CSP headers into your server. Here's an example in a Playwright configuration:
+
+```ts
+import { defineConfig } from "@playwright/test";
+import { getCSPScriptHash } from "@argos-ci/playwright";
+
+export default defineConfig({
+  webServer: {
+    command: "node my-app.js",
+    port: 3000,
+    env: {
+      CSP_SCRIPT_SRC: `${getCSPScriptHash()},'unsafe-eval'`,
+    },
+  },
+});
+```
+
+### 2. Configure Playwright to bypass CSP
+
+If you do not have the flexibility to add custom CSP headers for Playwright test execution, you can [configure Playwright to bypass CSP](https://playwright.dev/docs/api/class-testoptions#test-options-bypass-csp) in your Playwright configuration:
+
+```ts
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+  use: {
+    bypassCSP: true,
+  },
+});
+```
+
 ## API Overview
 
 ### argosScreenshot(page, name[, options])
@@ -171,6 +210,10 @@ npm exec -- playwright test --repeat-each 5
 - `options.threshold`: Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to `0.5`.
 
 Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
+
+### getCSPScriptHash()
+
+Returns the Content-Security-Policy script hash used by Argos (ex: `'sha256-xaC9wWpMVRiAXSfhxhP+Wyqkw0mgO+MIrHuzmMPIxEI='`).
 
 ### Playwright reporter
 
@@ -200,43 +243,6 @@ export default defineConfig({
   ],
 });
 ```
-
-## Upgrading from v0.0.x
-
-### Step 1: Setup Argos in your Playwright config
-
-```typescript
-import { defineConfig } from "@playwright/test";
-
-export default defineConfig({
-  // ... other configuration
-
-  // Add Argos reporter.
-  reporter: [
-    ["list"],
-    [
-      "@argos-ci/playwright/reporter",
-      {
-        // Upload artefacts to Argos on CI.
-        uploadToArgos: !!process.env.CI,
-      },
-    ],
-  ],
-
-  // Setup recording option to enable test debugging features
-  use: {
-    // Setting to capture screenshot only when a test fails
-    screenshot: "only-on-failure",
-    // Setting to retain traces only when a test fails
-    trace: "retain-on-failure",
-  },
-});
-```
-
-### Step 2: Phase Out CLI Usage:
-
-- Remove `argos upload` calls from your CI. (Note: Screenshots now upload through the reporter.)
-- Delete `@argos-ci/cli` from `package.json`.
 
 ## Additional Resources
 
