@@ -1,5 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
+import { createHash } from "node:crypto";
+
 import type {
   Page,
   PageScreenshotOptions,
@@ -73,8 +75,9 @@ async function injectArgos(page: Page) {
   const injected = await page.evaluate(
     () => typeof (window as any).__ARGOS__ !== "undefined",
   );
-  if (injected) return;
-  await page.addScriptTag({ content: getGlobalScript() });
+  if (!injected) {
+    await page.addScriptTag({ content: getGlobalScript() });
+  }
 }
 
 async function getTestInfo() {
@@ -309,4 +312,12 @@ export async function argosScreenshot(
   }
 
   await teardown();
+}
+
+/**
+ * Get the CSP script hash.
+ */
+export function getCSPScriptHash() {
+  const hash = createHash("sha256").update(getGlobalScript()).digest("base64");
+  return `'sha256-${hash}'`;
 }
