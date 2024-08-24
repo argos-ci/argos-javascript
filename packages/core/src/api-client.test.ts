@@ -90,7 +90,7 @@ describe("#getAuthToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { token: "this-token" };
-        expect(getAuthToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`this-token`);
       });
     });
   });
@@ -110,7 +110,7 @@ describe("#getAuthToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { ...configProps, token: "this-token" };
-        expect(getAuthToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`this-token`);
       });
     });
   });
@@ -121,7 +121,7 @@ describe("#getAuthToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { ...configProps, token: "this-token" };
-        expect(getAuthToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`this-token`);
       });
     });
 
@@ -147,9 +147,9 @@ describe("#getAuthToken", () => {
 
         const bearerToken = getAuthToken(config);
 
-        expect(bearerToken).toBe(`Bearer tokenless-github-${base64}`);
+        expect(bearerToken).toBe(`tokenless-github-${base64}`);
         expect(bearerToken).toBe(
-          "Bearer tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9",
+          "tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9",
         );
       });
     });
