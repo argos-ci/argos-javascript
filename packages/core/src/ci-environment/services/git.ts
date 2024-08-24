@@ -1,5 +1,10 @@
 import type { Service } from "../types";
-import { head, branch, checkIsGitRepository } from "../git";
+import {
+  head,
+  branch,
+  checkIsGitRepository,
+  getMergeBaseCommitSha,
+} from "../git";
 
 const service: Service = {
   name: "Git",
@@ -19,6 +24,7 @@ const service: Service = {
       nonce: null,
     };
   },
+  getMergeBaseCommitSha,
 };
 
 export default service;

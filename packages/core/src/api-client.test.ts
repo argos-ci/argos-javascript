@@ -3,17 +3,17 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { setupMockServer } from "../mocks/server";
 import {
   ArgosApiClient,
-  createArgosApiClient,
-  getBearerToken,
+  createArgosLegacyAPIClient,
+  getAuthToken,
 } from "./api-client";
 
 setupMockServer();
 
 let apiClient: ArgosApiClient;
 
-describe("#createArgosApiClient", () => {
+describe("#createArgosLegacyAPIClient", () => {
   beforeAll(() => {
-    apiClient = createArgosApiClient({
+    apiClient = createArgosLegacyAPIClient({
       baseUrl: "https://api.argos-ci.dev",
       bearerToken: "Bearer 92d832e0d22ab113c8979d73a87a11130eaa24a9",
     });
@@ -76,12 +76,12 @@ describe("#createArgosApiClient", () => {
   });
 });
 
-describe("#getBearerToken", () => {
+describe("#getAuthToken", () => {
   describe("without CI", () => {
     describe("without token", () => {
       it("should throw", () => {
         const config = {};
-        expect(() => getBearerToken(config)).toThrow(
+        expect(() => getAuthToken(config)).toThrow(
           "Missing Argos repository token 'ARGOS_TOKEN'",
         );
       });
@@ -90,7 +90,7 @@ describe("#getBearerToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { token: "this-token" };
-        expect(getBearerToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`this-token`);
       });
     });
   });
@@ -101,7 +101,7 @@ describe("#getBearerToken", () => {
     describe("without token", () => {
       it("should throw", () => {
         const config = { ...configProps };
-        expect(() => getBearerToken(config)).toThrow(
+        expect(() => getAuthToken(config)).toThrow(
           "Missing Argos repository token 'ARGOS_TOKEN'",
         );
       });
@@ -110,7 +110,7 @@ describe("#getBearerToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { ...configProps, token: "this-token" };
-        expect(getBearerToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`this-token`);
       });
     });
   });
@@ -121,7 +121,7 @@ describe("#getBearerToken", () => {
     describe("with token", () => {
       it("should return bearer token", () => {
         const config = { ...configProps, token: "this-token" };
-        expect(getBearerToken(config)).toBe(`Bearer this-token`);
+        expect(getAuthToken(config)).toBe(`this-token`);
       });
     });
 
@@ -145,11 +145,11 @@ describe("#getBearerToken", () => {
           "utf8",
         ).toString("base64");
 
-        const bearerToken = getBearerToken(config);
+        const bearerToken = getAuthToken(config);
 
-        expect(bearerToken).toBe(`Bearer tokenless-github-${base64}`);
+        expect(bearerToken).toBe(`tokenless-github-${base64}`);
         expect(bearerToken).toBe(
-          "Bearer tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9",
+          "tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9",
         );
       });
     });
@@ -157,7 +157,7 @@ describe("#getBearerToken", () => {
     describe("without token and without CI env variables", () => {
       it("should throw", () => {
         const config = { ...configProps };
-        expect(() => getBearerToken(config)).toThrow(
+        expect(() => getAuthToken(config)).toThrow(
           "Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'",
         );
       });

@@ -38,6 +38,7 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build-schema-types": "openapi-typescript https://api.argos-ci.com/v2/openapi.yaml -o src/schema.ts",
+    "build-schema-types-dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 openapi-typescript https://api.argos-ci.dev:4001/v2/openapi.yaml -o src/schema.ts",
     "build": "rollup -c"
   },
   "devDependencies": {

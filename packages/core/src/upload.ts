@@ -1,13 +1,15 @@
+import { createClient } from "@argos-ci/api-client";
 import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
-import { createArgosApiClient, getBearerToken } from "./api-client";
+import { createArgosLegacyAPIClient, getAuthToken } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
 import { getPlaywrightTracePath, readMetadata } from "@argos-ci/util";
 import { getArgosCoreSDKIdentifier } from "./version";
+import { getMergeBaseCommitSha } from "./ci-environment";
 
 /**
  * Size of the chunks used to upload screenshots to Argos.
@@ -145,9 +147,16 @@ export async function upload(params: UploadParameters) {
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
   debug("Using config and files", config, files);
 
-  const apiClient = createArgosApiClient({
+  const authToken = getAuthToken(config);
+
+  const apiClient = createClient({
     baseUrl: config.apiBaseUrl,
-    bearerToken: getBearerToken(config),
+    authToken,
+  });
+
+  const legacyApiClient = createArgosLegacyAPIClient({
+    baseUrl: config.apiBaseUrl,
+    bearerToken: `Bearer ${authToken}`,
   });
 
   // Collect screenshots
@@ -194,6 +203,35 @@ export async function upload(params: UploadParameters) {
     }),
   );
 
+  debug("Fetch project");
+  const { data: project, error } = await apiClient.GET("/project");
+  if (error) {
+    throw new Error(error.error);
+  }
+  const { defaultBaseBranch, hasRemoteContentAccess } = project;
+  const referenceBranch = config.referenceBranch || defaultBaseBranch;
+  const referenceCommit = (() => {
+    if (config.referenceCommit) {
+      debug("Found reference commit in config", config.referenceCommit);
+      return config.referenceCommit;
+    }
+
+    if (hasRemoteContentAccess) {
+      return null;
+    }
+
+    const sha = getMergeBaseCommitSha({
+      base: referenceBranch,
+      head: config.branch,
+    });
+    if (sha) {
+      debug("Found reference commit from git", sha);
+    } else {
+      debug("No reference commit found in git");
+    }
+    return sha;
+  })();
+
   // Create build
   debug("Creating build");
   const [pwTraceKeys, screenshotKeys] = screenshots.reduce(
@@ -211,7 +249,8 @@ export async function upload(params: UploadParameters) {
     },
     [[], []] as [string[], string[]],
   );
-  const result = await apiClient.createBuild({
+
+  const result = await legacyApiClient.createBuild({
     commit: config.commit,
     branch: config.branch,
     name: config.buildName,
@@ -222,8 +261,8 @@ export async function upload(params: UploadParameters) {
     pwTraceKeys,
     prNumber: config.prNumber,
     prHeadCommit: config.prHeadCommit,
-    referenceBranch: config.referenceBranch,
-    referenceCommit: config.referenceCommit,
+    referenceBranch,
+    referenceCommit,
     argosSdk,
     ciProvider: config.ciProvider,
     runId: config.runId,
@@ -264,7 +303,7 @@ export async function upload(params: UploadParameters) {
   // Update build
   debug("Updating build");
 
-  await apiClient.updateBuild({
+  await legacyApiClient.updateBuild({
     buildId: result.build.id,
     screenshots: screenshots.map((screenshot) => ({
       key: screenshot.hash,

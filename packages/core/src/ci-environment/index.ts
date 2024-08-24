@@ -6,7 +6,7 @@ import circleci from "./services/circleci";
 import travis from "./services/travis";
 import gitlab from "./services/gitlab";
 import git from "./services/git";
-import type { CiEnvironment, Options } from "./types";
+import type { CiEnvironment, Context } from "./types";
 import { debug } from "../debug";
 
 export { CiEnvironment };
@@ -24,17 +24,48 @@ const services = [
   git,
 ];
 
-export async function getCiEnvironment({
-  env = process.env,
-}: Options = {}): Promise<CiEnvironment | null> {
-  const ctx = { env };
-  debug("Detecting CI environment", { env });
-  const service = services.find((service) => service.detect(ctx));
+/**
+ * Create the context for the CI service detection.
+ */
+function createContext(): Context {
+  return { env: process.env };
+}
+
+/**
+ * Get the CI service that is currently running.
+ */
+function getCiService(context: Context) {
+  return services.find((service) => service.detect(context));
+}
+
+/**
+ * Get the merge base commit.
+ */
+export function getMergeBaseCommitSha(input: {
+  base: string;
+  head: string;
+}): string | null {
+  const context = createContext();
+  const service = getCiService(context);
+  if (!service) {
+    return null;
+  }
+  return service.getMergeBaseCommitSha(input, context);
+}
+
+/**
+ * Get the CI environment.
+ */
+export async function getCiEnvironment(): Promise<CiEnvironment | null> {
+  const context = createContext();
+
+  debug("Detecting CI environment", context);
+  const service = getCiService(context);
 
   // Service matched
   if (service) {
     debug("Internal service matched", service.name);
-    const variables = await service.config(ctx);
+    const variables = await service.config(context);
     const ciEnvironment = {
       name: service.name,
       key: service.key,

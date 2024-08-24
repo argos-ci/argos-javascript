@@ -59,6 +59,12 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
+      - name: Upload "@argos-ci/api-client" dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
+
       - name: Upload "@argos-ci/browser" dist
         uses: actions/upload-artifact@v4
         with:
@@ -126,6 +132,12 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
+
       - name: Test
         run: npm run test
 
@@ -166,6 +178,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
 
       - name: Run integration tests
         run: pnpm --filter core --filter cli run e2e
@@ -214,6 +232,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
 
       - name: Download "@argos-ci/browser" dist
         uses: actions/download-artifact@v4
@@ -275,6 +299,12 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
+
       - name: Download "@argos-ci/browser" dist
         uses: actions/download-artifact@v4
         with:
@@ -335,6 +365,12 @@ jobs:
           name: core-dist
           path: packages/core/dist
 
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
+
       - name: Download "@argos-ci/browser" dist
         uses: actions/download-artifact@v4
         with:
@@ -391,6 +427,12 @@ jobs:
         with:
           name: core-dist
           path: packages/core/dist
+
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
 
       - name: Download "@argos-ci/webdriverio" dist
         uses: actions/download-artifact@v4
