@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.4.2...@argos-ci/playwright@3.5.0) (2024-08-24)
+
+
+### Features
+
+* expose `getCSPScriptHash` in `@argos-ci/playwright` ([ec8e439](https://github.com/argos-ci/argos-javascript/commit/ec8e439d788cafcfacdfcfb0b69686b8439cd13f))
+
+
+
+
+
 ## [3.4.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.4.1...@argos-ci/playwright@3.4.2) (2024-08-24)
 
 **Note:** Version bump only for package @argos-ci/playwright
