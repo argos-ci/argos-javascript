@@ -49,13 +49,14 @@ function getMergeBaseCommitShaWithDepth(input: {
   head: string;
   depth: number;
 }): string | null {
-  const head = input.head || `HEAD`;
   try {
-    execSync(`git fetch origin ${head}:${head} --depth ${input.depth}`);
     execSync(
-      `git fetch origin ${input.base}:${input.base} --depth ${input.depth}`,
+      `git fetch --update-head-ok --depth ${input.depth} origin ${input.head}:${input.head}`,
     );
-    const mergeBase = execSync(`git merge-base ${head} ${input.base}`)
+    execSync(
+      `git fetch --update-head-ok --depth ${input.depth} origin ${input.base}:${input.base}`,
+    );
+    const mergeBase = execSync(`git merge-base ${input.head} ${input.base}`)
       .toString()
       .trim();
     return mergeBase || null;
