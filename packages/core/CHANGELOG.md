@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.5.1 (2024-08-29)
+
+
+### Bug Fixes
+
+* fix branch fetching on CircleCI ([2ae4b37](https://github.com/argos-ci/argos-javascript/commit/2ae4b3722b6699a19b10b375f770d5198170812c))
+
+
+
+
+
 # [2.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.4.1...@argos-ci/core@2.5.0) (2024-08-24)
 
 
