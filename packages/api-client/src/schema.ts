@@ -4,6 +4,54 @@
  */
 
 export interface paths {
+    "/builds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createBuild"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builds/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["finalizeBuilds"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builds/{buildId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateBuild"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project": {
         parameters: {
             query?: never;
@@ -40,15 +88,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description Error response */
-        Error: {
-            error: string;
-            details: {
-                message: string;
-            }[];
-        };
         /** @description Build */
         Build: {
+            /**
+             * @description A unique identifier for the build
+             * @example 12345
+             */
             id: string;
             number: number;
             status: ("accepted" | "rejected") | ("stable" | "diffDetected") | ("expired" | "pending" | "progress" | "error" | "aborted");
@@ -67,6 +112,18 @@ export interface components {
                 };
             } | null;
         };
+        /** @description Error response */
+        Error: {
+            error: string;
+            details: {
+                message: string;
+            }[];
+        };
+        /**
+         * @description A unique identifier for the build
+         * @example 12345
+         */
+        buildId: string;
     };
     responses: never;
     parameters: never;
@@ -76,6 +133,308 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    createBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    commit: string;
+                    branch: string;
+                    screenshotKeys: string[];
+                    pwTraceKeys?: string[];
+                    name?: string | null;
+                    parallel?: boolean | null;
+                    parallelNonce?: string | null;
+                    prNumber?: number | null;
+                    prHeadCommit?: string | null;
+                    referenceCommit?: string | null;
+                    referenceBranch?: string | null;
+                    /** @enum {string|null} */
+                    mode?: "ci" | "monitoring" | null;
+                    ciProvider?: string | null;
+                    argosSdk?: string | null;
+                    runId?: string | null;
+                    runAttempt?: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Result of build creation */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        build: components["schemas"]["Build"];
+                        screenshots: {
+                            key: string;
+                            /** Format: uri */
+                            putUrl: string;
+                        }[];
+                        pwTraces: {
+                            key: string;
+                            /** Format: uri */
+                            putUrl: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    finalizeBuilds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    parallelNonce: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Result of build finalization */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        builds: components["schemas"]["Build"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique identifier for the build */
+                buildId: components["schemas"]["buildId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    screenshots: {
+                        key: string;
+                        name: string;
+                        baseName?: string | null;
+                        metadata?: {
+                            url?: string;
+                            viewport?: {
+                                width: number;
+                                height: number;
+                            };
+                            /** @enum {string} */
+                            colorScheme?: "light" | "dark";
+                            /** @enum {string} */
+                            mediaType?: "screen" | "print";
+                            test?: {
+                                id?: string;
+                                title: string;
+                                titlePath: string[];
+                                retries?: number;
+                                retry?: number;
+                                repeat?: number;
+                                location?: {
+                                    file: string;
+                                    line: number;
+                                    column: number;
+                                };
+                            } | null;
+                            browser?: {
+                                name: string;
+                                version: string;
+                            };
+                            automationLibrary: {
+                                name: string;
+                                version: string;
+                            };
+                            sdk: {
+                                name: string;
+                                version: string;
+                            };
+                        } | null;
+                        pwTraceKey?: string | null;
+                        threshold?: number | null;
+                    }[];
+                    parallel?: boolean | null;
+                    parallelTotal?: number | null;
+                    parallelIndex?: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Result of build update */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        build: components["schemas"]["Build"];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getAuthProject: {
         parameters: {
             query?: never;
@@ -143,12 +502,12 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        results: components["schemas"]["Build"][];
                         pageInfo: {
                             total: number;
                             page: number;
                             perPage: number;
                         };
+                        results: components["schemas"]["Build"][];
                     };
                 };
             };
