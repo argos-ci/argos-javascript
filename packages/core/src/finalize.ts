@@ -1,4 +1,4 @@
-import { createClient } from "@argos-ci/api-client";
+import { createClient, throwAPIError } from "@argos-ci/api-client";
 import { getAuthToken } from "./auth";
 import { readConfig } from "./config";
 
@@ -33,7 +33,7 @@ export async function finalize(params: FinalizeParameters) {
   });
 
   if (finalizeBuildsResult.error) {
-    throw new Error(finalizeBuildsResult.error.error);
+    throwAPIError(finalizeBuildsResult);
   }
 
   return finalizeBuildsResult.data;
