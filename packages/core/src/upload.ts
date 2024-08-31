@@ -3,7 +3,7 @@ import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
-import { getAuthToken } from "./api-client";
+import { getAuthToken } from "./auth";
 import { upload as uploadToS3 } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";

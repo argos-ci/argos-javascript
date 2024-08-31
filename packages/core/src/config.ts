@@ -104,7 +104,7 @@ const schema = {
   },
   parallelTotal: {
     env: "ARGOS_PARALLEL_TOTAL",
-    format: "nat",
+    format: "int",
     default: null,
     nullable: true,
   },
@@ -217,8 +217,8 @@ export async function readConfig(options: Partial<Config> = {}) {
       config.get("parallelNonce") ||
       ciEnv?.nonce ||
       null,
-    parallelTotal: options.parallelTotal || config.get("parallelTotal") || null,
-    parallelIndex: options.parallelIndex || config.get("parallelIndex") || null,
+    parallelTotal: options.parallelTotal ?? config.get("parallelTotal") ?? null,
+    parallelIndex: options.parallelIndex ?? config.get("parallelIndex") ?? null,
     mode: options.mode || config.get("mode") || null,
     ciProvider: ciEnv?.key || null,
   });
