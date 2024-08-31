@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.5.1...@argos-ci/core@2.6.0) (2024-08-31)
+
+
+### Features
+
+* add finalize command ([53ce57d](https://github.com/argos-ci/argos-javascript/commit/53ce57d7bec003368575495e05781a31698b2816))
+
+
+
+
+
 ## 2.5.1 (2024-08-29)
 
 

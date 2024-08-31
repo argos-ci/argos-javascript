@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.3.0 (2024-08-31)
+
+
+### Features
+
+* add finalize command ([53ce57d](https://github.com/argos-ci/argos-javascript/commit/53ce57d7bec003368575495e05781a31698b2816))
+
+
+
+
+
 # [0.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.1.0...@argos-ci/api-client@0.2.0) (2024-08-24)
 
 
