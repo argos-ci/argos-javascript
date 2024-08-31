@@ -1,4 +1,4 @@
-import { createClient } from "@argos-ci/api-client";
+import { createClient, throwAPIError } from "@argos-ci/api-client";
 import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
@@ -201,7 +201,7 @@ export async function upload(params: UploadParameters) {
   debug("Fetch project");
   const projectResponse = await apiClient.GET("/project");
   if (projectResponse.error) {
-    throw new Error(projectResponse.error.error);
+    throwAPIError(projectResponse);
   }
   const { defaultBaseBranch, hasRemoteContentAccess } = projectResponse.data;
   const referenceBranch = config.referenceBranch || defaultBaseBranch;
@@ -267,7 +267,7 @@ export async function upload(params: UploadParameters) {
   });
 
   if (createBuildResponse.error) {
-    throw new Error(createBuildResponse.error.error);
+    throwAPIError(createBuildResponse);
   }
 
   const result = createBuildResponse.data;
@@ -328,7 +328,7 @@ export async function upload(params: UploadParameters) {
   });
 
   if (uploadBuildResponse.error) {
-    throw new Error(uploadBuildResponse.error.error);
+    throwAPIError(uploadBuildResponse);
   }
 
   return { build: uploadBuildResponse.data.build, screenshots };
