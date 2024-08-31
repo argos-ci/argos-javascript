@@ -3,7 +3,7 @@ import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
-import { createArgosLegacyAPIClient, getAuthToken } from "./api-client";
+import { getAuthToken } from "./api-client";
 import { upload as uploadToS3 } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
@@ -154,11 +154,6 @@ export async function upload(params: UploadParameters) {
     authToken,
   });
 
-  const legacyApiClient = createArgosLegacyAPIClient({
-    baseUrl: config.apiBaseUrl,
-    bearerToken: `Bearer ${authToken}`,
-  });
-
   // Collect screenshots
   const foundScreenshots = await discoverScreenshots(files, {
     root: params.root,
@@ -204,11 +199,11 @@ export async function upload(params: UploadParameters) {
   );
 
   debug("Fetch project");
-  const { data: project, error } = await apiClient.GET("/project");
-  if (error) {
-    throw new Error(error.error);
+  const projectResponse = await apiClient.GET("/project");
+  if (projectResponse.error) {
+    throw new Error(projectResponse.error.error);
   }
-  const { defaultBaseBranch, hasRemoteContentAccess } = project;
+  const { defaultBaseBranch, hasRemoteContentAccess } = projectResponse.data;
   const referenceBranch = config.referenceBranch || defaultBaseBranch;
   const referenceCommit = (() => {
     if (config.referenceCommit) {
@@ -250,24 +245,32 @@ export async function upload(params: UploadParameters) {
     [[], []] as [string[], string[]],
   );
 
-  const result = await legacyApiClient.createBuild({
-    commit: config.commit,
-    branch: config.branch,
-    name: config.buildName,
-    mode: config.mode,
-    parallel: config.parallel,
-    parallelNonce: config.parallelNonce,
-    screenshotKeys,
-    pwTraceKeys,
-    prNumber: config.prNumber,
-    prHeadCommit: config.prHeadCommit,
-    referenceBranch,
-    referenceCommit,
-    argosSdk,
-    ciProvider: config.ciProvider,
-    runId: config.runId,
-    runAttempt: config.runAttempt,
+  const createBuildResponse = await apiClient.POST("/builds", {
+    body: {
+      commit: config.commit,
+      branch: config.branch,
+      name: config.buildName,
+      mode: config.mode,
+      parallel: config.parallel,
+      parallelNonce: config.parallelNonce,
+      screenshotKeys,
+      pwTraceKeys,
+      prNumber: config.prNumber,
+      prHeadCommit: config.prHeadCommit,
+      referenceBranch,
+      referenceCommit,
+      argosSdk,
+      ciProvider: config.ciProvider,
+      runId: config.runId,
+      runAttempt: config.runAttempt,
+    },
   });
+
+  if (createBuildResponse.error) {
+    throw new Error(createBuildResponse.error.error);
+  }
+
+  const result = createBuildResponse.data;
 
   debug("Got uploads url", result);
 
@@ -303,20 +306,30 @@ export async function upload(params: UploadParameters) {
   // Update build
   debug("Updating build");
 
-  await legacyApiClient.updateBuild({
-    buildId: result.build.id,
-    screenshots: screenshots.map((screenshot) => ({
-      key: screenshot.hash,
-      name: screenshot.name,
-      metadata: screenshot.metadata,
-      pwTraceKey: screenshot.pwTrace?.hash ?? null,
-      threshold: screenshot.threshold ?? config?.threshold ?? null,
-      baseName: screenshot.baseName,
-    })),
-    parallel: config.parallel,
-    parallelTotal: config.parallelTotal,
-    parallelIndex: config.parallelIndex,
+  const uploadBuildResponse = await apiClient.PUT("/builds/{buildId}", {
+    params: {
+      path: {
+        buildId: result.build.id,
+      },
+    },
+    body: {
+      screenshots: screenshots.map((screenshot) => ({
+        key: screenshot.hash,
+        name: screenshot.name,
+        metadata: screenshot.metadata,
+        pwTraceKey: screenshot.pwTrace?.hash ?? null,
+        threshold: screenshot.threshold ?? config?.threshold ?? null,
+        baseName: screenshot.baseName,
+      })),
+      parallel: config.parallel,
+      parallelTotal: config.parallelTotal,
+      parallelIndex: config.parallelIndex,
+    },
   });
 
-  return { build: result.build, screenshots };
+  if (uploadBuildResponse.error) {
+    throw new Error(uploadBuildResponse.error.error);
+  }
+
+  return { build: uploadBuildResponse.data.build, screenshots };
 }
