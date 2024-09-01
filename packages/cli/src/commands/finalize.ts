@@ -17,7 +17,9 @@ export function finalizeCommand(program: Command) {
           },
         });
         spinner.succeed(
-          `Builds finalized: ${result.builds.map((b) => b.url).join(", ")}`,
+          result.builds.length === 0
+            ? "No builds to finalize"
+            : `Builds finalized: ${result.builds.map((b) => b.url).join(", ")}`,
         );
       } catch (error) {
         if (error instanceof Error) {
