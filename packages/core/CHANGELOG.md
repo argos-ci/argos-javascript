@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.7.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.6.0...@argos-ci/core@2.7.0) (2024-09-01)
+
+
+### Features
+
+* improve error handling ([baed0ef](https://github.com/argos-ci/argos-javascript/commit/baed0ef5a04386444ebcc5e3d734d6c7d3dc92db))
+
+
+
+
+
 # [2.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.5.1...@argos-ci/core@2.6.0) (2024-08-31)
 
 
