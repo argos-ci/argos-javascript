@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.8.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.7.0...@argos-ci/core@2.8.0) (2024-09-02)
+
+
+### Features
+
+* collect test report infos in cypress and playwright ([bc275a2](https://github.com/argos-ci/argos-javascript/commit/bc275a2ad1230bfd9a1aba9d85f86b780333f4a9))
+
+
+
+
+
 # [2.7.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.6.0...@argos-ci/core@2.7.0) (2024-09-01)
 
 

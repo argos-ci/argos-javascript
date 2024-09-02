@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.5.3...@argos-ci/playwright@3.6.0) (2024-09-02)
+
+
+### Features
+
+* collect test report infos in cypress and playwright ([bc275a2](https://github.com/argos-ci/argos-javascript/commit/bc275a2ad1230bfd9a1aba9d85f86b780333f4a9))
+
+
+
+
+
 ## [3.5.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.5.2...@argos-ci/playwright@3.5.3) (2024-09-01)
 
 **Note:** Version bump only for package @argos-ci/playwright
