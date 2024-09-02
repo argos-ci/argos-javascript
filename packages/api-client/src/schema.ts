@@ -88,17 +88,23 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description SHA1 hash */
+        Sha1Hash: string;
+        /** @description SHA256 hash */
+        Sha256Hash: string;
         /** @description Build */
         Build: {
-            /**
-             * @description A unique identifier for the build
-             * @example 12345
-             */
-            id: string;
+            id: components["schemas"]["BuildId"];
+            /** @description The build number */
             number: number;
+            /** @description The status of the build */
             status: ("accepted" | "rejected") | ("stable" | "diffDetected") | ("expired" | "pending" | "progress" | "error" | "aborted");
-            /** Format: uri */
+            /**
+             * Format: uri
+             * @description The URL of the build
+             */
             url: string;
+            /** @description The notification payload for the build */
             notification: {
                 description: string;
                 context: string;
@@ -112,6 +118,11 @@ export interface components {
                 };
             } | null;
         };
+        /**
+         * @description A unique identifier for the build
+         * @example 12345
+         */
+        BuildId: string;
         /** @description Error response */
         Error: {
             error: string;
@@ -124,6 +135,76 @@ export interface components {
          * @example 12345
          */
         buildId: string;
+        /** @description Screenshot input */
+        ScreenshotInput: {
+            key: string;
+            name: string;
+            baseName?: string | null;
+            metadata?: {
+                url?: string;
+                viewport?: {
+                    width: number;
+                    height: number;
+                };
+                /** @enum {string} */
+                colorScheme?: "light" | "dark";
+                /** @enum {string} */
+                mediaType?: "screen" | "print";
+                test?: {
+                    id?: string;
+                    title: string;
+                    titlePath: string[];
+                    retries?: number;
+                    retry?: number;
+                    repeat?: number;
+                    location?: {
+                        file: string;
+                        line: number;
+                        column: number;
+                    };
+                } | null;
+                browser?: {
+                    name: string;
+                    version: string;
+                };
+                automationLibrary: {
+                    name: string;
+                    version: string;
+                };
+                sdk: {
+                    name: string;
+                    version: string;
+                };
+            } | null;
+            pwTraceKey?: string | null;
+            threshold?: number | null;
+        };
+        /** @description Build metadata */
+        BuildMetadata: {
+            testReport?: {
+                /** @enum {string} */
+                status: "passed" | "failed" | "timedout" | "interrupted";
+                stats?: {
+                    startTime?: string;
+                    duration?: number;
+                };
+            };
+        };
+        /** @description Project */
+        Project: {
+            id: string;
+            defaultBaseBranch: string;
+            hasRemoteContentAccess: boolean;
+        };
+        /** @description Page information */
+        PageInfo: {
+            /** @description Total number of items */
+            total: number;
+            /** @description Current page number */
+            page: number;
+            /** @description Number of items per page */
+            perPage: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -143,10 +224,10 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    commit: string;
+                    commit: components["schemas"]["Sha1Hash"];
                     branch: string;
-                    screenshotKeys: string[];
-                    pwTraceKeys?: string[];
+                    screenshotKeys: components["schemas"]["Sha256Hash"][];
+                    pwTraceKeys?: components["schemas"]["Sha256Hash"][];
                     name?: string | null;
                     parallel?: boolean | null;
                     parallelNonce?: string | null;
@@ -318,52 +399,11 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    screenshots: {
-                        key: string;
-                        name: string;
-                        baseName?: string | null;
-                        metadata?: {
-                            url?: string;
-                            viewport?: {
-                                width: number;
-                                height: number;
-                            };
-                            /** @enum {string} */
-                            colorScheme?: "light" | "dark";
-                            /** @enum {string} */
-                            mediaType?: "screen" | "print";
-                            test?: {
-                                id?: string;
-                                title: string;
-                                titlePath: string[];
-                                retries?: number;
-                                retry?: number;
-                                repeat?: number;
-                                location?: {
-                                    file: string;
-                                    line: number;
-                                    column: number;
-                                };
-                            } | null;
-                            browser?: {
-                                name: string;
-                                version: string;
-                            };
-                            automationLibrary: {
-                                name: string;
-                                version: string;
-                            };
-                            sdk: {
-                                name: string;
-                                version: string;
-                            };
-                        } | null;
-                        pwTraceKey?: string | null;
-                        threshold?: number | null;
-                    }[];
+                    screenshots: components["schemas"]["ScreenshotInput"][];
                     parallel?: boolean | null;
                     parallelTotal?: number | null;
                     parallelIndex?: number | null;
+                    metadata?: components["schemas"]["BuildMetadata"];
                 };
             };
         };
@@ -450,11 +490,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        id: string;
-                        defaultBaseBranch: string;
-                        hasRemoteContentAccess: boolean;
-                    };
+                    "application/json": components["schemas"]["Project"];
                 };
             };
             /** @description Unauthorized */
@@ -484,8 +520,7 @@ export interface operations {
                 perPage?: string;
                 /** @description Page number */
                 page?: string;
-                /** @description Commit hash. */
-                commit?: string;
+                commit?: components["schemas"]["Sha1Hash"];
                 /** @description Only return the latest builds created, unique by name and commit. */
                 distinctName?: string;
             };
@@ -502,11 +537,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        pageInfo: {
-                            total: number;
-                            page: number;
-                            perPage: number;
-                        };
+                        pageInfo: components["schemas"]["PageInfo"];
                         results: components["schemas"]["Build"][];
                     };
                 };
