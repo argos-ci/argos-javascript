@@ -234,7 +234,7 @@ class ArgosReporter implements Reporter {
     );
   }
 
-  async onEnd(_result: FullResult) {
+  async onEnd(result: FullResult) {
     debug("ArgosReporter:onEnd");
     const rootUploadDir = await this.getRootUploadDirectory();
     if (!this.uploadToArgos) {
@@ -258,7 +258,17 @@ class ArgosReporter implements Reporter {
       files: ["**/*.png"],
       parallel: parallel ?? undefined,
       ...this.config,
-    };
+      buildName: undefined, // We will set it later
+      metadata: {
+        testReport: {
+          status: result.status,
+          stats: {
+            startTime: result.startTime.toISOString(),
+            duration: result.duration,
+          },
+        },
+      },
+    } satisfies Partial<UploadParameters>;
     try {
       if (checkIsDynamicBuildName(buildNameConfig)) {
         debug(

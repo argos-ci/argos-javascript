@@ -14,6 +14,14 @@ export type RegisterArgosTaskOptions = Omit<
   uploadToArgos?: boolean;
 };
 
+function checkIsCypressFailedResult(
+  results:
+    | CypressCommandLine.CypressFailedRunResult
+    | CypressCommandLine.CypressRunResult,
+): results is CypressCommandLine.CypressFailedRunResult {
+  return "status" in results && results.status === "failed";
+}
+
 export function registerArgosTask(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions,
@@ -37,16 +45,33 @@ export function registerArgosTask(
 
     return { path: newPath };
   });
-  on("after:run", async () => {
+  on("after:run", async (results) => {
     const { screenshotsFolder } = config;
-    if (!screenshotsFolder) return;
+    if (!screenshotsFolder) {
+      return;
+    }
     const { uploadToArgos = true } = options || {};
-    if (!uploadToArgos) return;
+    if (!uploadToArgos) {
+      return;
+    }
+
     const res = await upload({
+      ...options,
       files: ["**/*.png"],
       root: screenshotsFolder,
-      ...options,
+      metadata: {
+        testReport: checkIsCypressFailedResult(results)
+          ? { status: "failed" }
+          : {
+              status: "passed",
+              stats: {
+                startTime: results.startedTestsAt,
+                duration: results.totalDuration,
+              },
+            },
+      },
     });
+
     console.log(`✅ Argos build created: ${res.build.url}`);
   });
 }

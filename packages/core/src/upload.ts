@@ -1,4 +1,8 @@
-import { createClient, throwAPIError } from "@argos-ci/api-client";
+import {
+  ArgosAPISchema,
+  createClient,
+  throwAPIError,
+} from "@argos-ci/api-client";
 import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
@@ -15,6 +19,8 @@ import { getMergeBaseCommitSha } from "./ci-environment";
  * Size of the chunks used to upload screenshots to Argos.
  */
 const CHUNK_SIZE = 10;
+
+type BuildMetadata = ArgosAPISchema.components["schemas"]["BuildMetadata"];
 
 export interface UploadParameters {
   /**
@@ -88,6 +94,10 @@ export interface UploadParameters {
    * @default 0.5
    */
   threshold?: number;
+  /**
+   * Build metadata.
+   */
+  metadata?: BuildMetadata;
 }
 
 async function getConfigFromOptions({
@@ -324,6 +334,7 @@ export async function upload(params: UploadParameters) {
       parallel: config.parallel,
       parallelTotal: config.parallelTotal,
       parallelIndex: config.parallelIndex,
+      metadata: params.metadata,
     },
   });
 

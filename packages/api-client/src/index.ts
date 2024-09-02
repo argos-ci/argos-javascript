@@ -1,6 +1,8 @@
 import createFetchClient, { FetchResponse } from "openapi-fetch";
 import type { paths } from "./schema";
 
+export * as ArgosAPISchema from "./schema";
+
 export type ArgosAPIClient = ReturnType<typeof createClient>;
 
 /**
