@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.8.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.8.0...@argos-ci/core@2.8.1) (2024-09-08)
+
+
+### Bug Fixes
+
+* fix common js finalize & readConfig ([10f67bc](https://github.com/argos-ci/argos-javascript/commit/10f67bc78d03b4537053c5210992d487e6ed2f1e))
+
+
+
+
+
 # [2.8.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.7.0...@argos-ci/core@2.8.0) (2024-09-02)
 
 
