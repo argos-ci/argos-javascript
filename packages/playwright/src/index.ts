@@ -9,6 +9,7 @@ import type {
   ElementHandle,
   TestInfo,
   Locator,
+  ViewportSize,
 } from "@playwright/test";
 import {
   ViewportOption,
@@ -95,6 +96,19 @@ function getViewportSize(page: Page) {
     throw new Error("Can't take screenshots without a viewport.");
   }
   return viewportSize;
+}
+
+/**
+ * Sets the viewport size and waits for the visual viewport to match the specified dimensions.
+ * @returns A promise that resolves when the viewport size has been successfully set and matched.
+ */
+async function setViewportSize(page: Page, viewportSize: ViewportSize) {
+  await page.setViewportSize(viewportSize);
+  await page.waitForFunction(
+    ({ width, height }) =>
+      window.innerWidth === width && window.innerHeight === height,
+    { width: viewportSize.width, height: viewportSize.height },
+  );
 }
 
 /**
@@ -299,14 +313,14 @@ export async function argosScreenshot(
     // Take screenshots for each viewport
     for (const viewport of viewports) {
       const viewportSize = resolveViewport(viewport);
-      await page.setViewportSize(viewportSize);
+      await setViewportSize(page, viewportSize);
       await stabilizeAndScreenshot(
         getScreenshotName(name, { viewportWidth: viewportSize.width }),
       );
     }
 
     // Restore the original viewport size
-    await page.setViewportSize(originalViewportSize);
+    await setViewportSize(page, originalViewportSize);
   } else {
     await stabilizeAndScreenshot(name);
   }
