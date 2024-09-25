@@ -1,6 +1,6 @@
 export type ViewportOrientation = "portrait" | "landscape";
 
-type ViewportSize = {
+export type ViewportSize = {
   width: number;
   height: number;
 };

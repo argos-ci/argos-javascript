@@ -7,6 +7,7 @@ import {
   resolveViewport,
   ArgosGlobal,
   getGlobalScript,
+  ViewportSize,
 } from "@argos-ci/browser";
 import {
   ScreenshotMetadata,
@@ -97,6 +98,20 @@ function checkIsFullPage(options: ArgosScreenshotOptions) {
   return options.fullPage !== undefined
     ? options.fullPage
     : options.element === undefined;
+}
+
+/**
+ * Sets the viewport size and waits for the visual viewport to match the specified dimensions.
+ * @returns A promise that resolves when the viewport size has been successfully set and matched.
+ */
+async function setViewportSize(page: Page, viewportSize: ViewportSize) {
+  await page.setViewport(viewportSize);
+  await page.waitForFunction(
+    ({ width, height }) =>
+      window.innerWidth === width && window.innerHeight === height,
+    {},
+    { width: viewportSize.width, height: viewportSize.height },
+  );
 }
 
 /**
@@ -267,13 +282,13 @@ export async function argosScreenshot(
     // Take screenshots for each viewport
     for (const viewport of viewports) {
       const viewportSize = resolveViewport(viewport);
-      await page.setViewport(viewportSize);
+      await setViewportSize(page, viewportSize);
       await stabilizeAndScreenshot(
         getScreenshotName(name, { viewportWidth: viewportSize.width }),
       );
     }
     // Restore the original viewport
-    await page.setViewport(originalViewport);
+    await setViewportSize(page, originalViewport);
   } else {
     await stabilizeAndScreenshot(name);
   }
