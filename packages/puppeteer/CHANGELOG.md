@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.8](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@2.2.7...@argos-ci/puppeteer@2.2.8) (2024-09-25)
+
+
+### Bug Fixes
+
+* wait for viewport resize (puppeteer, playwright) ([#151](https://github.com/argos-ci/argos-javascript/issues/151)) ([a07f529](https://github.com/argos-ci/argos-javascript/commit/a07f5295203a85620110c7a432f872c000442383))
+
+
+
+
+
 ## [2.2.7](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@2.2.6...@argos-ci/puppeteer@2.2.7) (2024-09-08)
 
 **Note:** Version bump only for package @argos-ci/puppeteer
