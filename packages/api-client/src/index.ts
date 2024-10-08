@@ -1,4 +1,5 @@
-import createFetchClient, { FetchResponse } from "openapi-fetch";
+import createFetchClient from "openapi-fetch";
+import { debug } from "./debug";
 import type { paths } from "./schema";
 
 export * as ArgosAPISchema from "./schema";
@@ -27,17 +28,15 @@ export class APIError extends Error {
 /**
  * Handle API errors.
  */
-export function throwAPIError(
-  fetchResponse: FetchResponse<any, any, any>,
-): never {
-  const { error, response } = fetchResponse;
-  if (
-    error &&
-    typeof error === "object" &&
-    "error" in error &&
-    typeof error.error === "string"
-  ) {
-    throw new APIError(error.error);
-  }
-  throw new APIError(`API error: ${response.status} ${response.statusText}`);
+export function throwAPIError(error: {
+  error: string;
+  details: {
+    message: string;
+  }[];
+}): never {
+  debug("API error", error);
+  const detailMessage = error.details
+    .map((detail) => detail.message)
+    .join(", ");
+  throw new APIError(`${error.error}: ${detailMessage}`);
 }
