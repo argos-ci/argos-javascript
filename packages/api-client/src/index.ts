@@ -37,6 +37,11 @@ export function throwAPIError(
     "error" in error &&
     typeof error.error === "string"
   ) {
+    // Print the first validation error message if present.
+    const message = error.details?.[0]?.message;
+    if (typeof message === "string") {
+      throw new APIError(`${error.error}: ${message}`);
+    }
     throw new APIError(error.error);
   }
   throw new APIError(`API error: ${response.status} ${response.statusText}`);
