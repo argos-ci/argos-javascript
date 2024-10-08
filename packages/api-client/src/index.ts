@@ -1,4 +1,5 @@
 import createFetchClient, { FetchResponse } from "openapi-fetch";
+import { debug } from "./debug";
 import type { paths } from "./schema";
 
 export * as ArgosAPISchema from "./schema";
@@ -37,6 +38,7 @@ export function throwAPIError(
     "error" in error &&
     typeof error.error === "string"
   ) {
+    debug("API error", error);
     // Print the first validation error message if present.
     const message = error.details?.[0]?.message;
     if (typeof message === "string") {
