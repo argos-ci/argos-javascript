@@ -211,7 +211,7 @@ export async function upload(params: UploadParameters) {
   debug("Fetch project");
   const projectResponse = await apiClient.GET("/project");
   if (projectResponse.error) {
-    throwAPIError(projectResponse);
+    throwAPIError(projectResponse.error);
   }
   const { defaultBaseBranch, hasRemoteContentAccess } = projectResponse.data;
   const referenceBranch = config.referenceBranch || defaultBaseBranch;
@@ -277,7 +277,7 @@ export async function upload(params: UploadParameters) {
   });
 
   if (createBuildResponse.error) {
-    throwAPIError(createBuildResponse);
+    throwAPIError(createBuildResponse.error);
   }
 
   const result = createBuildResponse.data;
@@ -339,7 +339,7 @@ export async function upload(params: UploadParameters) {
   });
 
   if (uploadBuildResponse.error) {
-    throwAPIError(uploadBuildResponse);
+    throwAPIError(uploadBuildResponse.error);
   }
 
   return { build: uploadBuildResponse.data.build, screenshots };
