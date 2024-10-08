@@ -295,14 +295,14 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0
       chromedriver:
-        specifier: ^127.0.3
-        version: 127.0.3
+        specifier: ^129.0.2
+        version: 129.0.2
       tsx:
         specifier: ^4.17.0
         version: 4.17.0
       wdio-chromedriver-service:
         specifier: ^8.1.1
-        version: 8.1.1(@wdio/types@9.0.0)(chromedriver@127.0.3)(webdriverio@9.0.1)
+        version: 8.1.1(@wdio/types@9.0.0)(chromedriver@129.0.2)(webdriverio@9.0.1)
       webdriverio:
         specifier: ^9.0.1
         version: 9.0.1
@@ -2575,8 +2575,8 @@ packages:
     resolution: {integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==}
     engines: {node: '>=10'}
 
-  chromedriver@127.0.3:
-    resolution: {integrity: sha512-trUHkFt0n7jGzNOgkO1srOJfz50kKyAGJ016PyV0hrtyKNIGnOC9r3Jlssz19UoEjSzI/1g2shEiIFtDbBYVaw==}
+  chromedriver@129.0.2:
+    resolution: {integrity: sha512-rUEFCJAmAwOdFfaDFtveT97fFeA7NOxlkgyPyN+G09Ws4qGW39aLDxMQBbS9cxQQHhTihqZZobgF5CLVYXnmGA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -9582,7 +9582,7 @@ snapshots:
 
   chownr@2.0.0: {}
 
-  chromedriver@127.0.3:
+  chromedriver@129.0.2:
     dependencies:
       '@testim/chrome-version': 1.1.4
       axios: 1.7.4(debug@4.3.6)
@@ -14113,7 +14113,7 @@ snapshots:
     dependencies:
       defaults: 1.0.4
 
-  wdio-chromedriver-service@8.1.1(@wdio/types@9.0.0)(chromedriver@127.0.3)(webdriverio@9.0.1):
+  wdio-chromedriver-service@8.1.1(@wdio/types@9.0.0)(chromedriver@129.0.2)(webdriverio@9.0.1):
     dependencies:
       '@wdio/logger': 8.24.12
       fs-extra: 11.1.1
@@ -14122,7 +14122,7 @@ snapshots:
       webdriverio: 9.0.1
     optionalDependencies:
       '@wdio/types': 9.0.0
-      chromedriver: 127.0.3
+      chromedriver: 129.0.2
     transitivePeerDependencies:
       - supports-color
 
