@@ -235,6 +235,7 @@ export interface operations {
                     prHeadCommit?: string | null;
                     referenceCommit?: string | null;
                     referenceBranch?: string | null;
+                    parentCommits?: components["schemas"]["Sha1Hash"][] | null;
                     /** @enum {string|null} */
                     mode?: "ci" | "monitoring" | null;
                     ciProvider?: string | null;

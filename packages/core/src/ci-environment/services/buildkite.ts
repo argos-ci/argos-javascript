@@ -1,5 +1,5 @@
 import type { Service } from "../types";
-import { head, branch, getMergeBaseCommitSha } from "../git";
+import { head, branch, getMergeBaseCommitSha, listParentCommits } from "../git";
 
 const service: Service = {
   name: "Buildkite",
@@ -24,6 +24,7 @@ const service: Service = {
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

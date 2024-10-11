@@ -1,5 +1,5 @@
 import type { Service } from "../types";
-import { getMergeBaseCommitSha } from "../git";
+import { getMergeBaseCommitSha, listParentCommits } from "../git";
 
 const service: Service = {
   name: "Heroku",
@@ -19,6 +19,7 @@ const service: Service = {
     nonce: env.HEROKU_TEST_RUN_ID || null,
   }),
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

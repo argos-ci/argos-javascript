@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import type { Service, Context } from "../types";
 import axios from "axios";
 import { debug } from "../../debug";
-import { getMergeBaseCommitSha } from "../git";
+import { getMergeBaseCommitSha, listParentCommits } from "../git";
 
 type EventPayload = {
   pull_request?: {
@@ -177,6 +177,7 @@ const service: Service = {
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

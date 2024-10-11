@@ -54,6 +54,17 @@ export function getMergeBaseCommitSha(input: {
 }
 
 /**
+ * Get the merge base commit.
+ */
+export function listParentCommits(input: { sha: string }): string[] | null {
+  const context = createContext();
+  const service = getCiService(context);
+  if (!service) {
+    return null;
+  }
+  return service.listParentCommits(input, context);
+}
+/**
  * Get the CI environment.
  */
 export async function getCiEnvironment(): Promise<CiEnvironment | null> {

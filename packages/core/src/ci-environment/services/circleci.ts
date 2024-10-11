@@ -1,4 +1,4 @@
-import { getMergeBaseCommitSha } from "../git";
+import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type { Service, Context } from "../types";
 
 const getPrNumber = ({ env }: Context) => {
@@ -31,6 +31,7 @@ const service: Service = {
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

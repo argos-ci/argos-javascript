@@ -87,4 +87,10 @@ export interface Service {
     },
     ctx: Context,
   ): string | null;
+  listParentCommits(
+    input: {
+      sha: string;
+    },
+    ctx: Context,
+  ): string[] | null;
 }

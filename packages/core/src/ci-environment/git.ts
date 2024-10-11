@@ -69,7 +69,7 @@ export function getMergeBaseCommitSha(input: {
   base: string;
   head: string;
 }): string | null {
-  let depth = 50;
+  let depth = 200;
   while (depth < 1000) {
     const mergeBase = getMergeBaseCommitShaWithDepth({
       depth,
@@ -78,7 +78,18 @@ export function getMergeBaseCommitSha(input: {
     if (mergeBase) {
       return mergeBase;
     }
-    depth += 50;
+    depth += 200;
   }
   return null;
+}
+
+export function listParentCommits(input: { sha: string }): string[] | null {
+  try {
+    execSync(`git fetch --depth=200 origin ${input.sha}`);
+    const raw = execSync(`git log --format="%H" --max-count=200 ${input.sha}`);
+    const shas = raw.toString().trim().split("\n");
+    return shas;
+  } catch {
+    return null;
+  }
 }
