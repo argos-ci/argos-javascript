@@ -28,7 +28,7 @@ import { getAttachmentName } from "./attachment";
 import { getLibraryMetadata, getTestMetadataFromTestInfo } from "./metadata";
 import { checkIsUsingArgosReporter } from "./util";
 
-const screenshotFolder = "./screenshots";
+const DEFAULT_SCREENSHOT_ROOT = "./screenshots";
 
 type LocatorOptions = Parameters<Page["locator"]>[1];
 
@@ -65,6 +65,12 @@ export type ArgosScreenshotOptions = {
    * @default 0.5
    */
   threshold?: number;
+
+  /**
+   * Folder where the screenshots will be saved if not using the Argos reporter.
+   * @default "./screenshots"
+   */
+  root?: string;
 } & LocatorOptions &
   ScreenshotOptions<LocatorScreenshotOptions> &
   ScreenshotOptions<PageScreenshotOptions>;
@@ -179,8 +185,15 @@ export async function argosScreenshot(
    */
   options: ArgosScreenshotOptions = {},
 ) {
-  const { element, has, hasText, viewports, argosCSS, ...playwrightOptions } =
-    options;
+  const {
+    element,
+    has,
+    hasText,
+    viewports,
+    argosCSS,
+    root = DEFAULT_SCREENSHOT_ROOT,
+    ...playwrightOptions
+  } = options;
   if (!page) {
     throw new Error("A Playwright `page` object is required.");
   }
@@ -201,7 +214,7 @@ export async function argosScreenshot(
 
   await Promise.all([
     // Create the screenshot folder if it doesn't exist
-    useArgosReporter ? null : mkdir(screenshotFolder, { recursive: true }),
+    useArgosReporter ? null : mkdir(root, { recursive: true }),
     // Inject Argos script into the page
     injectArgos(page),
   ]);
@@ -275,10 +288,10 @@ export async function argosScreenshot(
     const screenshotPath =
       useArgosReporter && testInfo
         ? testInfo.outputPath("argos", `${names.name}.png`)
-        : resolve(screenshotFolder, `${names.name}.png`);
+        : resolve(root, `${names.name}.png`);
 
     const dir = dirname(screenshotPath);
-    if (dir !== screenshotFolder) {
+    if (dir !== root) {
       await mkdir(dirname(screenshotPath), { recursive: true });
     }
 
