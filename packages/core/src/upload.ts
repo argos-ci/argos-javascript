@@ -13,7 +13,7 @@ import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
 import { getPlaywrightTracePath, readMetadata } from "@argos-ci/util";
 import { getArgosCoreSDKIdentifier } from "./version";
-import { getMergeBaseCommitSha } from "./ci-environment";
+import { getMergeBaseCommitSha, listParentCommits } from "./ci-environment";
 
 /**
  * Size of the chunks used to upload screenshots to Argos.
@@ -213,28 +213,54 @@ export async function upload(params: UploadParameters) {
   if (projectResponse.error) {
     throwAPIError(projectResponse.error);
   }
+  debug("Project fetched", projectResponse.data);
+
   const { defaultBaseBranch, hasRemoteContentAccess } = projectResponse.data;
-  const referenceBranch = config.referenceBranch || defaultBaseBranch;
+
   const referenceCommit = (() => {
     if (config.referenceCommit) {
       debug("Found reference commit in config", config.referenceCommit);
       return config.referenceCommit;
     }
 
+    // If we have remote access, we will fetch it from the Git Provider.
     if (hasRemoteContentAccess) {
       return null;
     }
 
-    const sha = getMergeBaseCommitSha({
-      base: referenceBranch,
-      head: config.branch,
-    });
+    // We use the pull request as base branch if possible
+    // else branch specified by the user or the default branch.
+    const base =
+      config.referenceBranch || config.prBaseBranch || defaultBaseBranch;
+
+    const sha = getMergeBaseCommitSha({ base, head: config.branch });
+
     if (sha) {
-      debug("Found reference commit from git", sha);
+      debug("Found merge base", sha);
     } else {
-      debug("No reference commit found in git");
+      debug("No merge base found");
     }
+
     return sha;
+  })();
+
+  const parentCommits = (() => {
+    // If we have remote access, we will fetch them from the Git Provider.
+    if (hasRemoteContentAccess) {
+      return null;
+    }
+
+    if (referenceCommit) {
+      const commits = listParentCommits({ sha: referenceCommit });
+      if (commits) {
+        debug("Found parent commits", commits);
+      } else {
+        debug("No parent commits found");
+      }
+      return commits;
+    }
+
+    return null;
   })();
 
   // Create build
@@ -267,8 +293,9 @@ export async function upload(params: UploadParameters) {
       pwTraceKeys,
       prNumber: config.prNumber,
       prHeadCommit: config.prHeadCommit,
-      referenceBranch,
+      referenceBranch: config.referenceBranch,
       referenceCommit,
+      parentCommits,
       argosSdk,
       ciProvider: config.ciProvider,
       runId: config.runId,

@@ -1,4 +1,4 @@
-import { getMergeBaseCommitSha } from "../git";
+import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type { Service, Context } from "../types";
 
 const getPrNumber = ({ env }: Context) => {
@@ -20,10 +20,12 @@ const service: Service = {
       runAttempt: null,
       prNumber: getPrNumber({ env }),
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: env.BITRISEIO_PIPELINE_ID || null,
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

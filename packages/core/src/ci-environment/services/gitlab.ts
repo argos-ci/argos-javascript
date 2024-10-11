@@ -1,4 +1,4 @@
-import { getMergeBaseCommitSha } from "../git";
+import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type { Service } from "../types";
 
 const service: Service = {
@@ -16,10 +16,12 @@ const service: Service = {
       runAttempt: null,
       prNumber: null,
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: env.CI_PIPELINE_ID || null,
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

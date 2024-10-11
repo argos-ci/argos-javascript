@@ -85,6 +85,12 @@ const schema = {
     default: null,
     nullable: true,
   },
+  prBaseBranch: {
+    env: "ARGOS_PR_BASE_BRANCH",
+    format: String,
+    default: null,
+    nullable: true,
+  },
   parallel: {
     env: "ARGOS_PARALLEL",
     default: false,
@@ -177,6 +183,7 @@ export interface Config {
   runAttempt: number | null;
   prNumber: number | null;
   prHeadCommit: string | null;
+  prBaseBranch: string | null;
   mode: "ci" | "monitoring" | null;
   ciProvider: string | null;
   threshold: number | null;
@@ -202,6 +209,7 @@ export async function readConfig(options: Partial<Config> = {}) {
     prNumber:
       options.prNumber || config.get("prNumber") || ciEnv?.prNumber || null,
     prHeadCommit: config.get("prHeadCommit") || ciEnv?.prHeadCommit || null,
+    prBaseBranch: config.get("prBaseBranch") || ciEnv?.prBaseBranch || null,
     referenceBranch:
       options.referenceBranch || config.get("referenceBranch") || null,
     referenceCommit:

@@ -1,5 +1,5 @@
 import type { Context, Service } from "../types";
-import { getMergeBaseCommitSha } from "../git";
+import { getMergeBaseCommitSha, listParentCommits } from "../git";
 
 const getOwner = ({ env }: Context) => {
   if (!env.TRAVIS_REPO_SLUG) return null;
@@ -33,10 +33,12 @@ const service: Service = {
       runAttempt: null,
       prNumber: getPrNumber(ctx),
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: env.TRAVIS_BUILD_ID || null,
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

@@ -1,4 +1,4 @@
-import { getMergeBaseCommitSha } from "../git";
+import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type { Service, Context } from "../types";
 
 const getPrNumber = ({ env }: Context) => {
@@ -26,10 +26,12 @@ const service: Service = {
       runAttempt: null,
       prNumber: getPrNumber({ env }),
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: env.CIRCLE_WORKFLOW_ID || env.CIRCLE_BUILD_NUM || null,
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;

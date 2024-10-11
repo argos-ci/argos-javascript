@@ -4,6 +4,7 @@ import {
   branch,
   checkIsGitRepository,
   getMergeBaseCommitSha,
+  listParentCommits,
 } from "../git";
 
 const service: Service = {
@@ -21,10 +22,12 @@ const service: Service = {
       runAttempt: null,
       prNumber: null,
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: null,
     };
   },
   getMergeBaseCommitSha,
+  listParentCommits,
 };
 
 export default service;
