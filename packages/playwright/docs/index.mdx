@@ -210,6 +210,7 @@ export default defineConfig({
 - `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
 - `options.disableHover`: Disable hover effects by moving the mouse to the top-left corner of the page. Default to `true`.
 - `options.threshold`: Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to `0.5`.
+- `options.root`: Folder where the screenshots will be saved if not using the Argos reporter. Default to `./screenshots`.
 
 Unlike [Playwright's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
 
