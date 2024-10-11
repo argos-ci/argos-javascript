@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.9.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.8.2...@argos-ci/core@2.9.0) (2024-10-11)
+
+
+### Bug Fixes
+
+* use pr base branch if available for no remote content access mode ([0e7e888](https://github.com/argos-ci/argos-javascript/commit/0e7e888715f12c9196258d1cbac1b352891d95b5))
+
+
+### Features
+
+* **no-access:** send a list of commits ([8d36568](https://github.com/argos-ci/argos-javascript/commit/8d36568c01b30aaf5fc80d27b08d63c7f6d3ab7d))
+
+
+
+
+
 ## [2.8.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.8.1...@argos-ci/core@2.8.2) (2024-10-08)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.7.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.6.3...@argos-ci/playwright@3.7.0) (2024-10-11)
+
+
+### Features
+
+* **playwright:** allow to customize screenshots root folder ([#153](https://github.com/argos-ci/argos-javascript/issues/153)) ([27dba65](https://github.com/argos-ci/argos-javascript/commit/27dba6548cb1ebb3302212c7312b68cc6c181a75))
+
+
+
+
+
 ## [3.6.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.6.2...@argos-ci/playwright@3.6.3) (2024-10-08)
 
 **Note:** Version bump only for package @argos-ci/playwright
