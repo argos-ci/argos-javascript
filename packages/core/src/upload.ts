@@ -225,15 +225,17 @@ export async function upload(params: UploadParameters) {
       return null;
     }
 
-    const sha = getMergeBaseCommitSha({
-      base: referenceBranch,
-      head: config.branch,
-    });
+    // We use the pull request as base branch if possible.
+    const base = config.prBaseBranch || referenceBranch;
+
+    const sha = getMergeBaseCommitSha({ base, head: config.branch });
+
     if (sha) {
       debug("Found reference commit from git", sha);
     } else {
       debug("No reference commit found in git");
     }
+
     return sha;
   })();
 

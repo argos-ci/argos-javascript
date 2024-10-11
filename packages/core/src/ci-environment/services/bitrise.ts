@@ -20,6 +20,7 @@ const service: Service = {
       runAttempt: null,
       prNumber: getPrNumber({ env }),
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: env.BITRISEIO_PIPELINE_ID || null,
     };
   },

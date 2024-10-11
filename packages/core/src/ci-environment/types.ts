@@ -63,6 +63,11 @@ export interface CiEnvironment {
   prHeadCommit: string | null;
 
   /**
+   * The branch name that the pull request is targeting.
+   */
+  prBaseBranch: string | null;
+
+  /**
    * A unique string for each run of a particular workflow in a repository.
    */
   nonce: string | null;

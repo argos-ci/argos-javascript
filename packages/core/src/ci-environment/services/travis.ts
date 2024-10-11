@@ -33,6 +33,7 @@ const service: Service = {
       runAttempt: null,
       prNumber: getPrNumber(ctx),
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: env.TRAVIS_BUILD_ID || null,
     };
   },

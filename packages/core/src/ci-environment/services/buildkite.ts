@@ -19,6 +19,7 @@ const service: Service = {
         ? Number(env.BUILDKITE_PULL_REQUEST)
         : null,
       prHeadCommit: null,
+      prBaseBranch: null,
       nonce: env.BUILDKITE_BUILD_ID || null,
     };
   },

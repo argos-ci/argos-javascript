@@ -10,6 +10,10 @@ type EventPayload = {
       sha: string;
       ref: string;
     };
+    base: {
+      sha: string;
+      ref: string;
+    };
     number: number;
   };
   deployment?: {
@@ -159,6 +163,7 @@ const service: Service = {
         branch: pullRequest?.head.ref || payload.deployment.environment || null,
         prNumber: pullRequest?.number || null,
         prHeadCommit: pullRequest?.head.sha || null,
+        prBaseBranch: null,
       };
     }
 
@@ -168,6 +173,7 @@ const service: Service = {
         payload?.pull_request?.head.ref || getBranch(context, payload) || null,
       prNumber: payload?.pull_request?.number || null,
       prHeadCommit: payload?.pull_request?.head.sha ?? null,
+      prBaseBranch: payload?.pull_request?.base.ref ?? null,
     };
   },
   getMergeBaseCommitSha,

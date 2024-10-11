@@ -15,6 +15,7 @@ const service: Service = {
     runAttempt: null,
     prNumber: null,
     prHeadCommit: null,
+    prBaseBranch: null,
     nonce: env.HEROKU_TEST_RUN_ID || null,
   }),
   getMergeBaseCommitSha,
