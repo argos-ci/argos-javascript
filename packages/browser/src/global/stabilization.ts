@@ -128,7 +128,7 @@ function stabilizeElementPositions(document: Document) {
   const elements = Array.from(document.querySelectorAll("*"));
   elements.forEach((element) => {
     if (!checkIsHTMLElement(element)) return;
-    if (element.tagName === 'IFRAME') return;
+    if (element.tagName === "IFRAME") return;
     const style = window.getComputedStyle(element);
     const position = style.position;
     if (position === "fixed") {
