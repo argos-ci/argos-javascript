@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@2.2.4...@argos-ci/cypress@2.2.5) (2024-10-14)
+
+**Note:** Version bump only for package @argos-ci/cypress
+
+
+
+
+
 ## [2.2.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@2.2.3...@argos-ci/cypress@2.2.4) (2024-10-11)
 
 **Note:** Version bump only for package @argos-ci/cypress

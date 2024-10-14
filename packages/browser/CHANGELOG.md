@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@2.1.4...@argos-ci/browser@2.1.5) (2024-10-14)
+
+
+### Bug Fixes
+
+* **stabilization:** don't modify IFRAME to avoid reloads ([#155](https://github.com/argos-ci/argos-javascript/issues/155)) ([02b758a](https://github.com/argos-ci/argos-javascript/commit/02b758a28ef39c6387a7e797c0f64e54bd2d047a))
+
+
+
+
+
 ## 2.1.4 (2024-09-25)
 
 

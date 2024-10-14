@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/cypress",
   "description": "Visual testing solution to avoid visual regression. Cypress commands and utilities for Argos visual testing.",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
