@@ -126,7 +126,7 @@ export interface components {
         /** @description Error response */
         Error: {
             error: string;
-            details: {
+            details?: {
                 message: string;
             }[];
         };

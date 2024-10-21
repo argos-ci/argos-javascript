@@ -30,13 +30,16 @@ export class APIError extends Error {
  */
 export function throwAPIError(error: {
   error: string;
-  details: {
+  details?: {
     message: string;
   }[];
 }): never {
   debug("API error", error);
   const detailMessage = error.details
-    .map((detail) => detail.message)
+    ?.map((detail) => detail.message)
     .join(", ");
-  throw new APIError(`${error.error}: ${detailMessage}`);
+
+  throw new APIError(
+    detailMessage ? `${error.error}: ${detailMessage}` : error.error,
+  );
 }
