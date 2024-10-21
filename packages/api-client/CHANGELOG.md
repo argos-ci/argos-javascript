@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.6.0...@argos-ci/api-client@0.6.1) (2024-10-21)
+
+
+### Bug Fixes
+
+* **api:** fix error message ([#156](https://github.com/argos-ci/argos-javascript/issues/156)) ([1be8635](https://github.com/argos-ci/argos-javascript/commit/1be8635994da7ec70780ea0a8befebb8370e105c))
+
+
+
+
+
 # [0.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.5.1...@argos-ci/api-client@0.6.0) (2024-10-11)
 
 
