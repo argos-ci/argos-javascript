@@ -38,7 +38,7 @@ export const buildEs = ({
 
 export const buildCjs = ({
   input = "src/index.ts",
-  output = "dist/index.mjs",
+  output = "dist/index.cjs",
   external = ignoreRelative,
 } = {}) => ({
   input,
