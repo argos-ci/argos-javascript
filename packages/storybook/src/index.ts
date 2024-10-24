@@ -1,5 +1,10 @@
 import { TestContext, waitForPageReady } from "@storybook/test-runner";
-import type { Page, PageScreenshotOptions } from "playwright";
+import type {
+  ElementHandle,
+  Locator,
+  Page,
+  PageScreenshotOptions,
+} from "playwright";
 import { join } from "node:path";
 import { writeFile } from "node:fs/promises";
 import type { ScreenshotMetadata } from "@argos-ci/util";
@@ -10,6 +15,12 @@ export type ArgosScreenshotOptions = {
    * @default "./screenshots"
    */
   root?: string;
+
+  /**
+   * Fit the screenshot to the content size.
+   * @default true
+   */
+  fitToContent?: boolean;
 } & Omit<PageScreenshotOptions, "type">;
 
 export async function argosScreenshot(
@@ -18,7 +29,11 @@ export async function argosScreenshot(
   options?: ArgosScreenshotOptions,
 ) {
   await waitForPageReady(page);
-  const { root = "./screenshots", ...screenshotOptions } = options ?? {};
+  const {
+    root = "./screenshots",
+    fitToContent = true,
+    ...screenshotOptions
+  } = options ?? {};
   const path = join(root, context.title, `${context.name}.png`);
   const metadataPath = getMetadataPath(path);
 
@@ -38,12 +53,36 @@ export async function argosScreenshot(
     viewport: getViewportSize(page),
   };
 
-  await page.screenshot({
+  let styleTag: ElementHandle | undefined;
+  let handle: Locator | Page = page;
+  if (fitToContent) {
+    styleTag = await page.addStyleTag({
+      content: `
+        #storybook-root {
+          padding: 16px;
+          width: fit-content;
+          height: fit-content;
+        }
+      `,
+    });
+    handle = page.locator("#storybook-root");
+  }
+
+  await handle.screenshot({
     animations: "disabled",
     type: "png",
     path,
     ...screenshotOptions,
   });
+
+  if (styleTag) {
+    await page.evaluateHandle((styleTag) => {
+      if (!styleTag.parentNode) {
+        throw new Error("Style tag has no parent node.");
+      }
+      styleTag.parentNode.removeChild(styleTag);
+    }, styleTag);
+  }
 
   await writeFile(metadataPath, JSON.stringify(metadata));
 }
