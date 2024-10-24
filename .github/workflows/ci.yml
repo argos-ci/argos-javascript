@@ -491,7 +491,7 @@ jobs:
       - name: Server Storybook and run integration tests
         run: |
           pnpm dlx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "pnpm dlx http-server storybook-static --port 6006 --silent" \
+            "pnpm dlx http-server packages/storybook/storybook-static --port 6006 --silent" \
             "pnpm dlx wait-on tcp:127.0.0.1:6006 && pnpm --filter storybook run e2e"
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
