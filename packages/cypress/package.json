@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/cypress",
-  "description": "Visual testing solution to avoid visual regression. Cypress commands and utilities for Argos visual testing.",
+  "description": "Cypress SDK for visual testing with Argos.",
   "version": "2.2.6",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,11 +9,14 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/cypress"
   },
+  "homepage": "https://argos-ci.com/docs/cypress",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
   "keywords": [
     "cypress",
+    "cypress-plugin",
     "argos",
-    "automation",
-    "test automation",
     "testing",
     "visual testing",
     "regression",

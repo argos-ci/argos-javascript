@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/browser",
-  "description": "Browser utilities to stabilize visual testing.",
+  "description": "Browser utilities to stabilize visual testing with Argos.",
   "version": "2.1.5",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,15 +9,14 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/browser"
   },
+  "homepage": "https://github.com/argos-ci/argos-javascript/blob/main/packages/browser/README.md",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
   "keywords": [
     "browser",
-    "argos",
-    "automation",
-    "test automation",
-    "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "utilities",
+    "argos"
   ],
   "publishConfig": {
     "access": "public"

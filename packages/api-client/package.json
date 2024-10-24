@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/api-client",
-  "description": "Argos API client.",
+  "description": "Argos API Client library.",
   "version": "0.6.1",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,15 +9,14 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/api-client"
   },
+  "homepage": "https://github.com/argos-ci/argos-javascript/blob/main/packages/api-client/README.md",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
   "keywords": [
-    "browser",
-    "argos",
-    "automation",
-    "test automation",
-    "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "api",
+    "openapi",
+    "argos"
   ],
   "publishConfig": {
     "access": "public"

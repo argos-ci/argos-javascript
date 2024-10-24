@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/webdriverio",
-  "description": "Visual testing solution to avoid visual regression. Webdriver SDK and utilities for Argos visual testing.",
+  "description": "WebdriverIO SDK for visual testing with Argos.",
   "version": "0.3.15",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,11 +9,14 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/webdriverio"
   },
+  "homepage": "https://argos-ci.com/docs/webdriverio",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
   "keywords": [
     "webdriverio",
+    "webdriverio-plugin",
     "argos",
-    "automation",
-    "test automation",
     "testing",
     "visual testing",
     "regression",
