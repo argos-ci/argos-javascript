@@ -95,6 +95,12 @@ jobs:
           name: webdriverio-dist
           path: packages/webdriverio/dist
 
+      - name: Upload "@argos-ci/storybook" dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-dist
+          path: packages/storybook/dist
+
   unit:
     needs: ["build"]
 
@@ -442,6 +448,84 @@ jobs:
 
       - name: Run integration tests
         run: pnpm --filter webdriverio run e2e
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
+
+  e2e-storybook:
+    needs: ["build"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [current]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Download "@argos-ci/storybook" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: storybook-dist
+          path: packages/storybook/dist
+
+      - name: Download "@argos-ci/cli" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: cli-dist
+          path: packages/cli/dist
+
+      - name: Download "@argos-ci/core" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: core-dist
+          path: packages/core/dist
+
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: util-dist
+          path: packages/util/dist
+
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
+
+      - name: Download "@argos-ci/playwright" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-dist
+          path: packages/playwright/dist
+
+      - name: Download "@argos-ci/browser" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: browser-dist
+          path: packages/browser/dist
+
+      - name: Build Storybook
+        run: pnpm run --filter storybook -- build-storybook --quiet
+
+      - name: Setup Playwright
+        run: pnpm --filter storybook exec playwright install chromium --with-deps
+
+      - name: Server Storybook and run integration tests
+        run: |
+          pnpm dlx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "pnpm dlx http-server packages/storybook/storybook-static --port 6006 --silent" \
+            "pnpm dlx wait-on tcp:127.0.0.1:6006 && pnpm --filter storybook run e2e"
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
