@@ -485,6 +485,24 @@ jobs:
           name: cli-dist
           path: packages/cli/dist
 
+      - name: Download "@argos-ci/core" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: core-dist
+          path: packages/core/dist
+
+      - name: Download "@argos-ci/util" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: util-dist
+          path: packages/util/dist
+
+      - name: Download "@argos-ci/api-client" dist
+        uses: actions/download-artifact@v4
+        with:
+          name: api-client-dist
+          path: packages/api-client/dist
+
       - name: Build Storybook
         run: pnpm run --filter storybook -- build-storybook --quiet
 
