@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/gitlab",
-  "description": "GitLab utilities for Argos.",
+  "description": "GitLab utilities for visual testing with Argos.",
   "version": "0.1.9",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,11 +9,13 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/gitlab"
   },
+  "homepage": "https://argos-ci.com/docs/gitlab",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
   "keywords": [
-    "browser",
+    "gitlab",
     "argos",
-    "automation",
-    "test automation",
     "testing",
     "visual testing",
     "regression",

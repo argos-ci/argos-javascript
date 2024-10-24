@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/puppeteer",
-  "description": "Visual testing solution to avoid visual regression. Puppeteer commands and utilities for Argos visual testing.",
+  "description": "Puppeteer SDK for visual testing with Argos.",
   "version": "2.2.12",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,11 +9,13 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/puppeteer"
   },
+  "homepage": "https://argos-ci.com/docs/puppeteer",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
   "keywords": [
     "puppeteer",
     "argos",
-    "automation",
-    "test automation",
     "testing",
     "visual testing",
     "regression",

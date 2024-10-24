@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/util",
-  "description": "Set of utilities used across all Argos SDKs",
+  "description": "Set of utilities used across all Argos SDKs.",
   "version": "2.1.1",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,6 +9,14 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/util"
   },
+  "homepage": "https://github.com/argos-ci/argos-javascript/blob/main/packages/util/README.md",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
+  "keywords": [
+    "utilities",
+    "argos"
+  ],
   "publishConfig": {
     "access": "public"
   },

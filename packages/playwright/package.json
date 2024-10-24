@@ -1,6 +1,6 @@
 {
   "name": "@argos-ci/playwright",
-  "description": "Visual testing solution to avoid visual regression. Playwright commands and utilities for Argos visual testing.",
+  "description": "Playwright SDK for visual testing with Argos.",
   "version": "3.7.2",
   "author": "Smooth Code",
   "license": "MIT",
@@ -9,11 +9,16 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/playwright"
   },
+  "homepage": "https://argos-ci.com/docs/playwright",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
   "keywords": [
     "playwright",
+    "playwright-reporter",
+    "reporter",
+    "playwright-plugin",
     "argos",
-    "automation",
-    "test automation",
     "testing",
     "visual testing",
     "regression",
