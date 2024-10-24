@@ -7,7 +7,6 @@ import { argosScreenshot } from "./dist/index";
 import { argosScreenshot as typedArgosScreenshot } from "./src";
 // @ts-ignore
 import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
-import { checkIsUsingArgosReporter } from "./src/util.js";
 
 test.describe.configure({ mode: "serial" });
 const screenshotFolder = "screenshots";
@@ -24,7 +23,7 @@ export async function checkExists(path: string) {
 async function expectScreenshotToExists(screenshotName: string) {
   const info = await test.info();
   // If we are using the Argos reporter, screenshots are not saved locally
-  if (checkIsUsingArgosReporter(info)) return;
+  if (info.config.reporter.some((rep) => rep[0].includes("argos"))) return;
   const filepath = fileURLToPath(
     new URL(`${screenshotFolder}/${screenshotName}.png`, import.meta.url).href,
   );

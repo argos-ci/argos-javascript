@@ -44,7 +44,7 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.16.0"
   },
   "dependencies": {
     "@argos-ci/browser": "workspace:*",
@@ -56,7 +56,7 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/playwright": "workspace:.",
-    "@playwright/test": "^1.46.1",
+    "@playwright/test": "^1.48.1",
     "@types/debug": "^4.1.12",
     "@types/node": "^18.19.44"
   },

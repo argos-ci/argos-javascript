@@ -1,0 +1,76 @@
+{
+  "name": "@argos-ci/storybook",
+  "description": "Visual testing for Storybook test runner.",
+  "version": "0.0.0",
+  "author": "Smooth Code",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/storybook"
+  },
+  "homepage": "https://argos-ci.com/docs/storybook",
+  "keywords": [
+    "storybook",
+    "storybook-addon",
+    "screenshot",
+    "capture",
+    "testing",
+    "visual testing",
+    "argos",
+    "regression",
+    "visual regression"
+  ],
+  "bin": {
+    "argos-storybook": "./bin/argos-storybook.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=18.16.0"
+  },
+  "dependencies": {
+    "@argos-ci/playwright": "workspace:*",
+    "@argos-ci/util": "workspace:*"
+  },
+  "peerDependencies": {
+    "@storybook/test-runner": "*",
+    "playwright": "*"
+  },
+  "devDependencies": {
+    "@argos-ci/cli": "workspace:*",
+    "@argos-ci/util": "workspace:*",
+    "@storybook/blocks": "^8.3.6",
+    "@storybook/addon-essentials": "^8.3.6",
+    "@storybook/addon-links": "^8.3.6",
+    "@storybook/addon-interactions": "^8.3.6",
+    "@storybook/react": "^8.3.6",
+    "@storybook/react-vite": "^8.3.6",
+    "@storybook/test": "^8.3.6",
+    "@storybook/test-runner": "^0.19.1",
+    "playwright": "^1.48.1",
+    "prop-types": "^15.8.1",
+    "storybook": "^8.3.6"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test-storybook": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules test-storybook",
+    "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-storybook-e2e-node-$NODE_VERSION-$OS\"",
+    "e2e": "pnpm run test-storybook && pnpm run argos-upload"
+  }
+}
