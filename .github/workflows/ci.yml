@@ -489,7 +489,7 @@ jobs:
         run: pnpm run --filter storybook -- build-storybook --quiet
 
       - name: Setup Playwright
-        run: pnpm --filter playwright exec playwright install chromium --with-deps
+        run: pnpm --filter storybook exec playwright install chromium --with-deps
 
       - name: Server Storybook and run integration tests
         run: |
