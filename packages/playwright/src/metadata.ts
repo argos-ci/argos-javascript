@@ -22,11 +22,9 @@ function tryResolve(pkg: string) {
   }
 }
 
-type PlaywrightLibrary = "@playwright/test" | "playwright" | "playwright-core";
-
 type MetadataConfig = {
   sdk: ScreenshotMetadata["sdk"];
-  playwrightLibraries: PlaywrightLibrary[];
+  playwrightLibraries: string[];
 };
 
 /**
@@ -42,7 +40,7 @@ export async function setMetadataConfig(metadata: MetadataConfig) {
   metadataConfigStorage.enterWith(metadata);
 }
 
-const DEFAULT_PLAYWRIGHT_LIBRARIES: PlaywrightLibrary[] = [
+const DEFAULT_PLAYWRIGHT_LIBRARIES = [
   "@playwright/test",
   "playwright",
   "playwright-core",
