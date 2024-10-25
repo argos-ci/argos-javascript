@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.8.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.7.2...@argos-ci/playwright@3.8.0) (2024-10-25)
+
+
+### Features
+
+* **storybook:** add Storybook SDK ([c42b95c](https://github.com/argos-ci/argos-javascript/commit/c42b95c4a2f20434fe1a0f4cd9f9ff0e227234cf))
+
+
+
+
+
 ## [3.7.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.7.1...@argos-ci/playwright@3.7.2) (2024-10-21)
 
 **Note:** Version bump only for package @argos-ci/playwright

@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/storybook",
   "description": "Visual testing for Storybook test runner.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
@@ -52,10 +52,10 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "@storybook/blocks": "^8.3.6",
     "@storybook/addon-essentials": "^8.3.6",
-    "@storybook/addon-links": "^8.3.6",
     "@storybook/addon-interactions": "^8.3.6",
+    "@storybook/addon-links": "^8.3.6",
+    "@storybook/blocks": "^8.3.6",
     "@storybook/react": "^8.3.6",
     "@storybook/react-vite": "^8.3.6",
     "@storybook/test": "^8.3.6",
