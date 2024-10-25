@@ -72,7 +72,11 @@ export async function argosScreenshot(
 
   await DO_NOT_USE_setMetadataConfig({
     sdk: { name: "@argos-ci/storybook", version },
-    playwrightLibraries: ["playwright", "playwright-core"],
+    playwrightLibraries: [
+      "@storybook/test-runner",
+      "playwright",
+      "playwright-core",
+    ],
   });
 
   await argosPlaywrightScreenshot(page, join(context.title, context.name), {
