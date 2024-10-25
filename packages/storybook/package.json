@@ -21,9 +21,6 @@
     "regression",
     "visual regression"
   ],
-  "bin": {
-    "argos-storybook": "./bin/argos-storybook.js"
-  },
   "publishConfig": {
     "access": "public"
   },
