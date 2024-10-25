@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@0.1.0...@argos-ci/storybook@0.1.1) (2024-10-25)
+
+
+### Bug Fixes
+
+* **storybook:** fix metadata ([dd992aa](https://github.com/argos-ci/argos-javascript/commit/dd992aac34192b5f8326714caa96323995421710))
+
+
+
+
+
 # 0.1.0 (2024-10-25)
 
 
