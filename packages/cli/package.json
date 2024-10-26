@@ -36,8 +36,8 @@
   "dependencies": {
     "@argos-ci/core": "workspace:*",
     "commander": "^12.1.0",
-    "ora": "^8.0.1",
-    "update-notifier": "^7.2.0"
+    "ora": "^8.1.0",
+    "update-notifier": "^7.3.1"
   },
   "scripts": {
     "prebuild": "rm -rf dist",

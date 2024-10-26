@@ -43,10 +43,10 @@
   "devDependencies": {
     "@types/debug": "^4.1.12",
     "@types/node": "^18.19.44",
-    "openapi-typescript": "^7.3.0"
+    "openapi-typescript": "^7.4.2"
   },
   "dependencies": {
-    "debug": "^4.3.6",
-    "openapi-fetch": "^0.11.1"
+    "debug": "^4.3.7",
+    "openapi-fetch": "^0.13.0"
   }
 }

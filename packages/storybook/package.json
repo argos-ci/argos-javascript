@@ -57,7 +57,7 @@
     "@storybook/react-vite": "^8.3.6",
     "@storybook/test": "^8.3.6",
     "@storybook/test-runner": "^0.19.1",
-    "playwright": "^1.48.1",
+    "playwright": "^1.48.2",
     "prop-types": "^15.8.1",
     "storybook": "^8.3.6"
   },

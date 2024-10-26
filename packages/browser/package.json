@@ -40,8 +40,8 @@
     "build": "rollup -c"
   },
   "devDependencies": {
-    "@rollup/plugin-replace": "^5.0.7",
+    "@rollup/plugin-replace": "^6.0.1",
     "@types/node": "^18.19.44",
-    "openapi-typescript": "^7.3.0"
+    "openapi-typescript": "^7.4.2"
   }
 }
