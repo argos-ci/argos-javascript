@@ -1,4 +1,4 @@
-import { TestInfo } from "@playwright/test";
+import type { TestInfo } from "@playwright/test";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);

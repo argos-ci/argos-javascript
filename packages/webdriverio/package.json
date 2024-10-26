@@ -30,9 +30,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -59,8 +59,7 @@
     "webdriverio": "^9.2.1"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "rollup -c",
+    "build": "tsup && cp ./src/index.cjs ./dist",
     "test": "wdio run ./wdio.conf.ts",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-webdriverio-e2e-node-$NODE_VERSION-$OS\"",
     "e2e": "pnpm run test && pnpm run argos-upload"

@@ -32,14 +32,14 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.cjs"
     },
     "./reporter": {
       "types": "./dist/reporter.d.ts",
-      "import": "./dist/reporter.mjs",
-      "default": "./dist/reporter.mjs"
+      "import": "./dist/reporter.js",
+      "default": "./dist/reporter.js"
     },
     "./package.json": "./package.json"
   },
@@ -61,8 +61,7 @@
     "@types/node": "^18.19.44"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "rollup -c",
+    "build": "tsup && cp ./src/index.cjs ./dist",
     "test": "pnpm exec -- playwright test",
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test"
   }

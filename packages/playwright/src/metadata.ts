@@ -3,8 +3,8 @@ import {
   getGitRepositoryPath,
   readVersionFromPackage,
 } from "@argos-ci/util";
-import { TestInfo } from "@playwright/test";
-import { TestCase, TestResult } from "@playwright/test/reporter";
+import type { TestInfo } from "@playwright/test";
+import type { TestCase, TestResult } from "@playwright/test/reporter";
 import { relative } from "node:path";
 import { createRequire } from "node:module";
 import { AsyncLocalStorage } from "node:async_hooks";

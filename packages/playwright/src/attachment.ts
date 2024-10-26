@@ -1,4 +1,4 @@
-import { TestResult } from "@playwright/test/reporter";
+import type { TestResult } from "@playwright/test/reporter";
 
 export function getAttachmentName(name: string, type: string) {
   return `argos/${type}___${name}`;

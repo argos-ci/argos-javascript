@@ -25,8 +25,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.mjs"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -35,12 +35,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build-schema-types": "openapi-typescript https://api.argos-ci.dev:4001/v2/openapi.yaml -o dist/schema.ts",
-    "build": "rollup -c"
+    "build": "rm -rf dist && tsup --config global.tsup.config.ts && tsup"
   },
   "devDependencies": {
-    "@rollup/plugin-replace": "^6.0.1",
     "@types/node": "^18.19.44",
     "openapi-typescript": "^7.4.2"
   }

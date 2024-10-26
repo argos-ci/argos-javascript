@@ -29,9 +29,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -62,8 +62,7 @@
     "storybook": "^8.3.6"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "rollup -c",
+    "build": "tsup && cp ./src/index.cjs ./dist",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test-storybook": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules test-storybook",

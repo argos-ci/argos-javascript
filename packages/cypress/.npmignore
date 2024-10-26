@@ -1,2 +1,6 @@
 /*
-!/dist/
+!/dist/support.js
+!/dist/support.d.ts
+!/dist/task.js
+!/dist/task.cjs
+!/dist/task.d.ts

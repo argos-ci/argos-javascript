@@ -29,9 +29,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -58,8 +58,7 @@
     "puppeteer": "^23.6.0"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "rollup -c",
+    "build": "tsup && cp ./src/index.cjs ./dist",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test": "pnpm run jest --runInBand",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-puppeteer-e2e-node-$NODE_VERSION-$OS\"",
