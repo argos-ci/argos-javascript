@@ -6,8 +6,6 @@ export default defineConfig({
   format: ["esm"],
   dts: true,
   env: {
-    ["GLOBAL_SCRIPT"]: JSON.stringify(
-      readFileSync("dist/index.global.js", "utf-8"),
-    ),
+    ["GLOBAL_SCRIPT"]: readFileSync("dist/index.global.js", "utf-8"),
   },
 });
