@@ -30,12 +30,12 @@
   "exports": {
     "./support": {
       "types": "./dist/support.d.ts",
-      "import": "./dist/support.mjs",
-      "default": "./dist/support.mjs"
+      "import": "./dist/support.js",
+      "default": "./dist/support.js"
     },
     "./task": {
       "types": "./dist/task.d.ts",
-      "import": "./dist/task.mjs",
+      "import": "./dist/task.js",
       "require": "./dist/task.cjs",
       "default": "./dist/task.cjs"
     },
@@ -57,13 +57,12 @@
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/cypress": "workspace:.",
     "@types/node": "^18.19.44",
-    "cypress": "^13.13.3",
+    "cypress": "^13.15.1",
     "eslint-plugin-cypress": "^3.5.0",
     "eslint-plugin-html": "^8.1.1"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "rollup -c",
+    "build": "tsup",
     "test": "pnpm exec cypress run",
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test"
   }

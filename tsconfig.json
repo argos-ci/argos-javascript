@@ -10,7 +10,7 @@
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "node",
-    "target": "ES2021",
+    "target": "ES2022",
     "importHelpers": true,
     "declaration": true,
     "sourceMap": false,

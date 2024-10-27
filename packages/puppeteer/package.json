@@ -29,9 +29,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "@types/node": "^18.19.44",
     "eslint": "^8.57.0",
     "eslint-plugin-html": "^8.1.1",
@@ -55,11 +55,10 @@
     "jest": "^29.0.1",
     "jest-light-runner": "^0.6.0",
     "jest-puppeteer": "^10.1.0",
-    "puppeteer": "^23.1.0"
+    "puppeteer": "^23.6.0"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "rollup -c",
+    "build": "tsup && cp ./src/index.cjs ./dist",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test": "pnpm run jest --runInBand",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-puppeteer-e2e-node-$NODE_VERSION-$OS\"",

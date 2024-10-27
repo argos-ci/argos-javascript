@@ -1,1 +1,1 @@
-import "../../dist/support.mjs";
+import "../../dist/support.js";

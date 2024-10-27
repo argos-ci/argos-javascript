@@ -1,5 +1,5 @@
 /*
 !/dist/index.d.ts
-!/dist/index.mjs
-!/dist/cli.mjs
+!/dist/index.js
+!/dist/cli.js
 !/bin/argos-gitlab.js
