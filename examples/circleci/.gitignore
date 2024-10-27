@@ -1,0 +1,7 @@
+node_modules/
+
+# Ignore screenshots
+screenshots/*
+
+# Add screenshots folder (empty)
+!screenshots/.gitkeep
