@@ -311,9 +311,9 @@ export function getStabilityFailureReasons(
 }
 
 /**
- * Wait for the document to be stable.
+ * Check if the document is stable.
  */
-export function waitForStability(
+export function checkIsStable(
   document: Document,
   options?: StabilizationOptions,
 ) {

@@ -1,5 +1,5 @@
 import {
-  waitForStability,
+  checkIsStable,
   setup,
   teardown,
   SetupOptions,
@@ -10,8 +10,8 @@ import {
 import { getColorScheme, getMediaType } from "./media";
 
 const ArgosGlobal = {
-  waitForStability: (options?: StabilizationOptions) =>
-    waitForStability(document, options),
+  checkIsStable: (options?: StabilizationOptions) =>
+    checkIsStable(document, options),
   getStabilityFailureReasons: (options?: StabilizationOptions) =>
     getStabilityFailureReasons(document, options),
   setup: (options: SetupOptions = {}) => setup(document, options),

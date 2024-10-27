@@ -129,7 +129,7 @@ Cypress.Commands.add(
           cy
             .window({ log: false })
             .then((window) =>
-              ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(
+              ((window as any).__ARGOS__ as ArgosGlobal).checkIsStable(
                 stabilizationOptions,
               ),
             ),

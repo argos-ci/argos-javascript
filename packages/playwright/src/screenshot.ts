@@ -289,9 +289,7 @@ export async function argosScreenshot(
       try {
         await page.waitForFunction(
           (options) =>
-            ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(
-              options,
-            ),
+            ((window as any).__ARGOS__ as ArgosGlobal).checkIsStable(options),
           stabilizationOptions,
         );
       } catch (error) {
