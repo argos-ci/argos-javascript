@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@2.2.7...@argos-ci/cypress@2.3.0) (2024-10-27)
+
+
+### Features
+
+* allow to customization stabilization options ([073c081](https://github.com/argos-ci/argos-javascript/commit/073c081228c6ef8f4bfed84a1caee6b44e6ae642))
+* **cypress:** improve stability debugging ([98f8996](https://github.com/argos-ci/argos-javascript/commit/98f8996c54fde0a9cbd0e4d9200b2769a97d92f4)), closes [#133](https://github.com/argos-ci/argos-javascript/issues/133)
+
+
+
+
+
 ## [2.2.7](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@2.2.6...@argos-ci/cypress@2.2.7) (2024-10-25)
 
 **Note:** Version bump only for package @argos-ci/cypress

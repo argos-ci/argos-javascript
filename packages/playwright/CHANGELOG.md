@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.9.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.8.1...@argos-ci/playwright@3.9.0) (2024-10-27)
+
+
+### Features
+
+* allow to customization stabilization options ([073c081](https://github.com/argos-ci/argos-javascript/commit/073c081228c6ef8f4bfed84a1caee6b44e6ae642))
+
+
+
+
+
 ## [3.8.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.8.0...@argos-ci/playwright@3.8.1) (2024-10-25)
 
 

@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@0.1.2...@argos-ci/storybook@0.2.0) (2024-10-27)
+
+
+### Bug Fixes
+
+* detect library version only from "@storybook/test-runner" ([20294d1](https://github.com/argos-ci/argos-javascript/commit/20294d16b5379b848993c6de689853154f186c04))
+* **storybook:** disable aria-busy stabilization by default ([db781ec](https://github.com/argos-ci/argos-javascript/commit/db781ec31e8691bd0e2c0aae8d532b465c14cf6f))
+
+
+### Features
+
+* allow to customization stabilization options ([073c081](https://github.com/argos-ci/argos-javascript/commit/073c081228c6ef8f4bfed84a1caee6b44e6ae642))
+
+
+
+
+
 ## [0.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@0.1.1...@argos-ci/storybook@0.1.2) (2024-10-25)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.4.0...@argos-ci/webdriverio@0.5.0) (2024-10-27)
+
+
+### Features
+
+* allow to customization stabilization options ([073c081](https://github.com/argos-ci/argos-javascript/commit/073c081228c6ef8f4bfed84a1caee6b44e6ae642))
+
+
+
+
+
 # [0.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.3.15...@argos-ci/webdriverio@0.4.0) (2024-10-25)
 
 
