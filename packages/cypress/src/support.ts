@@ -126,13 +126,25 @@ Cypress.Commands.add(
           typeof stabilize === "object" ? stabilize : {};
 
         cy.waitUntil(() =>
-          cy
-            .window({ log: false })
-            .then((window) =>
-              ((window as any).__ARGOS__ as ArgosGlobal).checkIsStable(
-                stabilizationOptions,
-              ),
-            ),
+          cy.window({ log: false }).then((window) => {
+            const isStable = (
+              (window as any).__ARGOS__ as ArgosGlobal
+            ).checkIsStable(stabilizationOptions);
+
+            if (isStable) {
+              return true;
+            }
+
+            const failureReasons = (
+              (window as any).__ARGOS__ as ArgosGlobal
+            ).getStabilityFailureReasons(stabilizationOptions);
+
+            failureReasons.forEach((reason) => {
+              cy.log(`[argos] stability: ${reason}`);
+            });
+
+            return false;
+          }),
         );
       }
 
