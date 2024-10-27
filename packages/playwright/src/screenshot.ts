@@ -15,6 +15,7 @@ import {
   resolveViewport,
   ArgosGlobal,
   getGlobalScript,
+  StabilizationOptions,
 } from "@argos-ci/browser";
 import {
   getMetadataPath,
@@ -70,6 +71,15 @@ export type ArgosScreenshotOptions = {
    * @default "./screenshots"
    */
   root?: string;
+
+  /**
+   * Stabilization.
+   * By default, it waits for the UI to stabilize before taking a screenshot.
+   * Set to `false` to disable stabilization.
+   * Pass an object to customize the stabilization process.
+   * @default true
+   */
+  stabilize?: boolean | StabilizationOptions;
 } & LocatorOptions &
   ScreenshotOptions<LocatorScreenshotOptions> &
   ScreenshotOptions<PageScreenshotOptions>;
@@ -196,6 +206,7 @@ export async function argosScreenshot(
     hasText,
     viewports,
     argosCSS,
+    stabilize = true,
     root = DEFAULT_SCREENSHOT_ROOT,
     ...playwrightOptions
   } = options;
@@ -272,9 +283,34 @@ export async function argosScreenshot(
   };
 
   const stabilizeAndScreenshot = async (name: string) => {
-    await page.waitForFunction(() =>
-      ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
-    );
+    if (stabilize) {
+      const stabilizationOptions =
+        typeof stabilize === "object" ? stabilize : {};
+      try {
+        await page.waitForFunction(
+          (options) =>
+            ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(
+              options,
+            ),
+          stabilizationOptions,
+        );
+      } catch (error) {
+        const reasons = await page.evaluate(
+          (options) =>
+            (
+              (window as any).__ARGOS__ as ArgosGlobal
+            ).getStabilityFailureReasons(options),
+          stabilizationOptions,
+        );
+        throw new Error(
+          `
+Failed to stabilize screenshot, found the following issues:
+${reasons.map((reason) => `- ${reason}`).join("\n")}
+        `.trim(),
+          { cause: error },
+        );
+      }
+    }
 
     const names = getScreenshotNames(name, testInfo);
 
