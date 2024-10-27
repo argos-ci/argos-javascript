@@ -8,6 +8,7 @@ import {
   ArgosGlobal,
   getGlobalScript,
   ViewportSize,
+  StabilizationOptions,
 } from "@argos-ci/browser";
 import {
   ScreenshotMetadata,
@@ -41,25 +42,38 @@ export type ArgosScreenshotOptions = Omit<
    * ElementHandle or string selector of the element to take a screenshot of.
    */
   element?: string | ElementHandle;
+
   /**
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+
   /**
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
   /**
    * Disable hover effects by moving the mouse to the top-left corner of the page.
    * @default true
    */
   disableHover?: boolean;
+
   /**
    * Sensitivity threshold between 0 and 1.
    * The higher the threshold, the less sensitive the diff will be.
    * @default 0.5
    */
   threshold?: number;
+
+  /**
+   * Stabilization.
+   * By default, it waits for the UI to stabilize before taking a screenshot.
+   * Set to `false` to disable stabilization.
+   * Pass an object to customize the stabilization process.
+   * @default true
+   */
+  stabilize?: boolean | StabilizationOptions;
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -166,7 +180,13 @@ export async function argosScreenshot(
    */
   options: ArgosScreenshotOptions = {},
 ) {
-  const { element, viewports, argosCSS, ...puppeteerOptions } = options;
+  const {
+    element,
+    viewports,
+    argosCSS,
+    stabilize = true,
+    ...puppeteerOptions
+  } = options;
   if (!page) {
     throw new Error("A Puppeteer `page` object is required.");
   }
@@ -238,9 +258,35 @@ export async function argosScreenshot(
   }
 
   async function stabilizeAndScreenshot(name: string) {
-    await page.waitForFunction(() =>
-      ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
-    );
+    if (stabilize) {
+      const stabilizationOptions =
+        typeof stabilize === "object" ? stabilize : {};
+      try {
+        await page.waitForFunction(
+          (options) =>
+            ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(
+              options,
+            ),
+          undefined,
+          stabilizationOptions,
+        );
+      } catch (error) {
+        const reasons = await page.evaluate(
+          (options) =>
+            (
+              (window as any).__ARGOS__ as ArgosGlobal
+            ).getStabilityFailureReasons(options),
+          stabilizationOptions,
+        );
+        throw new Error(
+          `
+Failed to stabilize screenshot, found the following issues:
+${reasons.map((reason) => `- ${reason}`).join("\n")}
+        `.trim(),
+          { cause: error },
+        );
+      }
+    }
 
     const [screenshotPath, metadata] = await Promise.all([
       getScreenshotPath(name),

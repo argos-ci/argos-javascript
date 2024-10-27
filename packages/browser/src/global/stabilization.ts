@@ -255,14 +255,68 @@ function waitForNoBusy(document: Document) {
   return elements.every((element) => !checkIsVisible(element));
 }
 
+export type StabilizationOptions = {
+  /**
+   * Wait for [aria-busy="true"] elements to be invisible.
+   * @default true
+   */
+  ariaBusy?: boolean;
+  /**
+   * Wait for images to be loaded.
+   * @default true
+   */
+  images?: boolean;
+  /**
+   * Wait for fonts to be loaded.
+   * @default true
+   */
+  fonts?: boolean;
+};
+
+/**
+ * Get the stabilization state of the document.
+ */
+function getStabilityState(document: Document, options?: StabilizationOptions) {
+  const { ariaBusy = true, images = true, fonts = true } = options ?? {};
+  return {
+    ariaBusy: ariaBusy ? waitForNoBusy(document) : true,
+    images: images ? waitForImagesToLoad(document) : true,
+    fonts: fonts ? waitForFontsToLoad(document) : true,
+  };
+}
+
+const VALIDATION_ERRORS: Record<keyof StabilizationOptions, string> = {
+  ariaBusy: "Some elements still have `aria-busy='true'`",
+  images: "Some images are still loading",
+  fonts: "Some fonts are still loading",
+};
+
+/**
+ * Get the stability failure reasons.
+ */
+export function getStabilityFailureReasons(
+  document: Document,
+  options?: StabilizationOptions,
+) {
+  const stabilityState = getStabilityState(document, options);
+  return Object.entries(stabilityState).reduce<string[]>(
+    (reasons, [key, value]) => {
+      if (!value) {
+        reasons.push(VALIDATION_ERRORS[key as keyof typeof VALIDATION_ERRORS]);
+      }
+      return reasons;
+    },
+    [],
+  );
+}
+
 /**
  * Wait for the document to be stable.
  */
-export function waitForStability(document: Document) {
-  const results = [
-    waitForNoBusy(document),
-    waitForImagesToLoad(document),
-    waitForFontsToLoad(document),
-  ];
-  return results.every(Boolean);
+export function waitForStability(
+  document: Document,
+  options?: StabilizationOptions,
+) {
+  const stabilityState = getStabilityState(document, options);
+  return Object.values(stabilityState).every(Boolean);
 }

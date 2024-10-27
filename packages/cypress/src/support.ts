@@ -2,6 +2,7 @@ import "cypress-wait-until";
 import {
   ArgosGlobal,
   resolveViewport,
+  StabilizationOptions,
   type ViewportOption,
 } from "@argos-ci/browser";
 import { getGlobalScript } from "@argos-ci/browser";
@@ -21,16 +22,27 @@ type ArgosScreenshotOptions = Partial<
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+
   /**
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
   /**
    * Sensitivity threshold between 0 and 1.
    * The higher the threshold, the less sensitive the diff will be.
    * @default 0.5
    */
   threshold?: number;
+
+  /**
+   * Stabilization.
+   * By default, it waits for the UI to stabilize before taking a screenshot.
+   * Set to `false` to disable stabilization.
+   * Pass an object to customize the stabilization process.
+   * @default true
+   */
+  stabilize?: boolean | StabilizationOptions;
 };
 
 declare global {
@@ -88,7 +100,12 @@ Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
   (subject, name, options = {}) => {
-    const { viewports, argosCSS, ...cypressOptions } = options;
+    const {
+      viewports,
+      argosCSS,
+      stabilize = true,
+      ...cypressOptions
+    } = options;
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -104,13 +121,20 @@ Cypress.Commands.add(
     const teardown = setup(options);
 
     function stabilizeAndScreenshot(name: string) {
-      cy.waitUntil(() =>
-        cy
-          .window({ log: false })
-          .then((window) =>
-            ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(),
-          ),
-      );
+      if (stabilize) {
+        const stabilizationOptions =
+          typeof stabilize === "object" ? stabilize : {};
+
+        cy.waitUntil(() =>
+          cy
+            .window({ log: false })
+            .then((window) =>
+              ((window as any).__ARGOS__ as ArgosGlobal).waitForStability(
+                stabilizationOptions,
+              ),
+            ),
+        );
+      }
 
       let ref: any = {};
 
