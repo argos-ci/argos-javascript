@@ -81,6 +81,13 @@ export async function argosScreenshot(
 
   await argosPlaywrightScreenshot(page, join(context.title, context.name), {
     ...screenshotOptions,
+    // Disable aria-busy stabilization by default
+    stabilize: screenshotOptions.stabilize ?? {
+      ariaBusy: false,
+      ...(typeof screenshotOptions.stabilize === "object"
+        ? screenshotOptions.stabilize
+        : {}),
+    },
     ...fitToContentOptions,
   });
 }
