@@ -1,0 +1,40 @@
+---
+title: Storybook
+slug: /storybook
+---
+
+# Argos Storybook SDK
+
+Integrate visual testing with your Storybook seamlessly using Argos. This SDK allows you to capture and review visual changes in your Storybook components directly within your CI.
+
+## Getting Started
+
+To get started with Argos and Storybook, check out our [Storybook Quickstart Guide](/quickstart/storybook).
+
+## Comparing Argos and Chromatic
+
+While both Argos and Chromatic provide visual testing for Storybook, they take different approaches:
+
+- **Argos** captures screenshots of your Storybook components **in your CI using Playwright**.
+- **Chromatic** captures screenshots of your Storybook components **in the cloud**.
+
+For a deeper comparison, see our [Argos vs Chromatic guide](https://argos-ci.com/compare/chromatic).
+
+## API Overview
+
+### argosScreenshot(page, context[, options])
+
+- **`page`**: The [Playwright Page](https://playwright.dev/docs/api/class-page) instance.
+- **`context`**: The test context provided by the Storybook test runner.
+- **`options`**: Customizable options for `argosScreenshot`. Explore [available options](https://argos-ci.com/docs/playwright#argosscreenshotpage-name-options).
+  - **`options.fitToContent`**: Adjusts the screenshot to the content size (default: `true`).
+  - **`options.fitToContent.padding`**: Sets padding around the content in pixels (default: `16`).
+  - **`options.fitToContent.zoom`**: Specifies the zoom level (default: `2`).
+
+## Additional Resources
+
+- [Quickstart with Argos + Storybook](/quickstart/storybook)
+- [Quickstart for Argos + Storybook Legacy (\<v8)](/quickstart/legacy-storybook)
+- [Storybook + Playwright example](https://github.com/argos-ci/argos/tree/main/examples/storybook)
+- [@argos-ci/storybook on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/storybook)
+- [@argos-ci/storybook on npm](https://www.npmjs.com/package/@argos-ci/storybook)
