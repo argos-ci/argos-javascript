@@ -58,6 +58,10 @@ Screenshots are stored in `screenshots/argos` folder, relative to current direct
 - `options.argosCSS`: Specific CSS applied during the screenshot process. More on [injecting CSS](/injecting-css)
 - `options.disableHover`: Disable hover effects by moving the mouse to the top-left corner of the page. Default to `true`.
 - `options.threshold`: Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to `0.5`.
+- `options.stabilize`: Wait for the UI to stabilize before taking the screenshot. Set to `false` to disable stabilization. Pass an object to customize the stabilization. Default to `true`.
+- `options.stabilize.ariaBusy`: Wait for the `aria-busy` attribute to be removed from the document. Default to `true`.
+- `options.stabilize.fonts`: Wait for fonts to be loaded. Default to `true`.
+- `options.stabilize.images`: Wait for images to be loaded. Default to `true`.
 
 Unlike [Puppeteer's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), `argosScreenshot` set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
 

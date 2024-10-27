@@ -36,10 +36,9 @@ type ArgosScreenshotOptions = Partial<
   threshold?: number;
 
   /**
-   * Stabilization.
-   * By default, it waits for the UI to stabilize before taking a screenshot.
+   * Wait for the UI to stabilize before taking the screenshot.
    * Set to `false` to disable stabilization.
-   * Pass an object to customize the stabilization process.
+   * Pass an object to customize the stabilization.
    * @default true
    */
   stabilize?: boolean | StabilizationOptions;
