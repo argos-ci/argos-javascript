@@ -36,7 +36,7 @@ const metadataConfigStorage = new AsyncLocalStorage<MetadataConfig>();
 /**
  * Set the metadata config.
  */
-export async function setMetadataConfig(metadata: MetadataConfig) {
+export function setMetadataConfig(metadata: MetadataConfig) {
   metadataConfigStorage.enterWith(metadata);
 }
 

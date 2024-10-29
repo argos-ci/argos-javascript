@@ -70,7 +70,7 @@ export async function argosScreenshot(
 
   const version = await getArgosStorybookVersion();
 
-  await DO_NOT_USE_setMetadataConfig({
+  DO_NOT_USE_setMetadataConfig({
     sdk: { name: "@argos-ci/storybook", version },
     playwrightLibraries: ["@storybook/test-runner"],
   });
