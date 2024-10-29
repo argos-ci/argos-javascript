@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@0.2.0...@argos-ci/storybook@0.2.1) (2024-10-29)
+
+
+### Bug Fixes
+
+* **playwright:** make getCSPScriptHash synchronous ([86f3ee3](https://github.com/argos-ci/argos-javascript/commit/86f3ee3de937b6a1b58c078e9eba12da4f935028))
+
+
+
+
+
 # [0.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@0.1.2...@argos-ci/storybook@0.2.0) (2024-10-27)
 
 
