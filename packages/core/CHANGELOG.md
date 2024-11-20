@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.11.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.10.0...@argos-ci/core@2.11.0) (2024-11-20)
+
+
+### Features
+
+* increase max-screenshot size ([1f5d6c3](https://github.com/argos-ci/argos-javascript/commit/1f5d6c36f7346646b9a9686f419a78fe55d90e59))
+
+
+
+
+
 # [2.10.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.9.2...@argos-ci/core@2.10.0) (2024-10-27)
 
 
