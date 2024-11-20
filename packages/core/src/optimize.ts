@@ -10,7 +10,7 @@ export const optimizeScreenshot = async (filepath: string): Promise<string> => {
   try {
     const resultFilePath = await tmpFile();
     await sharp(filepath)
-      .resize(2048, 20480, {
+      .resize(2048, 64000, {
         fit: "inside",
         withoutEnlargement: true,
       })
