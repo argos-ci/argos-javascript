@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/webdriverio",
   "description": "WebdriverIO SDK for visual testing with Argos.",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
