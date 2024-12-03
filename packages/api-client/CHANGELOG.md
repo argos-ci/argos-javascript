@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.7.0...@argos-ci/api-client@0.7.1) (2024-12-03)
+
+
+### Bug Fixes
+
+* fix open-api-fetch version ([cc97b63](https://github.com/argos-ci/argos-javascript/commit/cc97b63502509c3508948c35babcedd61f12f3ab))
+
+
+
+
+
 # [0.7.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.6.2...@argos-ci/api-client@0.7.0) (2024-10-27)
 
 
