@@ -53,7 +53,8 @@
     "@types/convict": "^6.1.6",
     "@types/debug": "^4.1.12",
     "@types/tmp": "^0.2.6",
-    "msw": "^2.5.1"
+    "msw": "^2.5.1",
+    "@octokit/webhooks": "^13.4.1"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",

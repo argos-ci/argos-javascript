@@ -3,30 +3,18 @@ import type { Service, Context } from "../types";
 import axios from "axios";
 import { debug } from "../../debug";
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
+import * as webhooks from "@octokit/webhooks";
 
-type EventPayload = {
-  pull_request?: {
-    head: {
-      sha: string;
-      ref: string;
-    };
-    base: {
-      sha: string;
-      ref: string;
-    };
-    number: number;
-  };
-  deployment?: {
-    sha: string;
-    environment: string;
-  };
-};
+type EventPayload = webhooks.EmitterWebhookEvent["payload"];
 
 type GitHubPullRequest = {
   number: number;
   head: {
     ref: string;
     sha: string;
+  };
+  base: {
+    ref: string;
   };
 };
 
@@ -47,12 +35,16 @@ async function getPullRequestFromHeadSha({ env }: Context, sha: string) {
     if (!env.DISABLE_GITHUB_TOKEN_WARNING) {
       console.log(
         `
-Running argos from a "deployment_status" event requires a GITHUB_TOKEN.
-Please add \`GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}\` as environment variable.
+Argos couldn’t find a relevant pull request in the current environment.
+To resolve this, Argos requires a GITHUB_TOKEN to fetch the pull request associated with the head SHA. Please ensure the following environment variable is added:
 
-Read more at https://argos-ci.com/docs/run-on-preview-deployment
+GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 
-To disable this warning, add \`DISABLE_GITHUB_TOKEN_WARNING: true\` as environment variable.
+For more details, check out the documentation: Read more at https://argos-ci.com/docs/run-on-preview-deployment
+
+If you want to disable this warning, you can set the following environment variable:
+
+DISABLE_GITHUB_TOKEN_WARNING: true
 `.trim(),
       );
     }
@@ -92,14 +84,7 @@ To disable this warning, add \`DISABLE_GITHUB_TOKEN_WARNING: true\` as environme
   }
 }
 
-function getBranch(
-  context: Context,
-  eventPayload: EventPayload | null,
-): string | null {
-  if (eventPayload?.pull_request?.head.ref) {
-    return eventPayload.pull_request.head.ref;
-  }
-
+function getBranchFromContext(context: Context): string | null {
   const { env } = context;
 
   if (env.GITHUB_HEAD_REF) {
@@ -115,7 +100,20 @@ function getBranch(
   return matches?.[1] ?? null;
 }
 
-function getRepository({ env }: Context): string | null {
+function getBranchFromPayload(payload: EventPayload): string | null {
+  if ("workflow_run" in payload && payload.workflow_run) {
+    return payload.workflow_run.head_branch;
+  }
+
+  // If the event is a deployment, we can use the environment as branch name.
+  if ("deployment" in payload && payload.deployment) {
+    return payload.deployment.environment;
+  }
+
+  return null;
+}
+
+function getRepositoryFromContext({ env }: Context): string | null {
   if (!env.GITHUB_REPOSITORY) return null;
   return env.GITHUB_REPOSITORY.split("/")[1] || null;
 }
@@ -124,6 +122,40 @@ function readEventPayload({ env }: Context): EventPayload | null {
   if (!env.GITHUB_EVENT_PATH) return null;
   if (!existsSync(env.GITHUB_EVENT_PATH)) return null;
   return JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf-8"));
+}
+
+/**
+ * Get the pull request from an event payload.
+ */
+function getPullRequestFromPayload(
+  payload: EventPayload,
+): GitHubPullRequest | null {
+  if (
+    "pull_request" in payload &&
+    payload.pull_request &&
+    payload.pull_request
+  ) {
+    return payload.pull_request;
+  }
+
+  if (
+    "workflow_run" in payload &&
+    payload.workflow_run &&
+    payload.workflow_run.pull_requests[0]
+  ) {
+    return payload.workflow_run.pull_requests[0];
+  }
+
+  if (
+    "check_run" in payload &&
+    payload.check_run &&
+    "pull_requests" in payload.check_run &&
+    payload.check_run.pull_requests[0]
+  ) {
+    return payload.check_run.pull_requests[0];
+  }
+
+  return null;
 }
 
 const service: Service = {
@@ -139,41 +171,28 @@ const service: Service = {
       throw new Error(`GITHUB_SHA is missing`);
     }
 
-    const commonConfig = {
+    const pullRequest = payload
+      ? getPullRequestFromPayload(payload)
+      : await getPullRequestFromHeadSha(context, sha);
+
+    return {
       commit: sha,
       owner: env.GITHUB_REPOSITORY_OWNER || null,
-      repository: getRepository(context),
+      repository: getRepositoryFromContext(context),
       jobId: env.GITHUB_JOB || null,
       runId: env.GITHUB_RUN_ID || null,
       runAttempt: env.GITHUB_RUN_ATTEMPT
         ? Number(env.GITHUB_RUN_ATTEMPT)
         : null,
       nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}` || null,
-    };
-
-    // If the job is triggered by from a "deployment" or a "deployment_status"
-    if (payload?.deployment) {
-      debug("Deployment event detected");
-      // Try to find a relevant pull request for the sha
-      const pullRequest = await getPullRequestFromHeadSha(context, sha);
-      return {
-        ...commonConfig,
-        // If no pull request is found, we fallback to the deployment environment as branch name
-        // Branch name is required to create a build but has no real impact on the build.
-        branch: pullRequest?.head.ref || payload.deployment.environment || null,
-        prNumber: pullRequest?.number || null,
-        prHeadCommit: pullRequest?.head.sha || null,
-        prBaseBranch: null,
-      };
-    }
-
-    return {
-      ...commonConfig,
       branch:
-        payload?.pull_request?.head.ref || getBranch(context, payload) || null,
-      prNumber: payload?.pull_request?.number || null,
-      prHeadCommit: payload?.pull_request?.head.sha ?? null,
-      prBaseBranch: payload?.pull_request?.base.ref ?? null,
+        getBranchFromContext(context) ||
+        pullRequest?.head.ref ||
+        (payload ? getBranchFromPayload(payload) : null) ||
+        null,
+      prNumber: pullRequest?.number || null,
+      prHeadCommit: pullRequest?.head.sha ?? null,
+      prBaseBranch: pullRequest?.base.ref ?? null,
     };
   },
   getMergeBaseCommitSha,
