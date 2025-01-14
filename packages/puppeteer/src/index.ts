@@ -3,15 +3,15 @@ import { mkdir } from "node:fs/promises";
 import { ElementHandle, Page, ScreenshotOptions } from "puppeteer";
 import { createRequire } from "node:module";
 import {
-  ViewportOption,
+  type ViewportOption,
   resolveViewport,
-  ArgosGlobal,
+  type ArgosGlobal,
   getGlobalScript,
-  ViewportSize,
-  StabilizationOptions,
+  type ViewportSize,
+  type StabilizationOptions,
 } from "@argos-ci/browser";
 import {
-  ScreenshotMetadata,
+  type ScreenshotMetadata,
   getScreenshotName,
   readVersionFromPackage,
   validateThreshold,

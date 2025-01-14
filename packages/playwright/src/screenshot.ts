@@ -11,16 +11,16 @@ import type {
   ViewportSize,
 } from "@playwright/test";
 import {
-  ViewportOption,
+  type ViewportOption,
   resolveViewport,
-  ArgosGlobal,
+  type ArgosGlobal,
   getGlobalScript,
-  StabilizationOptions,
+  type StabilizationOptions,
 } from "@argos-ci/browser";
 import {
   getMetadataPath,
   getScreenshotName,
-  ScreenshotMetadata,
+  type ScreenshotMetadata,
   validateThreshold,
   writeMetadata,
 } from "@argos-ci/util";

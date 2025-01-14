@@ -7,7 +7,8 @@ import type {
   TestResult,
 } from "@playwright/test/reporter";
 import chalk from "chalk";
-import { readConfig, upload, UploadParameters } from "@argos-ci/core";
+import { readConfig, upload } from "@argos-ci/core";
+import type { UploadParameters } from "@argos-ci/core";
 import { randomBytes } from "node:crypto";
 import { copyFile, mkdir, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
