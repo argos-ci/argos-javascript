@@ -1,5 +1,6 @@
 /// <reference types="cypress" />
-import { UploadParameters, upload } from "@argos-ci/core";
+import { upload } from "@argos-ci/core";
+import type { UploadParameters } from "@argos-ci/core";
 import { basename, extname, join, dirname } from "node:path";
 import { rename } from "node:fs/promises";
 

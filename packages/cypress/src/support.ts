@@ -1,15 +1,15 @@
 import "cypress-wait-until";
 import {
-  ArgosGlobal,
+  type ArgosGlobal,
   resolveViewport,
-  StabilizationOptions,
+  type StabilizationOptions,
   type ViewportOption,
 } from "@argos-ci/browser";
 import { getGlobalScript } from "@argos-ci/browser";
 import {
   getMetadataPath,
   getScreenshotName,
-  ScreenshotMetadata,
+  type ScreenshotMetadata,
   validateThreshold,
 } from "@argos-ci/util/browser";
 // @ts-ignore
