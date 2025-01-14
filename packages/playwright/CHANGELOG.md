@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.10.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.9.4...@argos-ci/playwright@3.10.0) (2025-01-14)
+
+
+### Features
+
+* **playwright:** add `beforeScreenshot` and `afterScreenshot` hooks ([772ebcc](https://github.com/argos-ci/argos-javascript/commit/772ebcc4dbcfb41561c6c181dcd3cc93a0ceb15a))
+
+
+
+
+
 ## [3.9.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.9.3...@argos-ci/playwright@3.9.4) (2024-12-03)
 
 **Note:** Version bump only for package @argos-ci/playwright

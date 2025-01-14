@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.12.0...@argos-ci/core@3.0.0) (2025-01-14)
+
+
+### Features
+
+* improve the resize algorithm ([29aa0e3](https://github.com/argos-ci/argos-javascript/commit/29aa0e3ea11ba4d8c3e6365e2cb2900149eded5b))
+
+
+### BREAKING CHANGES
+
+* If you use large screenshots, images could be resized resulting in potential changes detection.
+
+
+
+
+
 # [2.12.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.11.1...@argos-ci/core@2.12.0) (2024-12-03)
 
 
