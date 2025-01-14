@@ -9,7 +9,7 @@ import git from "./services/git";
 import type { CiEnvironment, Context } from "./types";
 import { debug } from "../debug";
 
-export { CiEnvironment };
+export type { CiEnvironment };
 
 // List of services ordered by usage
 // "git" must be the last one

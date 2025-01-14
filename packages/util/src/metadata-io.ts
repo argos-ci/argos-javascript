@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { ScreenshotMetadata, getMetadataPath } from "./metadata";
+import { getMetadataPath } from "./metadata";
+import type { ScreenshotMetadata } from "./metadata";
 
 /**
  * Write screenshot metadata to disk.

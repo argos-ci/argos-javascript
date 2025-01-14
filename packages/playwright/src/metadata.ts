@@ -1,8 +1,5 @@
-import {
-  ScreenshotMetadata,
-  getGitRepositoryPath,
-  readVersionFromPackage,
-} from "@argos-ci/util";
+import { getGitRepositoryPath, readVersionFromPackage } from "@argos-ci/util";
+import type { ScreenshotMetadata } from "@argos-ci/util";
 import type { TestInfo } from "@playwright/test";
 import type { TestCase, TestResult } from "@playwright/test/reporter";
 import { relative } from "node:path";
