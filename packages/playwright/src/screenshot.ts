@@ -79,6 +79,18 @@ export type ArgosScreenshotOptions = {
    * @default true
    */
   stabilize?: boolean | StabilizationOptions;
+
+  /**
+   * Run a function before taking the screenshot.
+   * When using viewports, this function will run before taking sreenshots on each viewport.
+   */
+  beforeScreenshot?: () => Promise<void> | void;
+
+  /**
+   * Run a function after taking the screenshot.
+   * When using viewports, this function will run after taking sreenshots on each viewport.
+   */
+  afterScreenshot?: () => Promise<void> | void;
 } & LocatorOptions &
   ScreenshotOptions<LocatorScreenshotOptions> &
   ScreenshotOptions<PageScreenshotOptions>;
@@ -282,6 +294,8 @@ export async function argosScreenshot(
   };
 
   const stabilizeAndScreenshot = async (name: string) => {
+    await options.beforeScreenshot?.();
+
     if (stabilize) {
       const stabilizationOptions =
         typeof stabilize === "object" ? stabilize : {};
@@ -357,6 +371,8 @@ ${reasons.map((reason) => `- ${reason}`).join("\n")}
         }),
       ]);
     }
+
+    await options.afterScreenshot?.();
   };
 
   // If no viewports are specified, take a single screenshot
