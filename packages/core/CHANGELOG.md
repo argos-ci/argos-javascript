@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@3.0.0...@argos-ci/core@3.1.0) (2025-01-18)
+
+
+### Features
+
+* support preview URL ([cb541de](https://github.com/argos-ci/argos-javascript/commit/cb541de9b1d75fcb797066578cc3cfe6e8d1d886))
+
+
+
+
+
 # [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@2.12.0...@argos-ci/core@3.0.0) (2025-01-14)
 
 

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.0.0...@argos-ci/playwright@4.1.0) (2025-01-18)
+
+
+### Features
+
+* **playwright:** improve `beforeScreenshot` by allowing to run stabilization in it ([7ae1fa3](https://github.com/argos-ci/argos-javascript/commit/7ae1fa3c3c3a9e16c39ef9a4c0c43b156a71b0f8))
+* support preview URL ([cb541de](https://github.com/argos-ci/argos-javascript/commit/cb541de9b1d75fcb797066578cc3cfe6e8d1d886))
+
+
+
+
+
 # [4.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@3.10.0...@argos-ci/playwright@4.0.0) (2025-01-18)
 
 **Note:** Version bump only for package @argos-ci/playwright
