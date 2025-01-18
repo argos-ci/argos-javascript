@@ -276,9 +276,10 @@ export async function argosScreenshot(
     }
     const browserName = browser.browserType().name();
     const browserVersion = browser.version();
+    const url = page.url();
 
     const metadata: ScreenshotMetadata = {
-      url: page.url(),
+      url,
       viewport: viewportSize,
       colorScheme,
       mediaType,

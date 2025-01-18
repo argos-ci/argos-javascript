@@ -21,6 +21,30 @@ While Cypress inherently provides screenshot functionality, the Argos Cypress in
 
 Please refer to our [Quickstart guide](/quickstart/cypress) to get started with Argos and Cypress.
 
+## Set a Preview URL
+
+Argos displays the URL of the page when a screenshot is taken, helping you understand the screenshot’s context in the Argos UI. If you run tests locally and deploy your pull requests (PRs) to a preview URL, you can link the two by setting the `ARGOS_PREVIEW_URL` environment variable or configuring the `previewUrl` option in the Cypress configuration.
+
+### Example Configuration
+
+```ts title="cypress.config.js"
+const { defineConfig } = require("cypress");
+const { registerArgosTask } = require("@argos-ci/cypress/task");
+
+module.exports = defineConfig({
+  e2e: {
+    async setupNodeEvents(on, config) {
+      registerArgosTask(on, config, {
+        uploadToArgos: !!process.env.CI,
+        previewUrl: {
+          baseUrl: "https://my-site.com", // Use a dynamic value here for different environments if needed.
+        },
+      });
+    },
+  },
+});
+```
+
 ## API Overview
 
 ### cy.argosScreenshot([name][, options])

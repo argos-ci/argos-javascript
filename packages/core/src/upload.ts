@@ -98,6 +98,15 @@ export interface UploadParameters {
    * Build metadata.
    */
   metadata?: BuildMetadata;
+  /**
+   * Preview URL configuration.
+   * Accepts a base URL or a function that receives the URL and returns the preview URL.
+   */
+  previewUrl?:
+    | {
+        baseUrl: string;
+      }
+    | ((url: string) => string);
 }
 
 async function getConfigFromOptions({
@@ -144,6 +153,23 @@ async function uploadFilesToS3(
 }
 
 /**
+ * Format the preview URL.
+ */
+function formatPreviewUrl(
+  url: string,
+  formatter: NonNullable<UploadParameters["previewUrl"]>,
+) {
+  if (typeof formatter === "function") {
+    return formatter(url);
+  }
+  const urlObj = new URL(url);
+  return new URL(
+    urlObj.pathname + urlObj.search + urlObj.hash,
+    formatter.baseUrl,
+  ).href;
+}
+
+/**
  * Upload screenshots to Argos.
  */
 export async function upload(params: UploadParameters) {
@@ -154,6 +180,10 @@ export async function upload(params: UploadParameters) {
     getConfigFromOptions(params),
     getArgosCoreSDKIdentifier(),
   ]);
+  const previewUrlFormatter: UploadParameters["previewUrl"] =
+    params.previewUrl ??
+    (config.previewBaseUrl ? { baseUrl: config.previewBaseUrl } : undefined);
+
   const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
   debug("Using config and files", config, files);
 
@@ -191,6 +221,13 @@ export async function upload(params: UploadParameters) {
 
       if (metadata) {
         delete metadata.transient;
+
+        if (metadata.url && previewUrlFormatter) {
+          metadata.previewUrl = formatPreviewUrl(
+            metadata.url,
+            previewUrlFormatter,
+          );
+        }
       }
 
       return {
