@@ -3,7 +3,7 @@ import { getCiEnvironment } from "./ci-environment";
 
 const mustBeApiBaseUrl = (value: any) => {
   const URL_REGEX =
-    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
   if (!URL_REGEX.test(value)) {
     throw new Error("Invalid Argos API base URL");

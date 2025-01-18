@@ -49,17 +49,17 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "@storybook/addon-essentials": "^8.4.7",
-    "@storybook/addon-interactions": "^8.4.7",
-    "@storybook/addon-links": "^8.4.7",
-    "@storybook/blocks": "^8.4.7",
-    "@storybook/react": "^8.4.7",
-    "@storybook/react-vite": "^8.4.7",
-    "@storybook/test": "^8.4.7",
+    "@storybook/addon-essentials": "^8.5.0",
+    "@storybook/addon-interactions": "^8.5.0",
+    "@storybook/addon-links": "^8.5.0",
+    "@storybook/blocks": "^8.5.0",
+    "@storybook/react": "^8.5.0",
+    "@storybook/react-vite": "^8.5.0",
+    "@storybook/test": "^8.5.0",
     "@storybook/test-runner": "^0.21.0",
     "playwright": "^1.49.1",
     "prop-types": "^15.8.1",
-    "storybook": "^8.4.7"
+    "storybook": "^8.5.0"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",

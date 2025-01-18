@@ -57,9 +57,8 @@
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/cypress": "workspace:.",
     "@types/node": "^18.19.44",
-    "cypress": "^13.17.0",
-    "eslint-plugin-cypress": "^3.5.0",
-    "eslint-plugin-html": "^8.1.1"
+    "cypress": "^14.0.0",
+    "eslint-plugin-cypress": "^4.1.0"
   },
   "scripts": {
     "build": "tsup",

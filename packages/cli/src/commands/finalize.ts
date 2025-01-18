@@ -1,5 +1,5 @@
 import ora from "ora";
-import { Command } from "commander";
+import type { Command } from "commander";
 import { finalize } from "@argos-ci/core";
 import { parallelNonce } from "../options";
 

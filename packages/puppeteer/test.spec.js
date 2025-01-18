@@ -8,7 +8,7 @@ export async function checkExists(path) {
   try {
     await stat(path);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

@@ -1,4 +1,5 @@
-import { Command, Option } from "commander";
+import type { Command } from "commander";
+import { Option } from "commander";
 import { upload } from "@argos-ci/core";
 import ora from "ora";
 import { parallelNonce } from "../options";

@@ -2,17 +2,23 @@ import type { Context, Service } from "../types";
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
 
 const getOwner = ({ env }: Context) => {
-  if (!env.TRAVIS_REPO_SLUG) return null;
+  if (!env.TRAVIS_REPO_SLUG) {
+    return null;
+  }
   return env.TRAVIS_REPO_SLUG.split("/")[0] || null;
 };
 
 const getRepository = ({ env }: Context) => {
-  if (!env.TRAVIS_REPO_SLUG) return null;
+  if (!env.TRAVIS_REPO_SLUG) {
+    return null;
+  }
   return env.TRAVIS_REPO_SLUG.split("/")[1] || null;
 };
 
 const getPrNumber = ({ env }: Context) => {
-  if (env.TRAVIS_PULL_REQUEST) return Number(env.TRAVIS_PULL_REQUEST);
+  if (env.TRAVIS_PULL_REQUEST) {
+    return Number(env.TRAVIS_PULL_REQUEST);
+  }
   return null;
 };
 

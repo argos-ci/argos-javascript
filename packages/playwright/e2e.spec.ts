@@ -1,10 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { argosScreenshot } from "./dist/index";
 import { argosScreenshot as typedArgosScreenshot } from "./src";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
 
@@ -15,7 +16,7 @@ export async function checkExists(path: string) {
   try {
     await stat(path);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -23,7 +24,9 @@ export async function checkExists(path: string) {
 async function expectScreenshotToExists(screenshotName: string) {
   const info = await test.info();
   // If we are using the Argos reporter, screenshots are not saved locally
-  if (info.config.reporter.some((rep) => rep[0].includes("argos"))) return;
+  if (info.config.reporter.some((rep) => rep[0].includes("argos"))) {
+    return;
+  }
   const filepath = fileURLToPath(
     new URL(`${screenshotFolder}/${screenshotName}.png`, import.meta.url).href,
   );

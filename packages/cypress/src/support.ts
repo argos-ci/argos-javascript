@@ -12,7 +12,7 @@ import {
   type ScreenshotMetadata,
   validateThreshold,
 } from "@argos-ci/util/browser";
-// @ts-ignore
+// @ts-expect-error - can't import json in TypeScript
 import { version } from "../package.json";
 
 type ArgosScreenshotOptions = Partial<
@@ -72,7 +72,9 @@ declare global {
 
 function injectArgos() {
   cy.window({ log: false }).then((window) => {
-    if (typeof (window as any).__ARGOS__ !== "undefined") return;
+    if (typeof (window as any).__ARGOS__ !== "undefined") {
+      return;
+    }
     window.eval(getGlobalScript());
   });
 }
@@ -101,7 +103,7 @@ Cypress.Commands.add(
   (subject, name, options = {}) => {
     const {
       viewports,
-      argosCSS,
+      argosCSS: _argosCSS,
       stabilize = true,
       ...cypressOptions
     } = options;
@@ -147,7 +149,7 @@ Cypress.Commands.add(
         );
       }
 
-      let ref: any = {};
+      const ref: any = {};
 
       cy.wrap(subject).screenshot(name, {
         blackout: ['[data-visual-test="blackout"]'].concat(
@@ -179,7 +181,7 @@ Cypress.Commands.add(
             title: Cypress.currentTest.title,
             titlePath: Cypress.currentTest.titlePath,
             retry: Cypress.currentRetry,
-            // @ts-ignore
+            // @ts-expect-error - private property
             retries: cy.state("runnable")._retries,
           },
           browser: {

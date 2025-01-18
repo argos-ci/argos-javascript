@@ -121,7 +121,7 @@ async function getTestInfo() {
   try {
     const { test } = await import("@playwright/test");
     return test.info();
-  } catch (error: unknown) {
+  } catch {
     return null;
   }
 }
@@ -223,7 +223,7 @@ export async function argosScreenshot(
     has,
     hasText,
     viewports,
-    argosCSS,
+    argosCSS: _argosCSS,
     stabilize = true,
     root = DEFAULT_SCREENSHOT_ROOT,
     ...playwrightOptions

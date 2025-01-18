@@ -1,10 +1,12 @@
+import type {
+  SetupOptions,
+  TeardownOptions,
+  StabilizationOptions,
+} from "./stabilization";
 import {
   checkIsStable,
   setup,
   teardown,
-  SetupOptions,
-  TeardownOptions,
-  StabilizationOptions,
   getStabilityFailureReasons,
 } from "./stabilization";
 import { getColorScheme, getMediaType } from "./media";

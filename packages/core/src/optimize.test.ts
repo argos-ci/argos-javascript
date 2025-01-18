@@ -9,7 +9,7 @@ const exists = async (filepath: string) => {
   try {
     await stat(filepath);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
