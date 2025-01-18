@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@2.2.2...@argos-ci/browser@3.0.0) (2025-01-18)
+
+
+### Bug Fixes
+
+* **chromium:** reduce text-aliasing issue ([10fa86f](https://github.com/argos-ci/argos-javascript/commit/10fa86ff97b3a8eef118a64c83ed1d707ec66287))
+
+
+### BREAKING CHANGES
+
+* **chromium:** if not using "-webkit-font-smoothing: antialiased"
+you may experience differences on text after the update
+
+
+
+
+
 ## [2.2.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@2.2.1...@argos-ci/browser@2.2.2) (2025-01-14)
 
 **Note:** Version bump only for package @argos-ci/browser
