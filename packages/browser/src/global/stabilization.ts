@@ -11,6 +11,11 @@ const GLOBAL_CSS: string = `
   caret-color: transparent !important;
 }
 
+/* Reduce text-aliasing issues in Blink browsers */
+* {
+  -webkit-font-smoothing: antialiased !important;
+}
+
 /* Hide scrollbars */
 ::-webkit-scrollbar {
   display: none !important;
