@@ -7,7 +7,7 @@ export function getScreenshotName(
     viewportWidth?: number;
   } = {},
 ) {
-  let parts = [name];
+  const parts = [name];
   if (options.viewportWidth) {
     parts.push(`vw-${options.viewportWidth}`);
   }

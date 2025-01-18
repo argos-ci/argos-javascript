@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { mkdir } from "node:fs/promises";
-import { ElementHandle, Page, ScreenshotOptions } from "puppeteer";
+import type { ElementHandle, Page, ScreenshotOptions } from "puppeteer";
 import { createRequire } from "node:module";
 import {
   type ViewportOption,
@@ -27,7 +27,9 @@ async function injectArgos(page: Page) {
   const injected = await page.evaluate(
     () => typeof (window as any).__ARGOS__ !== "undefined",
   );
-  if (injected) return;
+  if (injected) {
+    return;
+  }
   await page.addScriptTag({ content: getGlobalScript() });
 }
 
@@ -100,7 +102,9 @@ async function getBrowserInfo(page: Page) {
 }
 
 async function getScreenshotPath(name: string) {
-  if (name.endsWith(".png")) return name;
+  if (name.endsWith(".png")) {
+    return name;
+  }
 
   const screenshotFolder = resolve(process.cwd(), "screenshots/argos");
   await mkdir(screenshotFolder, { recursive: true });
@@ -182,7 +186,7 @@ export async function argosScreenshot(
   const {
     element,
     viewports,
-    argosCSS,
+    argosCSS: _argosCSS,
     stabilize = true,
     ...puppeteerOptions
   } = options;

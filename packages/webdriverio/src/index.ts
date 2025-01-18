@@ -68,7 +68,9 @@ async function getImageDimensions(buffer: Buffer): Promise<Size> {
 }
 
 async function getScreenshotPath(name: string) {
-  if (name.endsWith(".png")) return name;
+  if (name.endsWith(".png")) {
+    return name;
+  }
 
   const screenshotFolder = resolve(process.cwd(), "screenshots/argos");
   await mkdir(screenshotFolder, { recursive: true });

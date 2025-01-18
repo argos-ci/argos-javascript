@@ -3,7 +3,7 @@ import type { Service, Context } from "../types";
 import axios from "axios";
 import { debug } from "../../debug";
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
-import * as webhooks from "@octokit/webhooks";
+import type * as webhooks from "@octokit/webhooks";
 
 type EventPayload = webhooks.EmitterWebhookEvent["payload"];
 
@@ -114,13 +114,19 @@ function getBranchFromPayload(payload: EventPayload): string | null {
 }
 
 function getRepositoryFromContext({ env }: Context): string | null {
-  if (!env.GITHUB_REPOSITORY) return null;
+  if (!env.GITHUB_REPOSITORY) {
+    return null;
+  }
   return env.GITHUB_REPOSITORY.split("/")[1] || null;
 }
 
 function readEventPayload({ env }: Context): EventPayload | null {
-  if (!env.GITHUB_EVENT_PATH) return null;
-  if (!existsSync(env.GITHUB_EVENT_PATH)) return null;
+  if (!env.GITHUB_EVENT_PATH) {
+    return null;
+  }
+  if (!existsSync(env.GITHUB_EVENT_PATH)) {
+    return null;
+  }
   return JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf-8"));
 }
 
@@ -184,7 +190,7 @@ const service: Service = {
       runAttempt: env.GITHUB_RUN_ATTEMPT
         ? Number(env.GITHUB_RUN_ATTEMPT)
         : null,
-      nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}` || null,
+      nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}`,
       branch:
         getBranchFromContext(context) ||
         pullRequest?.head.ref ||

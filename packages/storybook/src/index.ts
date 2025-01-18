@@ -1,11 +1,12 @@
-import { TestContext, waitForPageReady } from "@storybook/test-runner";
+import type { TestContext } from "@storybook/test-runner";
+import { waitForPageReady } from "@storybook/test-runner";
 import {
   argosScreenshot as argosPlaywrightScreenshot,
   DO_NOT_USE_setMetadataConfig,
 } from "@argos-ci/playwright";
 import type { ArgosScreenshotOptions as ArgosPlaywrightScreenshotOptions } from "@argos-ci/playwright";
 import { join } from "node:path";
-import { Page } from "playwright";
+import type { Page } from "playwright";
 import { getArgosStorybookVersion } from "./metadata";
 
 export type ArgosScreenshotOptions = {

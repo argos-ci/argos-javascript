@@ -1,8 +1,5 @@
-import {
-  ArgosAPISchema,
-  createClient,
-  throwAPIError,
-} from "@argos-ci/api-client";
+import type { ArgosAPISchema } from "@argos-ci/api-client";
+import { createClient, throwAPIError } from "@argos-ci/api-client";
 import { readConfig } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";

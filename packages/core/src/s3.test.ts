@@ -1,3 +1,4 @@
+/* eslint-disable vitest/expect-expect */
 import { describe, it } from "vitest";
 import { join } from "node:path";
 // import { fileURLToPath } from "node:url";

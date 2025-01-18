@@ -59,7 +59,9 @@ const SPELL_CHECK_QUERY =
 function disableSpellCheck(document: Document) {
   const inputs = document.querySelectorAll(SPELL_CHECK_QUERY);
   inputs.forEach((element) => {
-    if (!checkIsHTMLElement(element)) return;
+    if (!checkIsHTMLElement(element)) {
+      return;
+    }
     setAndBackupSpellcheck(element, "false");
   });
 }
@@ -129,11 +131,17 @@ function setAndBackupPosition(element: HTMLElement, position: string) {
  */
 function stabilizeElementPositions(document: Document) {
   const window = document.defaultView;
-  if (!window) return;
+  if (!window) {
+    return;
+  }
   const elements = Array.from(document.querySelectorAll("*"));
   elements.forEach((element) => {
-    if (!checkIsHTMLElement(element)) return;
-    if (element.tagName === "IFRAME") return;
+    if (!checkIsHTMLElement(element)) {
+      return;
+    }
+    if (element.tagName === "IFRAME") {
+      return;
+    }
     const style = window.getComputedStyle(element);
     const position = style.position;
     if (position === "fixed") {
@@ -149,10 +157,14 @@ function stabilizeElementPositions(document: Document) {
  */
 function restoreElementPositions(document: Document) {
   const window = document.defaultView;
-  if (!window) return;
+  if (!window) {
+    return;
+  }
   const elements = Array.from(document.querySelectorAll("*"));
   elements.forEach((element) => {
-    if (!checkIsHTMLElement(element)) return;
+    if (!checkIsHTMLElement(element)) {
+      return;
+    }
     const position = element.getAttribute("data-argos-bck-position");
     if (position === "unset") {
       element.style.removeProperty("position");

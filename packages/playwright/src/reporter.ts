@@ -2,7 +2,6 @@ import type {
   FullConfig,
   FullResult,
   Reporter,
-  Suite,
   TestCase,
   TestResult,
 } from "@playwright/test/reporter";
@@ -104,8 +103,12 @@ export function createArgosReporterOptions<T extends string[]>(
 async function getParallelFromConfig(
   config: FullConfig,
 ): Promise<null | UploadParameters["parallel"]> {
-  if (!config.shard) return null;
-  if (config.shard.total === 1) return null;
+  if (!config.shard) {
+    return null;
+  }
+  if (config.shard.total === 1) {
+    return null;
+  }
   const argosConfig = await readConfig();
   if (!argosConfig.parallelNonce) {
     throw new Error(
@@ -186,7 +189,7 @@ class ArgosReporter implements Reporter {
     return this.rootUploadDirectoryPromise;
   }
 
-  onBegin(config: FullConfig, _suite: Suite) {
+  onBegin(config: FullConfig) {
     debug("ArgosReporter:onBegin");
     this.playwrightConfig = config;
   }
