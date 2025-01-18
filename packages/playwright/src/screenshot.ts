@@ -84,7 +84,14 @@ export type ArgosScreenshotOptions = {
    * Run a function before taking the screenshot.
    * When using viewports, this function will run before taking sreenshots on each viewport.
    */
-  beforeScreenshot?: () => Promise<void> | void;
+  beforeScreenshot?: (api: {
+    /**
+     * Run Argos stabilization alorithm.
+     * Accepts an object to customize the stabilization.
+     * Note that this function is independent of the `stabilize` option.
+     */
+    runStabilization: (options?: StabilizationOptions) => Promise<void>;
+  }) => Promise<void> | void;
 
   /**
    * Run a function after taking the screenshot.
@@ -293,34 +300,36 @@ export async function argosScreenshot(
     return metadata;
   };
 
-  const stabilizeAndScreenshot = async (name: string) => {
-    await options.beforeScreenshot?.();
-
-    if (stabilize) {
-      const stabilizationOptions =
-        typeof stabilize === "object" ? stabilize : {};
-      try {
-        await page.waitForFunction(
-          (options) =>
-            ((window as any).__ARGOS__ as ArgosGlobal).checkIsStable(options),
-          stabilizationOptions,
-        );
-      } catch (error) {
-        const reasons = await page.evaluate(
-          (options) =>
-            (
-              (window as any).__ARGOS__ as ArgosGlobal
-            ).getStabilityFailureReasons(options),
-          stabilizationOptions,
-        );
-        throw new Error(
-          `
+  const runStabilization = async (options: StabilizationOptions = {}) => {
+    try {
+      await page.waitForFunction(
+        (options) =>
+          ((window as any).__ARGOS__ as ArgosGlobal).checkIsStable(options),
+        options,
+      );
+    } catch (error) {
+      const reasons = await page.evaluate(
+        (options) =>
+          ((window as any).__ARGOS__ as ArgosGlobal).getStabilityFailureReasons(
+            options,
+          ),
+        options,
+      );
+      throw new Error(
+        `
 Failed to stabilize screenshot, found the following issues:
 ${reasons.map((reason) => `- ${reason}`).join("\n")}
         `.trim(),
-          { cause: error },
-        );
-      }
+        { cause: error },
+      );
+    }
+  };
+
+  const stabilizeAndScreenshot = async (name: string) => {
+    await options.beforeScreenshot?.({ runStabilization });
+
+    if (stabilize) {
+      await runStabilization(stabilize === true ? undefined : stabilize);
     }
 
     const names = getScreenshotNames(name, testInfo);
