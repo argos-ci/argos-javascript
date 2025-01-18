@@ -98,7 +98,7 @@ export interface components {
             /** @description The build number */
             number: number;
             /** @description The status of the build */
-            status: ("accepted" | "rejected") | ("stable" | "diffDetected") | ("expired" | "pending" | "progress" | "error" | "aborted");
+            status: ("accepted" | "rejected") | ("no-changes" | "changes-detected") | ("expired" | "pending" | "progress" | "error" | "aborted");
             /**
              * Format: uri
              * @description The URL of the build
@@ -142,6 +142,7 @@ export interface components {
             baseName?: string | null;
             metadata?: {
                 url?: string;
+                previewUrl?: string;
                 viewport?: {
                     width: number;
                     height: number;

@@ -198,6 +198,30 @@ export default defineConfig({
 });
 ```
 
+## Set a Preview URL
+
+Argos displays the URL of the page when a screenshot is taken, helping you understand the screenshot’s context in the Argos UI. If you run tests locally and deploy your pull requests (PRs) to a preview URL, you can link the two by setting the `ARGOS_PREVIEW_URL` environment variable or configuring the `previewUrl` option in the Argos reporter.
+
+### Example Configuration
+
+```ts title="playwright.config.ts"
+import { defineConfig } from "@playwright/test";
+import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
+
+export default defineConfig({
+  reporter: [
+    [
+      "@argos-ci/playwright/reporter",
+      createArgosReporterOptions({
+        previewUrl: {
+          baseUrl: "https://my-site.com", // Use a dynamic value here for different environments if needed.
+        },
+      }),
+    ],
+  ],
+});
+```
+
 ## API Overview
 
 ### argosScreenshot(page, name[, options])

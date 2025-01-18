@@ -1,5 +1,6 @@
 export type ScreenshotMetadata = {
   url?: string;
+  previewUrl?: string;
   viewport?: {
     width: number;
     height: number;

@@ -71,7 +71,7 @@ type DynamicBuildName<T extends readonly string[]> = {
 
 export type ArgosReporterOptions<T extends string[] = string[]> = Omit<
   UploadParameters,
-  "files" | "root" | "buildName"
+  "files" | "root" | "buildName" | "metadata"
 > & {
   /**
    * Upload the report to Argos.

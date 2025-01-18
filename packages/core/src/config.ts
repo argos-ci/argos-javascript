@@ -162,6 +162,12 @@ const schema = {
     default: null,
     nullable: true,
   },
+  previewBaseUrl: {
+    env: "ARGOS_PREVIEW_BASE_URL",
+    format: String,
+    default: null,
+    nullable: true,
+  },
 };
 
 export interface Config {
@@ -187,6 +193,7 @@ export interface Config {
   mode: "ci" | "monitoring" | null;
   ciProvider: string | null;
   threshold: number | null;
+  previewBaseUrl: string | null;
 }
 
 const createConfig = () => {
@@ -229,6 +236,7 @@ export async function readConfig(options: Partial<Config> = {}) {
     parallelIndex: options.parallelIndex ?? config.get("parallelIndex") ?? null,
     mode: options.mode || config.get("mode") || null,
     ciProvider: ciEnv?.key || null,
+    previewBaseUrl: config.get("previewBaseUrl") || null,
   });
 
   config.validate();

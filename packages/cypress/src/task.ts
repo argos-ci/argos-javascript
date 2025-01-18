@@ -6,7 +6,7 @@ import { rename } from "node:fs/promises";
 
 export type RegisterArgosTaskOptions = Omit<
   UploadParameters,
-  "files" | "root"
+  "files" | "root" | "metadata"
 > & {
   /**
    * Upload the report to Argos.
