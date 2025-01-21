@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@3.1.0...@argos-ci/cypress@3.2.0) (2025-01-21)
+
+
+### Features
+
+* **cypress:** support Cypress v14 ([2c92690](https://github.com/argos-ci/argos-javascript/commit/2c926901e61b599cd9cda9b9dbeff5ebf120ec3f)), closes [#176](https://github.com/argos-ci/argos-javascript/issues/176)
+
+
+
+
+
 # [3.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@3.0.0...@argos-ci/cypress@3.1.0) (2025-01-18)
 
 
