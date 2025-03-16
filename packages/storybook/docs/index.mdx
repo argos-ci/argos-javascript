@@ -20,6 +20,17 @@ While both Argos and Chromatic provide visual testing for Storybook, they take d
 
 For a deeper comparison, see our [Argos vs Chromatic guide](https://argos-ci.com/compare/chromatic).
 
+## Interactions using the play function
+
+The `play` function in Storybook lets you define interactions for your components, ensuring they are in a specific state before capturing a screenshot.
+
+When running tests, the Storybook test runner **automatically executes the `play` function** before taking a screenshot. This means:
+
+- Your component will be in the expected state before the screenshot is taken.
+- You **do not** need to call the `play` function manually, Argos handles it for you.
+
+This ensures your visual tests accurately reflect how users interact with your components.
+
 ## API Overview
 
 ### argosScreenshot(page, context[, options])
