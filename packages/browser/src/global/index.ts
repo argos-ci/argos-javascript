@@ -8,6 +8,7 @@ import {
   setup,
   teardown,
   getStabilityFailureReasons,
+  afterEach,
 } from "./stabilization";
 import { getColorScheme, getMediaType } from "./media";
 
@@ -16,7 +17,7 @@ const ArgosGlobal = {
     checkIsStable(document, options),
   getStabilityFailureReasons: (options?: StabilizationOptions) =>
     getStabilityFailureReasons(document, options),
-  afterEach: () => teardown(document),
+  afterEach: () => afterEach(document),
   setup: (options: SetupOptions = {}) => setup(document, options),
   teardown: (options: TeardownOptions = {}) => teardown(document, options),
   getColorScheme: () => getColorScheme(window),
