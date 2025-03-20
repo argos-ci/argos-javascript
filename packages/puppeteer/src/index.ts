@@ -306,22 +306,26 @@ ${reasons.map((reason) => `- ${reason}`).join("\n")}
     // If no element is specified, take a screenshot of the whole page
     if (element === undefined) {
       await page.screenshot(screenshotOptions);
-      return;
     }
 
     // If a string is passed, take a screenshot of the element matching the selector
-    if (typeof element === "string") {
+    else if (typeof element === "string") {
       await page.waitForSelector(element);
       const handle = await page.$(element);
       if (!handle) {
         throw new Error(`Unable to find element ${element}`);
       }
       await handle.screenshot(screenshotOptions);
-      return;
     }
 
     // If an element is passed, take a screenshot of it
-    await element.screenshot(screenshotOptions);
+    else {
+      await element.screenshot(screenshotOptions);
+    }
+
+    await page.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
+    );
   }
 
   // If no viewports are specified, take a single screenshot

@@ -207,6 +207,10 @@ Cypress.Commands.add(
 
         cy.writeFile(getMetadataPath(ref.props.path), JSON.stringify(metadata));
       });
+
+      cy.window({ log: false }).then((window) => {
+        ((window as any).__ARGOS__ as ArgosGlobal).afterEach();
+      });
     }
 
     if (viewports) {

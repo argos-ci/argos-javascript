@@ -382,6 +382,9 @@ ${reasons.map((reason) => `- ${reason}`).join("\n")}
       ]);
     }
 
+    await page.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
+    );
     await options.afterScreenshot?.();
   };
 

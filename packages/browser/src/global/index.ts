@@ -16,6 +16,7 @@ const ArgosGlobal = {
     checkIsStable(document, options),
   getStabilityFailureReasons: (options?: StabilizationOptions) =>
     getStabilityFailureReasons(document, options),
+  afterEach: () => teardown(document),
   setup: (options: SetupOptions = {}) => setup(document, options),
   teardown: (options: TeardownOptions = {}) => teardown(document, options),
   getColorScheme: () => getColorScheme(window),
