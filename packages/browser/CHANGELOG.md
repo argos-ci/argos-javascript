@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@3.1.2...@argos-ci/browser@3.1.3) (2025-03-20)
+
+
+### Bug Fixes
+
+* fix restoration of image sizes ([cddc1f1](https://github.com/argos-ci/argos-javascript/commit/cddc1f103796753bdd8487bcab8962e4063c6b2d))
+
+
+
+
+
 ## [3.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@3.1.1...@argos-ci/browser@3.1.2) (2025-03-20)
 
 
