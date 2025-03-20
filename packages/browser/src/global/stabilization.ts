@@ -184,28 +184,18 @@ function stabilizeImageSizes(document: Document) {
   const images = Array.from(document.images);
 
   const results = images.map((img) => {
-    // Force sync decoding
-    if (img.decoding !== "sync") {
-      img.decoding = "sync";
-    }
-
-    // Force eager loading
-    if (img.loading !== "eager") {
-      img.loading = "eager";
-    }
-
-    if (!img.complete) {
-      // If the image is not loaded yet, we wait.
+    // If the image is stabilizing, we skip it.
+    if (img.dataset.argosStabilization === "pending") {
       return false;
     }
 
-    if (img.dataset.argosStabilized) {
-      // If the image is already stabilized, we skip it.
+    // If the image is already stabilized, we skip it.
+    if (img.dataset.argosStabilization === "complete") {
       return true;
     }
 
-    // Mark it as stabilized
-    img.dataset.argosStabilized = "true";
+    // Mark it as pending
+    img.dataset.argosStabilization = "pending";
 
     // Force the re-rendering of the image by removing the src and srcset attributes
     // and then restoring them.
@@ -218,7 +208,7 @@ function stabilizeImageSizes(document: Document) {
     img.srcset = originalSrcSet;
     img.src = originalSrc;
 
-    const setSizes = () => {
+    const update = () => {
       // Preserve the original width and height
       img.dataset.argosBckWidth = img.style.width ?? "";
       img.dataset.argosBckHeight = img.style.height ?? "";
@@ -227,16 +217,18 @@ function stabilizeImageSizes(document: Document) {
       const rect = img.getBoundingClientRect();
       img.style.width = `${Math.round(rect.width)}px`;
       img.style.height = `${Math.round(rect.height)}px`;
+
+      // Mark it as complete
+      img.dataset.argosStabilization = "complete";
     };
 
     if (img.complete) {
-      setSizes();
-      return;
+      update();
+      return true;
     }
 
-    img.addEventListener("load", setSizes, { once: true });
-
-    return true;
+    img.addEventListener("load", update, { once: true });
+    return false;
   });
 
   return results.every((x) => x);
@@ -248,12 +240,12 @@ function stabilizeImageSizes(document: Document) {
 function restoreImageSizes(document: Document) {
   const images = Array.from(document.images);
   images.forEach((img) => {
-    if (img.dataset.argosStabilized) {
+    if (img.dataset.argosStabilization) {
       img.style.width = img.dataset.argosBckWidth ?? "";
       img.style.height = img.dataset.argosBckHeight ?? "";
       delete img.dataset.argosBckWidth;
       delete img.dataset.argosBckHeight;
-      delete img.dataset.argosStabilized;
+      delete img.dataset.argosStabilization;
     }
   });
 }
@@ -389,10 +381,16 @@ function getStabilityState(document: Document, options?: StabilizationOptions) {
     fonts = true,
     imageSizes = true,
   } = options ?? {};
+  const imagesLoaded =
+    images || imageSizes ? waitForImagesToLoad(document) : null;
   return {
     ariaBusy: ariaBusy ? waitForNoBusy(document) : true,
-    images: images ? waitForImagesToLoad(document) : true,
-    imageSizes: imageSizes ? stabilizeImageSizes(document) : true,
+    images: images ? imagesLoaded : true,
+    imageSizes: imageSizes
+      ? imagesLoaded
+        ? stabilizeImageSizes(document)
+        : false
+      : true,
     fonts: fonts ? waitForFontsToLoad(document) : true,
   };
 }
