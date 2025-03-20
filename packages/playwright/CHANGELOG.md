@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.2.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.2.1...@argos-ci/playwright@4.2.2) (2025-03-20)
+
+
+### Bug Fixes
+
+* fix image size restoration ([28d1834](https://github.com/argos-ci/argos-javascript/commit/28d1834a08d9a88c0e1f7b01c61035bbfc190d3e))
+
+
+
+
+
 ## [4.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.2.0...@argos-ci/playwright@4.2.1) (2025-03-20)
 
 **Note:** Version bump only for package @argos-ci/playwright
