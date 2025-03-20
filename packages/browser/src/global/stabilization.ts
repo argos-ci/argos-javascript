@@ -175,6 +175,79 @@ function restoreElementPositions(document: Document) {
   });
 }
 
+/**
+ * Stabilize all image sizes.
+ * - Reload all images to ensure the dimensions are correctly calculated.
+ * - Set the width and height to the rounded values.
+ */
+function stabilizeImageSizes(document: Document) {
+  const images = Array.from(document.images);
+
+  const results = images.map((img) => {
+    // Force sync decoding
+    if (img.decoding !== "sync") {
+      img.decoding = "sync";
+    }
+
+    // Force eager loading
+    if (img.loading !== "eager") {
+      img.loading = "eager";
+    }
+
+    if (!img.complete) {
+      // If the image is not loaded yet, we wait.
+      return false;
+    }
+
+    if (img.dataset.argosStabilized) {
+      // If the image is already stabilized, we skip it.
+      return true;
+    }
+
+    // Force the re-rendering of the image by removing the src and srcset attributes
+    // and then restoring them.
+    // This will recalculate the dimensions of the image and make it right.
+    const originalSrcSet = img.srcset;
+    const originalSrc = img.src;
+    img.srcset = "";
+    img.src = "";
+    img.srcset = originalSrcSet;
+    img.src = originalSrc;
+
+    // Mark it as stabilized
+    img.dataset.argosStabilized = "true";
+
+    // Preserve the original width and height
+    img.dataset.argosBckWidth = img.style.width ?? "";
+    img.dataset.argosBckHeight = img.style.height ?? "";
+
+    // Set the width and height to the rounded values
+    const rect = img.getBoundingClientRect();
+    img.style.width = `${Math.round(rect.width)}px`;
+    img.style.height = `${Math.round(rect.height)}px`;
+
+    return true;
+  });
+
+  return results.every((x) => x);
+}
+
+/**
+ * Restore images to their original size.
+ */
+function restoreImageSizes(document: Document) {
+  const images = Array.from(document.images);
+  images.forEach((img) => {
+    if (img.dataset.argosStabilized) {
+      img.style.width = img.dataset.argosBckWidth ?? "";
+      img.style.height = img.dataset.argosBckHeight ?? "";
+      delete img.dataset.argosBckWidth;
+      delete img.dataset.argosBckHeight;
+      delete img.dataset.argosStabilized;
+    }
+  });
+}
+
 function addGlobalClass(document: Document, className: string) {
   document.documentElement.classList.add(className);
 }
@@ -221,6 +294,7 @@ export function teardown(
   if (fullPage) {
     restoreElementPositions(document);
   }
+  restoreImageSizes(document);
 }
 
 /**
@@ -236,8 +310,7 @@ function waitForFontsToLoad(document: Document) {
 function waitForImagesToLoad(document: Document) {
   const images = Array.from(document.images);
 
-  // Force eager loading
-  images.forEach((img) => {
+  return images.every((img) => {
     // Force sync decoding
     if (img.decoding !== "sync") {
       img.decoding = "sync";
@@ -247,9 +320,10 @@ function waitForImagesToLoad(document: Document) {
     if (img.loading !== "eager") {
       img.loading = "eager";
     }
-  });
 
-  return images.every((img) => img.complete);
+    // Check if the image is loaded
+    return img.complete;
+  });
 }
 
 /**
@@ -284,6 +358,11 @@ export type StabilizationOptions = {
    */
   images?: boolean;
   /**
+   * Stabilize the images sizes.
+   * @default true
+   */
+  imageSizes?: boolean;
+  /**
    * Wait for fonts to be loaded.
    * @default true
    */
@@ -294,10 +373,16 @@ export type StabilizationOptions = {
  * Get the stabilization state of the document.
  */
 function getStabilityState(document: Document, options?: StabilizationOptions) {
-  const { ariaBusy = true, images = true, fonts = true } = options ?? {};
+  const {
+    ariaBusy = true,
+    images = true,
+    fonts = true,
+    imageSizes = true,
+  } = options ?? {};
   return {
     ariaBusy: ariaBusy ? waitForNoBusy(document) : true,
     images: images ? waitForImagesToLoad(document) : true,
+    imageSizes: imageSizes ? stabilizeImageSizes(document) : true,
     fonts: fonts ? waitForFontsToLoad(document) : true,
   };
 }
@@ -305,6 +390,7 @@ function getStabilityState(document: Document, options?: StabilizationOptions) {
 const VALIDATION_ERRORS: Record<keyof StabilizationOptions, string> = {
   ariaBusy: "Some elements still have `aria-busy='true'`",
   images: "Some images are still loading",
+  imageSizes: "Failed to stabilize image sizes",
   fonts: "Some fonts are still loading",
 };
 
