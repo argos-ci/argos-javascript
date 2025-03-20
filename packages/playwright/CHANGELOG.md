@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.1.0...@argos-ci/playwright@4.2.0) (2025-03-20)
+
+
+### Features
+
+* stabilize image sizes ([1c2ed33](https://github.com/argos-ci/argos-javascript/commit/1c2ed33563f04b142d1895199240d7ad046f9dea))
+
+
+
+
+
 # [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.0.0...@argos-ci/playwright@4.1.0) (2025-01-18)
 
 
