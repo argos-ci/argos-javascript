@@ -204,6 +204,9 @@ function stabilizeImageSizes(document: Document) {
       return true;
     }
 
+    // Mark it as stabilized
+    img.dataset.argosStabilized = "true";
+
     // Force the re-rendering of the image by removing the src and srcset attributes
     // and then restoring them.
     // This will recalculate the dimensions of the image and make it right.
@@ -211,20 +214,27 @@ function stabilizeImageSizes(document: Document) {
     const originalSrc = img.src;
     img.srcset = "";
     img.src = "";
+
     img.srcset = originalSrcSet;
     img.src = originalSrc;
 
-    // Mark it as stabilized
-    img.dataset.argosStabilized = "true";
+    const setSizes = () => {
+      // Preserve the original width and height
+      img.dataset.argosBckWidth = img.style.width ?? "";
+      img.dataset.argosBckHeight = img.style.height ?? "";
 
-    // Preserve the original width and height
-    img.dataset.argosBckWidth = img.style.width ?? "";
-    img.dataset.argosBckHeight = img.style.height ?? "";
+      // Set the width and height to the rounded values
+      const rect = img.getBoundingClientRect();
+      img.style.width = `${Math.round(rect.width)}px`;
+      img.style.height = `${Math.round(rect.height)}px`;
+    };
 
-    // Set the width and height to the rounded values
-    const rect = img.getBoundingClientRect();
-    img.style.width = `${Math.round(rect.width)}px`;
-    img.style.height = `${Math.round(rect.height)}px`;
+    if (img.complete) {
+      setSizes();
+      return;
+    }
+
+    img.addEventListener("load", setSizes, { once: true });
 
     return true;
   });
