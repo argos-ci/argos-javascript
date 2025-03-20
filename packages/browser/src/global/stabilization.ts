@@ -204,7 +204,6 @@ function stabilizeImageSizes(document: Document) {
     const originalSrc = img.src;
     img.srcset = "";
     img.src = "";
-
     img.srcset = originalSrcSet;
     img.src = originalSrc;
 
@@ -220,6 +219,9 @@ function stabilizeImageSizes(document: Document) {
 
       // Mark it as complete
       img.dataset.argosStabilization = "complete";
+
+      img.removeEventListener("load", update);
+      img.removeEventListener("error", update);
     };
 
     if (img.complete) {
@@ -227,7 +229,8 @@ function stabilizeImageSizes(document: Document) {
       return true;
     }
 
-    img.addEventListener("load", update, { once: true });
+    img.addEventListener("load", update);
+    img.addEventListener("error", update);
     return false;
   });
 
@@ -296,6 +299,12 @@ export function teardown(
   if (fullPage) {
     restoreElementPositions(document);
   }
+}
+
+/**
+ * Run after each screenshot to restore the document.
+ */
+export function afterEach(document: Document) {
   restoreImageSizes(document);
 }
 
@@ -382,7 +391,7 @@ function getStabilityState(document: Document, options?: StabilizationOptions) {
     imageSizes = true,
   } = options ?? {};
   const imagesLoaded =
-    images || imageSizes ? waitForImagesToLoad(document) : null;
+    images || imageSizes ? waitForImagesToLoad(document) : false;
   return {
     ariaBusy: ariaBusy ? waitForNoBusy(document) : true,
     images: images ? imagesLoaded : true,
