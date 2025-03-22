@@ -79,20 +79,38 @@ function injectArgos() {
   });
 }
 
-function setup(options: ArgosScreenshotOptions) {
+function beforeAll(options: ArgosScreenshotOptions) {
   const { argosCSS } = options;
   const fullPage = !options.capture || options.capture === "fullPage";
 
   cy.window({ log: false }).then((window) =>
-    ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+    ((window as any).__ARGOS__ as ArgosGlobal).beforeAll({
+      fullPage,
+      argosCSS,
+    }),
   );
 
   return () => {
     cy.window({ log: false }).then((window) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).teardown({
-        fullPage,
-        argosCSS,
-      }),
+      ((window as any).__ARGOS__ as ArgosGlobal).afterAll(),
+    );
+  };
+}
+
+function beforeEach(options: ArgosScreenshotOptions) {
+  const { argosCSS } = options;
+  const fullPage = !options.capture || options.capture === "fullPage";
+
+  cy.window({ log: false }).then((window) =>
+    ((window as any).__ARGOS__ as ArgosGlobal).beforeEach({
+      fullPage,
+      argosCSS,
+    }),
+  );
+
+  return () => {
+    cy.window({ log: false }).then((window) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
     );
   };
 }
@@ -119,7 +137,7 @@ Cypress.Commands.add(
 
     injectArgos();
 
-    const teardown = setup(options);
+    const afterAll = beforeAll(options);
 
     function stabilizeAndScreenshot(name: string) {
       if (stabilize) {
@@ -128,9 +146,9 @@ Cypress.Commands.add(
 
         cy.waitUntil(() =>
           cy.window({ log: false }).then((window) => {
-            const isStable = (
-              (window as any).__ARGOS__ as ArgosGlobal
-            ).checkIsStable(stabilizationOptions);
+            const isStable = ((window as any).__ARGOS__ as ArgosGlobal).waitFor(
+              stabilizationOptions,
+            );
 
             if (isStable) {
               return true;
@@ -138,7 +156,7 @@ Cypress.Commands.add(
 
             const failureReasons = (
               (window as any).__ARGOS__ as ArgosGlobal
-            ).getStabilityFailureReasons(stabilizationOptions);
+            ).getWaitFailureExplanations(stabilizationOptions);
 
             failureReasons.forEach((reason) => {
               cy.log(`[argos] stability: ${reason}`);
@@ -148,6 +166,8 @@ Cypress.Commands.add(
           }),
         );
       }
+
+      const afterEach = beforeEach(options);
 
       const ref: any = {};
 
@@ -208,9 +228,7 @@ Cypress.Commands.add(
         cy.writeFile(getMetadataPath(ref.props.path), JSON.stringify(metadata));
       });
 
-      cy.window({ log: false }).then((window) => {
-        ((window as any).__ARGOS__ as ArgosGlobal).afterEach();
-      });
+      afterEach();
     }
 
     if (viewports) {
@@ -231,6 +249,6 @@ Cypress.Commands.add(
       stabilizeAndScreenshot(name);
     }
 
-    teardown();
+    afterAll();
   },
 );

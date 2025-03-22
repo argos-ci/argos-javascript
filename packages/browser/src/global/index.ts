@@ -1,27 +1,22 @@
-import type {
-  SetupOptions,
-  TeardownOptions,
-  StabilizationOptions,
-} from "./stabilization";
-import {
-  checkIsStable,
-  setup,
-  teardown,
-  getStabilityFailureReasons,
-  afterEach,
-} from "./stabilization";
 import { getColorScheme, getMediaType } from "./media";
+import {
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+  waitFor,
+  getWaitFailureExplanations,
+} from "./stabilization";
 
 const ArgosGlobal = {
-  checkIsStable: (options?: StabilizationOptions) =>
-    checkIsStable(document, options),
-  getStabilityFailureReasons: (options?: StabilizationOptions) =>
-    getStabilityFailureReasons(document, options),
-  afterEach: () => afterEach(document),
-  setup: (options: SetupOptions = {}) => setup(document, options),
-  teardown: (options: TeardownOptions = {}) => teardown(document, options),
-  getColorScheme: () => getColorScheme(window),
-  getMediaType: () => getMediaType(window),
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+  waitFor,
+  getWaitFailureExplanations,
+  getColorScheme: () => getColorScheme(),
+  getMediaType: () => getMediaType(),
 };
 
 (window as any).__ARGOS__ = ArgosGlobal;
