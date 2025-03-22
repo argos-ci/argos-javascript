@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.2.3...@argos-ci/playwright@4.3.0) (2025-03-22)
+
+
+### Features
+
+* split stabilization into plugins ([982e4e0](https://github.com/argos-ci/argos-javascript/commit/982e4e081fa30b83ff80d5d58c1644f4d10bbb8f))
+
+
+
+
+
 ## [4.2.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.2.2...@argos-ci/playwright@4.2.3) (2025-03-20)
 
 **Note:** Version bump only for package @argos-ci/playwright
