@@ -151,14 +151,16 @@ async function setViewportSize(page: Page, viewportSize: ViewportSize) {
 }
 
 /**
- * Setup Argos for the screenshot process.
- * @returns A function to teardown Argos.
+ * Run before taking all screenshots.
  */
-async function setup(page: Page, options: ArgosScreenshotOptions) {
+async function beforeAll(page: Page, options: ArgosScreenshotOptions) {
   const { disableHover = true, fullPage, argosCSS } = options;
   await page.evaluate(
     ({ fullPage, argosCSS }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).setup({ fullPage, argosCSS }),
+      ((window as any).__ARGOS__ as ArgosGlobal).beforeAll({
+        fullPage,
+        argosCSS,
+      }),
     { fullPage, argosCSS },
   );
   if (disableHover) {
@@ -166,13 +168,28 @@ async function setup(page: Page, options: ArgosScreenshotOptions) {
   }
 
   return async () => {
-    await page.evaluate(
-      ({ fullPage, argosCSS }) =>
-        ((window as any).__ARGOS__ as ArgosGlobal).teardown({
-          fullPage,
-          argosCSS,
-        }),
-      { fullPage, argosCSS },
+    await page.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).afterAll(),
+    );
+  };
+}
+
+/**
+ * Run before taking each screenshot.
+ */
+async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
+  const { fullPage, argosCSS } = options;
+  await page.evaluate(
+    ({ fullPage, argosCSS }) =>
+      ((window as any).__ARGOS__ as ArgosGlobal).beforeEach({
+        fullPage,
+        argosCSS,
+      }),
+    { fullPage, argosCSS },
+  );
+  return async () => {
+    await page.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
     );
   };
 }
@@ -258,7 +275,7 @@ export async function argosScreenshot(
   const fullPage =
     options.fullPage !== undefined ? options.fullPage : handle === page;
 
-  const teardown = await setup(page, options);
+  const afterAll = await beforeAll(page, options);
 
   const collectMetadata = async (
     testInfo: TestInfo | null,
@@ -305,13 +322,13 @@ export async function argosScreenshot(
     try {
       await page.waitForFunction(
         (options) =>
-          ((window as any).__ARGOS__ as ArgosGlobal).checkIsStable(options),
+          ((window as any).__ARGOS__ as ArgosGlobal).waitFor(options),
         options,
       );
     } catch (error) {
       const reasons = await page.evaluate(
         (options) =>
-          ((window as any).__ARGOS__ as ArgosGlobal).getStabilityFailureReasons(
+          ((window as any).__ARGOS__ as ArgosGlobal).getWaitFailureExplanations(
             options,
           ),
         options,
@@ -332,6 +349,8 @@ ${reasons.map((reason) => `- ${reason}`).join("\n")}
     if (stabilize) {
       await runStabilization(stabilize === true ? undefined : stabilize);
     }
+
+    const afterEach = await beforeEach(page, options);
 
     const names = getScreenshotNames(name, testInfo);
 
@@ -382,9 +401,8 @@ ${reasons.map((reason) => `- ${reason}`).join("\n")}
       ]);
     }
 
-    await page.evaluate(() =>
-      ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
-    );
+    await afterEach();
+
     await options.afterScreenshot?.();
   };
 
@@ -405,5 +423,5 @@ ${reasons.map((reason) => `- ${reason}`).join("\n")}
     await stabilizeAndScreenshot(name);
   }
 
-  await teardown();
+  await afterAll();
 }
