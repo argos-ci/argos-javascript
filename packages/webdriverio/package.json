@@ -53,7 +53,7 @@
     "@wdio/mocha-framework": "^9.5.0",
     "@wdio/spec-reporter": "^9.5.0",
     "@wdio/types": "^9.5.0",
-    "chromedriver": "^131.0.0",
+    "chromedriver": "^134.0.5",
     "tsx": "^4.19.2",
     "wdio-chromedriver-service": "^8.1.1",
     "webdriverio": "^9.5.7"
