@@ -42,7 +42,7 @@
   "dependencies": {
     "@argos-ci/api-client": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "axios": "^1.7.9",
+    "axios": "^1.8.4",
     "convict": "^6.2.4",
     "debug": "^4.4.0",
     "fast-glob": "^3.3.3",
@@ -50,11 +50,11 @@
     "tmp": "^0.2.3"
   },
   "devDependencies": {
-    "@octokit/webhooks": "^13.4.2",
+    "@octokit/webhooks": "^13.7.5",
     "@types/convict": "^6.1.6",
     "@types/debug": "^4.1.12",
     "@types/tmp": "^0.2.6",
-    "msw": "^2.7.0"
+    "msw": "^2.7.3"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",

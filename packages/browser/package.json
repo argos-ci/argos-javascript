@@ -39,6 +39,6 @@
   },
   "devDependencies": {
     "@types/node": "^18.19.44",
-    "openapi-typescript": "^7.5.2"
+    "openapi-typescript": "^7.6.1"
   }
 }
