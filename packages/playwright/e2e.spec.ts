@@ -133,7 +133,6 @@ test.describe("#argosScreenshot", () => {
           },
           { width: 800, height: 600 },
         ],
-        fullPage: false,
       });
 
       await Promise.all([
