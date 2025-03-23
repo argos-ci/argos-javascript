@@ -8,12 +8,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: pnpm/action-setup@v3
+    - uses: pnpm/action-setup@v4
       name: Install pnpm
-      id: pnpm-install
-      with:
-        version: 9
-        run_install: false
 
     - name: Install Node.js
       uses: actions/setup-node@v4
