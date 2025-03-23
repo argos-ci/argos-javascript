@@ -61,6 +61,7 @@
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",
     "test": "pnpm exec -- playwright test",
+    "build-e2e": "playwright install chromium --with-deps",
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
