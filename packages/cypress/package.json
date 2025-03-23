@@ -54,8 +54,6 @@
     "cypress": "^12.0.0 || ^13.0.0 || ^14.0.0"
   },
   "devDependencies": {
-    "@argos-ci/cli": "workspace:*",
-    "@argos-ci/cypress": "workspace:.",
     "@types/node": "^18.19.44",
     "cypress": "^14.2.0",
     "eslint-plugin-cypress": "^4.2.0"
@@ -63,6 +61,9 @@
   "scripts": {
     "build": "tsup",
     "test": "pnpm exec cypress run",
-    "e2e": "UPLOAD_TO_ARGOS=true pnpm run test"
+    "e2e": "UPLOAD_TO_ARGOS=true pnpm run test",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint ."
   }
 }

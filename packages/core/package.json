@@ -58,6 +58,10 @@
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",
-    "e2e": "node ./e2e/upload.cjs && node ./e2e/upload.mjs"
+    "e2e": "node ./e2e/upload.cjs && node ./e2e/upload.mjs",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint .",
+    "test": "vitest"
   }
 }

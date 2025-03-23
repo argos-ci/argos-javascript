@@ -37,7 +37,10 @@
   "scripts": {
     "build-schema-types": "openapi-typescript https://api.argos-ci.com/v2/openapi.yaml -o src/schema.ts",
     "build-schema-types-dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 openapi-typescript https://api.argos-ci.dev:4001/v2/openapi.yaml -o src/schema.ts",
-    "build": "tsup"
+    "build": "tsup",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",

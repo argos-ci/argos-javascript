@@ -5,10 +5,6 @@ package.json
 lerna.json
 CHANGELOG.md
 dist
-/packages/gatsby-plugin-argos/index.js
-/packages/gatsby-plugin-argos/gatsby-node.js
-/packages/gatsby-plugin-screenshot/index.js
-/packages/gatsby-plugin-screenshot/gatsby-node.js
 /docs
 __fixtures__/screenshots/invalid.argos.json
 packages/api-client/src/schema.ts

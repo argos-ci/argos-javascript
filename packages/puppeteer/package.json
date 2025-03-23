@@ -60,6 +60,9 @@
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test": "pnpm run jest --runInBand",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-puppeteer-e2e-node-$NODE_VERSION-$OS\"",
-    "e2e": "pnpm run test && pnpm run argos-upload"
+    "e2e": "pnpm run test && pnpm run argos-upload",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint ."
   }
 }
