@@ -86,7 +86,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run integration tests
-        run: turbo run e2e --filter=@argos-ci/core --filter=@argos-ci/cli
+        run: pnpm exec -- turbo run e2e --filter=@argos-ci/core --filter=@argos-ci/cli
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -111,7 +111,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run integration tests
-        run: turbo run e2e --filter=@argos-ci/cypress
+        run: pnpm exec -- turbo run e2e --filter=@argos-ci/cypress
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -136,7 +136,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run integration tests
-        run: turbo run e2e --filter=@argos-ci/playwright
+        run: pnpm exec -- turbo run e2e --filter=@argos-ci/playwright
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -161,7 +161,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run integration tests
-        run: turbo run e2e --filter=@argos-ci/puppeteer
+        run: pnpm exec -- turbo run e2e --filter=@argos-ci/puppeteer
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -186,7 +186,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run integration tests
-        run: turbo run e2e --filter=@argos-ci/webdriverio
+        run: pnpm exec -- turbo run e2e --filter=@argos-ci/webdriverio
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -211,7 +211,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Server Storybook and run integration tests
-        run: turbo run e2e --filter=@argos-ci/storybook
+        run: pnpm exec -- turbo run e2e --filter=@argos-ci/storybook
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
