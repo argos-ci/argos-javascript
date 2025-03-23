@@ -43,16 +43,16 @@
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/eslint.config.mjs"]
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["build"],
       "outputs": []
     },
     "build-e2e": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["build"],
       "cache": false
     },
     "e2e": {
       "env": ["ARGOS_TOKEN", "NODE_VERSION", "OS"],
-      "dependsOn": ["^build-e2e"],
+      "dependsOn": ["build-e2e"],
       "outputs": []
     }
   }
