@@ -210,7 +210,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Server Storybook and run integration tests
+      - name: Serve Storybook and run integration tests
         run: pnpm exec -- turbo run e2e --filter=@argos-ci/storybook
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
