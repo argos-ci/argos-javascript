@@ -73,8 +73,8 @@
     "serve-storybook": "http-server storybook-static --port 6006 --silent",
     "wait-storybook": "wait-on tcp:127.0.0.1:6006",
     "build-e2e": "pnpm run build-storybook --quiet && pnpm run install-playwright",
-    "run-e2e": "pnpm run test-storybook && pnpm run argos-upload",
-    "e2e": "pnpm dlx concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm run serve-storybook\" \"pnpm run wait-storybook && pnpm run run-e2e\"",
+    "test-e2e": "pnpm run test-storybook && pnpm run argos-upload",
+    "e2e": "pnpm dlx concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm run serve-storybook\" \"pnpm run wait-storybook && pnpm run test-e2e\"",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=./.gitignore --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."

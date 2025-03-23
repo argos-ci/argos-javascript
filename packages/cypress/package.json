@@ -60,9 +60,9 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "pnpm exec cypress run",
+    "test-e2e": "pnpm exec cypress run",
     "build-e2e": "cypress install",
-    "e2e": "UPLOAD_TO_ARGOS=true pnpm run test",
+    "e2e": "UPLOAD_TO_ARGOS=true pnpm run test-e2e",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."
