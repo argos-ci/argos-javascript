@@ -38,7 +38,10 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@types/node": "^18.19.44"

@@ -1,5 +1,10 @@
+# Node modules
 node_modules
-yarn-error.log
-dist
+# Dist
+dist/
+# Generated docs
 /docs
+# Storybook
 *storybook.log
+# Turborepo
+.turbo

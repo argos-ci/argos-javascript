@@ -62,6 +62,9 @@
     "build": "tsup && cp ./src/index.cjs ./dist",
     "test": "wdio run ./wdio.conf.ts",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-webdriverio-e2e-node-$NODE_VERSION-$OS\"",
-    "e2e": "pnpm run test && pnpm run argos-upload"
+    "e2e": "pnpm run test && pnpm run argos-upload",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint ."
   }
 }

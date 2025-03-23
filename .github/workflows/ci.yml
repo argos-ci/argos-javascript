@@ -6,8 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
 jobs:
-  static:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,19 +19,11 @@ jobs:
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
-        with:
-          node-version: 20
 
       - name: Lint
         run: npm run lint
 
-      - name: Check format
-        run: npm run check-format
-
-      - name: Check types
-        run: npm run check-types
-
-  build:
+  check-types:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,75 +31,23 @@ jobs:
 
       - name: Setup deps
         uses: ./.github/actions/setup-deps
-        with:
-          node-version: 20
 
-      - name: Build
-        run: npm run build
+      - name: Lint
+        run: npm run check-types
 
-      - name: Upload "@argos-ci/util" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Upload "@argos-ci/cli" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
 
-      - name: Upload "@argos-ci/core" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Upload "@argos-ci/api-client" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
-
-      - name: Upload "@argos-ci/browser" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: browser-dist
-          path: packages/browser/dist
-
-      - name: Upload "@argos-ci/playwright" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-dist
-          path: packages/playwright/dist
-
-      - name: Upload "@argos-ci/cypress" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-dist
-          path: packages/cypress/dist
-
-      - name: Upload "@argos-ci/puppeteer" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: puppeteer-dist
-          path: packages/puppeteer/dist
-
-      - name: Upload "@argos-ci/webdriverio" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: webdriverio-dist
-          path: packages/webdriverio/dist
-
-      - name: Upload "@argos-ci/storybook" dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: storybook-dist
-          path: packages/storybook/dist
+      - name: Lint
+        run: npm run check-format
 
   unit:
-    needs: ["build"]
-
     strategy:
       fail-fast: false
       matrix:
@@ -120,36 +64,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
-
-      - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
-
-      - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Download "@argos-ci/api-client" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
+      - name: Build
+        run: npm run build
 
       - name: Test
         run: npm run test
 
   e2e-core:
-    needs: ["build"]
-
     strategy:
       fail-fast: false
       matrix:
@@ -167,29 +88,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
-
-      - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
-
-      - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Download "@argos-ci/api-client" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
+      - name: Build
+        run: npm run build
 
       - name: Run integration tests
         run: pnpm --filter core --filter cli run e2e
@@ -199,8 +99,6 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-cypress:
-    needs: ["build"]
-
     strategy:
       fail-fast: false
       matrix:
@@ -218,44 +116,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Build
+        run: npm run build
+
       - name: Install Cypress
         run: pnpm --filter cypress exec cypress install
-
-      - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
-
-      - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
-
-      - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Download "@argos-ci/api-client" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
-
-      - name: Download "@argos-ci/browser" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: browser-dist
-          path: packages/browser/dist
-
-      - name: Download "@argos-ci/cypress" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cypress-dist
-          path: packages/cypress/dist
 
       - name: Run integration tests
         run: pnpm --filter cypress run e2e
@@ -265,8 +130,6 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-playwright:
-    needs: ["build"]
-
     strategy:
       fail-fast: false
       matrix:
@@ -284,44 +147,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Build
+        run: npm run build
+
       - name: Setup Playwright
         run: pnpm --filter playwright exec playwright install chromium --with-deps
-
-      - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
-
-      - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
-
-      - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Download "@argos-ci/api-client" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
-
-      - name: Download "@argos-ci/browser" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: browser-dist
-          path: packages/browser/dist
-
-      - name: Download "@argos-ci/playwright" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-dist
-          path: packages/playwright/dist
 
       - name: Run integration tests
         run: pnpm --filter playwright run e2e
@@ -331,8 +161,6 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-puppeteer:
-    needs: ["build"]
-
     strategy:
       fail-fast: false
       matrix:
@@ -350,44 +178,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Build
+        run: npm run build
+
       - name: Setup Puppeteer
         run: node packages/puppeteer/node_modules/puppeteer/install.mjs
-
-      - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
-
-      - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
-
-      - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Download "@argos-ci/api-client" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
-
-      - name: Download "@argos-ci/browser" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: browser-dist
-          path: packages/browser/dist
-
-      - name: Download "@argos-ci/puppeteer" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: puppeteer-dist
-          path: packages/puppeteer/dist
 
       - name: Run integration tests
         run: pnpm --filter puppeteer run e2e
@@ -397,8 +192,6 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-webdriverio:
-    needs: ["build"]
-
     strategy:
       fail-fast: false
       matrix:
@@ -416,35 +209,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
-
-      - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
-
-      - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Download "@argos-ci/api-client" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
-
-      - name: Download "@argos-ci/webdriverio" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: webdriverio-dist
-          path: packages/webdriverio/dist
+      - name: Build
+        run: npm run build
 
       - name: Run integration tests
         run: pnpm --filter webdriverio run e2e
@@ -454,8 +220,6 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-storybook:
-    needs: ["build"]
-
     strategy:
       fail-fast: false
       matrix:
@@ -473,47 +237,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Download "@argos-ci/storybook" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: storybook-dist
-          path: packages/storybook/dist
-
-      - name: Download "@argos-ci/cli" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: cli-dist
-          path: packages/cli/dist
-
-      - name: Download "@argos-ci/core" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-      - name: Download "@argos-ci/util" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: util-dist
-          path: packages/util/dist
-
-      - name: Download "@argos-ci/api-client" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: api-client-dist
-          path: packages/api-client/dist
-
-      - name: Download "@argos-ci/playwright" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-dist
-          path: packages/playwright/dist
-
-      - name: Download "@argos-ci/browser" dist
-        uses: actions/download-artifact@v4
-        with:
-          name: browser-dist
-          path: packages/browser/dist
+      - name: Build
+        run: npm run build
 
       - name: Build Storybook
         run: pnpm run --filter storybook -- build-storybook --quiet

@@ -67,6 +67,9 @@
     "build-storybook": "storybook build",
     "test-storybook": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules test-storybook",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-storybook-e2e-node-$NODE_VERSION-$OS\"",
-    "e2e": "pnpm run test-storybook && pnpm run argos-upload"
+    "e2e": "pnpm run test-storybook && pnpm run argos-upload",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=./.gitignore --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint ."
   }
 }
