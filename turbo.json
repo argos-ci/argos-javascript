@@ -51,7 +51,7 @@
       "cache": false
     },
     "e2e": {
-      "env": ["ARGOS_TOKEN", "NODE_VERSION", "OS"],
+      "env": ["ARGOS_TOKEN", "NODE_VERSION", "OS", "GITHUB_*"],
       "dependsOn": ["build-e2e"],
       "outputs": []
     }
