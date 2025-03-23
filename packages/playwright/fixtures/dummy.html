@@ -2,10 +2,14 @@
 <html lang="en">
   <head>
     <title>Dummy page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cantarell&family=Tangerine&display=swap">
     <style>
       main {
-        width: 650px;
+        width: 100%;
+        max-width: 800px;
         margin: 0 auto;
+        position: relative;
       }
       h3 {
         margin-bottom: 4px;
@@ -106,7 +110,13 @@
 
       <h3>Image</h3>
       <div class="hint">Hint: the image should be loaded.</div>
-      <img id="image" src="https://placebear.com/500/600" />
+      <img
+        id="image"
+        src="https://placehold.co/400x200"
+        srcset="https://placehold.co/1600x800 1600w, https://placehold.co/800x400 800w"
+        sizes="(max-width: 800px) 100vw, 800px"
+        style="width: 100%; height: auto;"
+      />
 
       <h3>Input</h3>
       <div class="hint">Hint: spellcheck should be disabled</div>
@@ -134,23 +144,14 @@
     </main>
 
     <script>
+      // Test aria-busy stabilization
       setTimeout(() => {
         document.querySelector("#loader").remove();
-      }, 300);
-
+      }, 1000);
       setTimeout(() => {
         const svg = document.querySelector("#svg-loader");
         svg.classList.add("blue-fill");
         svg.removeAttribute("aria-busy");
-      }, 300);
-
-      setTimeout(() => {
-        const url =
-          "https://fonts.googleapis.com/css2?family=Cantarell&family=Tangerine&display=swap";
-        var link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = url;
-        document.getElementsByTagName("head")[0].appendChild(link);
       }, 500);
     </script>
   </body>
