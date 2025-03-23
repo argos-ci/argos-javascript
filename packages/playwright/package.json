@@ -56,7 +56,7 @@
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/playwright": "workspace:.",
-    "@playwright/test": "^1.49.1",
+    "@playwright/test": "^1.51.1",
     "@types/debug": "^4.1.12",
     "@types/node": "^18.19.44"
   },
