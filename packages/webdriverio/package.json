@@ -53,6 +53,7 @@
     "@wdio/mocha-framework": "^9.12.1",
     "@wdio/spec-reporter": "^9.11.0",
     "@wdio/types": "^9.10.1",
+    "chromedriver": "^134.0.5",
     "tsx": "^4.19.3",
     "wdio-chromedriver-service": "^8.1.1",
     "webdriverio": "^9.12.1"
@@ -62,7 +63,6 @@
     "test-e2e": "wdio run ./wdio.conf.ts",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-webdriverio-e2e-node-$NODE_VERSION-$OS\"",
     "e2e": "pnpm run test-e2e && pnpm run argos-upload",
-    "build-e2e": "pnpm add chromedriver",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."

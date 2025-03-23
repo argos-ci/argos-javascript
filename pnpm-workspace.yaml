@@ -1,2 +1,14 @@
 packages:
-  - 'packages/*'
+  - packages/*
+onlyBuiltDependencies:
+  - '@swc/core'
+  - chromedriver
+  - cypress
+  - esbuild
+  - msw
+  - nx
+  - puppeteer
+  - sharp
+ignoredBuiltDependencies:
+  - edgedriver
+  - geckodriver
