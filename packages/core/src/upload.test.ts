@@ -8,6 +8,7 @@ setupMockServer();
 describe("#upload", () => {
   it("uploads", async () => {
     const result = await upload({
+      branch: "main",
       apiBaseUrl: "https://api.argos-ci.dev",
       root: join(__dirname, "../../../__fixtures__/screenshots"),
       commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
