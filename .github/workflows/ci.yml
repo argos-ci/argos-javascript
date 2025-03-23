@@ -32,7 +32,7 @@ jobs:
       - name: Setup deps
         uses: ./.github/actions/setup-deps
 
-      - name: Lint
+      - name: Check types
         run: npm run check-types
 
   check-format:
@@ -44,7 +44,7 @@ jobs:
       - name: Setup deps
         uses: ./.github/actions/setup-deps
 
-      - name: Lint
+      - name: Check format
         run: npm run check-format
 
   unit:
@@ -63,9 +63,6 @@ jobs:
         uses: ./.github/actions/setup-deps
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Build
-        run: npm run build
 
       - name: Test
         run: npm run test
@@ -88,11 +85,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
-        run: npm run build
-
       - name: Run integration tests
-        run: pnpm --filter core --filter cli run e2e
+        run: turbo run e2e --filter=@argos-ci/core --filter=@argos-ci/cli
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -116,14 +110,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
-        run: npm run build
-
-      - name: Install Cypress
-        run: pnpm --filter cypress exec cypress install
-
       - name: Run integration tests
-        run: pnpm --filter cypress run e2e
+        run: turbo run e2e --filter=@argos-ci/cypress
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -147,14 +135,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
-        run: npm run build
-
-      - name: Setup Playwright
-        run: pnpm --filter playwright exec playwright install chromium --with-deps
-
       - name: Run integration tests
-        run: pnpm --filter playwright run e2e
+        run: turbo run e2e --filter=@argos-ci/playwright
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -178,14 +160,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
-        run: npm run build
-
-      - name: Setup Puppeteer
-        run: node packages/puppeteer/node_modules/puppeteer/install.mjs
-
       - name: Run integration tests
-        run: pnpm --filter puppeteer run e2e
+        run: turbo run e2e --filter=@argos-ci/puppeteer
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -209,11 +185,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
-        run: npm run build
-
       - name: Run integration tests
-        run: pnpm --filter webdriverio run e2e
+        run: turbo run e2e --filter=@argos-ci/webdriverio
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
@@ -237,20 +210,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
-        run: npm run build
-
-      - name: Build Storybook
-        run: pnpm run --filter storybook -- build-storybook --quiet
-
-      - name: Setup Playwright
-        run: pnpm --filter storybook exec playwright install chromium --with-deps
-
       - name: Server Storybook and run integration tests
-        run: |
-          pnpm dlx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "pnpm dlx http-server packages/storybook/storybook-static --port 6006 --silent" \
-            "pnpm dlx wait-on tcp:127.0.0.1:6006 && pnpm --filter storybook run e2e"
+        run: turbo run e2e --filter=@argos-ci/storybook
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
