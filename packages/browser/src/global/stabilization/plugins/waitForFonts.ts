@@ -3,15 +3,12 @@ import type { Plugin } from "..";
 /**
  * Wait for fonts to be loaded.
  */
-export const plugin: Plugin = {
-  name: "fonts",
+export const plugin = {
+  name: "waitForFonts" as const,
   wait: {
-    for: (options) => {
-      if (options.fonts === false) {
-        return true;
-      }
+    for: () => {
       return document.fonts.status === "loaded";
     },
     failureExplanation: "Some fonts have not been loaded",
   },
-};
+} satisfies Plugin;

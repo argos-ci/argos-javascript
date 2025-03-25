@@ -18,8 +18,8 @@ function checkIsElementVisible(element: Element) {
 /**
  * Wait for [aria-busy="true"] elements to be invisible.
  */
-export const plugin: Plugin = {
-  name: "aria-busy",
+export const plugin = {
+  name: "waitForAriaBusy" as const,
   beforeEach() {
     Array.from(document.images).every((img) => {
       // Force sync decoding
@@ -35,14 +35,11 @@ export const plugin: Plugin = {
     return undefined;
   },
   wait: {
-    for: (options) => {
-      if (options.ariaBusy === false) {
-        return true;
-      }
+    for: () => {
       return Array.from(document.querySelectorAll('[aria-busy="true"]')).every(
         (element) => !checkIsElementVisible(element),
       );
     },
     failureExplanation: "Some elements still have `aria-busy='true'`",
   },
-};
+} satisfies Plugin;

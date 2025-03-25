@@ -6,8 +6,8 @@ const BACKUP_ATTRIBUTE_HEIGHT = "data-argos-bck-height";
 /**
  * Round all image sizes to stabilize images rendering.
  */
-export const plugin: Plugin = {
-  name: "image-size",
+export const plugin = {
+  name: "roundImageSize" as const,
   beforeEach() {
     Array.from(document.images).forEach((img) => {
       // Skip images that are not loaded yet.
@@ -44,4 +44,4 @@ export const plugin: Plugin = {
       });
     };
   },
-};
+} satisfies Plugin;

@@ -3,8 +3,8 @@ import type { Plugin } from "..";
 /**
  * Wait for images to be loaded.
  */
-export const plugin: Plugin = {
-  name: "images",
+export const plugin = {
+  name: "waitForImages" as const,
   beforeEach() {
     Array.from(document.images).every((img) => {
       // Force sync decoding
@@ -20,11 +20,7 @@ export const plugin: Plugin = {
     return undefined;
   },
   wait: {
-    for: (options) => {
-      if (options.images === false) {
-        return true;
-      }
-
+    for: () => {
       const images = Array.from(document.images);
 
       const results = images.map((img) => {
@@ -45,4 +41,4 @@ export const plugin: Plugin = {
     },
     failureExplanation: "Some images have not been loaded",
   },
-};
+} satisfies Plugin;
