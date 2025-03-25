@@ -99,6 +99,7 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with `fullPage` set to false", () => {
     test("does not take a screenshot of full page", async ({ page }) => {
+      await page.evaluate(() => window.scrollTo(0, 0));
       await argosScreenshot(page, "partial-page", { fullPage: false });
       await expectScreenshotToExists("partial-page");
     });
