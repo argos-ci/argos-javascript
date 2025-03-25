@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@1.0.6...@argos-ci/storybook@2.0.0) (2025-03-25)
+
+
+### Features
+
+* allow to disable every stabilization plugin ([60245ab](https://github.com/argos-ci/argos-javascript/commit/60245ab90a22ce2abd309761de6ac14fa5293e2d))
+
+
+### BREAKING CHANGES
+
+* `options.stabilize` has changed and now accepts any stabilization plugin
+
+
+
+
+
 ## [1.0.6](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@1.0.5...@argos-ci/storybook@1.0.6) (2025-03-22)
 
 **Note:** Version bump only for package @argos-ci/storybook

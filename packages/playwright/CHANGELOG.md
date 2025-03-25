@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.3.0...@argos-ci/playwright@5.0.0) (2025-03-25)
+
+
+### Features
+
+* allow to disable every stabilization plugin ([60245ab](https://github.com/argos-ci/argos-javascript/commit/60245ab90a22ce2abd309761de6ac14fa5293e2d))
+
+
+### BREAKING CHANGES
+
+* `options.stabilize` has changed and now accepts any stabilization plugin
+
+
+
+
+
 # [4.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@4.2.3...@argos-ci/playwright@4.3.0) (2025-03-22)
 
 

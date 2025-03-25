@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@2.3.0...@argos-ci/util@2.3.1) (2025-03-25)
+
+**Note:** Version bump only for package @argos-ci/util
+
+
+
+
+
 # [2.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@2.2.2...@argos-ci/util@2.3.0) (2025-01-18)
 
 

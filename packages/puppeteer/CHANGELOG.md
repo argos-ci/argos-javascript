@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@3.2.0...@argos-ci/puppeteer@4.0.0) (2025-03-25)
+
+
+### Features
+
+* allow to disable every stabilization plugin ([60245ab](https://github.com/argos-ci/argos-javascript/commit/60245ab90a22ce2abd309761de6ac14fa5293e2d))
+
+
+### BREAKING CHANGES
+
+* `options.stabilize` has changed and now accepts any stabilization plugin
+
+
+
+
+
 # [3.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@3.1.3...@argos-ci/puppeteer@3.2.0) (2025-03-22)
 
 

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@3.4.0...@argos-ci/cypress@4.0.0) (2025-03-25)
+
+
+### Features
+
+* allow to disable every stabilization plugin ([60245ab](https://github.com/argos-ci/argos-javascript/commit/60245ab90a22ce2abd309761de6ac14fa5293e2d))
+
+
+### BREAKING CHANGES
+
+* `options.stabilize` has changed and now accepts any stabilization plugin
+
+
+
+
+
 # [3.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@3.3.3...@argos-ci/cypress@3.4.0) (2025-03-22)
 
 
