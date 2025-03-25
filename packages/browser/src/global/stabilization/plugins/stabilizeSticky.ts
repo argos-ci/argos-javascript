@@ -1,4 +1,4 @@
-import type { Plugin, SetupOptions } from "..";
+import type { Plugin } from "..";
 
 const BACKUP_ATTRIBUTE = "data-argos-bck-position";
 
@@ -25,9 +25,9 @@ function setAndBackupPosition(element: HTMLElement, position: string) {
 /**
  * Stabilize sticky and fixed elements.
  */
-export const plugin: Plugin = {
-  name: "element-position",
-  beforeAll(options: SetupOptions) {
+export const plugin = {
+  name: "stabilizeSticky" as const,
+  beforeAll(options) {
     // If fullPage is not enabled, do nothing.
     if (!options.fullPage) {
       return undefined;
@@ -35,6 +35,11 @@ export const plugin: Plugin = {
 
     document.querySelectorAll("*").forEach((element) => {
       if (!(element instanceof HTMLElement)) {
+        return;
+      }
+
+      // Don't modify iframes to avoid reloading them.
+      if (element.tagName === "IFRAME") {
         return;
       }
 
@@ -70,4 +75,4 @@ export const plugin: Plugin = {
       });
     };
   },
-};
+} satisfies Plugin;

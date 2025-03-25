@@ -6,8 +6,8 @@ const BACKUP_ATTRIBUTE = "data-argos-bck-spellcheck";
 /**
  * Disable spellcheck to avoid displaying markers.
  */
-export const plugin: Plugin = {
-  name: "spellcheck",
+export const plugin = {
+  name: "disableSpellcheck" as const,
   beforeAll() {
     document
       .querySelectorAll(
@@ -39,4 +39,4 @@ export const plugin: Plugin = {
       });
     };
   },
-};
+} satisfies Plugin;

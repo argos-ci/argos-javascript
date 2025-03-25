@@ -80,7 +80,7 @@ export async function argosScreenshot(
     ...screenshotOptions,
     // Disable aria-busy stabilization by default
     stabilize: screenshotOptions.stabilize ?? {
-      ariaBusy: false,
+      waitForAriaBusy: false,
       ...(typeof screenshotOptions.stabilize === "object"
         ? screenshotOptions.stabilize
         : {}),

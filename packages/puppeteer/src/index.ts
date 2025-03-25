@@ -8,7 +8,8 @@ import {
   type ArgosGlobal,
   getGlobalScript,
   type ViewportSize,
-  type StabilizationOptions,
+  type StabilizationPluginOptions,
+  type StabilizationContext,
 } from "@argos-ci/browser";
 import {
   type ScreenshotMetadata,
@@ -74,7 +75,7 @@ export type ArgosScreenshotOptions = Omit<
    * Pass an object to customize the stabilization.
    * @default true
    */
-  stabilize?: boolean | StabilizationOptions;
+  stabilize?: boolean | StabilizationPluginOptions;
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -132,20 +133,32 @@ async function setViewportSize(page: Page, viewportSize: ViewportSize) {
 }
 
 /**
+ * Get the stabilization context from the options.
+ */
+function getStabilizationContext(
+  options: ArgosScreenshotOptions,
+): StabilizationContext {
+  const { argosCSS } = options;
+  const fullPage = checkIsFullPage(options);
+
+  return {
+    fullPage,
+    argosCSS,
+    options: options.stabilize,
+  };
+}
+
+/**
  * Run before taking all screenshots.
  */
 async function beforeAll(page: Page, options: ArgosScreenshotOptions) {
-  const { disableHover = true, argosCSS } = options;
+  const { disableHover = true } = options;
 
-  const fullPage = checkIsFullPage(options);
+  const context = getStabilizationContext(options);
 
   await page.evaluate(
-    ({ fullPage, argosCSS }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).beforeAll({
-        fullPage,
-        argosCSS,
-      }),
-    { fullPage, argosCSS },
+    (context) => ((window as any).__ARGOS__ as ArgosGlobal).beforeAll(context),
+    context,
   );
 
   if (disableHover) {
@@ -163,17 +176,11 @@ async function beforeAll(page: Page, options: ArgosScreenshotOptions) {
  * Run before taking each screenshot.
  */
 async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
-  const { argosCSS } = options;
-
-  const fullPage = checkIsFullPage(options);
+  const context = getStabilizationContext(options);
 
   await page.evaluate(
-    ({ fullPage, argosCSS }) =>
-      ((window as any).__ARGOS__ as ArgosGlobal).beforeEach({
-        fullPage,
-        argosCSS,
-      }),
-    { fullPage, argosCSS },
+    (context) => ((window as any).__ARGOS__ as ArgosGlobal).beforeEach(context),
+    context,
   );
 
   return async () => {
@@ -181,6 +188,36 @@ async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
       ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
     );
   };
+}
+
+/**
+ * Wait for the UI to be ready before taking the screenshot.
+ */
+async function waitForReadiness(page: Page, options: ArgosScreenshotOptions) {
+  const context = getStabilizationContext(options);
+
+  try {
+    await page.waitForFunction(
+      (context) => ((window as any).__ARGOS__ as ArgosGlobal).waitFor(context),
+      undefined,
+      context,
+    );
+  } catch (error) {
+    const reasons = await page.evaluate(
+      (context) =>
+        ((window as any).__ARGOS__ as ArgosGlobal).getWaitFailureExplanations(
+          context,
+        ),
+      context,
+    );
+    throw new Error(
+      `
+Failed to stabilize screenshot, found the following issues:
+${reasons.map((reason) => `- ${reason}`).join("\n")}
+    `.trim(),
+      { cause: error },
+    );
+  }
 }
 
 /**
@@ -208,7 +245,6 @@ export async function argosScreenshot(
     element,
     viewports,
     argosCSS: _argosCSS,
-    stabilize = true,
     ...puppeteerOptions
   } = options;
   if (!page) {
@@ -282,33 +318,7 @@ export async function argosScreenshot(
   }
 
   async function stabilizeAndScreenshot(name: string) {
-    if (stabilize) {
-      const stabilizationOptions =
-        typeof stabilize === "object" ? stabilize : {};
-      try {
-        await page.waitForFunction(
-          (options) =>
-            ((window as any).__ARGOS__ as ArgosGlobal).waitFor(options),
-          undefined,
-          stabilizationOptions,
-        );
-      } catch (error) {
-        const reasons = await page.evaluate(
-          (options) =>
-            (
-              (window as any).__ARGOS__ as ArgosGlobal
-            ).getWaitFailureExplanations(options),
-          stabilizationOptions,
-        );
-        throw new Error(
-          `
-Failed to stabilize screenshot, found the following issues:
-${reasons.map((reason) => `- ${reason}`).join("\n")}
-        `.trim(),
-          { cause: error },
-        );
-      }
-    }
+    await waitForReadiness(page, options);
 
     const afterEach = await beforeEach(page, options);
 

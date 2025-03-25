@@ -1,4 +1,4 @@
-import { plugins } from "./plugins";
+import { corePlugins, plugins, type PluginName } from "./plugins";
 
 type Cleanup = () => void;
 
@@ -10,11 +10,11 @@ export interface Plugin {
   /**
    * Run before taking all screenshots.
    */
-  beforeAll?: (options: SetupOptions) => Cleanup | undefined;
+  beforeAll?: (context: RuntimeContext) => Cleanup | undefined;
   /**
    * Run before taking each screenshot (between viewport changes).
    */
-  beforeEach?: (options: SetupOptions) => Cleanup | undefined;
+  beforeEach?: (context: RuntimeContext) => Cleanup | undefined;
   /**
    * Wait for a condition to be met before taking a screenshot.
    */
@@ -22,7 +22,7 @@ export interface Plugin {
     /**
      * Function to check if the condition is met.
      */
-    for: (options: StabilizationOptions) => boolean;
+    for: (context: RuntimeContext) => boolean;
     /**
      * Error message to display if the condition is not met.
      */
@@ -30,7 +30,7 @@ export interface Plugin {
   };
 }
 
-export interface SetupOptions {
+export interface RuntimeContext {
   /**
    * Is the test running in full page mode?
    */
@@ -42,34 +42,52 @@ export interface SetupOptions {
   argosCSS?: string;
 }
 
-export interface StabilizationOptions {
-  /**
-   * Wait for [aria-busy="true"] elements to be invisible.
-   * @default true
-   */
-  ariaBusy?: boolean;
-  /**
-   * Wait for images to be loaded.
-   * @default true
-   */
-  images?: boolean;
-  /**
-   * Wait for fonts to be loaded.
-   * @default true
-   */
-  fonts?: boolean;
+export type PluginOptions = {
+  [key in PluginName]?: boolean;
+};
+
+export interface Context extends RuntimeContext {
+  options?: PluginOptions | boolean;
 }
 
 const beforeAllCleanups = new Set<Cleanup>();
 const beforeEachCleanups = new Set<Cleanup>();
 
 /**
+ * Get the list of plugins to run based on the options.
+ */
+function getPlugins(context: Context): Plugin[] {
+  const enabledPlugins = plugins.filter((plugin) => {
+    if (context.options === false) {
+      return false;
+    }
+    if (typeof context.options === "object") {
+      const pluginEnabled = context.options[plugin.name];
+      if (pluginEnabled === false) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  return [...corePlugins, ...enabledPlugins];
+}
+
+function getPluginByName(name: string): Plugin {
+  const plugin = plugins.find((p) => p.name === name);
+  if (!plugin) {
+    throw new Error(`Invariant: plugin ${name} not found`);
+  }
+  return plugin;
+}
+
+/**
  * Run before taking all screenshots.
  */
-export function beforeAll(options: SetupOptions = {}) {
-  plugins.forEach((plugin) => {
+export function beforeAll(context: Context = {}) {
+  getPlugins(context).forEach((plugin) => {
     if (plugin.beforeAll) {
-      const cleanup = plugin.beforeAll(options);
+      const cleanup = plugin.beforeAll(context);
       if (cleanup) {
         beforeAllCleanups.add(cleanup);
       }
@@ -90,10 +108,10 @@ export function afterAll() {
 /**
  * Run before taking each screenshot (between viewport changes).
  */
-export function beforeEach(options: SetupOptions = {}) {
-  plugins.forEach((plugin) => {
+export function beforeEach(context: Context = {}) {
+  getPlugins(context).forEach((plugin) => {
     if (plugin.beforeEach) {
-      const cleanup = plugin.beforeEach(options);
+      const cleanup = plugin.beforeEach(context);
       if (cleanup) {
         beforeEachCleanups.add(cleanup);
       }
@@ -114,12 +132,12 @@ export function afterEach() {
 /**
  * Get the stabilization state of the document.
  */
-function getStabilityState(options: StabilizationOptions) {
+function getStabilityState(context: Context) {
   const stabilityState: Record<string, boolean> = {};
 
-  plugins.forEach((plugin) => {
+  getPlugins(context).forEach((plugin) => {
     if (plugin.wait) {
-      stabilityState[plugin.name] = plugin.wait.for(options);
+      stabilityState[plugin.name] = plugin.wait.for(context);
     }
   });
 
@@ -129,24 +147,26 @@ function getStabilityState(options: StabilizationOptions) {
 /**
  * Wait for a condition to be met before taking a screenshot.
  */
-export function waitFor(options: StabilizationOptions) {
-  const stabilityState = getStabilityState(options);
+export function waitFor(context: Context) {
+  const stabilityState = getStabilityState(context);
   return Object.values(stabilityState).every(Boolean);
 }
 
 /**
  * Get the error message to display if the condition is not met.
  */
-export function getWaitFailureExplanations(options: StabilizationOptions) {
+export function getWaitFailureExplanations(options: Context) {
   const stabilityState = getStabilityState(options);
   const failedPlugins = Object.entries(stabilityState).filter(
     ([, value]) => !value,
   );
 
   return failedPlugins.map(([name]) => {
-    const plugin = plugins.find((p) => p.name === name);
-    if (!plugin?.wait) {
-      throw new Error(`Invariant: plugin ${name} not found`);
+    const plugin = getPluginByName(name);
+    if (!plugin.wait) {
+      throw new Error(
+        `Invariant: plugin ${name} does not have a wait function`,
+      );
     }
     return plugin.wait.failureExplanation;
   });

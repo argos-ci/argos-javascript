@@ -5,8 +5,8 @@ import type { Plugin } from "..";
  * To ensure that if the viewport changes, it's the same behaviour
  * as if the page was reloaded.
  */
-export const plugin: Plugin = {
-  name: "image-srcset",
+export const plugin = {
+  name: "loadImageSrcset" as const,
   beforeAll() {
     const handleResize = () => {
       Array.from(document.images).forEach((img) => {
@@ -26,4 +26,4 @@ export const plugin: Plugin = {
       window.removeEventListener("resize", handleResize);
     };
   },
-};
+} satisfies Plugin;

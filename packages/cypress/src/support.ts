@@ -2,7 +2,8 @@ import "cypress-wait-until";
 import {
   type ArgosGlobal,
   resolveViewport,
-  type StabilizationOptions,
+  type StabilizationContext,
+  type StabilizationPluginOptions,
   type ViewportOption,
 } from "@argos-ci/browser";
 import { getGlobalScript } from "@argos-ci/browser";
@@ -41,7 +42,7 @@ type ArgosScreenshotOptions = Partial<
    * Pass an object to customize the stabilization.
    * @default true
    */
-  stabilize?: boolean | StabilizationOptions;
+  stabilize?: boolean | StabilizationPluginOptions;
 };
 
 declare global {
@@ -79,15 +80,30 @@ function injectArgos() {
   });
 }
 
-function beforeAll(options: ArgosScreenshotOptions) {
+/**
+ * Get the stabilization context from the options.
+ */
+function getStabilizationContext(
+  options: ArgosScreenshotOptions,
+): StabilizationContext {
   const { argosCSS } = options;
   const fullPage = !options.capture || options.capture === "fullPage";
 
+  return {
+    fullPage,
+    argosCSS,
+    options: options.stabilize,
+  };
+}
+
+/**
+ * Run before taking all screenshots.
+ */
+function beforeAll(options: ArgosScreenshotOptions) {
+  const context = getStabilizationContext(options);
+
   cy.window({ log: false }).then((window) =>
-    ((window as any).__ARGOS__ as ArgosGlobal).beforeAll({
-      fullPage,
-      argosCSS,
-    }),
+    ((window as any).__ARGOS__ as ArgosGlobal).beforeAll(context),
   );
 
   return () => {
@@ -97,15 +113,14 @@ function beforeAll(options: ArgosScreenshotOptions) {
   };
 }
 
+/**
+ * Run before taking each screenshot.
+ */
 function beforeEach(options: ArgosScreenshotOptions) {
-  const { argosCSS } = options;
-  const fullPage = !options.capture || options.capture === "fullPage";
+  const context = getStabilizationContext(options);
 
   cy.window({ log: false }).then((window) =>
-    ((window as any).__ARGOS__ as ArgosGlobal).beforeEach({
-      fullPage,
-      argosCSS,
-    }),
+    ((window as any).__ARGOS__ as ArgosGlobal).beforeEach(context),
   );
 
   return () => {
@@ -115,16 +130,40 @@ function beforeEach(options: ArgosScreenshotOptions) {
   };
 }
 
+/**
+ * Wait for the UI to be ready before taking the screenshot.
+ */
+function waitForReadiness(options: ArgosScreenshotOptions) {
+  const context = getStabilizationContext(options);
+
+  cy.waitUntil(() =>
+    cy.window({ log: false }).then((window) => {
+      const isStable = ((window as any).__ARGOS__ as ArgosGlobal).waitFor(
+        context,
+      );
+
+      if (isStable) {
+        return true;
+      }
+
+      const failureReasons = (
+        (window as any).__ARGOS__ as ArgosGlobal
+      ).getWaitFailureExplanations(context);
+
+      failureReasons.forEach((reason) => {
+        cy.log(`[argos] stability: ${reason}`);
+      });
+
+      return false;
+    }),
+  );
+}
+
 Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
   (subject, name, options = {}) => {
-    const {
-      viewports,
-      argosCSS: _argosCSS,
-      stabilize = true,
-      ...cypressOptions
-    } = options;
+    const { viewports, argosCSS: _argosCSS, ...cypressOptions } = options;
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -140,32 +179,7 @@ Cypress.Commands.add(
     const afterAll = beforeAll(options);
 
     function stabilizeAndScreenshot(name: string) {
-      if (stabilize) {
-        const stabilizationOptions =
-          typeof stabilize === "object" ? stabilize : {};
-
-        cy.waitUntil(() =>
-          cy.window({ log: false }).then((window) => {
-            const isStable = ((window as any).__ARGOS__ as ArgosGlobal).waitFor(
-              stabilizationOptions,
-            );
-
-            if (isStable) {
-              return true;
-            }
-
-            const failureReasons = (
-              (window as any).__ARGOS__ as ArgosGlobal
-            ).getWaitFailureExplanations(stabilizationOptions);
-
-            failureReasons.forEach((reason) => {
-              cy.log(`[argos] stability: ${reason}`);
-            });
-
-            return false;
-          }),
-        );
-      }
+      waitForReadiness(options);
 
       const afterEach = beforeEach(options);
 

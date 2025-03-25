@@ -59,9 +59,16 @@ Screenshots are stored in `screenshots/argos` folder, relative to current direct
 - `options.disableHover`: Disable hover effects by moving the mouse to the top-left corner of the page. Default to `true`.
 - `options.threshold`: Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to `0.5`.
 - `options.stabilize`: Wait for the UI to stabilize before taking the screenshot. Set to `false` to disable stabilization. Pass an object to customize the stabilization. Default to `true`.
-- `options.stabilize.ariaBusy`: Wait for the `aria-busy` attribute to be removed from the document. Default to `true`.
-- `options.stabilize.fonts`: Wait for fonts to be loaded. Default to `true`.
-- `options.stabilize.images`: Wait for images to be loaded. Default to `true`.
+- `options.stabilize.disableSpellCheck`: Disable spell check before taking the screenshot. Default to `true`.
+- `options.stabilize.fontAntialiasing`: Force font antialiasing. Default to `true`.
+- `options.stabilize.hideCarets`: Hide text carets before taking the screenshot. Default to `true`.
+- `options.stabilize.hideScrollbars`: Hide scrollbars before taking the screenshot. Default to `true`.
+- `options.stabilize.loadImageSrcset`: Force the loading of images with `srcset` attributes when the viewport changes. Default to `true`.
+- `options.stabilize.roundImageSize`: Round image sizes to the nearest integer. Default to `true`.
+- `options.stabilize.stabilizeSticky`: Stabilize sticky and fixed elements by switching to `position: absolute`. Default to `true`.
+- `options.stabilize.waitForAriaBusy`: Wait for the `aria-busy` attribute to be removed from the document. Default to `true`.
+- `options.stabilize.waitForFonts`: Wait for fonts to be loaded. Default to `true`.
+- `options.stabilize.waitForImages`: Wait for images to be loaded. Default to `true`.
 
 Unlike [Puppeteer's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), `argosScreenshot` set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
 
