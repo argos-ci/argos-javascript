@@ -20,9 +20,8 @@ export const plugin = {
       img.setAttribute(BACKUP_ATTRIBUTE_HEIGHT, img.style.height);
 
       // Set the width and height to the rounded values
-      const rect = img.getBoundingClientRect();
-      img.style.width = `${Math.round(rect.width)}px`;
-      img.style.height = `${Math.round(rect.height)}px`;
+      img.style.width = `${Math.round(img.offsetWidth)}px`;
+      img.style.height = `${Math.round(img.offsetHeight)}px`;
     });
 
     return () => {
