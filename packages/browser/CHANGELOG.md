@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.0.0...@argos-ci/browser@4.0.1) (2025-03-26)
+
+
+### Bug Fixes
+
+* **stabilization:** fix stabilization on transformed images ([165ed33](https://github.com/argos-ci/argos-javascript/commit/165ed33f3654dfea04b1ade10cb2f3e48c068809))
+
+
+
+
+
 # [4.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@3.2.0...@argos-ci/browser@4.0.0) (2025-03-25)
 
 
