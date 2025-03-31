@@ -1,6 +1,7 @@
 import { expect, userEvent, within } from "@storybook/test";
 
 import { Page } from "./Page";
+import { allModes } from "../.storybook/modes";
 
 export default {
   title: "Example/Page",
@@ -8,6 +9,15 @@ export default {
   parameters: {
     // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout
     layout: "fullscreen",
+
+    argos: {
+      modes: {
+        light: { disabled: true },
+        dark: { disabled: true },
+        mobile: allModes.mobile,
+        "dark tablet": allModes["dark tablet"],
+      },
+    },
   },
 };
 

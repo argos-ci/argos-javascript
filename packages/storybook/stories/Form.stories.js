@@ -1,10 +1,19 @@
 import { userEvent, within } from "@storybook/test";
 
 import { Form } from "./Form";
+import { allModes } from "../.storybook/modes";
 
 export default {
   title: "Example/Form",
   component: Form,
+  parameters: {
+    argos: {
+      modes: {
+        dark: { disabled: true },
+        tablet: allModes.tablet,
+      },
+    },
+  },
 };
 
 export const FillForm = {
