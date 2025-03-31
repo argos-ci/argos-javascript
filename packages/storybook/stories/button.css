@@ -1,12 +1,14 @@
 :root {
   --button-bg: #1ea7fd;
   --button-text: #fff;
+  color-scheme: light;
 }
 
 .dark {
   --button-bg: #fff;
   --button-text: #333;
   background: #000;
+  color-scheme: dark;
 }
 
 .storybook-button {
