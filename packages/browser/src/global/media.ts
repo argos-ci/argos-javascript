@@ -2,7 +2,10 @@
  * Get the current color scheme of the user.
  */
 export function getColorScheme() {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
+  const { colorScheme } = window.getComputedStyle(document.body);
+  return colorScheme === "dark" ||
+    colorScheme === "dark only" ||
+    window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 }
