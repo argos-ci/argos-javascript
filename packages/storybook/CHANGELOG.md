@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@2.0.1...@argos-ci/storybook@2.1.0) (2025-04-01)
+
+
+### Features
+
+* better dark mode detection ([ef78eee](https://github.com/argos-ci/argos-javascript/commit/ef78eeeb8894eacc475a2dcb6e060b59f08de6ae))
+* **storybook:** support argos.modes ([32a55ca](https://github.com/argos-ci/argos-javascript/commit/32a55ca07202e9b8306a0534f13d8ca0b9135187))
+
+
+
+
+
 ## [2.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@2.0.0...@argos-ci/storybook@2.0.1) (2025-03-26)
 
 **Note:** Version bump only for package @argos-ci/storybook
