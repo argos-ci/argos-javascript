@@ -120,6 +120,55 @@ To address the `ts(1479)` error when importing `@argos-ci/cypress/task` in your 
 
 The first option is a more comprehensive solution, dealing with the TypeScript bug through adopting the new `moduleResolution: "Bundler"` setting, which is designed for such cases. The second option is simpler and quicker but bypasses the issue rather than solving it at its core.
 
+### Viewports option not working
+
+When running Cypress in headless mode, the [Cypress.viewport](https://docs.cypress.io/api/commands/viewport) command (used internally by `@argos-ci/cypress`) may not behave as expected. This is because headless browsers don’t render a visible viewport, which can result in incorrect or inconsistent screenshots.
+
+To ensure a consistent viewport size, configure it via `setupNodeEvents` in your `cypress.config.js`. This approach sets the viewport before the browser launches, avoiding visual regressions.
+
+```ts title="cypress.config.js"
+import { defineConfig } from "cypress";
+
+export default defineConfig({
+  // setupNodeEvents can be defined in either
+  // the e2e or component configuration
+  e2e: {
+    setupNodeEvents(on, config) {
+      on("before:browser:launch", (browser, launchOptions) => {
+        if (browser.name === "chrome" && browser.isHeadless) {
+          // fullPage screenshot size is 1400x1200 on non-retina screens
+          // and 2800x2400 on retina screens
+          launchOptions.args.push("--window-size=1400,1200");
+
+          // force screen to be non-retina (1400x1200 size)
+          launchOptions.args.push("--force-device-scale-factor=1");
+
+          // force screen to be retina (2800x2400 size)
+          // launchOptions.args.push('--force-device-scale-factor=2')
+        }
+
+        if (browser.name === "electron" && browser.isHeadless) {
+          // fullPage screenshot size is 1400x1200
+          launchOptions.preferences.width = 1400;
+          launchOptions.preferences.height = 1200;
+        }
+
+        if (browser.name === "firefox" && browser.isHeadless) {
+          // menubars take up height on the screen
+          // so fullPage screenshot size is 1400x1126
+          launchOptions.args.push("--width=1400");
+          launchOptions.args.push("--height=1200");
+        }
+
+        return launchOptions;
+      });
+    },
+  },
+});
+```
+
+Reference: [Cypress Docs – Set screen size when running headless](https://docs.cypress.io/api/node-events/browser-launch-api#Set-screen-size-when-running-headless)
+
 ## Additional Resources
 
 - [Quickstart with Argos + Cypress](/quickstart/cypress)
