@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@5.0.2...@argos-ci/playwright@5.0.3) (2025-04-12)
+
+
+### Bug Fixes
+
+* **playwright:** properly return stabilization failure reasons ([f76da0c](https://github.com/argos-ci/argos-javascript/commit/f76da0ce38ef31fd0b42fcb8af107f35adc5fa4f))
+
+
+
+
+
 ## [5.0.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@5.0.1...@argos-ci/playwright@5.0.2) (2025-04-01)
 
 **Note:** Version bump only for package @argos-ci/playwright

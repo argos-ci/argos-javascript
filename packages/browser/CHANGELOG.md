@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.0...@argos-ci/browser@4.1.1) (2025-04-12)
+
+
+### Bug Fixes
+
+* remove unrelevant code to load images in `waitForAriaBusy` ([c7e6aed](https://github.com/argos-ci/argos-javascript/commit/c7e6aed4fbf2a9a596aa77f43706ce3493e61ddd))
+
+
+
+
+
 # [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.0.1...@argos-ci/browser@4.1.0) (2025-04-01)
 
 
