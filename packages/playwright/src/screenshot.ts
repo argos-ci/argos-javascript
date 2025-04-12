@@ -383,17 +383,6 @@ export async function argosScreenshot(
   };
 
   const stabilizeAndScreenshot = async (name: string) => {
-    await options.beforeScreenshot?.({
-      runStabilization: (stabilizationOptions) =>
-        waitForReadiness(page, {
-          ...options,
-          stabilize: stabilizationOptions ?? options.stabilize,
-        }),
-    });
-
-    await waitForReadiness(page, options);
-    const afterEach = await beforeEach(page, options);
-
     const names = getScreenshotNames(name, testInfo);
 
     const metadata = await collectMetadata(testInfo);
@@ -417,6 +406,17 @@ export async function argosScreenshot(
     if (dir !== root) {
       await mkdir(dirname(screenshotPath), { recursive: true });
     }
+
+    await options.beforeScreenshot?.({
+      runStabilization: (stabilizationOptions) =>
+        waitForReadiness(page, {
+          ...options,
+          stabilize: stabilizationOptions ?? options.stabilize,
+        }),
+    });
+
+    await waitForReadiness(page, options);
+    const afterEach = await beforeEach(page, options);
 
     await Promise.all([
       handle.screenshot({
@@ -444,7 +444,6 @@ export async function argosScreenshot(
     }
 
     await afterEach();
-
     await options.afterScreenshot?.();
   };
 
