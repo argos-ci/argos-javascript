@@ -20,20 +20,6 @@ function checkIsElementVisible(element: Element) {
  */
 export const plugin = {
   name: "waitForAriaBusy" as const,
-  beforeEach() {
-    Array.from(document.images).every((img) => {
-      // Force sync decoding
-      if (img.decoding !== "sync") {
-        img.decoding = "sync";
-      }
-
-      // Force eager loading
-      if (img.loading !== "eager") {
-        img.loading = "eager";
-      }
-    });
-    return undefined;
-  },
   wait: {
     for: () => {
       return Array.from(document.querySelectorAll('[aria-busy="true"]')).every(
