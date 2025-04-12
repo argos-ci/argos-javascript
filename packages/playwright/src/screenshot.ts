@@ -202,16 +202,45 @@ async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
 }
 
 /**
+ * Increase the timeout for the test x3.
+ * Returns a function to reset the timeout.
+ */
+async function increaseTimeout() {
+  const testInfo = await getTestInfo();
+  if (testInfo) {
+    const { timeout } = testInfo;
+    // Like in "slow" mode but we don't use it because we want to
+    // be able to reset it.
+    testInfo.setTimeout(timeout * 3);
+    return {
+      value: timeout,
+      reset: () => {
+        testInfo.setTimeout(timeout);
+      },
+    };
+  }
+  return null;
+}
+
+/**
  * Wait for the UI to be ready before taking the screenshot.
  */
 async function waitForReadiness(page: Page, options: ArgosScreenshotOptions) {
   const context = getStabilizationContext(options);
+  // We increase the timeout, so we will be able to get reasons
+  // if the stabilization fails.
+  const timeout = await increaseTimeout();
 
   try {
     await page.waitForFunction(
-      (context) => ((window as any).__ARGOS__ as ArgosGlobal).waitFor(context),
+      (context) => {
+        const argos = (window as any).__ARGOS__ as ArgosGlobal;
+        return argos.waitFor(context);
+      },
       context,
+      timeout ? { timeout: timeout.value } : undefined,
     );
+    timeout?.reset();
   } catch (error) {
     const reasons = await page.evaluate(
       (context) =>
