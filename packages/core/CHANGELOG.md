@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@3.1.1...@argos-ci/core@3.2.0) (2025-05-15)
+
+
+### Features
+
+* add debug info for merge base ([a385a2c](https://github.com/argos-ci/argos-javascript/commit/a385a2c18ffc51c4284038e90876b71036063055))
+
+
+
+
+
 ## [3.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@3.1.0...@argos-ci/core@3.1.1) (2025-03-25)
 
 **Note:** Version bump only for package @argos-ci/core
