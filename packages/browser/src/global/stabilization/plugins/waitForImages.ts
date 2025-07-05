@@ -5,20 +5,6 @@ import type { Plugin } from "..";
  */
 export const plugin = {
   name: "waitForImages" as const,
-  beforeEach() {
-    Array.from(document.images).every((img) => {
-      // Force sync decoding
-      if (img.decoding !== "sync") {
-        img.decoding = "sync";
-      }
-
-      // Force eager loading
-      if (img.loading !== "eager") {
-        img.loading = "eager";
-      }
-    });
-    return undefined;
-  },
   wait: {
     for: () => {
       const images = Array.from(document.images);
