@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.1...@argos-ci/browser@4.1.2) (2025-07-05)
+
+
+### Bug Fixes
+
+* improve loadImageSrcset plugin to work better on Chrome ([4b8219c](https://github.com/argos-ci/argos-javascript/commit/4b8219c62fa8fa77de2708a6f17aa758e5f75449))
+
+
+
+
+
 ## [4.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.0...@argos-ci/browser@4.1.1) (2025-04-12)
 
 
