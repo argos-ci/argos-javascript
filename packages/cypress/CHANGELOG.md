@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@4.0.5...@argos-ci/cypress@5.0.0) (2025-07-14)
+
+
+### Bug Fixes
+
+* **cypress:** use Argos name as screenshot name ([3107e90](https://github.com/argos-ci/argos-javascript/commit/3107e904e3caa683273313e5a2a9154fa829b4f2))
+
+
+### BREAKING CHANGES
+
+* **cypress:** Screenshot taken with `@argos/cypress` will change of name after upgrade
+
+
+
+
+
 ## [4.0.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@4.0.4...@argos-ci/cypress@4.0.5) (2025-07-05)
 
 **Note:** Version bump only for package @argos-ci/cypress
