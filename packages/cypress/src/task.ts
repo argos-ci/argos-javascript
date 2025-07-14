@@ -60,7 +60,8 @@ export function registerArgosTask(
 
     const argosScreenshotsDir = await getScreenshotsDirectory();
 
-    if (details.name.startsWith(NAME_PREFIX)) {
+    // Cypress types are wrong... The name can be "undefined"
+    if (details.name?.startsWith(NAME_PREFIX)) {
       const newPath = join(
         argosScreenshotsDir,
         details.name.slice(NAME_PREFIX.length) + extname(details.path),
