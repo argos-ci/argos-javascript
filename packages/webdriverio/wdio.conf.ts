@@ -54,10 +54,16 @@ export const config: Options.Testrunner & {
   capabilities: [
     {
       browserName: "chrome",
+      browserVersion: "stable",
       acceptInsecureCerts: true,
       // We need to extends some Chrome flags in order to tell Chrome to run headless
       "goog:chromeOptions": {
-        args: ["--headless", "--disable-gpu", "--disable-dev-shm-usage"],
+        args: [
+          "--no-sandbox",
+          "--headless",
+          "--disable-gpu",
+          "--disable-dev-shm-usage",
+        ],
       },
     },
   ],
@@ -109,16 +115,7 @@ export const config: Options.Testrunner & {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: [
-    [
-      "chromedriver",
-      {
-        logFileName: "wdio-chromedriver.log", // default
-        outputDir: "driver-logs", // overwrites the config.outputDir
-        args: ["--silent"],
-      },
-    ],
-  ],
+  // services: [],
   //
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
