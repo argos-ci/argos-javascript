@@ -8,9 +8,7 @@ import type {
 import chalk from "chalk";
 import { readConfig, upload } from "@argos-ci/core";
 import type { UploadParameters } from "@argos-ci/core";
-import { randomBytes } from "node:crypto";
-import { copyFile, mkdir, readdir, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { copyFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import {
   checkIsArgosScreenshot,
@@ -21,34 +19,7 @@ import {
 } from "./attachment";
 import { getMetadataFromTestCase } from "./metadata";
 import { debug } from "./debug";
-
-const createDirectoryPromises = new Map<string, Promise<void>>();
-
-/**
- * Create a directory if it doesn't exist.
- */
-async function createDirectory(pathname: string) {
-  let promise = createDirectoryPromises.get(pathname);
-  if (promise) {
-    return promise;
-  }
-
-  promise = mkdir(pathname, { recursive: true }).then(() => {});
-  createDirectoryPromises.set(pathname, promise);
-  return promise;
-}
-
-/**
- * Create temporary directory.
- */
-async function createTemporaryDirectory() {
-  debug("Creating temporary directory");
-  const osTmpDirectory = tmpdir();
-  const path = join(osTmpDirectory, "argos." + randomBytes(16).toString("hex"));
-  await createDirectory(path);
-  debug(`Temporary directory created: ${path}`);
-  return path;
-}
+import { createDirectory, createTemporaryDirectory } from "@argos-ci/util";
 
 /**
  * Dynamic build name.
