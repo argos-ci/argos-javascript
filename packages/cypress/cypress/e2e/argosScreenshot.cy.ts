@@ -1,29 +1,20 @@
-const screenshotsFolder = Cypress.browser.isHeaded
-  ? `./cypress/screenshots`
-  : `./cypress/screenshots/${Cypress.spec.name}`;
-
 describe("argosScreenshot", () => {
-  describe("with name", () => {
-    before(() => {
-      cy.visit("cypress/pages/index.html");
-      cy.argosScreenshot("screen");
-    });
+  it("takes a screenshot with a simple name", () => {
+    cy.visit("cypress/pages/index.html");
+    cy.argosScreenshot("screen");
 
-    it("waits for loader hiding", () => {
-      cy.get("#loader", { timeout: 0 }).should("not.exist");
-    });
-
-    it("takes a named screenshot", () => {
-      cy.readFile(`${screenshotsFolder}/screen.png`);
-    });
+    // Wait for the loader to hide
+    cy.get("#loader", { timeout: 0 }).should("not.exist");
   });
 
-  describe("component", () => {
-    it("takes a screenshot of a component with a generic name", () => {
-      cy.visit("cypress/pages/index.html");
-      cy.get(".specific-target").argosScreenshot("specific-target");
-      cy.readFile(`${screenshotsFolder}/specific-target.png`);
-    });
+  it("takes a screenshot with a folder name", () => {
+    cy.visit("cypress/pages/index.html");
+    cy.argosScreenshot("nested/screen");
+  });
+
+  it("takes a screenshot of a component with a generic name", () => {
+    cy.visit("cypress/pages/index.html");
+    cy.get(".specific-target").argosScreenshot("specific-target");
   });
 
   it("supports argosCSS option", () => {
@@ -35,8 +26,6 @@ describe("argosScreenshot", () => {
 
   it("supports threshold option", () => {
     cy.visit("cypress/pages/index.html");
-    cy.argosScreenshot("threshold-option", {
-      threshold: 0.2,
-    });
+    cy.argosScreenshot("threshold-option", { threshold: 0.2 });
   });
 });

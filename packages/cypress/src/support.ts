@@ -15,6 +15,7 @@ import {
 } from "@argos-ci/util/browser";
 // @ts-expect-error - can't import json in TypeScript
 import { version } from "../package.json";
+import { NAME_PREFIX } from "./shared";
 
 type ArgosScreenshotOptions = Partial<
   Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions
@@ -185,7 +186,7 @@ Cypress.Commands.add(
 
       const ref: any = {};
 
-      cy.wrap(subject).screenshot(name, {
+      cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
         blackout: ['[data-visual-test="blackout"]'].concat(
           options.blackout || [],
         ),
