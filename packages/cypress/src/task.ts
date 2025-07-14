@@ -3,7 +3,7 @@ import { upload } from "@argos-ci/core";
 import type { UploadParameters } from "@argos-ci/core";
 import { extname, join, dirname } from "node:path";
 import { NAME_PREFIX } from "./shared";
-import { rename } from "node:fs/promises";
+import { copyFile } from "node:fs/promises";
 
 export type RegisterArgosTaskOptions = Omit<
   UploadParameters,
@@ -68,7 +68,7 @@ export function registerArgosTask(
       );
 
       await createDirectory(dirname(newPath));
-      await rename(details.path, newPath);
+      await copyFile(details.path, newPath);
 
       return { path: newPath };
     }
@@ -93,7 +93,7 @@ export function registerArgosTask(
     const newPath = join(argosScreenshotsDir, relativePath);
 
     await createDirectory(dirname(newPath));
-    await rename(details.path, newPath);
+    await copyFile(details.path, newPath);
 
     return { path: join(argosScreenshotsDir, relativePath) };
   });
