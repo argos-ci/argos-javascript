@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@5.0.1...@argos-ci/cypress@5.0.2) (2025-07-14)
+
+
+### Bug Fixes
+
+* **cypress:** fix issue when running cypress in docker on GA ([597eea2](https://github.com/argos-ci/argos-javascript/commit/597eea2d679ec6540201e7629b8a20403b0acefb))
+
+
+
+
+
 ## [5.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@5.0.0...@argos-ci/cypress@5.0.1) (2025-07-14)
 
 
