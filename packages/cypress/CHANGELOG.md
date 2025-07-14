@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@5.0.0...@argos-ci/cypress@5.0.1) (2025-07-14)
+
+
+### Bug Fixes
+
+* **cypress:** fix undefined name ([a781652](https://github.com/argos-ci/argos-javascript/commit/a7816521d4f4092208d33bed9f721d704ad4c1f6))
+
+
+
+
+
 # [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@4.0.5...@argos-ci/cypress@5.0.0) (2025-07-14)
 
 
