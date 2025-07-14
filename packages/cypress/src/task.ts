@@ -1,7 +1,8 @@
 /// <reference types="cypress" />
 import { upload } from "@argos-ci/core";
 import type { UploadParameters } from "@argos-ci/core";
-import { basename, extname, join, dirname } from "node:path";
+import { extname, join, dirname } from "node:path";
+import { NAME_PREFIX } from "./shared";
 import { rename } from "node:fs/promises";
 
 export type RegisterArgosTaskOptions = Omit<
@@ -23,43 +24,91 @@ function checkIsCypressFailedResult(
   return "status" in results && results.status === "failed";
 }
 
+let screenshotsDirectoryPromise: Promise<string> | undefined = undefined;
+
+/**
+ * Get the path to the directory where screenshots will be stored.
+ */
+async function getScreenshotsDirectory(): Promise<string> {
+  const { createTemporaryDirectory } = await import("@argos-ci/util");
+
+  if (!screenshotsDirectoryPromise) {
+    screenshotsDirectoryPromise = createTemporaryDirectory();
+  }
+  return screenshotsDirectoryPromise;
+}
+
+/**
+ * Create a directory if it does not exist.
+ */
+async function createDirectory(directory: string): Promise<void> {
+  const { createDirectory } = await import("@argos-ci/util");
+  await createDirectory(directory);
+}
+
 export function registerArgosTask(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions,
   options?: RegisterArgosTaskOptions,
 ) {
   on("after:screenshot", async (details) => {
-    // Get the base filename without extension
-    const baseName = basename(details.path, extname(details.path));
+    const { uploadToArgos = true } = options || {};
 
-    // Remove attempt from the filename
-    const newBaseName = baseName.replace(/ \(attempt \d+\)/, "");
+    if (!uploadToArgos) {
+      return { path: details.path };
+    }
 
-    // Construct a new path with the original file extension
-    const newPath = join(
-      dirname(details.path),
-      newBaseName + extname(details.path),
+    const argosScreenshotsDir = await getScreenshotsDirectory();
+
+    if (details.name.startsWith(NAME_PREFIX)) {
+      const newPath = join(
+        argosScreenshotsDir,
+        details.name.slice(NAME_PREFIX.length) + extname(details.path),
+      );
+
+      await createDirectory(dirname(newPath));
+      await rename(details.path, newPath);
+
+      return { path: newPath };
+    }
+
+    const { screenshotsFolder } = config;
+
+    if (!screenshotsFolder) {
+      throw new Error(
+        "Cypress screenshotsFolder is not defined. Please set it in your cypress.config.js",
+      );
+    }
+
+    if (!details.path.startsWith(screenshotsFolder)) {
+      throw new Error(
+        `Cypress screenshot path ${details.path} does not start with the configured screenshotsFolder ${screenshotsFolder}. Please check your cypress.config.js.`,
+      );
+    }
+
+    const relativePath = details.path.slice(
+      screenshotsFolder.length + (screenshotsFolder.endsWith("/") ? 0 : 1),
     );
+    const newPath = join(argosScreenshotsDir, relativePath);
 
-    // Rename the file
+    await createDirectory(dirname(newPath));
     await rename(details.path, newPath);
 
-    return { path: newPath };
+    return { path: join(argosScreenshotsDir, relativePath) };
   });
   on("after:run", async (results) => {
-    const { screenshotsFolder } = config;
-    if (!screenshotsFolder) {
-      return;
-    }
     const { uploadToArgos = true } = options || {};
+
     if (!uploadToArgos) {
       return;
     }
 
+    const argosScreenshotsDir = await getScreenshotsDirectory();
+
     const res = await upload({
       ...options,
       files: ["**/*.png"],
-      root: screenshotsFolder,
+      root: argosScreenshotsDir,
       metadata: {
         testReport: checkIsCypressFailedResult(results)
           ? { status: "failed" }
