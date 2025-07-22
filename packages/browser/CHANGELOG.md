@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.2...@argos-ci/browser@4.1.3) (2025-07-22)
+
+
+### Bug Fixes
+
+* **stabilization:** bust with hash if possible ([34fa186](https://github.com/argos-ci/argos-javascript/commit/34fa1861317ddaa855abcdff4835705a23447515))
+
+
+
+
+
 ## [4.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.1...@argos-ci/browser@4.1.2) (2025-07-05)
 
 
