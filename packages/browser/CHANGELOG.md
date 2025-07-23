@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.3...@argos-ci/browser@4.1.4) (2025-07-23)
+
+
+### Bug Fixes
+
+* **stabilization:** override image busting hash ([cdf3047](https://github.com/argos-ci/argos-javascript/commit/cdf3047ae3024aa894b4332085e41b1683033b90))
+
+
+
+
+
 ## [4.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.2...@argos-ci/browser@4.1.3) (2025-07-22)
 
 

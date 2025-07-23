@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/cypress",
   "description": "Cypress SDK for visual testing with Argos.",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
