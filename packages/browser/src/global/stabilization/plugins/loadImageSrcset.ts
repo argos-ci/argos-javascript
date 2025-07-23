@@ -10,7 +10,7 @@ export const plugin = {
   beforeAll() {
     function addCacheBusterToSrc(src: string) {
       const url = new URL(src, window.location.href);
-      if (!url.hash) {
+      if (!url.hash || url.hash.match(/^#argosBust=\d+$/)) {
         url.hash = `argosBust=${String(Date.now())}`;
       } else {
         url.searchParams.set("argosBust", String(Date.now()));
