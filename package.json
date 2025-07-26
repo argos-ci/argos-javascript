@@ -19,7 +19,7 @@
     "vitest": "^3.0.9"
   },
   "resolutions": {
-    "@babel/helpers": "^7.27.0" 
+    "@babel/helpers": "^7.27.0"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production turbo run build",

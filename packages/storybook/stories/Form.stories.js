@@ -1,4 +1,4 @@
-import { userEvent, within } from "@storybook/test";
+import { userEvent, within } from "storybook/test";
 
 import { Form } from "./Form";
 import { allModes } from "../.storybook/modes";
