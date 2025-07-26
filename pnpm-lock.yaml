@@ -273,9 +273,6 @@ importers:
       '@storybook/test-runner':
         specifier: ^0.23.0
         version: 0.23.0(@types/node@22.13.13)(storybook@9.0.18(@testing-library/dom@10.4.0)(prettier@3.5.3))
-      eslint-plugin-storybook:
-        specifier: 9.0.18
-        version: 9.0.18(eslint@9.23.0(jiti@2.4.2))(storybook@9.0.18(@testing-library/dom@10.4.0)(prettier@3.5.3))(typescript@5.8.2)
       http-server:
         specifier: ^14.1.1
         version: 14.1.1
@@ -3461,13 +3458,6 @@ packages:
     resolution: {integrity: sha512-v5cyt0VYb1tEEODBJSE44PocYOwQsckyexJhCs7LtdD3FGO6D2GjnZB2s2Sts4RcxdxECTWX01nObOZRs26bQw==}
     peerDependencies:
       eslint: '>=9'
-
-  eslint-plugin-storybook@9.0.18:
-    resolution: {integrity: sha512-f2FnWjTQkM9kYtbpChVuEo8F04QATBiuxYUdSBR58lWb3NprPKBfmRZC1dTA5NVeLY6geXduDLIPXefwXFz6Ag==}
-    engines: {node: '>=20.0.0'}
-    peerDependencies:
-      eslint: '>=8'
-      storybook: ^9.0.18
 
   eslint-scope@8.3.0:
     resolution: {integrity: sha512-pUNxi75F8MJ/GdeKtVLSbYg4ZI34J6C0C7sbL4YOp2exGwen7ZsuBqKzUhXd0qMQ362yET3z+uPwKeg/0C2XCQ==}
@@ -10915,15 +10905,6 @@ snapshots:
     dependencies:
       eslint: 9.23.0(jiti@2.4.2)
       globals: 15.15.0
-
-  eslint-plugin-storybook@9.0.18(eslint@9.23.0(jiti@2.4.2))(storybook@9.0.18(@testing-library/dom@10.4.0)(prettier@3.5.3))(typescript@5.8.2):
-    dependencies:
-      '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      eslint: 9.23.0(jiti@2.4.2)
-      storybook: 9.0.18(@testing-library/dom@10.4.0)(prettier@3.5.3)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   eslint-scope@8.3.0:
     dependencies:
