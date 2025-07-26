@@ -43,7 +43,7 @@
     "@argos-ci/util": "workspace:*"
   },
   "peerDependencies": {
-    "@storybook/test-runner": "0.23.0",
+    "@storybook/test-runner": "*",
     "playwright": "*"
   },
   "devDependencies": {
@@ -58,7 +58,6 @@
     "prop-types": "^15.8.1",
     "storybook": "^9.0.18",
     "wait-on": "^8.0.3",
-    "eslint-plugin-storybook": "9.0.18",
     "@storybook/addon-docs": "^9.0.18"
   },
   "scripts": {
