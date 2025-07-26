@@ -43,27 +43,23 @@
     "@argos-ci/util": "workspace:*"
   },
   "peerDependencies": {
-    "@storybook/test-runner": "*",
+    "@storybook/test-runner": "0.23.0",
     "playwright": "*"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "@storybook/addon-essentials": "^8.6.9",
-    "@storybook/addon-interactions": "^8.6.9",
-    "@storybook/addon-links": "^8.6.9",
-    "@storybook/addon-themes": "^8.6.11",
-    "@storybook/addon-viewport": "^8.6.11",
-    "@storybook/blocks": "^8.6.9",
-    "@storybook/react": "^8.6.9",
-    "@storybook/react-vite": "^8.6.9",
-    "@storybook/test": "^8.6.9",
-    "@storybook/test-runner": "^0.22.0",
+    "@storybook/addon-links": "^9.0.18",
+    "@storybook/addon-themes": "^9.0.18",
+    "@storybook/react-vite": "^9.0.18",
+    "@storybook/test-runner": "^0.23.0",
     "http-server": "^14.1.1",
     "playwright": "^1.51.1",
     "prop-types": "^15.8.1",
-    "storybook": "^8.6.9",
-    "wait-on": "^8.0.3"
+    "storybook": "^9.0.18",
+    "wait-on": "^8.0.3",
+    "eslint-plugin-storybook": "9.0.18",
+    "@storybook/addon-docs": "^9.0.18"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",
