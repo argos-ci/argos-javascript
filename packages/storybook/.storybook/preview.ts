@@ -1,6 +1,6 @@
-import type { Preview } from "@storybook/react";
+import type { Preview } from "@storybook/react-vite";
 
-import { INITIAL_VIEWPORTS } from "@storybook/addon-viewport";
+import { INITIAL_VIEWPORTS } from "storybook/viewport";
 import { withThemeByClassName } from "@storybook/addon-themes";
 import { allModes } from "./modes";
 
