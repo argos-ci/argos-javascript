@@ -1,5 +1,5 @@
 import type { TestRunnerConfig } from "@storybook/test-runner";
-import { argosScreenshot } from "@argos-ci/storybook";
+import { argosScreenshot } from "@argos-ci/storybook/test-runner";
 
 const config: TestRunnerConfig = {
   async postVisit(page, context) {

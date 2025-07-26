@@ -54,7 +54,8 @@
     "@types/convict": "^6.1.6",
     "@types/debug": "^4.1.12",
     "@types/tmp": "^0.2.6",
-    "msw": "^2.7.3"
+    "msw": "^2.7.3",
+    "vitest": "catalog:"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",

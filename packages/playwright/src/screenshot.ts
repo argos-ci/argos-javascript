@@ -9,6 +9,7 @@ import type {
   TestInfo,
   Locator,
   ViewportSize,
+  Frame,
 } from "@playwright/test";
 import {
   type ViewportOption,
@@ -26,7 +27,11 @@ import {
   writeMetadata,
 } from "@argos-ci/util";
 import { getAttachmentName } from "./attachment";
-import { getLibraryMetadata, getTestMetadataFromTestInfo } from "./metadata";
+import {
+  getLibraryMetadata,
+  getMetadataOverrides,
+  getTestMetadata,
+} from "./metadata";
 import { checkIsUsingArgosReporter } from "./util";
 
 const DEFAULT_SCREENSHOT_ROOT = "./screenshots";
@@ -106,7 +111,7 @@ export type ArgosScreenshotOptions = {
 /**
  * Inject Argos script into the page.
  */
-async function injectArgos(page: Page) {
+async function injectArgos(page: Page | Frame) {
   const injected = await page.evaluate(
     () => typeof (window as any).__ARGOS__ !== "undefined",
   );
@@ -125,6 +130,17 @@ async function getTestInfo() {
   } catch {
     return null;
   }
+}
+
+function checkIsFrame(page: Page | Frame): page is Frame {
+  return "page" in page;
+}
+
+function getPage(page: Page | Frame): Page {
+  if (checkIsFrame(page)) {
+    return page.page();
+  }
+  return page;
 }
 
 /**
@@ -169,7 +185,7 @@ function getStabilizationContext(
 /**
  * Run before taking all screenshots.
  */
-async function beforeAll(page: Page, options: ArgosScreenshotOptions) {
+async function beforeAll(page: Page | Frame, options: ArgosScreenshotOptions) {
   const { disableHover = true } = options;
   const context = getStabilizationContext(options);
   await page.evaluate(
@@ -177,7 +193,7 @@ async function beforeAll(page: Page, options: ArgosScreenshotOptions) {
     context,
   );
   if (disableHover) {
-    await page.mouse.move(0, 0);
+    await getPage(page).mouse.move(0, 0);
   }
   return async () => {
     await page.evaluate(() =>
@@ -189,7 +205,7 @@ async function beforeAll(page: Page, options: ArgosScreenshotOptions) {
 /**
  * Run before taking each screenshot.
  */
-async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
+async function beforeEach(page: Page | Frame, options: ArgosScreenshotOptions) {
   const context = getStabilizationContext(options);
   await page.evaluate(
     (context) => ((window as any).__ARGOS__ as ArgosGlobal).beforeEach(context),
@@ -226,7 +242,10 @@ async function increaseTimeout() {
 /**
  * Wait for the UI to be ready before taking the screenshot.
  */
-async function waitForReadiness(page: Page, options: ArgosScreenshotOptions) {
+async function waitForReadiness(
+  page: Page | Frame,
+  options: ArgosScreenshotOptions,
+) {
   const context = getStabilizationContext(options);
   // We increase the timeout, so we will be able to get reasons
   // if the stabilization fails.
@@ -280,6 +299,12 @@ function getScreenshotNames(name: string, testInfo: TestInfo | null) {
   return { name, baseName: null };
 }
 
+export type Attachment = {
+  name: string;
+  contentType: string;
+  path: string;
+};
+
 /**
  * Stabilize the UI and takes a screenshot of the application under test.
  *
@@ -291,7 +316,7 @@ export async function argosScreenshot(
   /**
    * Playwright `page` object.
    */
-  page: Page,
+  page: Page | Frame,
   /**
    * Name of the screenshot. Must be unique.
    */
@@ -320,7 +345,7 @@ export async function argosScreenshot(
   const handle =
     typeof element === "string"
       ? page.locator(element, { has, hasText })
-      : (element ?? page);
+      : (element ?? (checkIsFrame(page) ? page.locator("body") : page));
 
   const testInfo = await getTestInfo();
 
@@ -335,7 +360,9 @@ export async function argosScreenshot(
     injectArgos(page),
   ]);
 
-  const originalViewportSize = getViewportSize(page);
+  const originalViewportSize = checkIsFrame(page)
+    ? null
+    : getViewportSize(page);
 
   const fullPage =
     options.fullPage !== undefined ? options.fullPage : handle === page;
@@ -345,6 +372,7 @@ export async function argosScreenshot(
   const collectMetadata = async (
     testInfo: TestInfo | null,
   ): Promise<ScreenshotMetadata> => {
+    const overrides = getMetadataOverrides();
     const [colorScheme, mediaType, libMetadata, testMetadata] =
       await Promise.all([
         page.evaluate(() =>
@@ -354,22 +382,21 @@ export async function argosScreenshot(
           ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
         ),
         getLibraryMetadata(),
-        testInfo ? getTestMetadataFromTestInfo(testInfo) : null,
+        getTestMetadata(testInfo),
       ]);
 
-    const viewportSize = getViewportSize(page);
+    const viewportSize = checkIsFrame(page) ? null : getViewportSize(page);
 
-    const browser = page.context().browser();
+    const browser = getPage(page).context().browser();
     if (!browser) {
       throw new Error("Can't take screenshots without a browser.");
     }
     const browserName = browser.browserType().name();
     const browserVersion = browser.version();
-    const url = page.url();
+    const url = overrides?.url ?? page.url();
 
     const metadata: ScreenshotMetadata = {
       url,
-      viewport: viewportSize,
       colorScheme,
       mediaType,
       test: testMetadata,
@@ -379,6 +406,12 @@ export async function argosScreenshot(
       },
       ...libMetadata,
     };
+
+    const viewport = viewportSize ?? getMetadataOverrides()?.viewport;
+
+    if (viewport) {
+      metadata.viewport = viewport;
+    }
 
     return metadata;
   };
@@ -432,39 +465,64 @@ export async function argosScreenshot(
       writeMetadata(screenshotPath, metadata),
     ]);
 
+    const attachments: Attachment[] = [
+      {
+        name: getAttachmentName(names.name, "screenshot"),
+        contentType: "image/png",
+        path: screenshotPath,
+      },
+      {
+        name: getAttachmentName(names.name, "metadata"),
+        contentType: "application/json",
+        path: getMetadataPath(screenshotPath),
+      },
+    ];
+
     if (useArgosReporter && testInfo) {
-      await Promise.all([
-        testInfo.attach(getAttachmentName(names.name, "metadata"), {
-          path: getMetadataPath(screenshotPath),
-          contentType: "application/json",
-        }),
-        testInfo.attach(getAttachmentName(names.name, "screenshot"), {
-          path: screenshotPath,
-          contentType: "image/png",
-        }),
-      ]);
+      await Promise.all(
+        attachments.map((attachment) =>
+          testInfo.attach(attachment.name, {
+            path: attachment.path,
+            contentType: attachment.contentType,
+          }),
+        ),
+      );
     }
 
     await afterEach();
     await options.afterScreenshot?.();
+
+    return attachments;
   };
+
+  const allAttachments: Attachment[] = [];
 
   // If no viewports are specified, take a single screenshot
   if (viewports) {
+    if (checkIsFrame(page)) {
+      throw new Error(`viewports option is not supported with an iframe`);
+    }
     // Take screenshots for each viewport
     for (const viewport of viewports) {
       const viewportSize = resolveViewport(viewport);
       await setViewportSize(page, viewportSize);
-      await stabilizeAndScreenshot(
+      const attachments = await stabilizeAndScreenshot(
         getScreenshotName(name, { viewportWidth: viewportSize.width }),
       );
+      allAttachments.push(...attachments);
     }
 
     // Restore the original viewport size
+    if (!originalViewportSize) {
+      throw new Error(`Invariant: viewport size must be saved`);
+    }
     await setViewportSize(page, originalViewportSize);
   } else {
-    await stabilizeAndScreenshot(name);
+    const attachments = await stabilizeAndScreenshot(name);
+    allAttachments.push(...attachments);
   }
 
   await afterAll();
+
+  return allAttachments;
 }

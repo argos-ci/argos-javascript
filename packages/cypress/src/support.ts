@@ -13,7 +13,6 @@ import {
   type ScreenshotMetadata,
   validateThreshold,
 } from "@argos-ci/util/browser";
-// @ts-expect-error - can't import json in TypeScript
 import { version } from "../package.json";
 import { NAME_PREFIX } from "./shared";
 
