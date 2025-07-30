@@ -157,10 +157,11 @@ async function setViewportSize(page: Page, viewportSize: ViewportSize) {
 function getStabilizationContext(
   options: ArgosScreenshotOptions,
 ): StabilizationContext {
-  const { fullPage, argosCSS, stabilize } = options;
+  const { fullPage, argosCSS, stabilize, viewports } = options;
   return {
     fullPage,
     argosCSS,
+    viewports,
     options: stabilize,
   };
 }

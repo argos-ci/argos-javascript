@@ -1,3 +1,4 @@
+import type { ViewportOption } from "../../viewport";
 import { corePlugins, plugins, type PluginName } from "./plugins";
 
 type Cleanup = () => void;
@@ -35,6 +36,11 @@ export interface RuntimeContext {
    * Is the test running in full page mode?
    */
   fullPage?: boolean;
+
+  /**
+   * Viewports to use for the test.
+   */
+  viewports?: ViewportOption[];
 
   /**
    * Custom CSS to apply to the page before taking a screenshot.
