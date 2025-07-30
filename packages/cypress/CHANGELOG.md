@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@5.0.4...@argos-ci/cypress@5.0.5) (2025-07-30)
+
+
+### Bug Fixes
+
+* disable loadImageSrcset if not using the viewport option ([0ea7677](https://github.com/argos-ci/argos-javascript/commit/0ea7677419fc3239b355e396e1984746017bef44))
+
+
+
+
+
 ## [5.0.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@5.0.3...@argos-ci/cypress@5.0.4) (2025-07-23)
 
 **Note:** Version bump only for package @argos-ci/cypress

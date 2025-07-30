@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.4...@argos-ci/browser@4.2.0) (2025-07-30)
+
+
+### Bug Fixes
+
+* disable loadImageSrcset if not using the viewport option ([0ea7677](https://github.com/argos-ci/argos-javascript/commit/0ea7677419fc3239b355e396e1984746017bef44))
+
+
+### Features
+
+* **stability:** improve loadImageSrcset ([a19977e](https://github.com/argos-ci/argos-javascript/commit/a19977ec8ba501126ef37c4046c6551bdb6cdea0))
+
+
+
+
+
 ## [4.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.1.3...@argos-ci/browser@4.1.4) (2025-07-23)
 
 

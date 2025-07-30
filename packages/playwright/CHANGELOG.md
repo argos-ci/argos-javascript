@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.9](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@5.0.8...@argos-ci/playwright@5.0.9) (2025-07-30)
+
+
+### Bug Fixes
+
+* disable loadImageSrcset if not using the viewport option ([0ea7677](https://github.com/argos-ci/argos-javascript/commit/0ea7677419fc3239b355e396e1984746017bef44))
+
+
+
+
+
 ## [5.0.8](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@5.0.7...@argos-ci/playwright@5.0.8) (2025-07-23)
 
 **Note:** Version bump only for package @argos-ci/playwright
