@@ -320,8 +320,8 @@ export async function argosScreenshot(
 
   async function stabilizeAndScreenshot(name: string) {
     await waitForReadiness(page, options);
-
     const afterEach = await beforeEach(page, options);
+    await waitForReadiness(page, options);
 
     const [screenshotPath, metadata] = await Promise.all([
       getScreenshotPath(name),
