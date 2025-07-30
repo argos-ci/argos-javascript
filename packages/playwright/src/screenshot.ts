@@ -418,6 +418,7 @@ export async function argosScreenshot(
 
     await waitForReadiness(page, options);
     const afterEach = await beforeEach(page, options);
+    await waitForReadiness(page, options);
 
     await Promise.all([
       handle.screenshot({

@@ -182,8 +182,8 @@ Cypress.Commands.add(
 
     function stabilizeAndScreenshot(name: string) {
       waitForReadiness(options);
-
       const afterEach = beforeEach(options);
+      waitForReadiness(options);
 
       const ref: any = {};
 

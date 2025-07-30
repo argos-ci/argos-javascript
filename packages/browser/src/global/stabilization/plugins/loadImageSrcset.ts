@@ -7,7 +7,7 @@ import type { Plugin } from "..";
  */
 export const plugin = {
   name: "loadImageSrcset" as const,
-  beforeAll(options) {
+  beforeEach(options) {
     // If the user is not using viewports, do nothing.
     if (!options.viewports || options.viewports.length === 0) {
       return undefined;
@@ -45,14 +45,6 @@ export const plugin = {
       img.setAttribute("srcset", bustSrcset(srcset));
     }
 
-    function handleResize() {
-      Array.from(document.images).forEach(forceSrcsetReload);
-    }
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    Array.from(document.images).forEach(forceSrcsetReload);
   },
 } satisfies Plugin;
