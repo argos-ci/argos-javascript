@@ -7,7 +7,12 @@ import type { Plugin } from "..";
  */
 export const plugin = {
   name: "loadImageSrcset" as const,
-  beforeAll() {
+  beforeAll(options) {
+    // If the user is not using viewports, do nothing.
+    if (!options.viewports || options.viewports.length === 0) {
+      return undefined;
+    }
+
     function addCacheBusterToSrc(src: string) {
       const url = new URL(src, window.location.href);
       if (!url.hash || url.hash.match(/^#argosBust=\d+$/)) {

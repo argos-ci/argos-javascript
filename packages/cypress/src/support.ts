@@ -87,12 +87,13 @@ function injectArgos() {
 function getStabilizationContext(
   options: ArgosScreenshotOptions,
 ): StabilizationContext {
-  const { argosCSS } = options;
+  const { argosCSS, viewports } = options;
   const fullPage = !options.capture || options.capture === "fullPage";
 
   return {
     fullPage,
     argosCSS,
+    viewports,
     options: options.stabilize,
   };
 }
