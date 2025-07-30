@@ -13,38 +13,48 @@ export const plugin = {
       return undefined;
     }
 
-    function addCacheBusterToSrc(src: string) {
-      const url = new URL(src, window.location.href);
-      if (!url.hash || url.hash.match(/^#argosBust=\d+$/)) {
-        url.hash = `argosBust=${String(Date.now())}`;
-      } else {
-        url.searchParams.set("argosBust", String(Date.now()));
-      }
-      return url.toString();
-    }
-
-    function bustSrcset(srcset: string) {
-      return srcset
+    function getLargestSrcFromSrcset(srcset: string) {
+      // Parse srcset into array of {url, width}
+      const sources = srcset
         .split(",")
         .map((item) => {
           const [url, size] = item.trim().split(/\s+/);
           if (!url) {
-            return item;
+            return null;
           }
-          const bustedUrl = addCacheBusterToSrc(url);
-          return size ? `${bustedUrl} ${size}` : bustedUrl;
+          // Only handle width descriptors (e.g., 800w)
+          const widthMatch = size && size.match(/^(\d+)w$/);
+          if (!widthMatch) {
+            return { url, width: 0 };
+          }
+          const width = parseInt(widthMatch[1]!, 10);
+          return { url, width };
         })
-        .join(", ");
+        .filter((x) => x !== null);
+
+      if (sources.length === 0) {
+        return srcset;
+      }
+
+      // Find the source with the largest width
+      const largest = sources.reduce((max, curr) =>
+        curr.width > max.width ? curr : max,
+      );
+
+      // Return only the largest source as srcset
+      return largest.url;
     }
 
-    function forceSrcsetReload(img: HTMLImageElement) {
+    function forceSrcsetReload(img: Element) {
       const srcset = img.getAttribute("srcset");
       if (!srcset) {
         return;
       }
-      img.setAttribute("srcset", bustSrcset(srcset));
+      img.setAttribute("srcset", getLargestSrcFromSrcset(srcset));
     }
 
-    Array.from(document.images).forEach(forceSrcsetReload);
+    Array.from(document.querySelectorAll("img,source")).forEach(
+      forceSrcsetReload,
+    );
   },
 } satisfies Plugin;
