@@ -11,6 +11,7 @@ export default {
     layout: "fullscreen",
 
     argos: {
+      fitToContent: false,
       modes: {
         light: { disabled: true },
         dark: { disabled: true },

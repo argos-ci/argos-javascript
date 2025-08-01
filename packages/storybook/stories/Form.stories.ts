@@ -1,9 +1,10 @@
 import { userEvent, within } from "storybook/test";
+import type { StoryObj, Meta } from "@storybook/react-vite";
 
 import { Form } from "./Form";
 import { allModes } from "../.storybook/modes";
 
-export default {
+const meta: Meta<typeof Form> = {
   title: "Example/Form",
   component: Form,
   parameters: {
@@ -16,8 +17,21 @@ export default {
   },
 };
 
-export const FillForm = {
-  play: async ({ canvasElement }) => {
+export default meta;
+
+type Story = StoryObj<typeof Form>;
+
+export const FillForm: Story = {
+  play: async (ctx) => {
+    const { canvasElement } = ctx;
+
+    // Only on vitest
+    if ("env" in import.meta) {
+      await import("../src/vitest").then(async ({ argosScreenshot }) => {
+        await argosScreenshot(ctx, "before-fill");
+      });
+    }
+
     const canvas = within(canvasElement);
 
     const emailInput = canvas.getByLabelText("Email", {

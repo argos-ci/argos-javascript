@@ -1,7 +1,10 @@
-import React from "react";
+import * as React from "react";
 
 export const Form = () => {
-  const [submitted, setSubmitted] = React.useState(null);
+  const [submitted, setSubmitted] = React.useState<{
+    email: string;
+    password: string;
+  } | null>(null);
   if (submitted) {
     return (
       <div>
@@ -16,7 +19,9 @@ export const Form = () => {
       onSubmit={(event) => {
         event.preventDefault();
         setSubmitted({
+          // @ts-expect-error fine
           email: event.target.email.value,
+          // @ts-expect-error fine
           password: event.target.password.value,
         });
       }}

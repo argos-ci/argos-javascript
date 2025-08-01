@@ -9,7 +9,11 @@ Integrate visual testing with your Storybook seamlessly using Argos. This SDK al
 
 ## Getting Started
 
-To get started with Argos and Storybook, check out our [Storybook Quickstart Guide](/quickstart/storybook).
+To get started with Argos and Storybook, check out our quick start guides:
+
+- [Storybook + Vitest](/quickstart/storybook).
+- [Storybook + Test Runner](/quickstart/storybook-test-runner).
+- [Storybook Legacy (\<v8)](/quickstart/storybook-legacy).
 
 ## Comparing Argos and Chromatic
 
@@ -20,20 +24,131 @@ While both Argos and Chromatic provide visual testing for Storybook, they take d
 
 For a deeper comparison, see our [Argos vs Chromatic guide](https://argos-ci.com/compare/chromatic).
 
+## Vitest vs Test Runner
+
+Argos supports both [Vitest](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon) and [Test Runner](https://storybook.js.org/docs/writing-tests/integrations/test-runner) for visual testing in Storybook.
+
+Storybook recommends using Vitest for testing and Argos experience is also better if you use it. To learn more about the differences, see [Vitest vs Test Runner comparison guide](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon#comparison-to-the-test-runner).
+
 ## Interactions using the play function
 
 The `play` function in Storybook lets you define interactions for your components, ensuring they are in a specific state before capturing a screenshot.
 
-When running tests, the Storybook test runner **automatically executes the `play` function** before taking a screenshot. This means:
+When running tests, either [Vitest](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon) or [Test Runner](https://storybook.js.org/docs/writing-tests/integrations/test-runner) **automatically executes the `play` function** before taking a screenshot.
 
-- Your component will be in the expected state before the screenshot is taken.
-- You **do not** need to call the `play` function manually, Argos handles it for you.
+If you use Vitest, you can also take custom screenshots in your tests using the `argosScreenshot` function:
 
-This ensures your visual tests accurately reflect how users interact with your components.
+```ts
+import { argosScreenshot } from "@argos-ci/storybook/vitest";
+
+export const FormStory: Story = {
+  play: async (ctx) => {
+    const { canvasElement } = ctx;
+
+    // Take a screenshot before filling the form
+    await argosScreenshot(ctx, "before-fill");
+
+    const canvas = within(canvasElement);
+
+    await userEvent.type(
+      canvas.getByLabelText("Email", { selector: "input" }),
+      "example-email@email.com",
+      { delay: 100 },
+    );
+
+    // Take a screenshot after filling the form
+    await argosScreenshot(ctx, "after-fill");
+
+    await userEvent.click(canvas.getByRole("button"));
+  },
+};
+```
+
+## Story Modes
+
+Argos supports Story modes to capture different states of your components. Read our [Story modes guide](/docs/storybook-story-modes) for more details.
+
+## Troubleshooting
+
+### `@storybook/addon-themes` is not working with Vitest
+
+If you are using the `@storybook/addon-themes` with Vitest, you may encounter issues with the theme not being applied correctly during tests. This is a known limitation, as the `@storybook/addon-themes` is not compatible with Vitest's test environment.
+
+To work around this limitation, we added an `applyGlobals` option to the `argosVitestPlugin`. This allows you to manually apply the theme based on the globals set in your Storybook configuration.
+
+```ts
+argosVitestPlugin({
+  applyGlobals: async ({ handler, globals }) => {
+    await handler.evaluate((globals) => {
+      if (globals.theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }, globals);
+  },
+}),
+```
 
 ## API Overview
 
+### `@argos-ci/storybook/vitest-plugin`
+
+Exposes the Vitest plugin to capture screenshots of your Storybook stories during tests.
+
+```ts
+import { argosVitestPlugin } from "@argos-ci/storybook/vitest-plugin";
+import { defineConfig } from "vitest/config";
+export default defineConfig({
+  plugins: [
+    argosVitestPlugin({
+      uploadToArgos: true, // Set to false to disable uploading
+      buildName: "My Build Name", // Optional build name
+    }),
+  ],
+});
+```
+
+- **`uploadToArgos`**: Set to `true` to upload screenshots to Argos CI.
+
+Also supports all options from the [Playwright `argosScreenshot` function](/docs/playwright#argosscreenshotpage-name-options) and [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/UploadParameters.html).
+
+### `@argos-ci/storybook/vitest`
+
+Take a screenshot of the Story inside the `play` function of a Storybook story (only available when using Vitest).
+
+```ts
+import { argosScreenshot } from "@argos-ci/storybook/vitest";
+
+export const Example: Story = {
+  play: async (ctx) => {
+    // Take a screenshot of the story
+    await argosScreenshot(ctx, "example-screenshot");
+  },
+};
+```
+
+- **`ctx`**: The Storybook context provided to the `play` function.
+- **`name`**: A name for the screenshot.
+
+### `@argos-ci/storybook/test-runner`
+
 ### argosScreenshot(page, context[, options])
+
+Take a screenshot of the Story inside the `postVisit` hook of the Storybook Test Runner.
+
+```ts
+import { type TestRunnerConfig } from "@storybook/test-runner";
+import { argosScreenshot } from "@argos-ci/storybook/test-runner";
+
+const config: TestRunnerConfig = {
+  async postVisit(page, context) {
+    await argosScreenshot(page, context);
+  },
+};
+
+export default config;
+```
 
 - **`page`**: The [Playwright Page](https://playwright.dev/docs/api/class-page) instance.
 - **`context`**: The test context provided by the Storybook test runner.
@@ -44,8 +159,10 @@ This ensures your visual tests accurately reflect how users interact with your c
 
 ## Additional Resources
 
-- [Quickstart with Argos + Storybook](/quickstart/storybook)
-- [Quickstart for Argos + Storybook Legacy (\<v8)](/quickstart/legacy-storybook)
-- [Argos + Storybook example](https://github.com/argos-ci/argos-javascript/tree/main/examples/storybook)
+- [Quickstart with Argos + Storybook + Vitest](/quickstart/storybook)
+- [Quickstart with Argos + Storybook Test Runner](/quickstart/storybook-test-runner)
+- [Quickstart with Argos + Storybook Legacy (\<v8)](/quickstart/storybook-legacy)
+- [Argos + Storybook Test Runner example](https://github.com/argos-ci/argos-javascript/tree/main/examples/storybook-test-runner)
+- [Argos + Storybook Vitest example](https://github.com/argos-ci/argos-javascript/tree/main/examples/storybook-vitest)
 - [@argos-ci/storybook on GitHub](https://github.com/argos-ci/argos-javascript/tree/main/packages/storybook)
 - [@argos-ci/storybook on npm](https://www.npmjs.com/package/@argos-ci/storybook)
