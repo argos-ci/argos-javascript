@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.8.1...@argos-ci/api-client@0.8.2) (2025-08-01)
+
+**Note:** Version bump only for package @argos-ci/api-client
+
+
+
+
+
 ## [0.8.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.8.0...@argos-ci/api-client@0.8.1) (2025-03-25)
 
 **Note:** Version bump only for package @argos-ci/api-client

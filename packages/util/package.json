@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/util",
   "description": "Set of utilities used across all Argos SDKs.",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {

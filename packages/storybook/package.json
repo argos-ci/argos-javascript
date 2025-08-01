@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/storybook",
   "description": "Visual testing for Storybook test runner.",
-  "version": "2.1.7",
+  "version": "3.0.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {

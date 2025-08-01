@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@2.1.7...@argos-ci/storybook@3.0.0) (2025-08-01)
+
+
+### Features
+
+* add support for Storybook Vitest Addon ([1fed57b](https://github.com/argos-ci/argos-javascript/commit/1fed57b8e1279e7919241c268ae782e9e2bae940))
+
+
+### BREAKING CHANGES
+
+* - `argosScreenshot` import path has changed to `@argos-ci/storybook/test-runner`.
+- All screenshots are now named with `${context.storyId} mode-[<mode>].png` format.
+
+
+
+
+
 ## [2.1.7](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@2.1.6...@argos-ci/storybook@2.1.7) (2025-07-30)
 
 **Note:** Version bump only for package @argos-ci/storybook
