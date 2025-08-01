@@ -66,7 +66,7 @@ export const FormStory: Story = {
 
 ## Story Modes
 
-Argos supports Story modes to capture different states of your components. Read our [Story modes guide](/docs/storybook-story-modes) for more details.
+Argos supports Story modes to capture different states of your components. Read our [Story modes guide](/storybook-story-modes) for more details.
 
 ## Troubleshooting
 
@@ -111,7 +111,7 @@ export default defineConfig({
 
 - **`uploadToArgos`**: Set to `true` to upload screenshots to Argos CI.
 
-Also supports all options from the [Playwright `argosScreenshot` function](/docs/playwright#argosscreenshotpage-name-options) and [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/UploadParameters.html).
+Also supports all options from the [Playwright `argosScreenshot` function](/playwright#argosscreenshotpage-name-options) and [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/UploadParameters.html).
 
 ### `@argos-ci/storybook/vitest`
 
@@ -152,7 +152,7 @@ export default config;
 
 - **`page`**: The [Playwright Page](https://playwright.dev/docs/api/class-page) instance.
 - **`context`**: The test context provided by the Storybook test runner.
-- **`options`**: Customizable options for `argosScreenshot`. Explore [available options](https://argos-ci.com/docs/playwright#argosscreenshotpage-name-options).
+- **`options`**: Customizable options for `argosScreenshot`. Explore [available options](/playwright#argosscreenshotpage-name-options).
   - **`options.fitToContent`**: Adjusts the screenshot to the content size (default: `true`).
   - **`options.fitToContent.padding`**: Sets padding around the content in pixels (default: `16`).
   - **`options.fitToContent.zoom`**: Specifies the zoom level (default: `2`).
