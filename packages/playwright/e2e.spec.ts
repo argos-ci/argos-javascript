@@ -57,7 +57,7 @@ test.describe("#argosScreenshot", () => {
       } catch (e: any) {
         error = e;
       }
-      expect(error.message).toBe("A Playwright `page` object is required.");
+      expect(error.message).toBe("A Playwright `handler` object is required.");
     });
 
     test("throws without name", async ({ page }) => {

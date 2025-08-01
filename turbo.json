@@ -15,7 +15,7 @@
       ]
     },
     "check-types": {
-      "dependsOn": ["^check-types"],
+      "dependsOn": ["build", "^check-types"],
       "outputs": [],
       "inputs": [
         "$TURBO_ROOT$/tsconfig.json",

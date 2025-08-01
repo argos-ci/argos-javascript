@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@argos-ci/cli": "^2.4.7",
-    "@argos-ci/storybook": "^0.1.2",
+    "@argos-ci/storybook": "^3.0.0",
     "@eslint/js": "^9.13.0",
     "@storybook/addon-essentials": "^8.3.6",
     "@storybook/addon-interactions": "^8.3.6",
