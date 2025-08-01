@@ -1,20 +1,29 @@
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type { Service, Context } from "../types";
 
-const getPrNumber = ({ env }: Context) => {
+function getPrNumber(context: Context) {
+  const { env } = context;
   return env.BITRISE_PULL_REQUEST ? Number(env.BITRISE_PULL_REQUEST) : null;
-};
+}
+
+function getRepository(context: Context): string | null {
+  const { env } = context;
+  if (env.BITRISEIO_GIT_REPOSITORY_OWNER && env.BITRISEIO_GIT_REPOSITORY_SLUG) {
+    return `${env.BITRISEIO_GIT_REPOSITORY_OWNER}/${env.BITRISEIO_GIT_REPOSITORY_SLUG}`;
+  }
+  return null;
+}
 
 const service: Service = {
   name: "Bitrise",
   key: "bitrise",
   detect: ({ env }) => Boolean(env.BITRISE_IO),
-  config: ({ env }) => {
+  config: (context) => {
+    const { env } = context;
     return {
       commit: env.BITRISE_GIT_COMMIT || null,
       branch: env.BITRISE_GIT_BRANCH || null,
-      owner: env.BITRISEIO_GIT_REPOSITORY_OWNER || null,
-      repository: env.BITRISEIO_GIT_REPOSITORY_SLUG || null,
+      repository: getRepository(context),
       jobId: null,
       runId: null,
       runAttempt: null,

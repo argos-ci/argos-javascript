@@ -182,7 +182,6 @@ export interface Config {
   parallelTotal: number | null;
   referenceBranch: string | null;
   referenceCommit: string | null;
-  owner: string | null;
   repository: string | null;
   jobId: string | null;
   runId: string | null;
@@ -221,7 +220,6 @@ export async function readConfig(options: Partial<Config> = {}) {
       options.referenceBranch || config.get("referenceBranch") || null,
     referenceCommit:
       options.referenceCommit || config.get("referenceCommit") || null,
-    owner: ciEnv?.owner || null,
     repository: ciEnv?.repository || null,
     jobId: ciEnv?.jobId || null,
     runId: ciEnv?.runId || null,

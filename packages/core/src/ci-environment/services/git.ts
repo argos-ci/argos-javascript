@@ -5,7 +5,17 @@ import {
   checkIsGitRepository,
   getMergeBaseCommitSha,
   listParentCommits,
+  getRepositoryURL,
 } from "../git";
+import { getRepositoryNameFromURL } from "../../util/url";
+
+function getRepository(): string | null {
+  const repositoryURL = getRepositoryURL();
+  if (!repositoryURL) {
+    return null;
+  }
+  return getRepositoryNameFromURL(repositoryURL);
+}
 
 const service: Service = {
   name: "Git",
@@ -15,8 +25,7 @@ const service: Service = {
     return {
       commit: head() || null,
       branch: branch() || null,
-      owner: null,
-      repository: null,
+      repository: getRepository(),
       jobId: null,
       runId: null,
       runAttempt: null,

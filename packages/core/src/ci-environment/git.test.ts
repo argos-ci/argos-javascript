@@ -1,4 +1,4 @@
-import { head, branch } from "./git";
+import { head, branch, getRepositoryURL } from "./git";
 import { describe, it, expect } from "vitest";
 
 describe("#head", () => {
@@ -7,11 +7,19 @@ describe("#head", () => {
   });
 });
 
-/**
- * This test can be run locally, too hard to make it work on CI.
- */
+// These tests are just examples to run locally
+// Hard to make it work reliably in CI
+
 describe.skip("#branch", () => {
   it("returns the current branch", () => {
     expect(branch()).toBe("main");
+  });
+});
+
+describe.skip("#getRepositoryURL", () => {
+  it("returns the repository URL", () => {
+    expect(getRepositoryURL()).toBe(
+      "git@github.com:argos-ci/argos-javascript.git",
+    );
   });
 });

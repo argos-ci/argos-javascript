@@ -1,17 +1,26 @@
-import type { Service } from "../types";
+import type { Context, Service } from "../types";
 import { head, branch, getMergeBaseCommitSha, listParentCommits } from "../git";
+import { getRepositoryNameFromURL } from "../../util/url";
+
+function getRepository(context: Context): string | null {
+  const { env } = context;
+  if (env.BUILDKITE_REPO) {
+    return getRepositoryNameFromURL(env.BUILDKITE_REPO);
+  }
+  return null;
+}
 
 const service: Service = {
   name: "Buildkite",
   key: "buildkite",
   detect: ({ env }) => Boolean(env.BUILDKITE),
-  config: ({ env }) => {
+  config: (context) => {
+    const { env } = context;
     return {
       // Buildkite doesn't work well so we fallback to git to ensure we have commit and branch
       commit: env.BUILDKITE_COMMIT || head() || null,
       branch: env.BUILDKITE_BRANCH || branch() || null,
-      owner: env.BUILDKITE_ORGANIZATION_SLUG || null,
-      repository: env.BUILDKITE_PROJECT_SLUG || null,
+      repository: getRepository(context),
       jobId: null,
       runId: null,
       runAttempt: null,

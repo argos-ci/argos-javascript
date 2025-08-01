@@ -45,6 +45,20 @@ export function branch() {
   }
 }
 
+/**
+ * Returns the repository URL.
+ */
+export function getRepositoryURL() {
+  try {
+    const url = execSync("git config --get remote.origin.url")
+      .toString()
+      .trim();
+    return url;
+  } catch {
+    return null;
+  }
+}
+
 function getMergeBaseCommitShaWithDepth(input: {
   base: string;
   head: string;

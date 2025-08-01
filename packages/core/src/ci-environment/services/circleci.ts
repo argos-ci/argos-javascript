@@ -1,26 +1,37 @@
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type { Service, Context } from "../types";
 
-const getPrNumber = ({ env }: Context) => {
-  const branchRegex = /pull\/(\d+)/;
-  const matches = branchRegex.exec(env.CIRCLE_PULL_REQUEST || "");
+function getPrNumber(context: Context) {
+  const { env } = context;
+  const matches = /pull\/(\d+)/.exec(env.CIRCLE_PULL_REQUEST || "");
   if (matches) {
     return Number(matches[1]);
   }
 
   return null;
-};
+}
+
+function getRepository(context: Context): string | null {
+  const { env } = context;
+  if (env.CIRCLE_PR_REPONAME && env.CIRCLE_PR_USERNAME) {
+    return `${env.CIRCLE_PR_USERNAME}/${env.CIRCLE_PR_REPONAME}`;
+  }
+  if (env.CIRCLE_PROJECT_USERNAME && env.CIRCLE_PROJECT_REPONAME) {
+    return `${env.CIRCLE_PROJECT_USERNAME}/${env.CIRCLE_PROJECT_REPONAME}`;
+  }
+  return null;
+}
 
 const service: Service = {
   name: "CircleCI",
   key: "circleci",
   detect: ({ env }) => Boolean(env.CIRCLECI),
-  config: ({ env }) => {
+  config: (context) => {
+    const { env } = context;
     return {
       commit: env.CIRCLE_SHA1 || null,
       branch: env.CIRCLE_BRANCH || null,
-      owner: env.CIRCLE_PROJECT_USERNAME || null,
-      repository: env.CIRCLE_PROJECT_REPONAME || null,
+      repository: getRepository(context),
       jobId: null,
       runId: null,
       runAttempt: null,

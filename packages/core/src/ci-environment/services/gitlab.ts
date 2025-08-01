@@ -1,16 +1,28 @@
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
-import type { Service } from "../types";
+import type { Context, Service } from "../types";
+
+function getRepository(context: Context): string | null {
+  const { env } = context;
+
+  // Merge request from a fork
+  if (env.CI_MERGE_REQUEST_PROJECT_PATH) {
+    return env.CI_MERGE_REQUEST_PROJECT_PATH;
+  }
+
+  // Fallback: current project
+  return env.CI_PROJECT_PATH || null;
+}
 
 const service: Service = {
   name: "GitLab",
   key: "gitlab",
   detect: ({ env }) => env.GITLAB_CI === "true",
-  config: ({ env }) => {
+  config: (context) => {
+    const { env } = context;
     return {
       commit: env.CI_COMMIT_SHA || null,
       branch: env.CI_COMMIT_REF_NAME || null,
-      owner: null,
-      repository: null,
+      repository: getRepository(context),
       jobId: null,
       runId: null,
       runAttempt: null,
