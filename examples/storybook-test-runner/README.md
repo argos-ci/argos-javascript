@@ -9,7 +9,7 @@
 
 <p align="center"><strong>The open source visual testing plaform for modern engineering teams.</strong></p>
 
-# Example of Argos + Storybook
+# Example of Argos + Storybook Test Runner
 
 This example showcases Argos Visual Testing integrated to [Storybook](https://storybook.js.org/) testing framework.
 
@@ -19,9 +19,11 @@ This example only shows how to takes screenshots using Storybook.
 
 It does not include any CI integration on purpose to keep it as clear as possible.
 
-Read [Argos documentations](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos/tree/main/examples) to find the best way to integrate your CI.
+Read [Argos documentations](https://argos-ci.com/docs) or explore [Storybook Testing in CI guide](https://storybook.js.org/docs/writing-tests/in-ci) to learn how to integrate into your CI.
 
 ## Links
 
+- [Quickstart with Argos + Storybook Test Runner](https://argos-ci.com/docs/quickstart/storybook-test-runner)
+- [Storybook SDK Reference](https://argos-ci.com/docs/storybook)
 - [Official Argos Docs](https://argos-ci.com/docs)
 - [Discord](https://argos-ci.com/discord)
