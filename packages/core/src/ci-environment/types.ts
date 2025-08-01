@@ -24,11 +24,6 @@ export interface CiEnvironment {
   branch: string | null;
 
   /**
-   * Owner of the repository.
-   */
-  owner: string | null;
-
-  /**
    * Repository name.
    */
   repository: string | null;

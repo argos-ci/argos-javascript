@@ -113,11 +113,22 @@ function getBranchFromPayload(payload: EventPayload): string | null {
   return null;
 }
 
-function getRepositoryFromContext({ env }: Context): string | null {
-  if (!env.GITHUB_REPOSITORY) {
-    return null;
+function getRepository(
+  context: Context,
+  payload: EventPayload | null,
+): string | null {
+  const { env } = context;
+
+  // If PR from fork
+  if (payload && "pull_request" in payload && payload.pull_request) {
+    const pr = payload.pull_request;
+    if (pr.head && pr.head.repo && pr.head.repo.full_name) {
+      return pr.head.repo.full_name;
+    }
   }
-  return env.GITHUB_REPOSITORY.split("/")[1] || null;
+
+  // Default: repository running the workflow
+  return env.GITHUB_REPOSITORY || null;
 }
 
 function readEventPayload({ env }: Context): EventPayload | null {
@@ -183,8 +194,7 @@ const service: Service = {
 
     return {
       commit: sha,
-      owner: env.GITHUB_REPOSITORY_OWNER || null,
-      repository: getRepositoryFromContext(context),
+      repository: getRepository(context, payload),
       jobId: env.GITHUB_JOB || null,
       runId: env.GITHUB_RUN_ID || null,
       runAttempt: env.GITHUB_RUN_ATTEMPT

@@ -1,26 +1,28 @@
 import type { Context, Service } from "../types";
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
 
-const getOwner = ({ env }: Context) => {
-  if (!env.TRAVIS_REPO_SLUG) {
-    return null;
-  }
-  return env.TRAVIS_REPO_SLUG.split("/")[0] || null;
-};
+function getRepository(context: Context): string | null {
+  const { env } = context;
 
-const getRepository = ({ env }: Context) => {
-  if (!env.TRAVIS_REPO_SLUG) {
-    return null;
+  if (env.TRAVIS_PULL_REQUEST_SLUG) {
+    // If this is a pull request from a fork, use the PR slug
+    return env.TRAVIS_PULL_REQUEST_SLUG;
   }
-  return env.TRAVIS_REPO_SLUG.split("/")[1] || null;
-};
 
-const getPrNumber = ({ env }: Context) => {
+  if (env.TRAVIS_REPO_SLUG) {
+    return env.TRAVIS_REPO_SLUG;
+  }
+
+  return null;
+}
+
+function getPrNumber(context: Context): number | null {
+  const { env } = context;
   if (env.TRAVIS_PULL_REQUEST) {
     return Number(env.TRAVIS_PULL_REQUEST);
   }
   return null;
-};
+}
 
 const service: Service = {
   name: "Travis CI",
@@ -32,7 +34,6 @@ const service: Service = {
     return {
       commit: env.TRAVIS_COMMIT || null,
       branch: env.TRAVIS_BRANCH || null,
-      owner: getOwner(ctx),
       repository: getRepository(ctx),
       jobId: null,
       runId: null,
