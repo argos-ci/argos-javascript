@@ -1,12 +1,29 @@
-# React + Vite
+<p align="center">
+  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
+    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
+  </picture>
+  </a>
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<p align="center"><strong>The open source visual testing plaform for modern engineering teams.</strong></p>
 
-Currently, two official plugins are available:
+# Example of Argos + Storybook Vitest
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This example showcases Argos Visual Testing integrated to [Storybook](https://storybook.js.org/) testing framework.
 
-## Expanding the ESLint configuration
+## Integrate with CI
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This example only shows how to takes screenshots using Storybook.
+
+It does not include any CI integration on purpose to keep it as clear as possible.
+
+Read [Argos documentations](https://argos-ci.com/docs) or explore [Storybook Testing in CI guide](https://storybook.js.org/docs/writing-tests/in-ci) to learn how to integrate into your CI.
+
+## Links
+
+- [Quickstart with Argos + Storybook + Vitest](https://argos-ci.com/docs/quickstart/storybook)
+- [Storybook SDK Reference](https://argos-ci.com/docs/storybook)
+- [Official Argos Docs](https://argos-ci.com/docs)
+- [Discord](https://argos-ci.com/discord)
