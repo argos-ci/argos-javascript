@@ -41,7 +41,6 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@types/node": "catalog:",
-    "openapi-typescript": "^7.8.0"
+    "@types/node": "catalog:"
   }
 }
