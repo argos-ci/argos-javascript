@@ -140,9 +140,9 @@ function applyFitToContent(
   const { padding, zoom } = fitToContent;
   return {
     ...options,
-    element: "body > div:nth-child(5)",
+    element: "body",
     argosCSS:
-      `body > div:nth-child(5) { padding: ${padding}px; width: fit-content; height: fit-content; zoom: ${zoom}; }` +
+      `body { padding: ${padding}px; width: fit-content; height: fit-content; min-height: initial; zoom: ${zoom}; }` +
       (options?.argosCSS ?? ""),
   };
 }
