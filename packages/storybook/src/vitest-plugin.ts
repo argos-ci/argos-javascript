@@ -140,9 +140,9 @@ function applyFitToContent(
   const { padding, zoom } = fitToContent;
   return {
     ...options,
-    element: "body > div:not(.sb-wrapper)",
+    element: "body > div:nth-child(5)",
     argosCSS:
-      `body > div:not(.sb-wrapper) { padding: ${padding}px; width: fit-content; height: fit-content; zoom: ${zoom}; }` +
+      `body > div:nth-child(5) { padding: ${padding}px; width: fit-content; height: fit-content; zoom: ${zoom}; }` +
       (options?.argosCSS ?? ""),
   };
 }
