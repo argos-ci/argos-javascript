@@ -18,6 +18,8 @@ export async function uploadFile(input: UploadInput): Promise<void> {
     body: new Uint8Array(file),
   });
   if (!response.ok) {
-    throw new Error(`Failed to upload file: ${response.statusText}`);
+    throw new Error(
+      `Failed to upload file to ${input.url}: ${response.status} ${response.statusText}`,
+    );
   }
 }
