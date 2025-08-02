@@ -331,7 +331,7 @@ export async function argosScreenshot(
     await writeMetadata(screenshotPath, metadata);
 
     const screenshotOptions: ScreenshotOptions = {
-      path: screenshotPath,
+      path: screenshotPath as ScreenshotOptions["path"],
       type: "png",
       fullPage,
       ...puppeteerOptions,
