@@ -42,7 +42,6 @@
   "dependencies": {
     "@argos-ci/api-client": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "axios": "^1.11.0",
     "convict": "^6.2.4",
     "debug": "^4.4.0",
     "fast-glob": "^3.3.3",

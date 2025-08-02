@@ -1,5 +1,4 @@
 import { readFile } from "node:fs/promises";
-import axios from "axios";
 
 interface UploadInput {
   url: string;
@@ -7,14 +6,16 @@ interface UploadInput {
   contentType: string;
 }
 
-export const upload = async (input: UploadInput) => {
+export async function uploadFile(input: UploadInput): Promise<void> {
   const file = await readFile(input.path);
-  await axios({
+  const response = await fetch(input.url, {
     method: "PUT",
-    url: input.url,
-    data: file,
     headers: {
       "Content-Type": input.contentType,
     },
+    body: file,
   });
-};
+  if (!response.ok) {
+    throw new Error(`Failed to upload file: ${response.statusText}`);
+  }
+}

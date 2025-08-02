@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
 import type { Service, Context } from "../types";
-import axios from "axios";
 import { debug } from "../../debug";
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type * as webhooks from "@octokit/webhooks";
@@ -51,27 +50,31 @@ DISABLE_GITHUB_TOKEN_WARNING: true
     return null;
   }
   try {
-    const result = await axios.get<GitHubPullRequest[]>(
+    const url = new URL(
       `https://api.github.com/repos/${env.GITHUB_REPOSITORY}/pulls`,
-      {
-        params: {
-          state: "open",
-          sort: "updated",
-          per_page: 30,
-          page: 1,
-        },
-        headers: {
-          Accept: "application/vnd.github+json",
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
     );
-    if (result.data.length === 0) {
+    url.search = new URLSearchParams({
+      state: "open",
+      sort: "updated",
+      per_page: "30",
+      page: "1",
+    }).toString();
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch pull requests: ${response.statusText}`);
+    }
+    const result = (await response.json()) as GitHubPullRequest[];
+    if (result.length === 0) {
       debug("Aborting because no pull request found");
       return null;
     }
-    const matchingPr = result.data.find((pr) => pr.head.sha === sha);
+    const matchingPr = result.find((pr) => pr.head.sha === sha);
     if (matchingPr) {
       debug("Pull request found", matchingPr);
       return matchingPr;

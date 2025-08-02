@@ -5,7 +5,7 @@ import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
 import { getAuthToken } from "./auth";
-import { upload as uploadToS3 } from "./s3";
+import { uploadFile } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
 import { getPlaywrightTracePath, readMetadata } from "@argos-ci/util";
@@ -138,7 +138,7 @@ async function uploadFilesToS3(
     }
     await Promise.all(
       chunk.map(async ({ url, path, contentType }) => {
-        await uploadToS3({
+        await uploadFile({
           url,
           path,
           contentType,
