@@ -56,9 +56,9 @@ export type ArgosScreenshotOptions = Omit<
  */
 export async function storybookArgosScreenshot<Handler extends Page | Frame>(
   /**
-   * Playwright `page` object.
+   * Playwright `handler` object.
    */
-  page: Handler,
+  handler: Handler,
   /**
    * Context of the story.
    */
@@ -99,7 +99,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
       }
 
       const attachments = await runHooksAndScreenshot({
-        page,
+        handler,
         context,
         metadata,
         options: argosOptions,
@@ -113,7 +113,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
     }
   } else {
     const attachments = await runHooksAndScreenshot({
-      page,
+      handler,
       context,
       metadata,
       options: argosOptions,
@@ -127,11 +127,11 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
   // Reset all globals to the initial state.
   if (context.applyGlobals) {
     await context.applyGlobals({
-      handler: page,
+      handler,
       globals: {},
     });
   }
-  await setStorybookGlobals({ page, globals: {} });
+  await setStorybookGlobals({ handler, globals: {} });
 
   return allAttachments;
 }
@@ -147,11 +147,11 @@ type StorybookPreview = {
  * Set the Storybook globals.
  */
 async function setStorybookGlobals(args: {
-  page: Page | Frame;
+  handler: Page | Frame;
   globals: StorybookGlobals;
 }) {
-  const { page, globals } = args;
-  await page.evaluate((globals) => {
+  const { handler, globals } = args;
+  await handler.evaluate((globals) => {
     const channel = (() => {
       if ("__STORYBOOK_PREVIEW__" in globalThis) {
         return ((globalThis as any).__STORYBOOK_PREVIEW__ as StorybookPreview)
@@ -182,23 +182,23 @@ async function setStorybookGlobals(args: {
  * Wait for the page to be ready and take a screenshot.
  */
 async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
-  page: Handler;
+  handler: Handler;
   context: StorybookScreenshotContext<Handler>;
   options: ArgosScreenshotOptions;
   globals: StorybookGlobals;
   suffix?: string;
   metadata: MetadataConfig;
 }) {
-  const { page, context, options, globals, metadata } = args;
+  const { handler, context, options, globals, metadata } = args;
 
   if (context.applyGlobals) {
     await context.applyGlobals({
-      handler: page,
+      handler,
       globals,
     });
   }
 
-  await setStorybookGlobals({ page, globals });
+  await setStorybookGlobals({ handler, globals });
 
   // Get the viewport from globals set on the mode.
   const viewportFromGlobals = globals.viewport
@@ -218,7 +218,7 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
   });
 
   return argosPlaywrightScreenshot(
-    page,
+    handler,
     context.name + (args.suffix ?? ""),
     options,
   );
