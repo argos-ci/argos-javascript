@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.2.1...@argos-ci/browser@5.0.0) (2025-08-02)
+
+
+### Features
+
+* require Node.js > 20 ([c894a82](https://github.com/argos-ci/argos-javascript/commit/c894a82c1b51acfced9892b32b31ebbf699282ca))
+
+
+### BREAKING CHANGES
+
+* Node.js v20 or higher is now required
+
+
+
+
+
 ## [4.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.2.0...@argos-ci/browser@4.2.1) (2025-08-01)
 
 **Note:** Version bump only for package @argos-ci/browser

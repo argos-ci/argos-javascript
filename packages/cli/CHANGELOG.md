@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@2.5.10...@argos-ci/cli@3.0.0) (2025-08-02)
+
+
+### Features
+
+* require Node.js > 20 ([c894a82](https://github.com/argos-ci/argos-javascript/commit/c894a82c1b51acfced9892b32b31ebbf699282ca))
+
+
+### BREAKING CHANGES
+
+* Node.js v20 or higher is now required
+
+
+
+
+
 ## [2.5.10](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@2.5.9...@argos-ci/cli@2.5.10) (2025-08-02)
 
 **Note:** Version bump only for package @argos-ci/cli

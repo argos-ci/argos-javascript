@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@3.2.3...@argos-ci/core@4.0.0) (2025-08-02)
+
+
+### Features
+
+* remove dependency to axios ([dee8fcb](https://github.com/argos-ci/argos-javascript/commit/dee8fcb274cc317cd914c02936fb39633a4387aa))
+* require Node.js > 20 ([c894a82](https://github.com/argos-ci/argos-javascript/commit/c894a82c1b51acfced9892b32b31ebbf699282ca))
+
+
+### BREAKING CHANGES
+
+* Node.js v20 or higher is now required
+
+
+
+
+
 ## [3.2.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@3.2.2...@argos-ci/core@3.2.3) (2025-08-02)
 
 **Note:** Version bump only for package @argos-ci/core
