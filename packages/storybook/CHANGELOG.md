@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@3.0.1...@argos-ci/storybook@3.0.2) (2025-08-02)
+
+
+### Bug Fixes
+
+* **storybook:** fix `fitToContent` behaviour ([a44465a](https://github.com/argos-ci/argos-javascript/commit/a44465a1d4c02a58db8608cafbfd65348c2f34db))
+
+
+
+
+
 ## [3.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@3.0.0...@argos-ci/storybook@3.0.1) (2025-08-02)
 
 
