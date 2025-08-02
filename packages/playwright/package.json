@@ -54,9 +54,9 @@
     "debug": "^4.4.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.51.1",
+    "@playwright/test": "^1.54.2",
     "@types/debug": "^4.1.12",
-    "@types/node": "^18.19.44"
+    "@types/node": "catalog:"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",
