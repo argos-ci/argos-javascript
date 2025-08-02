@@ -41,7 +41,7 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@types/node": "^18.19.44",
-    "openapi-typescript": "^7.6.1"
+    "@types/node": "catalog:",
+    "openapi-typescript": "^7.8.0"
   }
 }

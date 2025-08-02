@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@argos-ci/core": "workspace:*",
-    "commander": "^13.1.0",
+    "commander": "^14.0.0",
     "ora": "^8.2.0",
     "update-notifier": "^7.3.1"
   },

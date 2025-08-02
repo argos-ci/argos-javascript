@@ -9,9 +9,7 @@ onlyBuiltDependencies:
   - nx
   - puppeteer
   - sharp
-ignoredBuiltDependencies:
-  - edgedriver
-  - geckodriver
-
+  - unrs-resolver
 catalog:
+  '@types/node': ^18.19.44
   vitest: ^3.2.4

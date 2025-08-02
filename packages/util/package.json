@@ -44,7 +44,7 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@types/node": "^18.19.44",
+    "@types/node": "catalog:",
     "vitest": "catalog:"
   }
 }
