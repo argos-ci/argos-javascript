@@ -68,6 +68,51 @@ export const FormStory: Story = {
 
 Argos supports Story modes to capture different states of your components. Read our [Story modes guide](/storybook-story-modes) for more details.
 
+## Fit to Content vs Page
+
+By default, Argos screenshots are cropped to fit the rendered component (`fitToContent: true`). You can capture the entire page instead by setting `argos.parameters.fitToContent` to `false`.
+
+### Per Story
+
+```ts title="src/components/ProductPage/ProductPage.stories.js"
+import { ProductPage } from "./ProductPage";
+import { allModes } from "../../../.storybook/modes";
+
+export default {
+  title: "Pages/ProductPage",
+  component: ProductPage,
+  parameters: {
+    argos: {
+      fitToContent: false,
+    },
+  },
+};
+```
+
+### Project-Wide Setting
+
+```ts title=".storybook/preview.js"
+import { allModes } from "./modes";
+
+const preview = {
+  parameters: {
+    argos: {
+      argos: {
+        fitToContent: false,
+      },
+    },
+  },
+};
+
+export default preview;
+```
+
+### Options
+
+- **`fitToContent`**: Adjusts the screenshot to the content size (default: `true`).
+- **`fitToContent.padding`**: Sets padding around the content in pixels (default: `16`).
+- **`fitToContent.zoom`**: Specifies the zoom level (default: `2`).
+
 ## Troubleshooting
 
 ### `@storybook/addon-themes` is not working with Vitest
@@ -153,9 +198,6 @@ export default config;
 - **`page`**: The [Playwright Page](https://playwright.dev/docs/api/class-page) instance.
 - **`context`**: The test context provided by the Storybook test runner.
 - **`options`**: Customizable options for `argosScreenshot`. Explore [available options](/playwright#argosscreenshotpage-name-options).
-  - **`options.fitToContent`**: Adjusts the screenshot to the content size (default: `true`).
-  - **`options.fitToContent.padding`**: Sets padding around the content in pixels (default: `16`).
-  - **`options.fitToContent.zoom`**: Specifies the zoom level (default: `2`).
 
 ## Additional Resources
 
