@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@3.0.0...@argos-ci/storybook@3.0.1) (2025-08-02)
+
+
+### Bug Fixes
+
+* **storybook:** fix fitElement selector in vitest ([536715f](https://github.com/argos-ci/argos-javascript/commit/536715f7cd7ab3c593c96a8081d80f054a470181))
+
+
+
+
+
 # [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@2.1.7...@argos-ci/storybook@3.0.0) (2025-08-01)
 
 
