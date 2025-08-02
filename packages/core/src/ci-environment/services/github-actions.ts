@@ -65,6 +65,7 @@ DISABLE_GITHUB_TOKEN_WARNING: true
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         "X-GitHub-Api-Version": "2022-11-28",
       },
+      signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
       throw new Error(`Failed to fetch pull requests: ${response.statusText}`);

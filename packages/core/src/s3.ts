@@ -12,8 +12,10 @@ export async function uploadFile(input: UploadInput): Promise<void> {
     method: "PUT",
     headers: {
       "Content-Type": input.contentType,
+      "Content-Length": file.length.toString(),
     },
-    body: file,
+    signal: AbortSignal.timeout(30_000),
+    body: new Uint8Array(file),
   });
   if (!response.ok) {
     throw new Error(`Failed to upload file: ${response.statusText}`);
