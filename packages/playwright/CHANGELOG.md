@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.0.0...@argos-ci/playwright@6.0.1) (2025-08-05)
+
+
+### Bug Fixes
+
+* **playwright:** allow to override parallel config ([3678a85](https://github.com/argos-ci/argos-javascript/commit/3678a85f6f1eba72bb89ac0a36502f1534194659)), closes [#213](https://github.com/argos-ci/argos-javascript/issues/213)
+
+
+
+
+
 # [6.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@5.0.11...@argos-ci/playwright@6.0.0) (2025-08-02)
 
 
