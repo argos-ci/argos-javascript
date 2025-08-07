@@ -294,6 +294,10 @@ class ArgosReporter implements Reporter {
     }
     return;
   }
+
+  printsToStdio() {
+    return false;
+  }
 }
 
 export default ArgosReporter;
