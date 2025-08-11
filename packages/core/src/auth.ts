@@ -7,19 +7,17 @@ const base64Encode = (obj: any) =>
 export function getAuthToken({
   token,
   ciProvider,
-  owner,
   repository,
   jobId,
   runId,
   prNumber,
 }: {
-  token?: string | null;
-  ciProvider?: string | null;
-  owner?: string | null;
-  repository?: string | null;
-  jobId?: string | null;
-  runId?: string | null;
-  prNumber?: number | null;
+  token: string | null;
+  ciProvider: string | null;
+  repository: string | null;
+  jobId: string | null;
+  runId: string | null;
+  prNumber: number | null;
 }) {
   if (token) {
     return token;
@@ -27,18 +25,20 @@ export function getAuthToken({
 
   switch (ciProvider) {
     case "github-actions": {
-      if (!owner || !repository || !jobId || !runId) {
+      if (!repository || !jobId || !runId) {
         throw new Error(
           `Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'`,
         );
       }
 
+      const [owner, repo] = repository.split("/");
+
       return `tokenless-github-${base64Encode({
         owner,
-        repository,
+        repository: repo,
         jobId,
         runId,
-        prNumber,
+        prNumber: prNumber ?? undefined,
       })}`;
     }
 

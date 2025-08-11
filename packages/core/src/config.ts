@@ -141,11 +141,6 @@ const schema = {
     default: null,
     nullable: true,
   },
-  owner: {
-    format: String,
-    default: null,
-    nullable: true,
-  },
   repository: {
     format: String,
     default: null,

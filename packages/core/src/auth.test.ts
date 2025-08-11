@@ -6,7 +6,14 @@ describe("#getAuthToken", () => {
   describe("without CI", () => {
     describe("without token", () => {
       it("should throw", () => {
-        const config = {};
+        const config = {
+          token: null,
+          ciProvider: null,
+          repository: null,
+          jobId: null,
+          runId: null,
+          prNumber: null,
+        };
         expect(() => getAuthToken(config)).toThrow(
           "Missing Argos repository token 'ARGOS_TOKEN'",
         );
@@ -15,14 +22,28 @@ describe("#getAuthToken", () => {
 
     describe("with token", () => {
       it("should return bearer token", () => {
-        const config = { token: "this-token" };
+        const config = {
+          token: "this-token",
+          ciProvider: null,
+          repository: null,
+          jobId: null,
+          runId: null,
+          prNumber: null,
+        };
         expect(getAuthToken(config)).toBe(`this-token`);
       });
     });
   });
 
   describe("with unknown CI", () => {
-    const configProps = { ciProvider: "unknown" };
+    const configProps = {
+      token: null,
+      repository: null,
+      jobId: null,
+      runId: null,
+      prNumber: null,
+      ciProvider: "unknown",
+    };
 
     describe("without token", () => {
       it("should throw", () => {
@@ -42,7 +63,14 @@ describe("#getAuthToken", () => {
   });
 
   describe("with Github Actions CI", () => {
-    const configProps = { ciProvider: "github-actions" };
+    const configProps = {
+      token: null,
+      repository: null,
+      jobId: null,
+      runId: null,
+      prNumber: null,
+      ciProvider: "github-actions",
+    };
 
     describe("with token", () => {
       it("should return bearer token", () => {
@@ -55,18 +83,17 @@ describe("#getAuthToken", () => {
       it("should return a composite token", () => {
         const config = {
           ...configProps,
-          owner: "this-owner",
-          repository: "this-repository",
+          repository: "this-owner/this-repository",
           jobId: "this-jobId",
           runId: "12345",
         };
 
         const base64 = Buffer.from(
           JSON.stringify({
-            owner: config.owner,
-            repository: config.repository,
-            jobId: config.jobId,
-            runId: config.runId,
+            owner: "this-owner",
+            repository: "this-repository",
+            jobId: "this-jobId",
+            runId: "12345",
           }),
           "utf8",
         ).toString("base64");
@@ -76,6 +103,34 @@ describe("#getAuthToken", () => {
         expect(bearerToken).toBe(`tokenless-github-${base64}`);
         expect(bearerToken).toBe(
           "tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSJ9",
+        );
+      });
+
+      it("should return a composite token with PR number", () => {
+        const config = {
+          ...configProps,
+          repository: "this-owner/this-repository",
+          jobId: "this-jobId",
+          runId: "12345",
+          prNumber: 42,
+        };
+
+        const base64 = Buffer.from(
+          JSON.stringify({
+            owner: "this-owner",
+            repository: "this-repository",
+            jobId: "this-jobId",
+            runId: "12345",
+            prNumber: 42,
+          }),
+          "utf8",
+        ).toString("base64");
+
+        const bearerToken = getAuthToken(config);
+
+        expect(bearerToken).toBe(`tokenless-github-${base64}`);
+        expect(bearerToken).toBe(
+          "tokenless-github-eyJvd25lciI6InRoaXMtb3duZXIiLCJyZXBvc2l0b3J5IjoidGhpcy1yZXBvc2l0b3J5Iiwiam9iSWQiOiJ0aGlzLWpvYklkIiwicnVuSWQiOiIxMjM0NSIsInByTnVtYmVyIjo0Mn0=",
         );
       });
     });
