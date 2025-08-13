@@ -59,23 +59,57 @@ export function getRepositoryURL() {
   }
 }
 
-function getMergeBaseCommitShaWithDepth(input: {
-  base: string;
-  head: string;
-  depth: number;
-}): string | null {
-  execSync(
-    `git fetch --update-head-ok --depth ${input.depth} origin ${input.head}:${input.head}`,
-  );
-  execSync(
-    `git fetch --update-head-ok --depth ${input.depth} origin ${input.base}:${input.base}`,
-  );
-  const mergeBase = execSync(`git merge-base ${input.head} ${input.base}`)
-    .toString()
-    .trim();
-  return mergeBase || null;
+/**
+ * Run git merge-base command.
+ */
+function gitMergeBase(input: { base: string; head: string }) {
+  try {
+    return execSync(`git merge-base ${input.head} ${input.base}`)
+      .toString()
+      .trim();
+  } catch (error) {
+    // When a merge base is not found, it returns a status of 1 with no error.
+    // In this case it's not a fatal error, just no merge-base found.
+    if (
+      checkIsExecError(error) &&
+      error.status === 1 &&
+      error.stderr.toString() === ""
+    ) {
+      return null;
+    }
+    throw error;
+  }
 }
 
+/**
+ * Run git fetch with a specific ref and depth.
+ */
+function gitFetch(input: { ref: string; depth: number }) {
+  execSync(
+    `git fetch --update-head-ok --depth ${input.depth} origin ${input.ref}:${input.ref}`,
+  );
+}
+
+/**
+ * Check if an error is an exec error that includes stderr.
+ */
+function checkIsExecError(
+  error: unknown,
+): error is Error & { stderr: Buffer; status: number } {
+  return (
+    error instanceof Error &&
+    "status" in error &&
+    typeof error.status === "number" &&
+    "stderr" in error &&
+    Buffer.isBuffer(error.stderr)
+  );
+}
+
+/**
+ * Get the merge base commit SHA.
+ * Fetch both base and head with depth and then run merge base.
+ * Try to find a merge base with a depth of 1000 max.
+ */
 export function getMergeBaseCommitSha(input: {
   base: string;
   head: string;
@@ -83,10 +117,9 @@ export function getMergeBaseCommitSha(input: {
   let depth = 200;
 
   while (depth < 1000) {
-    const mergeBase = getMergeBaseCommitShaWithDepth({
-      depth,
-      ...input,
-    });
+    gitFetch({ ref: input.head, depth });
+    gitFetch({ ref: input.base, depth });
+    const mergeBase = gitMergeBase(input);
     if (mergeBase) {
       return mergeBase;
     }
