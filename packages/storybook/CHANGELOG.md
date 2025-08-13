@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@4.0.4...@argos-ci/storybook@4.0.5) (2025-08-13)
+
+
+### Bug Fixes
+
+* **storybook:** fix timeout and instability with test runner ([0437d07](https://github.com/argos-ci/argos-javascript/commit/0437d072e357c8e64c0842f50bfb6390be241a47))
+
+
+
+
+
 ## [4.0.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@4.0.3...@argos-ci/storybook@4.0.4) (2025-08-13)
 
 **Note:** Version bump only for package @argos-ci/storybook
