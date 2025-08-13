@@ -40,7 +40,7 @@ export async function argosScreenshot(
     {
       name: storyContext.id,
       playwrightLibraries: ["@storybook/test-runner"],
-      applyGlobals: async ({ handler }) => {
+      beforeScreenshot: async ({ handler }) => {
         await waitForPageReady(handler);
       },
       story: {
