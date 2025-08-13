@@ -19,23 +19,11 @@ export type StorybookScreenshotContext<Handler extends Page | Frame> = {
   playwrightLibraries: string[];
   test?: MetadataConfig["test"];
   setViewportSize: (size: ViewportSize | "default") => Promise<void>;
-  /**
-   * Opportunity to apply globals or other context-specific settings.
-   * This can be useful to emulate dark mode or other visual modes.
-   * @example
-   * ```typescript
-   * applyGlobals: async ({ frame, globals }) => {
-   *   await frame.evaluate((globals) => {
-   *     if (globals.theme === "dark") {
-   *       document.documentElement.classList.add("dark");
-   *     } else {
-   *       document.documentElement.classList.remove("dark");
-   *     }
-   *   }, globals);
-   * }
-   * ```
-   */
-  applyGlobals?: (input: {
+  beforeScreenshot?: (input: {
+    handler: Handler;
+    globals: StorybookGlobals;
+  }) => Promise<void>;
+  afterScreenshot?: (input: {
     handler: Handler;
     globals: StorybookGlobals;
   }) => Promise<void>;
@@ -124,14 +112,14 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
 
   await context.setViewportSize("default");
 
-  // Reset all globals to the initial state.
-  if (context.applyGlobals) {
-    await context.applyGlobals({
+  await setStorybookGlobals({ handler, globals: {} });
+
+  if (context.afterScreenshot) {
+    await context.afterScreenshot({
       handler,
       globals: {},
     });
   }
-  await setStorybookGlobals({ handler, globals: {} });
 
   return allAttachments;
 }
@@ -191,14 +179,14 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
 }) {
   const { handler, context, options, globals, metadata } = args;
 
-  if (context.applyGlobals) {
-    await context.applyGlobals({
+  await setStorybookGlobals({ handler, globals });
+
+  if (context.beforeScreenshot) {
+    await context.beforeScreenshot({
       handler,
       globals,
     });
   }
-
-  await setStorybookGlobals({ handler, globals });
 
   // Get the viewport from globals set on the mode.
   const viewportFromGlobals = globals.viewport

@@ -8,6 +8,7 @@ import {
 import {
   getFitToContentFromParameters,
   type FitToContent,
+  type StorybookGlobals,
 } from "./utils/parameters";
 import type { Frame } from "playwright";
 import { ArgosReporter, type ArgosReporterConfig } from "./vitest-reporter";
@@ -20,14 +21,33 @@ export type ArgosScreenshotCommandArgs = [
 ];
 
 export interface ArgosVitestPluginOptions
-  extends Pick<StorybookScreenshotContext<Frame>, "applyGlobals">,
-    ArgosReporterConfig,
+  extends ArgosReporterConfig,
     ArgosScreenshotOptions {
   /**
    * Upload the report to Argos.
    * @default true
    */
   uploadToArgos?: boolean;
+  /**
+   * Opportunity to apply globals or other context-specific settings.
+   * This can be useful to emulate dark mode or other visual modes.
+   * @example
+   * ```typescript
+   * applyGlobals: async ({ frame, globals }) => {
+   *   await frame.evaluate((globals) => {
+   *     if (globals.theme === "dark") {
+   *       document.documentElement.classList.add("dark");
+   *     } else {
+   *       document.documentElement.classList.remove("dark");
+   *     }
+   *   }, globals);
+   * }
+   * ```
+   */
+  applyGlobals?: (input: {
+    handler: Frame;
+    globals: StorybookGlobals;
+  }) => Promise<void>;
 }
 
 /**
@@ -78,7 +98,8 @@ export const createArgosScreenshotCommand = (
             }
           }, size);
         },
-        applyGlobals,
+        beforeScreenshot: applyGlobals,
+        afterScreenshot: applyGlobals,
       },
       applyFitToContent(screenshotOptions, fitToContent),
     );
