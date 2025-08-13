@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.0.1...@argos-ci/core@4.0.2) (2025-08-13)
+
+
+### Bug Fixes
+
+* **git:** fix merge base error ([b5fd2d6](https://github.com/argos-ci/argos-javascript/commit/b5fd2d68a99636d4e658c347252e461d34f6d82b))
+
+
+
+
+
 ## [4.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.0.0...@argos-ci/core@4.0.1) (2025-08-11)
 
 
