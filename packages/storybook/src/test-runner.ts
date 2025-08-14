@@ -13,6 +13,8 @@ import {
 export type { ArgosStorybookParameters } from "./utils/parameters";
 export type { ArgosScreenshotOptions };
 
+const DEFAULT_PLAYWRIGHT_VIEWPORT_SIZE = { width: 1280, height: 720 };
+
 /**
  * Stabilize the UI and takes a screenshot of the application under test.
  *
@@ -50,11 +52,20 @@ export async function argosScreenshot(
         globals: null,
       },
       setViewportSize: async (size) => {
-        if (size === "default") {
-          // Set the default viewport of Playwright.
-          await page.setViewportSize({ width: 1280, height: 720 });
-        } else {
-          await page.setViewportSize(size);
+        const actualSize = await page.viewportSize();
+        const absoluteSize =
+          size === "default" ? DEFAULT_PLAYWRIGHT_VIEWPORT_SIZE : size;
+        if (
+          !actualSize ||
+          actualSize.height !== absoluteSize.height ||
+          actualSize.width !== absoluteSize.width
+        ) {
+          await page.setViewportSize(absoluteSize);
+          await page.waitForFunction(
+            ({ width, height }) =>
+              window.innerWidth === width && window.innerHeight === height,
+            { width: absoluteSize.width, height: absoluteSize.height },
+          );
         }
       },
     },

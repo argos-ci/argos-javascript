@@ -98,6 +98,10 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
         },
       });
       allAttachments.push(...attachments);
+
+      // Reset viewport and globals
+      await context.setViewportSize("default");
+      await setStorybookGlobals({ handler, globals: {} });
     }
   } else {
     const attachments = await runHooksAndScreenshot({
@@ -110,16 +114,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
     allAttachments.push(...attachments);
   }
 
-  await context.setViewportSize("default");
-
-  await setStorybookGlobals({ handler, globals: {} });
-
-  if (context.afterScreenshot) {
-    await context.afterScreenshot({
-      handler,
-      globals: {},
-    });
-  }
+  await context.afterScreenshot?.({ handler, globals: {} });
 
   return allAttachments;
 }
@@ -181,13 +176,6 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
 
   await setStorybookGlobals({ handler, globals });
 
-  if (context.beforeScreenshot) {
-    await context.beforeScreenshot({
-      handler,
-      globals,
-    });
-  }
-
   // Get the viewport from globals set on the mode.
   const viewportFromGlobals = globals.viewport
     ? getViewport(context.story.parameters, globals.viewport)
@@ -204,6 +192,8 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
     ...metadata,
     viewport: viewport && viewport !== "default" ? viewport : undefined,
   });
+
+  await context.beforeScreenshot?.({ handler, globals });
 
   return argosPlaywrightScreenshot(
     handler,
