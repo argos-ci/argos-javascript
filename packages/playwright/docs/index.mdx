@@ -222,6 +222,30 @@ export default defineConfig({
 });
 ```
 
+## Test annotations
+
+Argos supports [annotations](https://playwright.dev/docs/test-annotations) added to your tests, providing additional context and information. All annotations are displayed in Argos Build UI, except those where type starts with \_ symbol.
+
+### Example Usage
+
+```ts
+import { test, expect } from "@playwright/test";
+
+test(
+  "test login page",
+  {
+    annotation: {
+      type: "visual-test",
+      description:
+        "Critical UI path – ensures login form fields and CTA button align correctly on desktop viewport. Related to regression #1423.",
+    },
+  },
+  async ({ page }) => {
+    // ...
+  },
+);
+```
+
 ## API Overview
 
 ### argosScreenshot(page, name[, options])

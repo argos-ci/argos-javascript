@@ -29,13 +29,29 @@ export type ScreenshotMetadata = {
         repeat?: number | null;
         /** @description The location of the test in the source code */
         location?: {
-          /** @description The file where the test is located */
+          /** @description The located file */
           file: string;
           /** @description The line number in the file */
           line: number;
           /** @description The column number in the file */
           column: number;
         };
+        /** @description Annotations associated to the test */
+        annotations?: {
+          /** @description The type of annotation */
+          type: string;
+          /** @description The description of the annotation */
+          description?: string;
+          /** @description The location of the annotation in the source code */
+          location?: {
+            /** @description The located file */
+            file: string;
+            /** @description The line number in the file */
+            line: number;
+            /** @description The column number in the file */
+            column: number;
+          };
+        }[];
       } | null)
     | null;
   browser?: {
