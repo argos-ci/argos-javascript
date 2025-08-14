@@ -171,6 +171,7 @@ export async function getTestMetadata(
       line: testInfo.line,
       column: testInfo.column,
     },
+    annotations: testInfo.annotations,
   };
   return testMetadata;
 }
@@ -193,6 +194,7 @@ export async function getTestMetadataFromTestCase(
       line: testCase.location.line,
       column: testCase.location.column,
     },
+    annotations: testCase.annotations,
   };
   return testMetadata;
 }

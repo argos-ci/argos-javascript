@@ -90,6 +90,21 @@ test.describe("#argosScreenshot", () => {
     });
   });
 
+  test.describe(
+    "with annotations",
+    {
+      annotation: {
+        type: "info",
+        description: "This is an annotation",
+      },
+    },
+    () => {
+      test("takes a screenshot", async ({ page }) => {
+        await argosScreenshot(page, "with-annotation");
+      });
+    },
+  );
+
   test.describe("with cjs version", () => {
     test("takes a screenshot", async ({ page }) => {
       await argosScreenshotCjs(page, "basic-cjs");
