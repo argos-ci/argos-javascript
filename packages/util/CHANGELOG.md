@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@3.0.0...@argos-ci/util@3.1.0) (2025-08-16)
+
+
+### Features
+
+* **playwright:** support test annotations ([e454086](https://github.com/argos-ci/argos-javascript/commit/e454086fbe408f7087cc0c7e07bbdb8f65429be5))
+
+
+
+
+
 # [3.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@2.3.3...@argos-ci/util@3.0.0) (2025-08-02)
 
 

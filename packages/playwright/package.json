@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/playwright",
   "description": "Playwright SDK for visual testing with Argos.",
-  "version": "6.0.4",
+  "version": "6.1.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
