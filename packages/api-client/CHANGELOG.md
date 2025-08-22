@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.10.0...@argos-ci/api-client@0.11.0) (2025-08-22)
+
+
+### Features
+
+* **core:** retry network errors ([8dad001](https://github.com/argos-ci/argos-javascript/commit/8dad001ebc5dd83ed6286a1300fef5303a00857f))
+
+
+
+
+
 # [0.10.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.9.0...@argos-ci/api-client@0.10.0) (2025-08-16)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.0.3...@argos-ci/core@4.1.0) (2025-08-22)
+
+
+### Features
+
+* **core:** retry network errors ([8dad001](https://github.com/argos-ci/argos-javascript/commit/8dad001ebc5dd83ed6286a1300fef5303a00857f))
+
+
+
+
+
 ## [4.0.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.0.2...@argos-ci/core@4.0.3) (2025-08-16)
 
 **Note:** Version bump only for package @argos-ci/core
