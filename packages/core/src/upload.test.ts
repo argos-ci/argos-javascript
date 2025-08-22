@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { join } from "node:path";
 import { upload } from "./upload";
-import { setupMockServer } from "../mocks/server";
+import { server, setupMockServer } from "../mocks/server";
+import { http, HttpResponse } from "msw";
 
 setupMockServer();
 
@@ -76,5 +77,30 @@ describe("#upload", () => {
         },
       ],
     });
+  });
+
+  it("retries", () => {
+    return server.boundary(async () => {
+      let reqCount = 0;
+      server.use(
+        http.post("https://api.argos-ci.dev/builds", () => {
+          reqCount++;
+          if (reqCount < 2) {
+            return HttpResponse.error();
+          }
+          return undefined;
+        }),
+      );
+
+      await upload({
+        branch: "main",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+      });
+
+      expect(reqCount).toBe(2);
+    })();
   });
 });
