@@ -52,7 +52,7 @@ export function uploadCommand(program: Command) {
     .addOption(
       new Option(
         "--parallel-index <number>",
-        "The index of the parallel node being ran",
+        "The index of the parallel node being ran (must be at least 1)",
       ).env("ARGOS_PARALLEL_INDEX"),
     )
     .addOption(
