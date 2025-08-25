@@ -28,6 +28,16 @@ const mustBeArgosToken = (value: any) => {
   }
 };
 
+const minNumber = (value: any, min: number) => {
+  const number = parseInt(value, 10);
+  if (!Number.isInteger(number)) {
+    throw new Error("must be a number");
+  }
+  if (number < min) {
+    throw new Error(`must be at least ${min}`);
+  }
+};
+
 convict.addFormat({
   name: "float-percent",
   validate: function (val) {
@@ -104,15 +114,15 @@ const schema = {
   },
   parallelIndex: {
     env: "ARGOS_PARALLEL_INDEX",
-    format: "nat",
     default: null,
     nullable: true,
+    format: (value: any) => minNumber(value, 1),
   },
   parallelTotal: {
     env: "ARGOS_PARALLEL_TOTAL",
-    format: "int",
     default: null,
     nullable: true,
+    format: (value: any) => minNumber(value, -1),
   },
   referenceBranch: {
     env: "ARGOS_REFERENCE_BRANCH",
