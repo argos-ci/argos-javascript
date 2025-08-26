@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.0.4...@argos-ci/cli@3.0.5) (2025-08-26)
+
+
+### Bug Fixes
+
+* **config:** improve parallel validation ([26d4f35](https://github.com/argos-ci/argos-javascript/commit/26d4f35ed364457d46afc5fc91225fdeb565c320))
+
+
+
+
+
 ## [3.0.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.0.3...@argos-ci/cli@3.0.4) (2025-08-22)
 
 **Note:** Version bump only for package @argos-ci/cli

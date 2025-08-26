@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.0...@argos-ci/core@4.1.1) (2025-08-26)
+
+
+### Bug Fixes
+
+* **config:** improve parallel validation ([26d4f35](https://github.com/argos-ci/argos-javascript/commit/26d4f35ed364457d46afc5fc91225fdeb565c320))
+
+
+
+
+
 # [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.0.3...@argos-ci/core@4.1.0) (2025-08-22)
 
 
