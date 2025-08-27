@@ -28,26 +28,51 @@ const mustBeArgosToken = (value: any) => {
   }
 };
 
-const minNumber = (value: any, min: number) => {
-  const number = parseInt(value, 10);
-  if (!Number.isInteger(number)) {
-    throw new Error("must be a number");
+const minInteger = (min: number) => (value: number) => {
+  if (!Number.isInteger(value)) {
+    throw new Error("must be an integer");
   }
-  if (number < min) {
+  if (value < min) {
     throw new Error(`must be at least ${min}`);
   }
 };
 
+const toInt = (value: string) => {
+  if (value === "") {
+    return null;
+  }
+
+  const num = Number(value);
+
+  if (!Number.isInteger(num) || Number.isNaN(num)) {
+    return num;
+  }
+
+  return num;
+};
+
+const toFloat = (value: string) => parseFloat(value);
+
+convict.addFormat({
+  name: "parallel-total",
+  validate: minInteger(-1),
+  coerce: toInt,
+});
+
+convict.addFormat({
+  name: "parallel-index",
+  validate: minInteger(1),
+  coerce: toInt,
+});
+
 convict.addFormat({
   name: "float-percent",
-  validate: function (val) {
+  validate: (val) => {
     if (val !== 0 && (!val || val > 1 || val < 0)) {
       throw new Error("Must be a float between 0 and 1, inclusive.");
     }
   },
-  coerce: function (val) {
-    return parseFloat(val);
-  },
+  coerce: toFloat,
 });
 
 const schema = {
@@ -114,15 +139,15 @@ const schema = {
   },
   parallelIndex: {
     env: "ARGOS_PARALLEL_INDEX",
+    format: "parallel-index",
     default: null,
     nullable: true,
-    format: (value: any) => minNumber(value, 1),
   },
   parallelTotal: {
     env: "ARGOS_PARALLEL_TOTAL",
+    format: "parallel-total",
     default: null,
     nullable: true,
-    format: (value: any) => minNumber(value, -1),
   },
   referenceBranch: {
     env: "ARGOS_REFERENCE_BRANCH",
