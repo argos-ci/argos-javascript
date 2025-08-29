@@ -89,4 +89,12 @@ describe("#readConfig", () => {
       "parallelIndex: must be at least 1: value was -1",
     );
   });
+
+  it("token passed as argument is prioritary over env variable", async () => {
+    process.env.ARGOS_TOKEN = "env-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    const config = await readDummyConfig({
+      token: "arg-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    });
+    expect(config.token).toBe("arg-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+  });
 });
