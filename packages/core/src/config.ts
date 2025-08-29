@@ -225,46 +225,57 @@ export interface Config {
   previewBaseUrl: string | null;
 }
 
-const createConfig = () => {
-  return convict<Config>(schema, {
-    args: [],
-  });
-};
+function createConfig() {
+  return convict<Config>(schema, { args: [], env: {} });
+}
+
+function getDefaultConfig() {
+  return Object.entries(schema).reduce<Record<string, any>>(
+    (cfg, [key, entry]) => {
+      cfg[key] =
+        "env" in entry && entry.env && process.env[entry.env]
+          ? process.env[entry.env]
+          : entry.default;
+      return cfg;
+    },
+    {} as Record<string, any>,
+  ) as Config;
+}
 
 export async function readConfig(options: Partial<Config> = {}) {
   const config = createConfig();
 
   const ciEnv = await getCiEnvironment();
-
+  const defaultConfig = getDefaultConfig();
   config.load({
-    apiBaseUrl: options.apiBaseUrl || config.get("apiBaseUrl"),
-    commit: options.commit || config.get("commit") || ciEnv?.commit || null,
-    branch: options.branch || config.get("branch") || ciEnv?.branch || null,
-    token: options.token || config.get("token") || null,
-    buildName: options.buildName || config.get("buildName") || null,
+    apiBaseUrl: options.apiBaseUrl || defaultConfig.apiBaseUrl,
+    commit: options.commit || defaultConfig.commit || ciEnv?.commit || null,
+    branch: options.branch || defaultConfig.branch || ciEnv?.branch || null,
+    token: options.token || defaultConfig.token || null,
+    buildName: options.buildName || defaultConfig.buildName || null,
     prNumber:
-      options.prNumber || config.get("prNumber") || ciEnv?.prNumber || null,
-    prHeadCommit: config.get("prHeadCommit") || ciEnv?.prHeadCommit || null,
-    prBaseBranch: config.get("prBaseBranch") || ciEnv?.prBaseBranch || null,
+      options.prNumber || defaultConfig.prNumber || ciEnv?.prNumber || null,
+    prHeadCommit: defaultConfig.prHeadCommit || ciEnv?.prHeadCommit || null,
+    prBaseBranch: defaultConfig.prBaseBranch || ciEnv?.prBaseBranch || null,
     referenceBranch:
-      options.referenceBranch || config.get("referenceBranch") || null,
+      options.referenceBranch || defaultConfig.referenceBranch || null,
     referenceCommit:
-      options.referenceCommit || config.get("referenceCommit") || null,
+      options.referenceCommit || defaultConfig.referenceCommit || null,
     repository: ciEnv?.repository || null,
     jobId: ciEnv?.jobId || null,
     runId: ciEnv?.runId || null,
     runAttempt: ciEnv?.runAttempt || null,
-    parallel: options.parallel ?? config.get("parallel") ?? false,
+    parallel: options.parallel ?? defaultConfig.parallel ?? false,
     parallelNonce:
       options.parallelNonce ||
-      config.get("parallelNonce") ||
+      defaultConfig.parallelNonce ||
       ciEnv?.nonce ||
       null,
-    parallelTotal: options.parallelTotal ?? config.get("parallelTotal") ?? null,
-    parallelIndex: options.parallelIndex ?? config.get("parallelIndex") ?? null,
-    mode: options.mode || config.get("mode") || null,
+    parallelTotal: options.parallelTotal ?? defaultConfig.parallelTotal ?? null,
+    parallelIndex: options.parallelIndex ?? defaultConfig.parallelIndex ?? null,
+    mode: options.mode || defaultConfig.mode || null,
     ciProvider: ciEnv?.key || null,
-    previewBaseUrl: config.get("previewBaseUrl") || null,
+    previewBaseUrl: defaultConfig.previewBaseUrl || null,
   });
 
   config.validate();
