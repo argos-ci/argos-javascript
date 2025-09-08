@@ -1,6 +1,5 @@
-import { afterEach } from "vitest";
+import type * as vitest from "vitest";
 import type { ComposedStoryFn } from "storybook/internal/types";
-import { server } from "@vitest/browser/context";
 import type { ArgosScreenshotOptions } from "./utils/screenshot";
 import type { ArgosScreenshotCommandArgs } from "./vitest-plugin";
 import type { Attachment } from "@argos-ci/playwright";
@@ -19,7 +18,11 @@ declare module "@vitest/browser/context" {
 /**
  * Setup Argos hooks for Vitest.
  */
-export function setupArgos() {
+export function setupArgos({
+  afterEach,
+}: {
+  afterEach: typeof vitest.afterEach;
+}) {
   afterEach(async (ctx) => {
     const story = "story" in ctx ? (ctx.story as ComposedStoryFn) : null;
     if (!story) {
@@ -27,6 +30,7 @@ export function setupArgos() {
         `@argos-ci/storybook/vitest-plugin should be used with @storybook/addon-vitest/vitest-plugin`,
       );
     }
+    const { server } = await import("@vitest/browser/context");
     await server.commands.argosScreenshot({
       name: story.id,
       story: {
@@ -59,6 +63,11 @@ export async function argosScreenshot(
   },
   name: string,
 ) {
+  const isVitest = await checkIsVitestEnv();
+  if (!isVitest) {
+    return;
+  }
+  const { server } = await import("@vitest/browser/context");
   await server.commands.argosScreenshot({
     name: `${story.id}/${name}`,
     story: {
@@ -67,4 +76,13 @@ export async function argosScreenshot(
       globals: story.globals,
     },
   });
+}
+
+async function checkIsVitestEnv(): Promise<boolean> {
+  try {
+    await import("@vitest/browser/context");
+    return true;
+  } catch {
+    return false;
+  }
 }

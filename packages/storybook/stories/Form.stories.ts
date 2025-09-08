@@ -3,6 +3,7 @@ import type { StoryObj, Meta } from "@storybook/react-vite";
 
 import { Form } from "./Form";
 import { allModes } from "../.storybook/modes";
+import { argosScreenshot } from "../src/vitest";
 
 const meta: Meta<typeof Form> = {
   title: "Example/Form",
@@ -24,6 +25,7 @@ type Story = StoryObj<typeof Form>;
 export const FillForm: Story = {
   play: async (ctx) => {
     const { canvasElement } = ctx;
+    await argosScreenshot(ctx, "before-fill");
 
     // Only on vitest
     if ("env" in import.meta) {
