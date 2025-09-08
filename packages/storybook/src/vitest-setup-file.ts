@@ -1,3 +1,4 @@
+import { afterEach } from "vitest";
 import { setupArgos } from "./vitest";
 
-setupArgos();
+setupArgos({ afterEach });
