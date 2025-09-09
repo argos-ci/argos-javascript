@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@4.0.10...@argos-ci/storybook@5.0.0) (2025-09-09)
+
+
+### Bug Fixes
+
+* **storybook:** fix error while importing `@argos-ci/storybook/vitest` ([ec2a0a8](https://github.com/argos-ci/argos-javascript/commit/ec2a0a888fdd24c09ca82e4a7d14f3d525b5466d))
+
+
+### Features
+
+* **storybook:** improve addons and manual screenshots ([46cfd9f](https://github.com/argos-ci/argos-javascript/commit/46cfd9f3346e57972a8d27c805067b7bd167da78))
+
+
+### BREAKING CHANGES
+
+* **storybook:** - Remove `applyGlobals` function (now not needed)
+- Replay the story before taking the screenshot
+- Manual screenshots are now taken for each defined mode
+- Story is now rendered in a `storybook-root` container
+
+
+
+
+
 ## [4.0.10](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@4.0.9...@argos-ci/storybook@4.0.10) (2025-08-27)
 
 **Note:** Version bump only for package @argos-ci/storybook

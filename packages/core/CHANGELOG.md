@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.2...@argos-ci/core@4.1.3) (2025-09-09)
+
+
+### Bug Fixes
+
+* **config:** local config is prioritary over environment variables ([6acec21](https://github.com/argos-ci/argos-javascript/commit/6acec2110ae3ad3363f0b8cf3012e40318c9eaa1))
+
+
+
+
+
 ## [4.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.1...@argos-ci/core@4.1.2) (2025-08-27)
 
 
