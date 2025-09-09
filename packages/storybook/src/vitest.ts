@@ -18,20 +18,26 @@ declare module "@vitest/browser/context" {
 /**
  * Setup Argos hooks for Vitest.
  */
-export function setupArgos({
-  afterEach,
-}: {
-  afterEach: typeof vitest.afterEach;
-}) {
-  afterEach(async (ctx) => {
+export function setupArgos(api: { afterEach: typeof vitest.afterEach }) {
+  api.afterEach(async (ctx) => {
+    // In Vitest, the context contains the story when using @storybook/addon-vitest
     const story = "story" in ctx ? (ctx.story as ComposedStoryFn) : null;
+
     if (!story) {
       throw new Error(
         `@argos-ci/storybook/vitest-plugin should be used with @storybook/addon-vitest/vitest-plugin`,
       );
     }
+
+    // Load vitest/browser using dynamic import to avoid loading it in non-Vitest environments.
     const { server } = await import("@vitest/browser/context");
+
+    // Expose the Story as global to be able to re-render it.
+    (globalThis as any).__ARGOS_STORYBOOK_STORY = story;
+
+    // Take the screenshot.
     await server.commands.argosScreenshot({
+      mode: "automatic",
       name: story.id,
       story: {
         id: story.id,
@@ -63,12 +69,16 @@ export async function argosScreenshot(
   },
   name: string,
 ) {
+  // Only run in Vitest.
   const isVitest = await checkIsVitestEnv();
   if (!isVitest) {
     return;
   }
+
+  // Load vitest/browser using dynamic import to avoid loading it in non-Vitest environments.
   const { server } = await import("@vitest/browser/context");
   await server.commands.argosScreenshot({
+    mode: "manual",
     name: `${story.id}/${name}`,
     story: {
       id: story.id,
@@ -78,6 +88,9 @@ export async function argosScreenshot(
   });
 }
 
+/**
+ * Check if we are running in a Vitest environment.
+ */
 async function checkIsVitestEnv(): Promise<boolean> {
   try {
     await import("@vitest/browser/context");

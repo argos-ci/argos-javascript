@@ -27,13 +27,6 @@ export const FillForm: Story = {
     const { canvasElement } = ctx;
     await argosScreenshot(ctx, "before-fill");
 
-    // Only on vitest
-    if ("env" in import.meta) {
-      await import("../src/vitest").then(async ({ argosScreenshot }) => {
-        await argosScreenshot(ctx, "before-fill");
-      });
-    }
-
     const canvas = within(canvasElement);
 
     const emailInput = canvas.getByLabelText("Email", {

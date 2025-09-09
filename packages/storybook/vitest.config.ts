@@ -25,15 +25,6 @@ export default defineConfig({
           argosVitestPlugin({
             uploadToArgos: process.env.UPLOAD_TO_ARGOS === "true",
             buildName: process.env.BUILD_NAME,
-            applyGlobals: async ({ handler, globals }) => {
-              await handler.evaluate((globals) => {
-                if (globals.theme === "dark") {
-                  document.documentElement.classList.add("dark");
-                } else {
-                  document.documentElement.classList.remove("dark");
-                }
-              }, globals);
-            },
           }),
         ],
         test: {
