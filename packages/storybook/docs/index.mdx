@@ -115,25 +115,21 @@ export default preview;
 
 ## Troubleshooting
 
-### `@storybook/addon-themes` is not working with Vitest
+### My addon is not working with Vitest
 
-If you are using the `@storybook/addon-themes` with Vitest, you may encounter issues with the theme not being applied correctly during tests. This is a known limitation, as the `@storybook/addon-themes` is not compatible with Vitest's test environment.
+To be sure that your addons are properly loaded when running Vitest, be sure to specify your addon annotations in `setProjectAnnotations`:
 
-To work around this limitation, we added an `applyGlobals` option to the `argosVitestPlugin`. This allows you to manually apply the theme based on the globals set in your Storybook configuration.
+**Example for `storybook-addon-pseudo-states`**:
 
 ```ts
-argosVitestPlugin({
-  applyGlobals: async ({ handler, globals }) => {
-    await handler.evaluate((globals) => {
-      if (globals.theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }, globals);
-  },
-}),
+import { setProjectAnnotations } from "@storybook/react-vite";
+import * as projectAnnotations from "./preview";
+import * as addonAnnotations from "storybook-addon-pseudo-states/preview";
+
+setProjectAnnotations([projectAnnotations, addonAnnotations]);
 ```
+
+Read more in the [Storybook documentation](https://storybook.js.org/docs/api/portable-stories/portable-stories-vitest#setprojectannotations).
 
 ## API Overview
 

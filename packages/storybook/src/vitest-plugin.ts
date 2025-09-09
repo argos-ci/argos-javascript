@@ -8,7 +8,6 @@ import {
 import {
   getFitToContentFromParameters,
   type FitToContent,
-  type StorybookGlobals,
 } from "./utils/parameters";
 import type { Frame } from "playwright";
 import { ArgosReporter, type ArgosReporterConfig } from "./vitest-reporter";
@@ -17,7 +16,7 @@ import { resolve } from "node:path";
 export type { ArgosScreenshotOptions };
 
 export type ArgosScreenshotCommandArgs = [
-  Pick<StorybookScreenshotContext<Frame>, "name" | "story" | "test">,
+  Pick<StorybookScreenshotContext<Frame>, "name" | "story" | "test" | "mode">,
 ];
 
 export interface ArgosVitestPluginOptions
@@ -28,26 +27,6 @@ export interface ArgosVitestPluginOptions
    * @default true
    */
   uploadToArgos?: boolean;
-  /**
-   * Opportunity to apply globals or other context-specific settings.
-   * This can be useful to emulate dark mode or other visual modes.
-   * @example
-   * ```typescript
-   * applyGlobals: async ({ frame, globals }) => {
-   *   await frame.evaluate((globals) => {
-   *     if (globals.theme === "dark") {
-   *       document.documentElement.classList.add("dark");
-   *     } else {
-   *       document.documentElement.classList.remove("dark");
-   *     }
-   *   }, globals);
-   * }
-   * ```
-   */
-  applyGlobals?: (input: {
-    handler: Frame;
-    globals: StorybookGlobals;
-  }) => Promise<void>;
 }
 
 /**
@@ -56,7 +35,7 @@ export interface ArgosVitestPluginOptions
 export const createArgosScreenshotCommand = (
   pluginOptions?: ArgosVitestPluginOptions,
 ): BrowserCommand<ArgosScreenshotCommandArgs> => {
-  const { applyGlobals, ...screenshotOptions } = pluginOptions ?? {};
+  const screenshotOptions = pluginOptions ?? {};
   return async (ctx, testContext) => {
     const frame = await ctx.frame();
     // Get the fitToContent option from the story parameters.
@@ -98,8 +77,6 @@ export const createArgosScreenshotCommand = (
             }
           }, size);
         },
-        beforeScreenshot: applyGlobals,
-        afterScreenshot: applyGlobals,
       },
       applyFitToContent(screenshotOptions, fitToContent),
     );

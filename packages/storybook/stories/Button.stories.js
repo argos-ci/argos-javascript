@@ -1,5 +1,6 @@
 import { fn } from "storybook/test";
 
+import { argosScreenshot } from "../src/vitest";
 import { Button } from "./Button";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
@@ -25,6 +26,21 @@ export const Primary = {
   args: {
     primary: true,
     label: "Button",
+  },
+  play: async (ctx) => {
+    await argosScreenshot(ctx, "in-play");
+  },
+};
+
+export const PrimaryHover = {
+  args: {
+    primary: true,
+    label: "Button",
+  },
+  parameters: {
+    pseudo: {
+      hover: true,
+    },
   },
 };
 
