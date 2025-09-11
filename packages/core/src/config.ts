@@ -278,6 +278,12 @@ export async function readConfig(options: Partial<Config> = {}) {
     previewBaseUrl: defaultConfig.previewBaseUrl || null,
   });
 
+  if (!config.get("branch") || !config.get("commit")) {
+    throw new Error(
+      "Argos requires a branch and a commit to be set. If you are running in a non-git environment consider setting ARGOS_BRANCH and ARGOS_COMMIT environment variables.",
+    );
+  }
+
   config.validate();
 
   return config.get();
