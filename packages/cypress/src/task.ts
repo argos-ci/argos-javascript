@@ -46,83 +46,120 @@ async function createDirectory(directory: string): Promise<void> {
   await createDirectory(directory);
 }
 
+function getArgosConfigFromOptions(
+  options: RegisterArgosTaskOptions | undefined,
+) {
+  return {
+    uploadToArgos: options?.uploadToArgos ?? true,
+  };
+}
+
+/**
+ * Cypress "after:screenshot" event handler.
+ * - Move screenshots to Argos directory
+ */
+export async function argosAfterScreenshot(
+  config: Cypress.PluginConfigOptions,
+  details: Cypress.ScreenshotDetails,
+  options?: RegisterArgosTaskOptions,
+) {
+  const { uploadToArgos } = getArgosConfigFromOptions(options);
+
+  if (!uploadToArgos) {
+    return { path: details.path };
+  }
+
+  const argosScreenshotsDir = await getScreenshotsDirectory();
+
+  // Cypress types are wrong... The name can be "undefined"
+  if (details.name?.startsWith(NAME_PREFIX)) {
+    const newPath = join(
+      argosScreenshotsDir,
+      details.name.slice(NAME_PREFIX.length) + extname(details.path),
+    );
+
+    await createDirectory(dirname(newPath));
+    await copyFile(details.path, newPath);
+
+    return { path: newPath };
+  }
+
+  const { screenshotsFolder } = config;
+
+  if (!screenshotsFolder) {
+    throw new Error(
+      "Cypress screenshotsFolder is not defined. Please set it in your cypress.config.js",
+    );
+  }
+
+  if (!details.path.startsWith(screenshotsFolder)) {
+    throw new Error(
+      `Cypress screenshot path ${details.path} does not start with the configured screenshotsFolder ${screenshotsFolder}. Please check your cypress.config.js.`,
+    );
+  }
+
+  const relativePath = details.path.slice(
+    screenshotsFolder.length + (screenshotsFolder.endsWith("/") ? 0 : 1),
+  );
+  const newPath = join(argosScreenshotsDir, relativePath);
+
+  await createDirectory(dirname(newPath));
+  await copyFile(details.path, newPath);
+
+  return { path: join(argosScreenshotsDir, relativePath) };
+}
+
+/**
+ * Cypress "after:run" event handler.
+ * - Upload screenshots to Argos
+ */
+export async function argosAfterRun(
+  _config: Cypress.PluginConfigOptions,
+  results:
+    | CypressCommandLine.CypressRunResult
+    | CypressCommandLine.CypressFailedRunResult,
+  options?: RegisterArgosTaskOptions,
+) {
+  const { uploadToArgos } = getArgosConfigFromOptions(options);
+
+  if (!uploadToArgos) {
+    return;
+  }
+
+  const argosScreenshotsDir = await getScreenshotsDirectory();
+
+  const res = await upload({
+    ...options,
+    files: ["**/*.png"],
+    root: argosScreenshotsDir,
+    metadata: {
+      testReport: checkIsCypressFailedResult(results)
+        ? { status: "failed" }
+        : {
+            status: "passed",
+            stats: {
+              startTime: results.startedTestsAt,
+              duration: results.totalDuration,
+            },
+          },
+    },
+  });
+
+  console.log(`✅ Argos build created: ${res.build.url}`);
+}
+
+/**
+ * Register the Argos tasks for Cypress.
+ */
 export function registerArgosTask(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions,
   options?: RegisterArgosTaskOptions,
 ) {
-  on("after:screenshot", async (details) => {
-    const { uploadToArgos = true } = options || {};
-
-    if (!uploadToArgos) {
-      return { path: details.path };
-    }
-
-    const argosScreenshotsDir = await getScreenshotsDirectory();
-
-    // Cypress types are wrong... The name can be "undefined"
-    if (details.name?.startsWith(NAME_PREFIX)) {
-      const newPath = join(
-        argosScreenshotsDir,
-        details.name.slice(NAME_PREFIX.length) + extname(details.path),
-      );
-
-      await createDirectory(dirname(newPath));
-      await copyFile(details.path, newPath);
-
-      return { path: newPath };
-    }
-
-    const { screenshotsFolder } = config;
-
-    if (!screenshotsFolder) {
-      throw new Error(
-        "Cypress screenshotsFolder is not defined. Please set it in your cypress.config.js",
-      );
-    }
-
-    if (!details.path.startsWith(screenshotsFolder)) {
-      throw new Error(
-        `Cypress screenshot path ${details.path} does not start with the configured screenshotsFolder ${screenshotsFolder}. Please check your cypress.config.js.`,
-      );
-    }
-
-    const relativePath = details.path.slice(
-      screenshotsFolder.length + (screenshotsFolder.endsWith("/") ? 0 : 1),
-    );
-    const newPath = join(argosScreenshotsDir, relativePath);
-
-    await createDirectory(dirname(newPath));
-    await copyFile(details.path, newPath);
-
-    return { path: join(argosScreenshotsDir, relativePath) };
+  on("after:screenshot", (details) => {
+    return argosAfterScreenshot(config, details, options);
   });
   on("after:run", async (results) => {
-    const { uploadToArgos = true } = options || {};
-
-    if (!uploadToArgos) {
-      return;
-    }
-
-    const argosScreenshotsDir = await getScreenshotsDirectory();
-
-    const res = await upload({
-      ...options,
-      files: ["**/*.png"],
-      root: argosScreenshotsDir,
-      metadata: {
-        testReport: checkIsCypressFailedResult(results)
-          ? { status: "failed" }
-          : {
-              status: "passed",
-              stats: {
-                startTime: results.startedTestsAt,
-                duration: results.totalDuration,
-              },
-            },
-      },
-    });
-
-    console.log(`✅ Argos build created: ${res.build.url}`);
+    return argosAfterRun(config, results, options);
   });
 }

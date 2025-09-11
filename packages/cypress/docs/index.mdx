@@ -45,6 +45,42 @@ module.exports = defineConfig({
 });
 ```
 
+## Setup individual Cypress events
+
+Cypress only supports one handler per event. If you need to set up other handlers for the same event, you can call the individual functions provided by the SDK.
+
+```ts title="cypress.config.js"
+const { defineConfig } = require("cypress");
+const {
+  argosAfterScreenshot,
+  argosAfterRun,
+} = require("@argos-ci/cypress/task");
+
+module.exports = defineConfig({
+  // setupNodeEvents can be defined in either
+  // the e2e or component configuration
+  e2e: {
+    async setupNodeEvents(on, config) {
+      const argosConfig = {
+        uploadToArgos: !!process.env.CI,
+      };
+
+      on("after:screenshot", async (details) => {
+        // Your custom logic...
+
+        return argosAfterScreenshot(config, details, argosConfig);
+      });
+
+      on("after:run", async (results) => {
+        // Your custom logic...
+
+        return argosAfterRun(config, results, argosConfig);
+      });
+    },
+  },
+});
+```
+
 ## API Overview
 
 ### cy.argosScreenshot([name][, options])
@@ -100,6 +136,70 @@ module.exports = defineConfig({
     async setupNodeEvents(on, config) {
       registerArgosTask(on, config, {
         uploadToArgos: !!process.env.CI,
+      });
+
+      // include any other plugin code...
+    },
+  },
+});
+```
+
+### argosAfterScreenshot(config, details[, options])
+
+Cypress "after:screenshot" event handler.
+
+- `config`: Cypress config.
+- `details`: Screenshot details provided by Cypress.
+- `options`: All [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/UploadParameters.html).
+- `options.uploadToArgos`: Upload results and create a build on Argos, `true` by default.
+
+```ts title="cypress.config.js"
+const { defineConfig } = require("cypress");
+const { argosAfterScreenshot } = require("@argos-ci/cypress/task");
+
+module.exports = defineConfig({
+  // setupNodeEvents can be defined in either
+  // the e2e or component configuration
+  e2e: {
+    async setupNodeEvents(on, config) {
+      on("after:screenshot", async (details) => {
+        // Your custom logic...
+
+        return argosAfterScreenshot(config, details, {
+          uploadToArgos: !!process.env.CI,
+        });
+      });
+
+      // include any other plugin code...
+    },
+  },
+});
+```
+
+### argosAfterRun(config, results[, options])
+
+Cypress "after:run" event handler.
+
+- `config`: Cypress config.
+- `results`: Run results provided by Cypress.
+- `options`: All [upload parameters](https://js-sdk-reference.argos-ci.com/interfaces/UploadParameters.html).
+- `options.uploadToArgos`: Upload results and create a build on Argos, `true` by default.
+
+```ts title="cypress.config.js"
+const { defineConfig } = require("cypress");
+const { argosAfterRun } = require("@argos-ci/cypress/task");
+
+module.exports = defineConfig({
+  // setupNodeEvents can be defined in either
+  // the e2e or component configuration
+  e2e: {
+    async setupNodeEvents(on, config) {
+      on("after:run", async (results) => {
+        // Your custom logic...
+
+        await argosAfterRun(config, results, {
+          uploadToArgos: !!process.env.CI,
+        });
       });
 
       // include any other plugin code...
