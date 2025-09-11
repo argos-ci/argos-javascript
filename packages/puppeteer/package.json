@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/puppeteer",
   "description": "Puppeteer SDK for visual testing with Argos.",
-  "version": "5.0.8",
+  "version": "5.0.9",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {

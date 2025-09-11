@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.3...@argos-ci/core@4.1.4) (2025-09-11)
+
+
+### Bug Fixes
+
+* **core:** improve message when branch and commit is missing ([3b8721e](https://github.com/argos-ci/argos-javascript/commit/3b8721ef19f20531c89119ed907020548eb51001))
+
+
+
+
+
 ## [4.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.2...@argos-ci/core@4.1.3) (2025-09-09)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.0.7...@argos-ci/cypress@6.1.0) (2025-09-11)
+
+
+### Features
+
+* **cypress:** expose individual event handlers ([66e476f](https://github.com/argos-ci/argos-javascript/commit/66e476fe1bf063d9fae958097f3bc6c0869411e6))
+
+
+
+
+
 ## [6.0.7](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.0.6...@argos-ci/cypress@6.0.7) (2025-09-09)
 
 **Note:** Version bump only for package @argos-ci/cypress
