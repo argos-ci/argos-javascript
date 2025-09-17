@@ -13,7 +13,7 @@ export type FinalizeParameters = {
  */
 export async function finalize(params: FinalizeParameters) {
   const config = await readConfig({
-    parallelNonce: params.parallel?.nonce ?? null,
+    parallelNonce: params.parallel?.nonce,
   });
   const authToken = getAuthToken(config);
 

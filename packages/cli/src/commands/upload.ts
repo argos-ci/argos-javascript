@@ -91,7 +91,7 @@ export function uploadCommand(program: Command) {
                 total: options.parallelTotal,
                 index: options.parallelIndex,
               }
-            : false,
+            : undefined,
           referenceBranch: options.referenceBranch,
           referenceCommit: options.referenceCommit,
           mode: options.mode,

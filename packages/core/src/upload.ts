@@ -112,10 +112,10 @@ async function getConfigFromOptions({
 }: UploadParameters) {
   return readConfig({
     ...options,
-    parallel: Boolean(parallel),
-    parallelNonce: parallel ? parallel.nonce : null,
-    parallelTotal: parallel ? parallel.total : null,
-    parallelIndex: parallel ? parallel.index : null,
+    parallel: parallel !== undefined ? Boolean(parallel) : undefined,
+    parallelNonce: parallel ? parallel.nonce : undefined,
+    parallelTotal: parallel ? parallel.total : undefined,
+    parallelIndex: parallel ? parallel.index : undefined,
   });
 }
 
