@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.4...@argos-ci/core@4.1.5) (2025-09-17)
+
+
+### Bug Fixes
+
+* **config:** fix setting parallel mode from environment vars ([fc25216](https://github.com/argos-ci/argos-javascript/commit/fc252168e6886cc47cd0d80fada00e4b39ddb871)), closes [#1825](https://github.com/argos-ci/argos-javascript/issues/1825)
+
+
+
+
+
 ## [4.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.3...@argos-ci/core@4.1.4) (2025-09-11)
 
 

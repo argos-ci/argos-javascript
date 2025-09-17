@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.9](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.0.8...@argos-ci/cli@3.0.9) (2025-09-17)
+
+
+### Bug Fixes
+
+* **config:** fix setting parallel mode from environment vars ([fc25216](https://github.com/argos-ci/argos-javascript/commit/fc252168e6886cc47cd0d80fada00e4b39ddb871)), closes [#1825](https://github.com/argos-ci/argos-javascript/issues/1825)
+
+
+
+
+
 ## [3.0.8](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.0.7...@argos-ci/cli@3.0.8) (2025-09-11)
 
 **Note:** Version bump only for package @argos-ci/cli
