@@ -9,7 +9,7 @@ describe("#getAuthToken", () => {
         const config = {
           token: null,
           ciProvider: null,
-          repository: null,
+          originalRepository: null,
           jobId: null,
           runId: null,
           prNumber: null,
@@ -25,7 +25,7 @@ describe("#getAuthToken", () => {
         const config = {
           token: "this-token",
           ciProvider: null,
-          repository: null,
+          originalRepository: null,
           jobId: null,
           runId: null,
           prNumber: null,
@@ -38,7 +38,7 @@ describe("#getAuthToken", () => {
   describe("with unknown CI", () => {
     const configProps = {
       token: null,
-      repository: null,
+      originalRepository: null,
       jobId: null,
       runId: null,
       prNumber: null,
@@ -65,7 +65,7 @@ describe("#getAuthToken", () => {
   describe("with Github Actions CI", () => {
     const configProps = {
       token: null,
-      repository: null,
+      originalRepository: null,
       jobId: null,
       runId: null,
       prNumber: null,
@@ -83,7 +83,7 @@ describe("#getAuthToken", () => {
       it("should return a composite token", () => {
         const config = {
           ...configProps,
-          repository: "this-owner/this-repository",
+          originalRepository: "this-owner/this-repository",
           jobId: "this-jobId",
           runId: "12345",
         };
@@ -109,7 +109,7 @@ describe("#getAuthToken", () => {
       it("should return a composite token with PR number", () => {
         const config = {
           ...configProps,
-          repository: "this-owner/this-repository",
+          originalRepository: "this-owner/this-repository",
           jobId: "this-jobId",
           runId: "12345",
           prNumber: 42,

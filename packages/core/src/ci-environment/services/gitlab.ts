@@ -9,7 +9,11 @@ function getRepository(context: Context): string | null {
     return env.CI_MERGE_REQUEST_PROJECT_PATH;
   }
 
-  // Fallback: current project
+  return getOriginalRepository(context);
+}
+
+function getOriginalRepository(context: Context): string | null {
+  const { env } = context;
   return env.CI_PROJECT_PATH || null;
 }
 
@@ -23,6 +27,7 @@ const service: Service = {
       commit: env.CI_COMMIT_SHA || null,
       branch: env.CI_COMMIT_REF_NAME || null,
       repository: getRepository(context),
+      originalRepository: getOriginalRepository(context),
       jobId: null,
       runId: null,
       runAttempt: null,

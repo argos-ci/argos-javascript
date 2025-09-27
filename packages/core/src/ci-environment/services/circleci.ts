@@ -16,6 +16,11 @@ function getRepository(context: Context): string | null {
   if (env.CIRCLE_PR_REPONAME && env.CIRCLE_PR_USERNAME) {
     return `${env.CIRCLE_PR_USERNAME}/${env.CIRCLE_PR_REPONAME}`;
   }
+  return getOriginalRepository(context);
+}
+
+function getOriginalRepository(context: Context): string | null {
+  const { env } = context;
   if (env.CIRCLE_PROJECT_USERNAME && env.CIRCLE_PROJECT_REPONAME) {
     return `${env.CIRCLE_PROJECT_USERNAME}/${env.CIRCLE_PROJECT_REPONAME}`;
   }
@@ -32,6 +37,7 @@ const service: Service = {
       commit: env.CIRCLE_SHA1 || null,
       branch: env.CIRCLE_BRANCH || null,
       repository: getRepository(context),
+      originalRepository: getOriginalRepository(context),
       jobId: null,
       runId: null,
       runAttempt: null,

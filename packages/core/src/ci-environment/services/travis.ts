@@ -9,11 +9,12 @@ function getRepository(context: Context): string | null {
     return env.TRAVIS_PULL_REQUEST_SLUG;
   }
 
-  if (env.TRAVIS_REPO_SLUG) {
-    return env.TRAVIS_REPO_SLUG;
-  }
+  return getOriginalRepository(context);
+}
 
-  return null;
+function getOriginalRepository(context: Context): string | null {
+  const { env } = context;
+  return env.TRAVIS_REPO_SLUG || null;
 }
 
 function getPrNumber(context: Context): number | null {
@@ -35,6 +36,7 @@ const service: Service = {
       commit: env.TRAVIS_COMMIT || null,
       branch: env.TRAVIS_BRANCH || null,
       repository: getRepository(ctx),
+      originalRepository: getOriginalRepository(ctx),
       jobId: null,
       runId: null,
       runAttempt: null,

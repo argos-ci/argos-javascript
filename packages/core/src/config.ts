@@ -181,6 +181,11 @@ const schema = {
     default: null,
     nullable: true,
   },
+  originalRepository: {
+    format: String,
+    default: null,
+    nullable: true,
+  },
   ciProvider: {
     format: String,
     default: null,
@@ -201,27 +206,99 @@ const schema = {
 };
 
 export interface Config {
+  /**
+   * Argos API base URL (for self-hosted installations)
+   */
   apiBaseUrl: string;
+  /**
+   * The commit SHA1 (40 characters)
+   */
   commit: string;
+  /**
+   * The git branch name (e.g. "main", "master", "develop", "release/1.0" etc.)
+   */
   branch: string;
+  /**
+   * The Argos repository token (40 characters)
+   */
   token: string | null;
+  /**
+   * The name of the build (for multi-build setups)
+   */
   buildName: string | null;
+  /**
+   * Whether the current run is parallelized (split in multiple jobs) or not
+   */
   parallel: boolean;
+  /**
+   * The parallelization nonce (identifier shared by all parallel jobs)
+   */
   parallelNonce: string | null;
+  /**
+   * The index of the current job (between 1 and parallelTotal inclusive, or null if not set)
+   */
   parallelIndex: number | null;
+  /**
+   * The total number of parallel jobs (or -1 if unknown, or null if not set)
+   */
   parallelTotal: number | null;
+  /**
+   * The reference git branch to compare against
+   */
   referenceBranch: string | null;
+  /**
+   * The reference commit SHA1 to compare against
+   */
   referenceCommit: string | null;
+  /**
+   * The git repository slug (e.g. "my-org/my-repo" or "my-user/my-repo")
+   * If from a fork, this is the fork's repository.
+   */
   repository: string | null;
+  /**
+   * The original git repository slug (e.g. "my-org/my-repo" or "my-user/my-repo")
+   * If from a fork, this is the base repository.
+   */
+  originalRepository: string | null;
+  /**
+   * The CI job identifier (if available)
+   */
   jobId: string | null;
+  /**
+   * The CI run identifier (if available)
+   */
   runId: string | null;
+  /**
+   * The CI run attempt (if available)
+   */
   runAttempt: number | null;
+  /**
+   * The pull request number (if available)
+   */
   prNumber: number | null;
+  /**
+   * The pull request head commit SHA1 (if available)
+   */
   prHeadCommit: string | null;
+  /**
+   * The pull request base branch (if available)
+   */
   prBaseBranch: string | null;
+  /**
+   * The mode Argos is running in (ci or monitoring)
+   */
   mode: "ci" | "monitoring" | null;
+  /**
+   * The CI provider name (if detected)
+   */
   ciProvider: string | null;
+  /**
+   * The threshold to use for this run (if any, between 0 and 1 inclusive, e.g. 0.1 for 10% or 0.0 for 0%)
+   */
   threshold: number | null;
+  /**
+   * The base URL to use for preview links (if any)
+   */
   previewBaseUrl: string | null;
 }
 
@@ -262,6 +339,7 @@ export async function readConfig(options: Partial<Config> = {}) {
     referenceCommit:
       options.referenceCommit || defaultConfig.referenceCommit || null,
     repository: ciEnv?.repository || null,
+    originalRepository: ciEnv?.originalRepository || null,
     jobId: ciEnv?.jobId || null,
     runId: ciEnv?.runId || null,
     runAttempt: ciEnv?.runAttempt || null,
