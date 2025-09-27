@@ -1,5 +1,10 @@
 packages:
   - packages/*
+
+catalog:
+  '@types/node': ^20.0.0
+  vitest: ^3.2.4
+
 onlyBuiltDependencies:
   - '@swc/core'
   - chromedriver
@@ -10,6 +15,6 @@ onlyBuiltDependencies:
   - puppeteer
   - sharp
   - unrs-resolver
-catalog:
-  '@types/node': ^20.0.0
-  vitest: ^3.2.4
+
+overrides:
+  esbuild: ^0.25.10
