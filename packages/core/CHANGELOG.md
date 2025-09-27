@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.6](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.5...@argos-ci/core@4.1.6) (2025-09-27)
+
+
+### Bug Fixes
+
+* **tokenless:** fix tokenless auth with forked PR ([375c16e](https://github.com/argos-ci/argos-javascript/commit/375c16e51bd2977b6066ade5309ed01c27cad956))
+
+
+
+
+
 ## [4.1.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.4...@argos-ci/core@4.1.5) (2025-09-17)
 
 
