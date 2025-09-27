@@ -16,11 +16,13 @@ const service: Service = {
   detect: ({ env }) => Boolean(env.BUILDKITE),
   config: (context) => {
     const { env } = context;
+    const repository = getRepository(context);
     return {
       // Buildkite doesn't work well so we fallback to git to ensure we have commit and branch
       commit: env.BUILDKITE_COMMIT || head() || null,
       branch: env.BUILDKITE_BRANCH || branch() || null,
-      repository: getRepository(context),
+      repository,
+      originalRepository: repository,
       jobId: null,
       runId: null,
       runAttempt: null,

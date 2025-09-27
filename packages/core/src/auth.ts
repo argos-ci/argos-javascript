@@ -4,21 +4,23 @@ const base64Encode = (obj: any) =>
 /**
  * Get the authentication token.
  */
-export function getAuthToken({
-  token,
-  ciProvider,
-  repository,
-  jobId,
-  runId,
-  prNumber,
-}: {
+export function getAuthToken(args: {
   token: string | null;
   ciProvider: string | null;
-  repository: string | null;
+  originalRepository: string | null;
   jobId: string | null;
   runId: string | null;
   prNumber: number | null;
 }) {
+  const {
+    token,
+    ciProvider,
+    originalRepository: repository,
+    jobId,
+    runId,
+    prNumber,
+  } = args;
+
   if (token) {
     return token;
   }

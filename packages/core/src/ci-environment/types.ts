@@ -4,29 +4,36 @@ export interface Context {
 
 export interface CiEnvironment {
   /**
-   * Name of the CI service.
+   * Name of the CI service, e.g. "GitHub Actions".
    */
   name: string | null;
 
   /**
-   * Unique identifier of the CI service.
+   * Key of the CI service, e.g. "github-actions".
    */
   key: string | null;
 
   /**
-   * Commit hash.
+   * The commit SHA1 being built.
    */
   commit: string | null;
 
   /**
-   * Branch name.
+   * The git branch name (e.g. "main", "master", "develop", "release/1.0" etc.)
    */
   branch: string | null;
 
   /**
-   * Repository name.
+   * Repository slug, e.g. owner/name.
+   * If from a fork, this is the fork's repository.
    */
   repository: string | null;
+
+  /**
+   * The original git repository slug (e.g. "my-org/my-repo" or "my-user/my-repo")
+   * If from a fork, this is the base repository.
+   */
+  originalRepository: string | null;
 
   /**
    * The job_id of the current job. For example, greeting_job.
@@ -48,22 +55,22 @@ export interface CiEnvironment {
   runAttempt: number | null;
 
   /**
-   * Pull request number.
+   * The pull request number if the current job is building a PR.
    */
   prNumber: number | null;
 
   /**
-   * The commit hash of the head commit of the pull request.
+   * The commit SHA1 of the head commit of the pull request if the current job is building a PR.
    */
   prHeadCommit: string | null;
 
   /**
-   * The branch name that the pull request is targeting.
+   * The branch name of the base branch of the pull request if the current job is building a PR.
    */
   prBaseBranch: string | null;
 
   /**
-   * A unique string for each run of a particular workflow in a repository.
+   * A unique identifier for the current run, combining runId and runAttempt.
    */
   nonce: string | null;
 }

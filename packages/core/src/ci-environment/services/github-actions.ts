@@ -121,8 +121,6 @@ function getRepository(
   context: Context,
   payload: EventPayload | null,
 ): string | null {
-  const { env } = context;
-
   // If PR from fork
   if (payload && "pull_request" in payload && payload.pull_request) {
     const pr = payload.pull_request;
@@ -131,7 +129,11 @@ function getRepository(
     }
   }
 
-  // Default: repository running the workflow
+  return getOriginalRepository(context);
+}
+
+function getOriginalRepository(context: Context): string | null {
+  const { env } = context;
   return env.GITHUB_REPOSITORY || null;
 }
 
@@ -199,6 +201,7 @@ const service: Service = {
     return {
       commit: sha,
       repository: getRepository(context, payload),
+      originalRepository: getOriginalRepository(context),
       jobId: env.GITHUB_JOB || null,
       runId: env.GITHUB_RUN_ID || null,
       runAttempt: env.GITHUB_RUN_ATTEMPT

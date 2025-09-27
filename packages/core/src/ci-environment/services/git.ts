@@ -22,10 +22,12 @@ const service: Service = {
   key: "git",
   detect: () => checkIsGitRepository(),
   config: () => {
+    const repository = getRepository();
     return {
       commit: head() || null,
       branch: branch() || null,
-      repository: getRepository(),
+      repository,
+      originalRepository: repository,
       jobId: null,
       runId: null,
       runAttempt: null,

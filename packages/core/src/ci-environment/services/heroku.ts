@@ -10,6 +10,7 @@ const service: Service = {
     branch: env.HEROKU_TEST_RUN_BRANCH || null,
     owner: null,
     repository: null,
+    originalRepository: null,
     jobId: null,
     runId: null,
     runAttempt: null,

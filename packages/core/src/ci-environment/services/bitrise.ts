@@ -20,10 +20,12 @@ const service: Service = {
   detect: ({ env }) => Boolean(env.BITRISE_IO),
   config: (context) => {
     const { env } = context;
+    const repository = getRepository(context);
     return {
       commit: env.BITRISE_GIT_COMMIT || null,
       branch: env.BITRISE_GIT_BRANCH || null,
-      repository: getRepository(context),
+      repository,
+      originalRepository: repository,
       jobId: null,
       runId: null,
       runAttempt: null,
