@@ -9,3 +9,4 @@ dist
 __fixtures__/screenshots/invalid.argos.json
 packages/api-client/src/schema.ts
 /examples
+/.nx/workspace-data

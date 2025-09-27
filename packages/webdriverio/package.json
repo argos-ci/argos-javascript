@@ -43,18 +43,18 @@
     "webdriverio": "^6 || ^7 || ^8 || ^9"
   },
   "dependencies": {
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.4"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
-    "@wdio/cli": "^9.18.4",
+    "@wdio/cli": "^9.19.2",
     "@wdio/globals": "^9.17.0",
-    "@wdio/local-runner": "^9.18.4",
-    "@wdio/mocha-framework": "^9.18.0",
-    "@wdio/spec-reporter": "^9.18.0",
-    "@wdio/types": "^9.16.2",
-    "tsx": "^4.20.3",
-    "webdriverio": "^9.18.4"
+    "@wdio/local-runner": "^9.19.2",
+    "@wdio/mocha-framework": "^9.19.2",
+    "@wdio/spec-reporter": "^9.19.2",
+    "@wdio/types": "^9.19.2",
+    "tsx": "^4.20.6",
+    "webdriverio": "^9.19.2"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",

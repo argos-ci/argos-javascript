@@ -4,11 +4,11 @@
     "baseUrl": ".",
     "paths": {
       "@argos-ci/*": ["packages/*/src"],
+      "@argos-ci/playwright/reporter": ["packages/playwright/src/reporter.ts"],
       "@argos-ci/storybook/test-runner": ["packages/*/src/test-runner.ts"],
-      "@argos-ci/storybook/vitest-plugin": ["packages/*/src/vitest-plugin.ts"],
       "@argos-ci/storybook/vitest": ["packages/*/src/vitest.ts"],
-      "@argos-ci/util/browser": ["packages/util/src/browser.ts"],
-      "@argos-ci/playwright/reporter": ["packages/playwright/src/reporter.ts"]
+      "@argos-ci/storybook/vitest-plugin": ["packages/*/src/vitest-plugin.ts"],
+      "@argos-ci/util/browser": ["packages/util/src/browser.ts"]
     },
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
