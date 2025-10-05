@@ -79,6 +79,22 @@ describe("#upload", () => {
     });
   });
 
+  it("allows to skip", async () => {
+    const result = await upload({
+      branch: "main",
+      apiBaseUrl: "https://api.argos-ci.dev",
+      root: join(__dirname, "../../../__fixtures__/screenshots"),
+      commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+      token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+      skipped: true,
+    });
+
+    expect(result).toEqual({
+      build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
+      screenshots: [],
+    });
+  });
+
   it("retries", () => {
     return server.boundary(async () => {
       let reqCount = 0;

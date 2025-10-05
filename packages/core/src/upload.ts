@@ -1,6 +1,6 @@
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { createClient, throwAPIError } from "@argos-ci/api-client";
-import { readConfig } from "./config";
+import { getConfigFromOptions } from "./config";
 import { discoverScreenshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
@@ -8,7 +8,11 @@ import { getAuthToken } from "./auth";
 import { uploadFile } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
-import { getPlaywrightTracePath, readMetadata } from "@argos-ci/util";
+import {
+  getPlaywrightTracePath,
+  readMetadata,
+  type ScreenshotMetadata,
+} from "@argos-ci/util";
 import { getArgosCoreSDKIdentifier } from "./version";
 import { getMergeBaseCommitSha, listParentCommits } from "./ci-environment";
 
@@ -21,155 +25,138 @@ type BuildMetadata = ArgosAPISchema.components["schemas"]["BuildMetadata"];
 
 export interface UploadParameters {
   /**
-   * Globs matching image file paths to upload
+   * Globs that match image file paths to upload.
    */
   files?: string[];
+
   /**
-   * Root directory to look for image to upload
+   * Root directory used to resolve image paths.
    * @default process.cwd()
    */
   root?: string;
+
   /**
-   * Globs matching image file paths to ignore
-   * @default ["**\/*.\{png,jpg,jpeg\}"]
+   * Globs that match image file paths to exclude from upload.
+   * @default ["**\/*.{png,jpg,jpeg}"]
    */
   ignore?: string[];
+
   /**
-   * Base URL of Argos API
+   * Base URL of the Argos API.
    * @default "https://api.argos-ci.com/v2/"
    */
   apiBaseUrl?: string;
+
   /**
-   * Git commit
+   * Git commit SHA of the build.
    */
   commit?: string;
+
   /**
-   * Git branch
+   * Git branch name of the build.
    */
   branch?: string;
+
   /**
-   * Argos repository token
+   * Argos repository access token.
    */
   token?: string;
+
   /**
-   * Pull-request number
+   * Pull request number associated with the build.
    */
   prNumber?: number;
+
   /**
-   * Name of the build used to trigger multiple Argos builds on one commit
+   * Custom build name. Useful when triggering multiple Argos builds
+   * for the same commit.
    */
   buildName?: string;
+
   /**
-   * Mode of comparison applied
+   * Build mode to use.
+   * - "ci": Review the visual changes introduced by a feature branch and prevent regressions.
+   * - "monitoring": Track visual changes outside the standard CI flow, either on a schedule or before a release.
+   * @see https://argos-ci.com/docs/build-modes
    * @default "ci"
    */
   mode?: "ci" | "monitoring";
+
   /**
-   Parallel test suite mode
+   * Parallel test suite configuration.
+   * @default false
    */
   parallel?:
     | {
-        /** Unique build ID for this parallel build */
+        /** Unique build identifier shared across parallel jobs. */
         nonce: string;
-        /** The number of parallel nodes being ran */
+        /** Total number of parallel jobs, set to -1 to finalize manually. */
         total: number;
-        /** The index of the parallel node */
+        /** Index of the current job (must start from 1). */
         index?: number;
       }
     | false;
+
   /**
-   * Branch used as baseline for screenshot comparison
+   * Branch used as the baseline for screenshot comparison.
    */
   referenceBranch?: string;
+
   /**
-   * Commit used as baseline for screenshot comparison
+   * Commit SHA used as the baseline for screenshot comparison.
    */
   referenceCommit?: string;
+
   /**
-   * Sensitivity threshold between 0 and 1.
-   * The higher the threshold, the less sensitive the diff will be.
+   * Diff sensitivity threshold between 0 and 1.
+   * Higher values make Argos less sensitive to differences.
    * @default 0.5
    */
   threshold?: number;
+
   /**
-   * Build metadata.
+   * Additional build metadata.
    */
   metadata?: BuildMetadata;
+
   /**
    * Preview URL configuration.
-   * Accepts a base URL or a function that receives the URL and returns the preview URL.
+   * Can be a fixed base URL or a function to transform URLs dynamically.
    */
   previewUrl?:
     | {
         baseUrl: string;
       }
     | ((url: string) => string);
+
+  /**
+   * Mark this build as skipped.
+   * No screenshots are uploaded, and the commit status is marked as success.
+   */
+  skipped?: boolean;
 }
 
-async function getConfigFromOptions({
-  parallel,
-  ...options
-}: UploadParameters) {
-  return readConfig({
-    ...options,
-    parallel: parallel !== undefined ? Boolean(parallel) : undefined,
-    parallelNonce: parallel ? parallel.nonce : undefined,
-    parallelTotal: parallel ? parallel.total : undefined,
-    parallelIndex: parallel ? parallel.index : undefined,
-  });
-}
-
-async function uploadFilesToS3(
-  files: { url: string; path: string; contentType: string }[],
-) {
-  debug(`Split files in chunks of ${CHUNK_SIZE}`);
-  const chunks = chunk(files, CHUNK_SIZE);
-
-  debug(`Starting upload of ${chunks.length} chunks`);
-
-  for (let i = 0; i < chunks.length; i++) {
-    // Upload files
-    debug(`Uploading chunk ${i + 1}/${chunks.length}`);
-    const timeLabel = `Chunk ${i + 1}/${chunks.length}`;
-    debugTime(timeLabel);
-    const chunk = chunks[i];
-    if (!chunk) {
-      throw new Error(`Invariant: chunk ${i} is empty`);
-    }
-    await Promise.all(
-      chunk.map(async ({ url, path, contentType }) => {
-        await uploadFile({
-          url,
-          path,
-          contentType,
-        });
-      }),
-    );
-    debugTimeEnd(timeLabel);
-  }
-}
-
-/**
- * Format the preview URL.
- */
-function formatPreviewUrl(
-  url: string,
-  formatter: NonNullable<UploadParameters["previewUrl"]>,
-) {
-  if (typeof formatter === "function") {
-    return formatter(url);
-  }
-  const urlObj = new URL(url);
-  return new URL(
-    urlObj.pathname + urlObj.search + urlObj.hash,
-    formatter.baseUrl,
-  ).href;
+interface Screenshot {
+  hash: string;
+  optimizedPath: string;
+  metadata: ScreenshotMetadata | null;
+  threshold: number | null;
+  baseName: string | null;
+  pwTrace: {
+    path: string;
+    hash: string;
+  } | null;
+  name: string;
+  path: string;
 }
 
 /**
  * Upload screenshots to Argos.
  */
-export async function upload(params: UploadParameters) {
+export async function upload(params: UploadParameters): Promise<{
+  build: ArgosAPISchema.components["schemas"]["Build"];
+  screenshots: Screenshot[];
+}> {
   debug("Starting upload with params", params);
 
   // Read config
@@ -177,12 +164,6 @@ export async function upload(params: UploadParameters) {
     getConfigFromOptions(params),
     getArgosCoreSDKIdentifier(),
   ]);
-  const previewUrlFormatter: UploadParameters["previewUrl"] =
-    params.previewUrl ??
-    (config.previewBaseUrl ? { baseUrl: config.previewBaseUrl } : undefined);
-
-  const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
-  debug("Using config and files", config, files);
 
   const authToken = getAuthToken(config);
 
@@ -190,6 +171,44 @@ export async function upload(params: UploadParameters) {
     baseUrl: config.apiBaseUrl,
     authToken,
   });
+
+  if (config.skipped) {
+    const createBuildResponse = await apiClient.POST("/builds", {
+      body: {
+        commit: config.commit,
+        branch: config.branch,
+        name: config.buildName,
+        mode: config.mode,
+        parallel: config.parallel,
+        parallelNonce: config.parallelNonce,
+        prNumber: config.prNumber,
+        prHeadCommit: config.prHeadCommit,
+        referenceBranch: config.referenceBranch,
+        referenceCommit: config.referenceCommit,
+        argosSdk,
+        ciProvider: config.ciProvider,
+        runId: config.runId,
+        runAttempt: config.runAttempt,
+        skipped: true,
+        screenshotKeys: [],
+        pwTraceKeys: [],
+        parentCommits: [],
+      },
+    });
+
+    if (createBuildResponse.error) {
+      throwAPIError(createBuildResponse.error);
+    }
+
+    return { build: createBuildResponse.data.build, screenshots: [] };
+  }
+
+  const previewUrlFormatter: UploadParameters["previewUrl"] =
+    params.previewUrl ??
+    (config.previewBaseUrl ? { baseUrl: config.previewBaseUrl } : undefined);
+
+  const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
+  debug("Using config and files", config, files);
 
   // Collect screenshots
   const foundScreenshots = await discoverScreenshots(files, {
@@ -404,4 +423,51 @@ export async function upload(params: UploadParameters) {
   }
 
   return { build: uploadBuildResponse.data.build, screenshots };
+}
+
+async function uploadFilesToS3(
+  files: { url: string; path: string; contentType: string }[],
+) {
+  debug(`Split files in chunks of ${CHUNK_SIZE}`);
+  const chunks = chunk(files, CHUNK_SIZE);
+
+  debug(`Starting upload of ${chunks.length} chunks`);
+
+  for (let i = 0; i < chunks.length; i++) {
+    // Upload files
+    debug(`Uploading chunk ${i + 1}/${chunks.length}`);
+    const timeLabel = `Chunk ${i + 1}/${chunks.length}`;
+    debugTime(timeLabel);
+    const chunk = chunks[i];
+    if (!chunk) {
+      throw new Error(`Invariant: chunk ${i} is empty`);
+    }
+    await Promise.all(
+      chunk.map(async ({ url, path, contentType }) => {
+        await uploadFile({
+          url,
+          path,
+          contentType,
+        });
+      }),
+    );
+    debugTimeEnd(timeLabel);
+  }
+}
+
+/**
+ * Format the preview URL.
+ */
+function formatPreviewUrl(
+  url: string,
+  formatter: NonNullable<UploadParameters["previewUrl"]>,
+) {
+  if (typeof formatter === "function") {
+    return formatter(url);
+  }
+  const urlObj = new URL(url);
+  return new URL(
+    urlObj.pathname + urlObj.search + urlObj.hash,
+    formatter.baseUrl,
+  ).href;
 }
