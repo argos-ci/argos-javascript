@@ -73,6 +73,12 @@ export function uploadCommand(program: Command) {
         "Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to 0.5",
       ).env("ARGOS_THRESHOLD"),
     )
+    .addOption(
+      new Option(
+        "--skipped",
+        "Mark this build as skipped. No screenshots are uploaded, and the commit status is marked as success.",
+      ).env("ARGOS_SKIPPED"),
+    )
     .action(async (directory, options) => {
       const spinner = ora("Uploading screenshots").start();
       try {
@@ -96,6 +102,7 @@ export function uploadCommand(program: Command) {
           referenceCommit: options.referenceCommit,
           mode: options.mode,
           threshold: options.threshold,
+          skipped: options.skipped,
         });
         spinner.succeed(`Build created: ${result.build.url}`);
       } catch (error) {

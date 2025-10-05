@@ -103,6 +103,11 @@ export interface components {
             name: string;
             baseName?: string | null;
             metadata?: {
+                /**
+                 * @description Ignored. Can be set to get completions, validations and documentation in some editors.
+                 * @example https://api.argos-ci.com/v2/screenshot-metadata.json
+                 */
+                $schema?: string;
                 /** @description The URL of the page that was screenshotted */
                 url?: string | null;
                 /** @description An URL to an accessible preview of the screenshot */
@@ -258,23 +263,42 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** @description The commit the build is running on */
                     commit: components["schemas"]["Sha1Hash"];
+                    /** @description The branch the build is running on */
                     branch: string;
+                    /** @description Keys of screenshot files */
                     screenshotKeys: components["schemas"]["Sha256Hash"][];
+                    /** @description Keys of Playwright trace files */
                     pwTraceKeys?: components["schemas"]["Sha256Hash"][];
+                    /** @description The name of the build (for multi-build setups) */
                     name?: string | null;
+                    /** @description Whether to run the build in parallel */
                     parallel?: boolean | null;
+                    /** @description A unique nonce for the parallel build */
                     parallelNonce?: string | null;
+                    /** @description The pull request number */
                     prNumber?: number | null;
-                    prHeadCommit?: string | null;
-                    referenceCommit?: string | null;
+                    /** @description The head commit of the pull request */
+                    prHeadCommit?: components["schemas"]["Sha1Hash"] | null;
+                    /** @description The commit to use as a reference for the build */
+                    referenceCommit?: components["schemas"]["Sha1Hash"] | null;
+                    /** @description The branch to use as a reference for the build */
                     referenceBranch?: string | null;
+                    /** @description The parent commits of the build */
                     parentCommits?: components["schemas"]["Sha1Hash"][] | null;
+                    /** @description The mode in which the build is running */
                     mode?: ("ci" | "monitoring") | null;
+                    /** @description The CI provider being used */
                     ciProvider?: string | null;
+                    /** @description The version of the Argos SDK being used */
                     argosSdk?: string | null;
+                    /** @description The ID of the current run */
                     runId?: string | null;
+                    /** @description The attempt number of the current run */
                     runAttempt?: number | null;
+                    /** @description Whether the build was skipped, not comparing anything and always succeeding */
+                    skipped?: boolean | null;
                 };
             };
         };

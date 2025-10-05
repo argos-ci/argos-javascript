@@ -203,103 +203,151 @@ const schema = {
     default: null,
     nullable: true,
   },
+  skipped: {
+    env: "ARGOS_SKIPPED",
+    format: Boolean,
+    default: false,
+  },
 };
 
 export interface Config {
   /**
-   * Argos API base URL (for self-hosted installations)
+   * Base URL of the Argos API.
+   * Use this to target a self-hosted installation.
+   * @default "https://api.argos-ci.com/v2/"
    */
   apiBaseUrl: string;
+
   /**
-   * The commit SHA1 (40 characters)
+   * Git commit SHA.
    */
   commit: string;
+
   /**
-   * The git branch name (e.g. "main", "master", "develop", "release/1.0" etc.)
+   * Git branch name of the build.
+   * @example "main", "develop", "release/1.0"
    */
   branch: string;
+
   /**
-   * The Argos repository token (40 characters)
+   * Argos repository access token.
    */
   token: string | null;
+
   /**
-   * The name of the build (for multi-build setups)
+   * Custom build name.
+   * Useful for multi-build setups on the same commit.
    */
   buildName: string | null;
+
   /**
-   * Whether the current run is parallelized (split in multiple jobs) or not
+   * Whether this build is split across multiple parallel jobs.
+   * @default false
    */
   parallel: boolean;
+
   /**
-   * The parallelization nonce (identifier shared by all parallel jobs)
+   * Unique identifier shared by all parallel jobs.
    */
   parallelNonce: string | null;
+
   /**
-   * The index of the current job (between 1 and parallelTotal inclusive, or null if not set)
+   * Index of the current parallel job.
+   * Must be between 1 and `parallelTotal`, or null if not set.
    */
   parallelIndex: number | null;
+
   /**
-   * The total number of parallel jobs (or -1 if unknown, or null if not set)
+   * Total number of parallel jobs.
+   * Use -1 if unknown, or null if not set.
    */
   parallelTotal: number | null;
+
   /**
-   * The reference git branch to compare against
+   * Git branch used as the baseline for screenshot comparison.
    */
   referenceBranch: string | null;
+
   /**
-   * The reference commit SHA1 to compare against
+   * Git commit SHA used as the baseline for screenshot comparison.
    */
   referenceCommit: string | null;
+
   /**
-   * The git repository slug (e.g. "my-org/my-repo" or "my-user/my-repo")
-   * If from a fork, this is the fork's repository.
+   * Repository slug of the source repository.
+   * Example: "my-org/my-repo" or "my-user/my-repo".
+   * If from a fork, this refers to the fork repository.
    */
   repository: string | null;
+
   /**
-   * The original git repository slug (e.g. "my-org/my-repo" or "my-user/my-repo")
-   * If from a fork, this is the base repository.
+   * Repository slug of the original (base) repository.
+   * Example: "my-org/my-repo" or "my-user/my-repo".
+   * If from a fork, this refers to the base repository.
    */
   originalRepository: string | null;
+
   /**
-   * The CI job identifier (if available)
+   * CI job identifier (if provided by the CI environment).
    */
   jobId: string | null;
+
   /**
-   * The CI run identifier (if available)
+   * CI run identifier (if provided by the CI environment).
    */
   runId: string | null;
+
   /**
-   * The CI run attempt (if available)
+   * CI run attempt number (if provided by the CI environment).
    */
   runAttempt: number | null;
+
   /**
-   * The pull request number (if available)
+   * Pull request number associated with the build.
    */
   prNumber: number | null;
+
   /**
-   * The pull request head commit SHA1 (if available)
+   * Pull request head commit SHA (if available).
    */
   prHeadCommit: string | null;
+
   /**
-   * The pull request base branch (if available)
+   * Pull request base branch (if available).
    */
   prBaseBranch: string | null;
+
   /**
-   * The mode Argos is running in (ci or monitoring)
+   * Build mode to use.
+   * - "ci": Review visual changes introduced by a feature branch and prevent regressions.
+   * - "monitoring": Track visual changes outside the standard CI flow, either on a schedule or before a release.
+   * @see https://argos-ci.com/docs/build-modes
    */
   mode: "ci" | "monitoring" | null;
+
   /**
-   * The CI provider name (if detected)
+   * Name of the detected CI provider (if available).
+   * @example "github-actions", "gitlab-ci", "circleci"
    */
   ciProvider: string | null;
+
   /**
-   * The threshold to use for this run (if any, between 0 and 1 inclusive, e.g. 0.1 for 10% or 0.0 for 0%)
+   * Diff sensitivity threshold between 0 and 1.
+   * Higher values make Argos less sensitive to differences.
    */
   threshold: number | null;
+
   /**
-   * The base URL to use for preview links (if any)
+   * Base URL to use for preview links.
+   * @example "https://my-preview.example.com"
    */
   previewBaseUrl: string | null;
+
+  /**
+   * Skip this build.
+   * No screenshots are uploaded, and the commit status is marked as success.
+   */
+  skipped?: boolean;
 }
 
 function createConfig() {
@@ -354,6 +402,7 @@ export async function readConfig(options: Partial<Config> = {}) {
     mode: options.mode || defaultConfig.mode || null,
     ciProvider: ciEnv?.key || null,
     previewBaseUrl: defaultConfig.previewBaseUrl || null,
+    skipped: options.skipped ?? defaultConfig.skipped ?? false,
   });
 
   if (!config.get("branch") || !config.get("commit")) {
@@ -365,4 +414,29 @@ export async function readConfig(options: Partial<Config> = {}) {
   config.validate();
 
   return config.get();
+}
+
+export async function getConfigFromOptions({
+  parallel,
+  ...options
+}: Omit<Partial<Config>, "parallel"> & {
+  parallel?:
+    | {
+        /** Unique build ID for this parallel build */
+        nonce: string;
+        /** The number of parallel nodes being ran */
+        total: number;
+        /** The index of the parallel node */
+        index?: number;
+      }
+    | false
+    | undefined;
+}) {
+  return readConfig({
+    ...options,
+    parallel: parallel !== undefined ? Boolean(parallel) : undefined,
+    parallelNonce: parallel ? parallel.nonce : undefined,
+    parallelTotal: parallel ? parallel.total : undefined,
+    parallelIndex: parallel ? parallel.index : undefined,
+  });
 }
