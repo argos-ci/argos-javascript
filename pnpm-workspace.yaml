@@ -9,7 +9,9 @@ onlyBuiltDependencies:
   - '@swc/core'
   - chromedriver
   - cypress
+  - edgedriver
   - esbuild
+  - geckodriver
   - msw
   - nx
   - puppeteer
