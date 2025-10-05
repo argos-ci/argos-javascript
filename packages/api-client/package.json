@@ -50,6 +50,6 @@
   },
   "dependencies": {
     "debug": "^4.4.3",
-    "openapi-fetch": "^0.14.0"
+    "openapi-fetch": "^0.14.1"
   }
 }
