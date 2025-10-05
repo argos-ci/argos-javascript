@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.0.10...@argos-ci/cli@3.1.0) (2025-10-05)
+
+
+### Features
+
+* **skip:** allow to mark a build as skipped ([5cd48f3](https://github.com/argos-ci/argos-javascript/commit/5cd48f3395d784e0fdca1c77850d16b86ae28f70))
+
+
+
+
+
 ## [3.0.10](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.0.9...@argos-ci/cli@3.0.10) (2025-09-27)
 
 **Note:** Version bump only for package @argos-ci/cli

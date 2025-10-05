@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.6...@argos-ci/core@4.2.0) (2025-10-05)
+
+
+### Features
+
+* **skip:** allow to mark a build as skipped ([5cd48f3](https://github.com/argos-ci/argos-javascript/commit/5cd48f3395d784e0fdca1c77850d16b86ae28f70))
+
+
+
+
+
 ## [4.1.6](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.5...@argos-ci/core@4.1.6) (2025-09-27)
 
 

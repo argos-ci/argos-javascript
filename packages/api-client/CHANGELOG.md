@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.11.1...@argos-ci/api-client@0.12.0) (2025-10-05)
+
+
+### Features
+
+* **skip:** allow to mark a build as skipped ([5cd48f3](https://github.com/argos-ci/argos-javascript/commit/5cd48f3395d784e0fdca1c77850d16b86ae28f70))
+
+
+
+
+
 ## [0.11.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.11.0...@argos-ci/api-client@0.11.1) (2025-09-27)
 
 **Note:** Version bump only for package @argos-ci/api-client
