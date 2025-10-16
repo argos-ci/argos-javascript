@@ -81,6 +81,149 @@ export const Page = () => {
           </svg>
           Viewports addon in the toolbar
         </div>
+        <p>
+          <strong>Paragraph One</strong> — There is a unique strength in doing
+          one thing at a time. Focus on a single task to channel energy, reduce
+          distractions, and gain clarity. The discipline of one leads to
+          mastery.
+        </p>
+
+        <p>
+          <strong>Paragraph Two</strong> — Two represents balance and duality.
+          Progress emerges when two perspectives meet, like speed with stability
+          or design with implementation.
+        </p>
+
+        <p>
+          <strong>Paragraph Three</strong> — Three introduces structure. A
+          tripod is stable with three legs, and ideas feel complete when framed
+          as three arguments.
+        </p>
+
+        <p>
+          <strong>Paragraph Four</strong> — One can also mean solitude. Working
+          alone sharpens creativity and supports deep work away from noise.
+        </p>
+
+        <p>
+          <strong>Paragraph Five</strong> — Two emphasizes dialogue. Pair
+          programming and code review show how two minds can reach stronger
+          outcomes.
+        </p>
+
+        <p>
+          <strong>Paragraph Six</strong> — Three signals progression. First the
+          idea, second the prototype, third the refinement. Each stage builds on
+          the prior two.
+        </p>
+
+        <p>
+          <strong>Paragraph Seven</strong> — One is the starting point. Every
+          journey begins with a single decision. Without the first step, the
+          second and third never exist.
+        </p>
+
+        <p>
+          <strong>Paragraph Eight</strong> — Three often marks completion. Past,
+          present, and future give a sense of arc, and ready, set, go frames the
+          threshold to act.
+        </p>
+
+        <p>
+          <strong>Paragraph One</strong> — There is a unique strength in doing
+          one thing at a time. Focus on a single task to channel energy, reduce
+          distractions, and gain clarity. The discipline of one leads to
+          mastery.
+        </p>
+
+        <p>
+          <strong>Paragraph Two</strong> — Two represents balance and duality.
+          Progress emerges when two perspectives meet, like speed with stability
+          or design with implementation.
+        </p>
+
+        <p>
+          <strong>Paragraph Three</strong> — Three introduces structure. A
+          tripod is stable with three legs, and ideas feel complete when framed
+          as three arguments.
+        </p>
+
+        <p>
+          <strong>Paragraph Four</strong> — One can also mean solitude. Working
+          alone sharpens creativity and supports deep work away from noise.
+        </p>
+
+        <p>
+          <strong>Paragraph Five</strong> — Two emphasizes dialogue. Pair
+          programming and code review show how two minds can reach stronger
+          outcomes.
+        </p>
+
+        <p>
+          <strong>Paragraph Six</strong> — Three signals progression. First the
+          idea, second the prototype, third the refinement. Each stage builds on
+          the prior two.
+        </p>
+
+        <p>
+          <strong>Paragraph Seven</strong> — One is the starting point. Every
+          journey begins with a single decision. Without the first step, the
+          second and third never exist.
+        </p>
+
+        <p>
+          <strong>Paragraph Eight</strong> — Three often marks completion. Past,
+          present, and future give a sense of arc, and ready, set, go frames the
+          threshold to act.
+        </p>
+
+        <p>
+          <strong>Paragraph One</strong> — There is a unique strength in doing
+          one thing at a time. Focus on a single task to channel energy, reduce
+          distractions, and gain clarity. The discipline of one leads to
+          mastery.
+        </p>
+
+        <p>
+          <strong>Paragraph Two</strong> — Two represents balance and duality.
+          Progress emerges when two perspectives meet, like speed with stability
+          or design with implementation.
+        </p>
+
+        <p>
+          <strong>Paragraph Three</strong> — Three introduces structure. A
+          tripod is stable with three legs, and ideas feel complete when framed
+          as three arguments.
+        </p>
+
+        <p>
+          <strong>Paragraph Four</strong> — One can also mean solitude. Working
+          alone sharpens creativity and supports deep work away from noise.
+        </p>
+
+        <p>
+          <strong>Paragraph Five</strong> — Two emphasizes dialogue. Pair
+          programming and code review show how two minds can reach stronger
+          outcomes.
+        </p>
+
+        <p>
+          <strong>Paragraph Six</strong> — Three signals progression. First the
+          idea, second the prototype, third the refinement. Each stage builds on
+          the prior two.
+        </p>
+
+        <p>
+          <strong>Paragraph Seven</strong> — One is the starting point. Every
+          journey begins with a single decision. Without the first step, the
+          second and third never exist.
+        </p>
+
+        <p>
+          <strong>Paragraph Eight</strong> — Three often marks completion. Past,
+          present, and future give a sense of arc, and ready, set, go frames the
+          threshold to act.
+        </p>
       </section>
     </article>
   );

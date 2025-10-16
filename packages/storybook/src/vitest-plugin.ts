@@ -43,39 +43,55 @@ export const createArgosScreenshotCommand = (
       testContext.story.parameters,
     );
     const after = await before(ctx);
+
     const attachments = await storybookArgosScreenshot(
       frame,
       {
         ...testContext,
         playwrightLibraries: ["@storybook/addon-vitest"],
         setViewportSize: async (size) => {
-          await ctx.page.evaluate((size) => {
-            const iframe = document.querySelector('iframe[data-vitest="true"]');
+          await ctx.page.evaluate(
+            ({ size, fullPage }) => {
+              const iframe = document.querySelector(
+                'iframe[data-vitest="true"]',
+              );
 
-            if (!(iframe instanceof HTMLIFrameElement)) {
-              throw new Error("Vitest iframe not found");
-            }
-
-            if (size === "default") {
-              // Restore the default width and height if they were set.
-              if (iframe.dataset.defaultWidth && iframe.dataset.defaultHeight) {
-                iframe.style.width = iframe.dataset.defaultWidth;
-                iframe.style.height = iframe.dataset.defaultHeight;
-              }
-            } else {
-              // Backup default width and height if not already set.
-              if (
-                !iframe.dataset.defaultWidth &&
-                !iframe.dataset.defaultHeight
-              ) {
-                iframe.dataset.defaultWidth = iframe.style.width;
-                iframe.dataset.defaultHeight = iframe.style.height;
+              if (!(iframe instanceof HTMLIFrameElement)) {
+                throw new Error("Vitest iframe not found");
               }
 
-              iframe.style.width = `${size.width}px`;
-              iframe.style.height = `${size.height}px`;
-            }
-          }, size);
+              if (!iframe.contentDocument) {
+                throw new Error("Vitest iframe contentDocument not found");
+              }
+
+              if (size === "default") {
+                // Restore the default width and height if they were set.
+                if (
+                  iframe.dataset.defaultWidth &&
+                  iframe.dataset.defaultHeight
+                ) {
+                  iframe.style.width = iframe.dataset.defaultWidth;
+                  iframe.style.height = iframe.dataset.defaultHeight;
+                }
+              } else {
+                // Backup default width and height if not already set.
+                if (
+                  !iframe.dataset.defaultWidth &&
+                  !iframe.dataset.defaultHeight
+                ) {
+                  iframe.dataset.defaultWidth = iframe.style.width;
+                  iframe.dataset.defaultHeight = iframe.style.height;
+                }
+
+                iframe.style.height = "auto";
+                iframe.style.width = `${size.width}px`;
+                iframe.style.height = fullPage
+                  ? `${iframe.contentDocument.body.offsetHeight}px`
+                  : `${size.height}px`;
+              }
+            },
+            { size, fullPage: screenshotOptions.fullPage ?? !fitToContent },
+          );
         },
       },
       applyFitToContent(screenshotOptions, fitToContent),
