@@ -184,6 +184,8 @@ export interface components {
             } | null;
             pwTraceKey?: string | null;
             threshold?: number | null;
+            /** @default image/png */
+            contentType: string;
         };
         /** @description Build metadata */
         BuildMetadata: {

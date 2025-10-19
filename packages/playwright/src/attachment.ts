@@ -1,7 +1,16 @@
 import type { TestResult } from "@playwright/test/reporter";
 import { METADATA_EXTENSION, PNG_EXTENSION } from "./util";
 
-export function getAttachmentName(name: string, type: string) {
+export type ArgosAttachment = {
+  name: string;
+  contentType: string;
+  path: string;
+};
+
+export function getAttachmentName(
+  name: string,
+  type: "screenshot" | "snapshot" | "metadata",
+) {
   return `argos/${type}___${name}`;
 }
 
@@ -12,6 +21,9 @@ function getOriginalAttachmentName(name: string) {
 export function getAttachmentFilename(name: string) {
   if (name.startsWith("argos/screenshot")) {
     return `${getOriginalAttachmentName(name)}${PNG_EXTENSION}`;
+  }
+  if (name.startsWith("argos/snapshot")) {
+    return `${getOriginalAttachmentName(name)}.yaml`;
   }
   if (name.startsWith("argos/metadata")) {
     return `${getOriginalAttachmentName(name)}${PNG_EXTENSION}${METADATA_EXTENSION}`;
@@ -51,6 +63,16 @@ export function checkIsArgosScreenshot(
   return (
     attachment.name.startsWith("argos/") &&
     attachment.contentType === "image/png" &&
+    Boolean(attachment.path)
+  );
+}
+
+export function checkIsArgosSnapshot(
+  attachment: Attachment,
+): attachment is ArgosScreenshotAttachment {
+  return (
+    attachment.name.startsWith("argos/") &&
+    attachment.contentType === "application/yaml" &&
     Boolean(attachment.path)
   );
 }

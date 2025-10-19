@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import {
   checkIsArgosScreenshot,
   checkIsArgosScreenshotMetadata,
+  checkIsArgosSnapshot,
   checkIsAutomaticScreenshot,
   checkIsTrace,
   getAttachmentFilename,
@@ -175,6 +176,7 @@ class ArgosReporter implements Reporter {
       result.attachments.map(async (attachment) => {
         if (
           checkIsArgosScreenshot(attachment) ||
+          checkIsArgosSnapshot(attachment) ||
           checkIsArgosScreenshotMetadata(attachment)
         ) {
           const path = join(uploadDir, getAttachmentFilename(attachment.name));
@@ -222,7 +224,7 @@ class ArgosReporter implements Reporter {
 
     const buildNameConfig = this.config.buildName;
     const uploadOptions = {
-      files: ["**/*.png"],
+      files: ["**/*.png", "**/*.yaml"],
       parallel: parallel ?? undefined,
       ...this.config,
       buildName: undefined, // We will set it later
@@ -252,7 +254,7 @@ class ArgosReporter implements Reporter {
         const iteratesOnBuildNames = parallel
           ? buildNameConfig.values
           : directories;
-        // Iterate over each build name and upload the screenshots
+        // Iterate over each build name and upload the snapshots
         for (const buildName of iteratesOnBuildNames) {
           const uploadDir = join(rootUploadDir, buildName);
           await createDirectory(uploadDir);

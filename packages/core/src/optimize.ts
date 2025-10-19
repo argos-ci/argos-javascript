@@ -2,6 +2,7 @@ import { promisify } from "node:util";
 import { basename } from "node:path";
 import sharp from "sharp";
 import tmp from "tmp";
+import { checkIsValidImageFile } from "./discovery";
 
 export type ImageFormat = keyof sharp.FormatEnum;
 
@@ -18,7 +19,11 @@ const MAX_PIXELS = 80_000_000;
  */
 const DEFAULT_MAX_WIDTH = 2048;
 
-export const optimizeScreenshot = async (filepath: string): Promise<string> => {
+export async function optimizeScreenshot(filepath: string): Promise<string> {
+  if (!checkIsValidImageFile(filepath)) {
+    return filepath;
+  }
+
   try {
     const [resultFilePath, metadata] = await Promise.all([
       tmpFile(),
@@ -87,4 +92,4 @@ export const optimizeScreenshot = async (filepath: string): Promise<string> => {
       cause: error,
     });
   }
-};
+}

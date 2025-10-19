@@ -2,7 +2,7 @@ import type * as vitest from "vitest";
 import type { ComposedStoryFn } from "storybook/internal/types";
 import type { ArgosScreenshotOptions } from "./utils/screenshot";
 import type { ArgosScreenshotCommandArgs } from "./vitest-plugin";
-import type { Attachment } from "@argos-ci/playwright";
+import type { ArgosAttachment } from "@argos-ci/playwright";
 import type { StorybookGlobals } from "./utils/parameters";
 
 export type { ArgosScreenshotOptions };
@@ -11,7 +11,7 @@ declare module "vitest/browser" {
   interface BrowserCommands {
     argosScreenshot: (
       ...args: ArgosScreenshotCommandArgs
-    ) => Promise<Attachment[]>;
+    ) => Promise<ArgosAttachment[]>;
   }
 }
 

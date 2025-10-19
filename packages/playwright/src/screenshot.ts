@@ -26,7 +26,7 @@ import {
   validateThreshold,
   writeMetadata,
 } from "@argos-ci/util";
-import { getAttachmentName } from "./attachment";
+import { getAttachmentName, type ArgosAttachment } from "./attachment";
 import {
   getLibraryMetadata,
   getMetadataOverrides,
@@ -307,12 +307,6 @@ function getScreenshotNames(name: string, testInfo: TestInfo | null) {
   return { name, baseName: null };
 }
 
-export type Attachment = {
-  name: string;
-  contentType: string;
-  path: string;
-};
-
 type Handler = Page | Frame;
 
 /**
@@ -340,6 +334,8 @@ export async function argosScreenshot(
     element,
     has,
     hasText,
+    hasNot,
+    hasNotText,
     viewports,
     argosCSS: _argosCSS,
     root = DEFAULT_SCREENSHOT_ROOT,
@@ -354,7 +350,7 @@ export async function argosScreenshot(
 
   const screenshotTarget =
     typeof element === "string"
-      ? handler.locator(element, { has, hasText })
+      ? handler.locator(element, { has, hasText, hasNot, hasNotText })
       : (element ??
         (checkIsFrame(handler) ? handler.locator("body") : handler));
 
@@ -480,7 +476,7 @@ export async function argosScreenshot(
       writeMetadata(screenshotPath, metadata),
     ]);
 
-    const attachments: Attachment[] = [
+    const attachments: ArgosAttachment[] = [
       {
         name: getAttachmentName(names.name, "screenshot"),
         contentType: "image/png",
@@ -510,7 +506,7 @@ export async function argosScreenshot(
     return attachments;
   };
 
-  const allAttachments: Attachment[] = [];
+  const allAttachments: ArgosAttachment[] = [];
 
   // If no viewports are specified, take a single screenshot
   if (viewports) {

@@ -1,7 +1,7 @@
 import {
   argosScreenshot as argosPlaywrightScreenshot,
   DO_NOT_USE_setMetadataConfig,
-  type Attachment,
+  type ArgosAttachment,
   type ArgosScreenshotOptions as BaseArgosScreenshotOptions,
   type MetadataConfig,
 } from "@argos-ci/playwright";
@@ -86,7 +86,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
   const argosParameters = getArgosParameters(context.story.parameters);
   const modes = argosParameters?.modes;
 
-  const allAttachments: Attachment[] = [];
+  const allAttachments: ArgosAttachment[] = [];
   if (context.mode === "automatic") {
     if (modes) {
       for (const [name, globals] of Object.entries(modes)) {
