@@ -30,6 +30,8 @@ describe("#upload", () => {
           metadata: null,
           threshold: null,
           baseName: null,
+          contentType: "image/jpeg",
+          parentName: null,
         },
         {
           name: "penelope.png",
@@ -62,6 +64,8 @@ describe("#upload", () => {
           },
           threshold: 0.2,
           baseName: null,
+          contentType: "image/png",
+          parentName: null,
         },
         {
           name: "nested/alicia.jpg",
@@ -74,6 +78,8 @@ describe("#upload", () => {
           metadata: null,
           threshold: null,
           baseName: null,
+          contentType: "image/jpeg",
+          parentName: null,
         },
       ],
     });

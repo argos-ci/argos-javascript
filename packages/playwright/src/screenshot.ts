@@ -1,38 +1,44 @@
-import { mkdir } from "node:fs/promises";
-import { resolve, dirname } from "node:path";
-
 import type {
   Page,
   PageScreenshotOptions,
   LocatorScreenshotOptions,
   ElementHandle,
-  TestInfo,
   Locator,
-  ViewportSize,
   Frame,
 } from "@playwright/test";
 import {
   type ViewportOption,
   resolveViewport,
-  type ArgosGlobal,
-  getGlobalScript,
   type StabilizationPluginOptions,
   type StabilizationContext,
 } from "@argos-ci/browser";
 import {
   getMetadataPath,
   getScreenshotName,
-  type ScreenshotMetadata,
   validateThreshold,
   writeMetadata,
+  type ScreenshotMetadata,
 } from "@argos-ci/util";
-import { getAttachmentName } from "./attachment";
+import { getAttachmentName, type ArgosAttachment } from "./attachment";
 import {
-  getLibraryMetadata,
-  getMetadataOverrides,
-  getTestMetadata,
-} from "./metadata";
-import { checkIsUsingArgosReporter } from "./util";
+  attachAttachments,
+  beforeAll,
+  beforeEach,
+  checkIsElementHandle,
+  checkIsFrame,
+  checkIsPage,
+  checkIsUsingArgosReporter,
+  getPathAndMetadata,
+  getSnapshotNames,
+  getTestInfo,
+  getViewportSize,
+  PNG_EXTENSION,
+  prepare,
+  screenshotToSnapshotPath,
+  setViewportSize,
+  waitForReadiness,
+} from "./util";
+import { writeFile } from "node:fs/promises";
 
 const DEFAULT_SCREENSHOT_ROOT = "./screenshots";
 
@@ -53,6 +59,15 @@ export type ArgosScreenshotOptions = {
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+
+  /**
+   * Capture an ARIA snapshot along with the screenshot.
+   * Each ARIA snapshot counts as an additional screenshot for billing.
+   * When using the viewports setting, one ARIA snapshot is taken per viewport.
+   * @see https://playwright.dev/docs/aria-snapshots#aria-snapshots
+   * @default false
+   */
+  ariaSnapshot?: boolean;
 
   /**
    * Custom CSS evaluated during the screenshot process.
@@ -109,213 +124,6 @@ export type ArgosScreenshotOptions = {
   ScreenshotOptions<PageScreenshotOptions>;
 
 /**
- * Inject Argos script into the document.
- */
-async function injectArgos(handler: Handler) {
-  const injected = await handler.evaluate(
-    () => typeof (window as any).__ARGOS__ !== "undefined",
-  );
-  if (!injected) {
-    await handler.addScriptTag({ content: getGlobalScript() });
-  }
-}
-
-/**
- * Get test info from the Playwright test.
- */
-async function getTestInfo() {
-  try {
-    const { test } = await import("@playwright/test");
-    return test.info();
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Check if the handler is a Frame.
- */
-function checkIsFrame(handler: Handler): handler is Frame {
-  return "page" in handler && typeof handler.page === "function";
-}
-
-/**
- * Get the Playwright `Page` from the handler.
- * If the handler is a Frame, it returns the parent page.
- * Otherwise, it returns the handler itself.
- */
-function getPage(handler: Handler): Page {
-  if (checkIsFrame(handler)) {
-    return handler.page();
-  }
-  return handler;
-}
-
-/**
- * Get the viewport size.
- */
-function getViewportSize(page: Page) {
-  const viewportSize = page.viewportSize();
-  if (!viewportSize) {
-    throw new Error("Can't take screenshots without a viewport.");
-  }
-  return viewportSize;
-}
-
-/**
- * Sets the viewport size and waits for the visual viewport to match the specified dimensions.
- * @returns A promise that resolves when the viewport size has been successfully set and matched.
- */
-async function setViewportSize(page: Page, viewportSize: ViewportSize) {
-  await page.setViewportSize(viewportSize);
-  await page.waitForFunction(
-    ({ width, height }) =>
-      window.innerWidth === width && window.innerHeight === height,
-    { width: viewportSize.width, height: viewportSize.height },
-  );
-}
-
-/**
- * Get the stabilization context from the options.
- */
-function getStabilizationContext(
-  options: ArgosScreenshotOptions,
-): StabilizationContext {
-  const { fullPage, argosCSS, stabilize, viewports } = options;
-  return {
-    fullPage,
-    argosCSS,
-    viewports,
-    options: stabilize,
-  };
-}
-
-/**
- * Run before taking all screenshots.
- */
-async function beforeAll(handler: Handler, options: ArgosScreenshotOptions) {
-  const { disableHover = true } = options;
-  const context = getStabilizationContext(options);
-  await handler.evaluate(
-    (context) => ((window as any).__ARGOS__ as ArgosGlobal).beforeAll(context),
-    context,
-  );
-  if (disableHover) {
-    await getPage(handler).mouse.move(0, 0);
-  }
-  return async () => {
-    await handler.evaluate(() =>
-      ((window as any).__ARGOS__ as ArgosGlobal).afterAll(),
-    );
-  };
-}
-
-/**
- * Run before taking each screenshot.
- */
-async function beforeEach(handler: Handler, options: ArgosScreenshotOptions) {
-  const context = getStabilizationContext(options);
-  await handler.evaluate(
-    (context) => ((window as any).__ARGOS__ as ArgosGlobal).beforeEach(context),
-    context,
-  );
-  return async () => {
-    await handler.evaluate(() =>
-      ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
-    );
-  };
-}
-
-/**
- * Increase the timeout for the test x3.
- * Returns a function to reset the timeout.
- */
-async function increaseTimeout() {
-  const testInfo = await getTestInfo();
-  if (testInfo) {
-    const { timeout } = testInfo;
-    // Like in "slow" mode but we don't use it because we want to
-    // be able to reset it.
-    testInfo.setTimeout(timeout * 3);
-    return {
-      value: timeout,
-      reset: () => {
-        testInfo.setTimeout(timeout);
-      },
-    };
-  }
-  return null;
-}
-
-/**
- * Wait for the UI to be ready before taking the screenshot.
- */
-async function waitForReadiness(
-  handler: Handler,
-  options: ArgosScreenshotOptions,
-) {
-  const context = getStabilizationContext(options);
-  // We increase the timeout, so we will be able to get reasons
-  // if the stabilization fails.
-  const timeout = await increaseTimeout();
-
-  try {
-    await handler.waitForFunction(
-      (context) => {
-        const argos = (window as any).__ARGOS__ as ArgosGlobal;
-        return argos.waitFor(context);
-      },
-      context,
-      timeout ? { timeout: timeout.value } : undefined,
-    );
-    timeout?.reset();
-  } catch (error) {
-    const reasons = await handler.evaluate(
-      (context) =>
-        ((window as any).__ARGOS__ as ArgosGlobal).getWaitFailureExplanations(
-          context,
-        ),
-      context,
-    );
-    throw new Error(
-      `
-Failed to stabilize screenshot, found the following issues:
-${reasons.map((reason) => `- ${reason}`).join("\n")}
-        `.trim(),
-      { cause: error },
-    );
-  }
-}
-
-/**
- * Get the screenshot names based on the test info.
- */
-function getScreenshotNames(name: string, testInfo: TestInfo | null) {
-  if (testInfo) {
-    const projectName = `${testInfo.project.name}/${name}`;
-
-    if (testInfo.repeatEachIndex > 0) {
-      return {
-        name: `${projectName} repeat-${testInfo.repeatEachIndex}`,
-        baseName: projectName,
-      };
-    }
-
-    return { name: projectName, baseName: null };
-  }
-
-  return { name, baseName: null };
-}
-
-export type Attachment = {
-  name: string;
-  contentType: string;
-  path: string;
-};
-
-type Handler = Page | Frame;
-
-/**
  * Stabilize the UI and takes a screenshot of the application under test.
  *
  * @example
@@ -326,7 +134,7 @@ export async function argosScreenshot(
   /**
    * Playwright `page` or `frame` object.
    */
-  handler: Handler,
+  handler: Page | Frame,
   /**
    * Name of the screenshot. Must be unique.
    */
@@ -340,11 +148,16 @@ export async function argosScreenshot(
     element,
     has,
     hasText,
+    hasNot,
+    hasNotText,
     viewports,
     argosCSS: _argosCSS,
     root = DEFAULT_SCREENSHOT_ROOT,
+    ariaSnapshot,
+    disableHover = true,
     ...playwrightOptions
   } = options;
+
   if (!handler) {
     throw new Error("A Playwright `handler` object is required.");
   }
@@ -354,22 +167,15 @@ export async function argosScreenshot(
 
   const screenshotTarget =
     typeof element === "string"
-      ? handler.locator(element, { has, hasText })
+      ? handler.locator(element, { has, hasText, hasNot, hasNotText })
       : (element ??
         (checkIsFrame(handler) ? handler.locator("body") : handler));
 
   const testInfo = await getTestInfo();
 
-  const useArgosReporter = Boolean(
-    testInfo && checkIsUsingArgosReporter(testInfo),
-  );
+  const useArgosReporter = checkIsUsingArgosReporter(testInfo);
 
-  await Promise.all([
-    // Create the screenshot folder if it doesn't exist
-    useArgosReporter ? null : mkdir(root, { recursive: true }),
-    // Inject Argos script into the page
-    injectArgos(handler),
-  ]);
+  await prepare({ handler, useArgosReporter, root });
 
   const originalViewportSize = checkIsFrame(handler)
     ? null
@@ -380,95 +186,79 @@ export async function argosScreenshot(
       ? options.fullPage
       : screenshotTarget === handler;
 
-  const afterAll = await beforeAll(handler, options);
-
-  const collectMetadata = async (
-    testInfo: TestInfo | null,
-  ): Promise<ScreenshotMetadata> => {
-    const overrides = getMetadataOverrides();
-    const [colorScheme, mediaType, libMetadata, testMetadata] =
-      await Promise.all([
-        handler.evaluate(() =>
-          ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
-        ),
-        handler.evaluate(() =>
-          ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
-        ),
-        getLibraryMetadata(),
-        getTestMetadata(testInfo),
-      ]);
-
-    const viewportSize = checkIsFrame(handler)
-      ? null
-      : getViewportSize(handler);
-
-    const browser = getPage(handler).context().browser();
-    if (!browser) {
-      throw new Error("Can't take screenshots without a browser.");
-    }
-    const browserName = browser.browserType().name();
-    const browserVersion = browser.version();
-    const url = overrides?.url ?? handler.url();
-
-    const metadata: ScreenshotMetadata = {
-      url,
-      colorScheme,
-      mediaType,
-      test: testMetadata,
-      browser: {
-        name: browserName,
-        version: browserVersion,
-      },
-      ...libMetadata,
-    };
-
-    const viewport = viewportSize ?? getMetadataOverrides()?.viewport;
-
-    if (viewport) {
-      metadata.viewport = viewport;
-    }
-
-    return metadata;
-  };
+  const context = getStabilizationContext(options);
+  const afterAll = await beforeAll(handler, context, { disableHover });
 
   const stabilizeAndScreenshot = async (name: string) => {
-    const names = getScreenshotNames(name, testInfo);
-
-    const metadata = await collectMetadata(testInfo);
-    metadata.transient = {};
+    const names = getSnapshotNames(name, testInfo);
+    const { path: screenshotPath, metadata } = await getPathAndMetadata({
+      handler,
+      extension: PNG_EXTENSION,
+      root,
+      names,
+      testInfo,
+      useArgosReporter,
+    });
 
     if (options.threshold !== undefined) {
       validateThreshold(options.threshold);
       metadata.transient.threshold = options.threshold;
     }
 
-    if (names.baseName) {
-      metadata.transient.baseName = `${names.baseName}.png`;
-    }
-
-    const screenshotPath =
-      useArgosReporter && testInfo
-        ? testInfo.outputPath("argos", `${names.name}.png`)
-        : resolve(root, `${names.name}.png`);
-
-    const dir = dirname(screenshotPath);
-    if (dir !== root) {
-      await mkdir(dirname(screenshotPath), { recursive: true });
-    }
-
     await options.beforeScreenshot?.({
       runStabilization: (stabilizationOptions) =>
-        waitForReadiness(handler, {
-          ...options,
-          stabilize: stabilizationOptions ?? options.stabilize,
-        }),
+        waitForReadiness(
+          handler,
+          getStabilizationContext({
+            ...options,
+            stabilize: stabilizationOptions ?? options.stabilize,
+          }),
+        ),
     });
 
     await waitForReadiness(handler, options);
-    const afterEach = await beforeEach(handler, options);
+    const afterEach = await beforeEach(handler, context);
     await waitForReadiness(handler, options);
 
-    await Promise.all([
+    const [snapshotPath] = await Promise.all([
+      (async () => {
+        if (!ariaSnapshot) {
+          return null;
+        }
+        const snapshotTarget = checkIsPage(screenshotTarget)
+          ? screenshotTarget.locator("body")
+          : screenshotTarget;
+
+        if (checkIsElementHandle(snapshotTarget)) {
+          throw new Error(
+            `Element handle is not supported with "ariaSnapshot" option. Use a Locator instead.`,
+          );
+        }
+
+        const snapshotPath = screenshotToSnapshotPath(screenshotPath);
+        const snapshotMetadata: ScreenshotMetadata = {
+          ...metadata,
+          transient: {
+            parentName: `${names.name}${PNG_EXTENSION}`,
+            ...(metadata.transient.baseName
+              ? {
+                  baseName: screenshotToSnapshotPath(
+                    metadata.transient.baseName,
+                  ),
+                }
+              : {}),
+          },
+        };
+
+        await Promise.all([
+          snapshotTarget.ariaSnapshot().then((snapshot) => {
+            return writeFile(snapshotPath, snapshot, "utf-8");
+          }),
+          writeMetadata(snapshotPath, snapshotMetadata),
+        ]);
+
+        return snapshotPath;
+      })(),
       screenshotTarget.screenshot({
         path: screenshotPath,
         type: "png",
@@ -480,29 +270,35 @@ export async function argosScreenshot(
       writeMetadata(screenshotPath, metadata),
     ]);
 
-    const attachments: Attachment[] = [
+    const attachments: ArgosAttachment[] = [
       {
         name: getAttachmentName(names.name, "screenshot"),
         contentType: "image/png",
         path: screenshotPath,
       },
       {
-        name: getAttachmentName(names.name, "metadata"),
+        name: getAttachmentName(names.name, "screenshot/metadata"),
         contentType: "application/json",
         path: getMetadataPath(screenshotPath),
       },
     ];
 
-    if (useArgosReporter && testInfo) {
-      await Promise.all(
-        attachments.map((attachment) =>
-          testInfo.attach(attachment.name, {
-            path: attachment.path,
-            contentType: attachment.contentType,
-          }),
-        ),
+    if (snapshotPath) {
+      attachments.push(
+        {
+          name: getAttachmentName(names.name, "aria"),
+          contentType: "application/yaml",
+          path: snapshotPath,
+        },
+        {
+          name: getAttachmentName(names.name, "aria/metadata"),
+          contentType: "application/json",
+          path: getMetadataPath(snapshotPath),
+        },
       );
     }
+
+    await attachAttachments({ attachments, testInfo, useArgosReporter });
 
     await afterEach();
     await options.afterScreenshot?.();
@@ -510,7 +306,7 @@ export async function argosScreenshot(
     return attachments;
   };
 
-  const allAttachments: Attachment[] = [];
+  const allAttachments: ArgosAttachment[] = [];
 
   // If no viewports are specified, take a single screenshot
   if (viewports) {
@@ -540,4 +336,19 @@ export async function argosScreenshot(
   await afterAll();
 
   return allAttachments;
+}
+
+/**
+ * Get the stabilization context from the options.
+ */
+function getStabilizationContext(
+  options: ArgosScreenshotOptions,
+): StabilizationContext {
+  const { fullPage, argosCSS, stabilize, viewports } = options;
+  return {
+    fullPage,
+    argosCSS,
+    viewports,
+    options: stabilize,
+  };
 }

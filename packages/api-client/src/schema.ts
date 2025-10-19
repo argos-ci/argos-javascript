@@ -102,6 +102,7 @@ export interface components {
             key: string;
             name: string;
             baseName?: string | null;
+            parentName?: string | null;
             metadata?: {
                 /**
                  * @description Ignored. Can be set to get completions, validations and documentation in some editors.
@@ -184,6 +185,8 @@ export interface components {
             } | null;
             pwTraceKey?: string | null;
             threshold?: number | null;
+            /** @default image/png */
+            contentType: string;
         };
         /** @description Build metadata */
         BuildMetadata: {

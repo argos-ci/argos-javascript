@@ -1,26 +1,57 @@
 import type { TestResult } from "@playwright/test/reporter";
-import { METADATA_EXTENSION, PNG_EXTENSION } from "./util";
+import { METADATA_EXTENSION, PNG_EXTENSION, ARIA_EXTENSION } from "./util";
 
-export function getAttachmentName(name: string, type: string) {
+export type ArgosAttachment = {
+  name: string;
+  contentType: string;
+  path: string;
+};
+
+type ArgosAttachmentType =
+  | "screenshot"
+  | "aria"
+  | "screenshot/metadata"
+  | "aria/metadata";
+
+export function getAttachmentName(name: string, type: ArgosAttachmentType) {
   return `argos/${type}___${name}`;
 }
 
-function getOriginalAttachmentName(name: string) {
-  return name.replace(/^argos\/[^/]+___/, "");
+function parseAttachmentName(name: string): {
+  type: ArgosAttachmentType;
+  originalName: string;
+} | null {
+  const match = name.match(/^argos\/(screenshot|aria)(\/metadata)?___(.*)$/);
+  if (!match) {
+    return null;
+  }
+  const [, mainType, metadataPart, originalName] = match;
+  if (!originalName) {
+    throw new Error(`Invalid attachment name: ${name}`);
+  }
+  const type: ArgosAttachmentType = metadataPart
+    ? (`${mainType}/metadata` as ArgosAttachmentType)
+    : (mainType as ArgosAttachmentType);
+  return { type, originalName };
 }
 
-export function getAttachmentFilename(name: string) {
-  if (name.startsWith("argos/screenshot")) {
-    return `${getOriginalAttachmentName(name)}${PNG_EXTENSION}`;
+export function getAttachmentFilename(attachment: Attachment): string {
+  const parsed = parseAttachmentName(attachment.name);
+  if (!parsed) {
+    throw new Error(`Invalid attachment name: ${attachment.name}`);
   }
-  if (name.startsWith("argos/metadata")) {
-    return `${getOriginalAttachmentName(name)}${PNG_EXTENSION}${METADATA_EXTENSION}`;
-  }
-  throw new Error(`Unknown attachment name: ${name}`);
+  const { type, originalName } = parsed;
+  const extension = {
+    screenshot: PNG_EXTENSION,
+    aria: ARIA_EXTENSION,
+    "screenshot/metadata": `${PNG_EXTENSION}${METADATA_EXTENSION}`,
+    "aria/metadata": `${ARIA_EXTENSION}${METADATA_EXTENSION}`,
+  }[type];
+  return `${originalName}${extension}`;
 }
 
 export type Attachment = TestResult["attachments"][number];
-export type ArgosScreenshotAttachment = Attachment & {
+export type ArgosSnapshotAttachment = Attachment & {
   path: string;
 };
 export type ArgosMetadataAttachment = Attachment & {
@@ -45,23 +76,25 @@ export function checkIsTrace(
   );
 }
 
-export function checkIsArgosScreenshot(
+export function checkIsArgosSnapshot(
   attachment: Attachment,
-): attachment is ArgosScreenshotAttachment {
-  return (
-    attachment.name.startsWith("argos/") &&
-    attachment.contentType === "image/png" &&
-    Boolean(attachment.path)
-  );
+): attachment is ArgosSnapshotAttachment {
+  const parsed = parseAttachmentName(attachment.name);
+  if (!parsed) {
+    return false;
+  }
+  return parsed.type === "aria" || parsed.type === "screenshot";
 }
 
-export function checkIsArgosScreenshotMetadata(
+export function checkIsArgosMetadata(
   attachment: Attachment,
 ): attachment is ArgosMetadataAttachment {
+  const parsed = parseAttachmentName(attachment.name);
+  if (!parsed) {
+    return false;
+  }
   return (
-    attachment.name.startsWith("argos/") &&
-    attachment.contentType === "application/json" &&
-    Boolean(attachment.path)
+    parsed.type === "aria/metadata" || parsed.type === "screenshot/metadata"
   );
 }
 
