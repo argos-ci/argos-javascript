@@ -8,6 +8,7 @@ import { argosScreenshot as typedArgosScreenshot } from "./src";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
+import { argosAriaSnapshot } from "./dist/index";
 
 test.describe.configure({ mode: "serial" });
 const screenshotFolder = "screenshots";
@@ -21,14 +22,21 @@ export async function checkExists(path: string) {
   }
 }
 
-async function expectScreenshotToExists(screenshotName: string) {
+async function expectSnapshotToExists(
+  screenshotName: string,
+  type: "screenshot" | "aria" = "screenshot",
+) {
   const info = await test.info();
   // If we are using the Argos reporter, screenshots are not saved locally
   if (info.config.reporter.some((rep) => rep[0].includes("argos"))) {
     return;
   }
+  const extension = { screenshot: "png", aria: ".aria.yml" }[type];
   const filepath = fileURLToPath(
-    new URL(`${screenshotFolder}/${screenshotName}.png`, import.meta.url).href,
+    new URL(
+      `${screenshotFolder}/${screenshotName}.${extension}`,
+      import.meta.url,
+    ).href,
   );
   const exists = await checkExists(filepath);
   expect(exists).toBe(true);
@@ -78,7 +86,7 @@ test.describe("#argosScreenshot", () => {
       await page.getByTestId("hoverable").hover();
 
       await argosScreenshot(page, "default");
-      await expectScreenshotToExists("default");
+      await expectSnapshotToExists("default");
 
       // Check that the loader is not visible
       // because we should wait for it to disappear in `argosScreenshot`
@@ -108,7 +116,7 @@ test.describe("#argosScreenshot", () => {
   test.describe("with cjs version", () => {
     test("takes a screenshot", async ({ page }) => {
       await argosScreenshotCjs(page, "basic-cjs");
-      await expectScreenshotToExists("basic-cjs");
+      await expectSnapshotToExists("basic-cjs");
     });
   });
 
@@ -116,7 +124,7 @@ test.describe("#argosScreenshot", () => {
     test("does not take a screenshot of full page", async ({ page }) => {
       await page.evaluate(() => window.scrollTo(0, 0));
       await argosScreenshot(page, "partial-page", { fullPage: false });
-      await expectScreenshotToExists("partial-page");
+      await expectSnapshotToExists("partial-page");
     });
   });
 
@@ -152,10 +160,10 @@ test.describe("#argosScreenshot", () => {
       });
 
       await Promise.all([
-        expectScreenshotToExists("viewport vw-320"),
-        expectScreenshotToExists("viewport vw-800"),
-        expectScreenshotToExists("viewport vw-1024"),
-        expectScreenshotToExists("viewport vw-1440"),
+        expectSnapshotToExists("viewport vw-320"),
+        expectSnapshotToExists("viewport vw-800"),
+        expectSnapshotToExists("viewport vw-1024"),
+        expectSnapshotToExists("viewport vw-1440"),
       ]);
     });
   });
@@ -174,5 +182,42 @@ test.describe("#argosScreenshot", () => {
         threshold: 0.2,
       });
     });
+  });
+});
+
+test.describe("#argosAriaSnapshot", () => {
+  test("takes a an aria snapshot with the screenshot", async ({ page }) => {
+    await page.goto(url);
+    await argosScreenshot(page, "with-aria-snapshot", {
+      ariaSnapshot: true,
+    });
+    await expectSnapshotToExists("with-aria-snapshot", "screenshot");
+    await expectSnapshotToExists("with-aria-snapshot", "aria");
+  });
+
+  test("takes a an aria snapshot with the screenshot by viewport", async ({
+    page,
+  }) => {
+    await page.goto(url);
+    await argosScreenshot(page, "with-aria-snapshot-viewport", {
+      ariaSnapshot: true,
+      viewports: ["iphone-4", "macbook-16"],
+    });
+  });
+
+  test("takes a an aria snapshot of the page", async ({ page }) => {
+    await page.goto(url);
+    await argosAriaSnapshot(page, "body-aria-snapshot");
+    await expectSnapshotToExists("body-aria-snapshot", "aria");
+  });
+
+  test("takes a an aria snapshot of the transparent section", async ({
+    page,
+  }) => {
+    await page.goto(url);
+    await argosAriaSnapshot(page, "section-aria-snapshot", {
+      element: "#transparent-section",
+    });
+    await expectSnapshotToExists("section-aria-snapshot", "aria");
   });
 });

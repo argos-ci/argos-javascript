@@ -11,8 +11,8 @@ import type { UploadParameters } from "@argos-ci/core";
 import { copyFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import {
-  checkIsArgosScreenshot,
-  checkIsArgosScreenshotMetadata,
+  checkIsArgosMetadata,
+  checkIsArgosSnapshot,
   checkIsAutomaticScreenshot,
   checkIsTrace,
   getAttachmentFilename,
@@ -174,10 +174,10 @@ class ArgosReporter implements Reporter {
     await Promise.all(
       result.attachments.map(async (attachment) => {
         if (
-          checkIsArgosScreenshot(attachment) ||
-          checkIsArgosScreenshotMetadata(attachment)
+          checkIsArgosSnapshot(attachment) ||
+          checkIsArgosMetadata(attachment)
         ) {
-          const path = join(uploadDir, getAttachmentFilename(attachment.name));
+          const path = join(uploadDir, getAttachmentFilename(attachment));
           await Promise.all([
             this.copyFile(attachment.path, path),
             this.copyTraceIfFound(result, path),
@@ -222,7 +222,7 @@ class ArgosReporter implements Reporter {
 
     const buildNameConfig = this.config.buildName;
     const uploadOptions = {
-      files: ["**/*.png"],
+      files: ["**/*.png", "**/*.aria.yml"],
       parallel: parallel ?? undefined,
       ...this.config,
       buildName: undefined, // We will set it later
@@ -252,7 +252,7 @@ class ArgosReporter implements Reporter {
         const iteratesOnBuildNames = parallel
           ? buildNameConfig.values
           : directories;
-        // Iterate over each build name and upload the screenshots
+        // Iterate over each build name and upload the snapshots
         for (const buildName of iteratesOnBuildNames) {
           const uploadDir = join(rootUploadDir, buildName);
           await createDirectory(uploadDir);

@@ -1,7 +1,7 @@
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { createClient, throwAPIError } from "@argos-ci/api-client";
 import { getConfigFromOptions } from "./config";
-import { discoverScreenshots } from "./discovery";
+import { discoverSnapshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
 import { getAuthToken } from "./auth";
@@ -15,6 +15,7 @@ import {
 } from "@argos-ci/util";
 import { getArgosCoreSDKIdentifier } from "./version";
 import { getMergeBaseCommitSha, listParentCommits } from "./ci-environment";
+import { getSnapshotMimeType } from "./mime-type";
 
 /**
  * Size of the chunks used to upload screenshots to Argos.
@@ -207,24 +208,27 @@ export async function upload(params: UploadParameters): Promise<{
     params.previewUrl ??
     (config.previewBaseUrl ? { baseUrl: config.previewBaseUrl } : undefined);
 
-  const files = params.files ?? ["**/*.{png,jpg,jpeg}"];
-  debug("Using config and files", config, files);
+  const globs = params.files ?? ["**/*.{png,jpg,jpeg}"];
+  debug("Using config and files", config, globs);
 
-  // Collect screenshots
-  const foundScreenshots = await discoverScreenshots(files, {
+  // Collect snapshots
+  const files = await discoverSnapshots(globs, {
     root: params.root,
     ignore: params.ignore,
   });
 
-  debug("Found screenshots", foundScreenshots);
+  debug("Found snapshots", files);
 
   // Optimize & compute hashes
-  const screenshots = await Promise.all(
-    foundScreenshots.map(async (screenshot) => {
+  const snapshots = await Promise.all(
+    files.map(async (snapshot) => {
+      const contentType = getSnapshotMimeType(snapshot.path);
       const [metadata, pwTracePath, optimizedPath] = await Promise.all([
-        readMetadata(screenshot.path),
-        getPlaywrightTracePath(screenshot.path),
-        optimizeScreenshot(screenshot.path),
+        readMetadata(snapshot.path),
+        getPlaywrightTracePath(snapshot.path),
+        contentType.startsWith("image/")
+          ? optimizeScreenshot(snapshot.path)
+          : snapshot.path,
       ]);
 
       const [hash, pwTraceHash] = await Promise.all([
@@ -234,6 +238,7 @@ export async function upload(params: UploadParameters): Promise<{
 
       const threshold = metadata?.transient?.threshold ?? null;
       const baseName = metadata?.transient?.baseName ?? null;
+      const parentName = metadata?.transient?.parentName ?? null;
 
       if (metadata) {
         delete metadata.transient;
@@ -247,16 +252,18 @@ export async function upload(params: UploadParameters): Promise<{
       }
 
       return {
-        ...screenshot,
+        ...snapshot,
         hash,
         optimizedPath,
         metadata,
         threshold,
         baseName,
+        parentName,
         pwTrace:
           pwTracePath && pwTraceHash
             ? { path: pwTracePath, hash: pwTraceHash }
             : null,
+        contentType,
       };
     }),
   );
@@ -318,18 +325,15 @@ export async function upload(params: UploadParameters): Promise<{
 
   // Create build
   debug("Creating build");
-  const [pwTraceKeys, screenshotKeys] = screenshots.reduce(
-    ([pwTraceKeys, screenshotKeys], screenshot) => {
-      if (
-        screenshot.pwTrace &&
-        !pwTraceKeys.includes(screenshot.pwTrace.hash)
-      ) {
-        pwTraceKeys.push(screenshot.pwTrace.hash);
+  const [pwTraceKeys, snapshotKeys] = snapshots.reduce(
+    ([pwTraceKeys, snapshotKeys], snapshot) => {
+      if (snapshot.pwTrace && !pwTraceKeys.includes(snapshot.pwTrace.hash)) {
+        pwTraceKeys.push(snapshot.pwTrace.hash);
       }
-      if (!screenshotKeys.includes(screenshot.hash)) {
-        screenshotKeys.push(screenshot.hash);
+      if (!snapshotKeys.includes(snapshot.hash)) {
+        snapshotKeys.push(snapshot.hash);
       }
-      return [pwTraceKeys, screenshotKeys];
+      return [pwTraceKeys, snapshotKeys];
     },
     [[], []] as [string[], string[]],
   );
@@ -342,7 +346,7 @@ export async function upload(params: UploadParameters): Promise<{
       mode: config.mode,
       parallel: config.parallel,
       parallelNonce: config.parallelNonce,
-      screenshotKeys,
+      screenshotKeys: snapshotKeys,
       pwTraceKeys,
       prNumber: config.prNumber,
       prHeadCommit: config.prHeadCommit,
@@ -366,26 +370,26 @@ export async function upload(params: UploadParameters): Promise<{
 
   const uploadFiles = [
     ...result.screenshots.map(({ key, putUrl }) => {
-      const screenshot = screenshots.find((s) => s.hash === key);
-      if (!screenshot) {
-        throw new Error(`Invariant: screenshot with hash ${key} not found`);
+      const snapshot = snapshots.find((s) => s.hash === key);
+      if (!snapshot) {
+        throw new Error(`Invariant: snapshot with hash ${key} not found`);
       }
       return {
         url: putUrl,
-        path: screenshot.optimizedPath,
-        contentType: "image/png",
+        path: snapshot.optimizedPath,
+        contentType: snapshot.contentType,
       };
     }),
     ...(result.pwTraces?.map(({ key, putUrl }) => {
-      const screenshot = screenshots.find(
+      const snapshot = snapshots.find(
         (s) => s.pwTrace && s.pwTrace.hash === key,
       );
-      if (!screenshot || !screenshot.pwTrace) {
+      if (!snapshot || !snapshot.pwTrace) {
         throw new Error(`Invariant: trace with ${key} not found`);
       }
       return {
         url: putUrl,
-        path: screenshot.pwTrace.path,
+        path: snapshot.pwTrace.path,
         contentType: "application/json",
       };
     }) ?? []),
@@ -403,13 +407,15 @@ export async function upload(params: UploadParameters): Promise<{
       },
     },
     body: {
-      screenshots: screenshots.map((screenshot) => ({
-        key: screenshot.hash,
-        name: screenshot.name,
-        metadata: screenshot.metadata,
-        pwTraceKey: screenshot.pwTrace?.hash ?? null,
-        threshold: screenshot.threshold ?? config?.threshold ?? null,
-        baseName: screenshot.baseName,
+      screenshots: snapshots.map((snapshot) => ({
+        key: snapshot.hash,
+        name: snapshot.name,
+        metadata: snapshot.metadata,
+        pwTraceKey: snapshot.pwTrace?.hash ?? null,
+        threshold: snapshot.threshold ?? config?.threshold ?? null,
+        baseName: snapshot.baseName,
+        parentName: snapshot.parentName,
+        contentType: snapshot.contentType,
       })),
       parallel: config.parallel,
       parallelTotal: config.parallelTotal,
@@ -422,7 +428,7 @@ export async function upload(params: UploadParameters): Promise<{
     throwAPIError(uploadBuildResponse.error);
   }
 
-  return { build: uploadBuildResponse.data.build, screenshots };
+  return { build: uploadBuildResponse.data.build, screenshots: snapshots };
 }
 
 async function uploadFilesToS3(

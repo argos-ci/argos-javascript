@@ -76,14 +76,18 @@ export type ScreenshotMetadata = {
   };
   // Metadata used to pass informations later removed from metadata.
   transient?: {
+    /** Threshold configured for this screenshot. */
     threshold?: number;
+    /** Override the name to find the comparison baseline. */
     baseName?: string;
+    /** Name of the parent screenshot. */
+    parentName?: string;
   };
 };
 
 /**
- * Get metadata path from screenshot path.
+ * Get metadata path from snapshot path.
  */
-export function getMetadataPath(screenshotPath: string) {
-  return screenshotPath + ".argos.json";
+export function getMetadataPath(snapshotPath: string) {
+  return snapshotPath + ".argos.json";
 }
