@@ -86,7 +86,7 @@ function gitMergeBase(input: { base: string; head: string }) {
  */
 function gitFetch(input: { ref: string; depth: number; target: string }) {
   execSync(
-    `git fetch --update-head-ok --depth ${input.depth} origin ${input.ref}:${input.target}`,
+    `git fetch --force --update-head-ok --depth ${input.depth} origin ${input.ref}:${input.target}`,
   );
 }
 
