@@ -84,9 +84,9 @@ function gitMergeBase(input: { base: string; head: string }) {
 /**
  * Run git fetch with a specific ref and depth.
  */
-function gitFetch(input: { ref: string; depth: number }) {
+function gitFetch(input: { ref: string; depth: number; target: string }) {
   execSync(
-    `git fetch --update-head-ok --depth ${input.depth} origin ${input.ref}:${input.ref}`,
+    `git fetch --update-head-ok --depth ${input.depth} origin ${input.ref}:${input.target}`,
   );
 }
 
@@ -116,10 +116,16 @@ export function getMergeBaseCommitSha(input: {
 }): string | null {
   let depth = 200;
 
+  const argosBaseRef = `argos/${input.base}`;
+  const argosHeadRef = `argos/${input.head}`;
+
   while (depth < 1000) {
-    gitFetch({ ref: input.head, depth });
-    gitFetch({ ref: input.base, depth });
-    const mergeBase = gitMergeBase(input);
+    gitFetch({ ref: input.head, depth, target: argosHeadRef });
+    gitFetch({ ref: input.base, depth, target: argosBaseRef });
+    const mergeBase = gitMergeBase({
+      base: argosBaseRef,
+      head: argosHeadRef,
+    });
     if (mergeBase) {
       return mergeBase;
     }
@@ -127,8 +133,8 @@ export function getMergeBaseCommitSha(input: {
   }
 
   if (isDebugEnabled) {
-    const headShas = listShas(input.head);
-    const baseShas = listShas(input.base);
+    const headShas = listShas(argosHeadRef);
+    const baseShas = listShas(argosBaseRef);
     debug(
       `No merge base found for ${input.head} and ${input.base} with depth ${depth}`,
     );
