@@ -4,14 +4,14 @@ import { Header } from "./Header";
 import "./page.css";
 
 export const Page = () => {
-  const [user, setUser] = React.useState();
+  const [user, setUser] = React.useState<{ name: string } | null>(null);
 
   return (
     <article>
       <Header
         user={user}
         onLogin={() => setUser({ name: "Jane Doe" })}
-        onLogout={() => setUser(undefined)}
+        onLogout={() => setUser(null)}
         onCreateAccount={() => setUser({ name: "Jane Doe" })}
       />
 

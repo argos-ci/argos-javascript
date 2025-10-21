@@ -19,7 +19,6 @@ const meta: Meta<typeof Form> = {
 };
 
 export default meta;
-
 type Story = StoryObj<typeof Form>;
 
 export const FillForm: Story = {
