@@ -14,6 +14,7 @@ export function checkIsUsingArgosReporter(testInfo: TestInfo) {
 }
 
 export const PNG_EXTENSION = `.png`;
+export const YAML_EXTENSION = `.yaml`;
 
 export const METADATA_EXTENSION = `.argos.json`;
 

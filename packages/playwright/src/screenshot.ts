@@ -483,7 +483,7 @@ export async function argosScreenshot(
         path: screenshotPath,
       },
       {
-        name: getAttachmentName(names.name, "metadata"),
+        name: getAttachmentName(names.name, "screenshot/metadata"),
         contentType: "application/json",
         path: getMetadataPath(screenshotPath),
       },

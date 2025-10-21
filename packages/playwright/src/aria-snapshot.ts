@@ -380,7 +380,7 @@ export async function argosAriaSnapshot(
       path: snapshotPath,
     },
     {
-      name: getAttachmentName(names.name, "metadata"),
+      name: getAttachmentName(names.name, "snapshot/metadata"),
       contentType: "application/json",
       path: getMetadataPath(snapshotPath),
     },
