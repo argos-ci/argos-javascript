@@ -2,8 +2,9 @@ import { expect, userEvent, within } from "storybook/test";
 
 import { Page } from "./Page";
 import { allModes } from "../.storybook/modes";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-export default {
+const meta = {
   title: "Example/Page",
   component: Page,
   parameters: {
@@ -20,12 +21,14 @@ export default {
       },
     },
   },
-};
+} satisfies Meta<typeof Page>;
 
-export const LoggedOut = {};
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-// More on interaction testing: https://storybook.js.org/docs/writing-tests/interaction-testing
-export const LoggedIn = {
+export const LoggedOut: Story = {};
+
+export const LoggedIn: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const loginButton = canvas.getByRole("button", { name: /Log in/i });
@@ -38,7 +41,7 @@ export const LoggedIn = {
   },
 };
 
-export const LoggedOutNoMode = {
+export const LoggedOutNoMode: Story = {
   parameters: {
     argos: {
       modes: null,
