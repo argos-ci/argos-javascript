@@ -24,7 +24,9 @@ export type StorybookScreenshotContext<Handler extends Page | Frame> = {
   name: string;
   playwrightLibraries: string[];
   test?: MetadataConfig["test"];
-  setViewportSize: (size: ViewportSize | "default") => Promise<void>;
+  setViewportSize: (
+    size: ViewportSize | "default" | "initial",
+  ) => Promise<void>;
   beforeScreenshot?: (input: {
     handler: Handler;
     globals: StorybookGlobals;
@@ -113,7 +115,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
         allAttachments.push(...attachments);
 
         // Reset viewport.
-        await context.setViewportSize("default");
+        await context.setViewportSize("initial");
 
         // Reset the current mode global.
         await handler.evaluate(() => {
@@ -128,6 +130,10 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
         options: argosOptions,
         globals: context.story.globals ?? {},
       });
+
+      // Reset viewport.
+      await context.setViewportSize("initial");
+
       allAttachments.push(...attachments);
     }
   } else if (context.mode === "manual") {

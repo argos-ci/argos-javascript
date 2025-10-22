@@ -64,30 +64,36 @@ export const createArgosScreenshotCommand = (
                 throw new Error("Vitest iframe contentDocument not found");
               }
 
-              if (size === "default") {
-                // Restore the default width and height if they were set.
+              if (size === "initial") {
                 if (
-                  iframe.dataset.defaultWidth &&
-                  iframe.dataset.defaultHeight
+                  iframe.dataset.initialWidth &&
+                  iframe.dataset.initialHeight
                 ) {
-                  iframe.style.width = iframe.dataset.defaultWidth;
-                  iframe.style.height = iframe.dataset.defaultHeight;
+                  iframe.style.width = iframe.dataset.initialWidth;
+                  iframe.style.height = iframe.dataset.initialHeight;
                 }
-              } else {
-                // Backup default width and height if not already set.
-                if (
-                  !iframe.dataset.defaultWidth &&
-                  !iframe.dataset.defaultHeight
-                ) {
-                  iframe.dataset.defaultWidth = iframe.style.width;
-                  iframe.dataset.defaultHeight = iframe.style.height;
-                }
+                return;
+              }
 
-                iframe.style.height = "auto";
+              // Backup default width/height if not set
+              if (
+                !iframe.dataset.initialWidth &&
+                !iframe.dataset.initialHeight
+              ) {
+                iframe.dataset.initialWidth = iframe.style.width;
+                iframe.dataset.initialHeight = iframe.style.height;
+              }
+
+              if (size !== "default") {
                 iframe.style.width = `${size.width}px`;
-                iframe.style.height = fullPage
-                  ? `${iframe.contentDocument.body.offsetHeight}px`
-                  : `${size.height}px`;
+              }
+
+              if (fullPage) {
+                iframe.style.height = "auto";
+                iframe.style.height = `${iframe.contentDocument.body.offsetHeight}px`;
+              } else if (size !== "default") {
+                iframe.style.height = "auto";
+                iframe.style.height = `${size.height}px`;
               }
             },
             { size, fullPage: screenshotOptions.fullPage ?? !fitToContent },
