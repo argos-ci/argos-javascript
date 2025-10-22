@@ -37,3 +37,11 @@ export const LoggedIn = {
     await expect(logoutButton).toBeInTheDocument();
   },
 };
+
+export const LoggedOutNoMode = {
+  parameters: {
+    argos: {
+      modes: null,
+    },
+  },
+};

@@ -55,7 +55,9 @@ export async function argosScreenshot(
       setViewportSize: async (size) => {
         const actualSize = await page.viewportSize();
         const absoluteSize =
-          size === "default" ? DEFAULT_PLAYWRIGHT_VIEWPORT_SIZE : size;
+          size === "default" || size === "initial"
+            ? DEFAULT_PLAYWRIGHT_VIEWPORT_SIZE
+            : size;
         if (
           !actualSize ||
           actualSize.height !== absoluteSize.height ||
