@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.6](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.0.5...@argos-ci/storybook@5.0.6) (2025-10-22)
+
+
+### Bug Fixes
+
+* **storybook:** fix full screen without modes ([b8d433c](https://github.com/argos-ci/argos-javascript/commit/b8d433cc77c69ee5940316b649a6bba1a9345c21))
+
+
+
+
+
 ## [5.0.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.0.4...@argos-ci/storybook@5.0.5) (2025-10-16)
 
 
