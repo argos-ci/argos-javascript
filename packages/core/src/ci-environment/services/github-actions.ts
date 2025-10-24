@@ -235,9 +235,10 @@ const service: Service = {
     const vercelPayload = getVercelDeploymentPayload(payload);
     const sha = getSha(context, vercelPayload);
 
-    const pullRequest = payload
-      ? getPullRequestFromPayload(payload)
-      : await getPullRequestFromHeadSha(context, sha);
+    const pullRequest =
+      payload && !vercelPayload
+        ? getPullRequestFromPayload(payload)
+        : await getPullRequestFromHeadSha(context, sha);
 
     return {
       commit: sha,
