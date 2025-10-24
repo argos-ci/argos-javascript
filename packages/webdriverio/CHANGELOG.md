@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.13](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.6.12...@argos-ci/webdriverio@0.6.13) (2025-10-24)
+
+**Note:** Version bump only for package @argos-ci/webdriverio
+
+
+
+
+
 ## [0.6.12](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.6.11...@argos-ci/webdriverio@0.6.12) (2025-10-24)
 
 **Note:** Version bump only for package @argos-ci/webdriverio
