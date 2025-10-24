@@ -7,7 +7,7 @@ import type { StorybookGlobals } from "./utils/parameters";
 
 export type { ArgosScreenshotOptions };
 
-declare module "@vitest/browser/context" {
+declare module "vitest/browser" {
   interface BrowserCommands {
     argosScreenshot: (
       ...args: ArgosScreenshotCommandArgs
