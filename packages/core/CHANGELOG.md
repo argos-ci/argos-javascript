@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.2.0...@argos-ci/core@4.3.0) (2025-10-24)
+
+
+### Features
+
+* **vercel:** support Vercel "repository_dispatch" events ([44b368b](https://github.com/argos-ci/argos-javascript/commit/44b368bdab5f3fd29eb38f1c8d5d5f231e17364d))
+
+
+
+
+
 # [4.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.1.6...@argos-ci/core@4.2.0) (2025-10-05)
 
 
