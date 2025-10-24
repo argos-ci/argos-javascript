@@ -3,6 +3,7 @@ import type { Service, Context } from "../types";
 import { debug } from "../../debug";
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type * as webhooks from "@octokit/webhooks";
+import type { RepositoryDispatchContext } from "@vercel/repository-dispatch/context";
 
 type EventPayload = webhooks.EmitterWebhookEvent["payload"];
 
@@ -181,6 +182,49 @@ function getPullRequestFromPayload(
   return null;
 }
 
+type VercelDeploymentPayload = RepositoryDispatchContext["payload"];
+
+/**
+ * Get a payload from a Vercel deployment "repository_dispatch"
+ * @see https://vercel.com/docs/git/vercel-for-github#repository-dispatch-events
+ */
+function getVercelDeploymentPayload(
+  payload: EventPayload | null,
+): VercelDeploymentPayload | null {
+  if (!payload) {
+    return null;
+  }
+
+  if (process.env.GITHUB_EVENT_NAME !== "repository_dispatch") {
+    return null;
+  }
+
+  if (!("client_payload" in payload) || !("action" in payload)) {
+    return null;
+  }
+
+  if (payload.action !== "vercel.deployment.success") {
+    return null;
+  }
+
+  return payload as unknown as VercelDeploymentPayload;
+}
+
+function getSha(
+  context: Context,
+  vercelPayload: VercelDeploymentPayload | null,
+): string {
+  if (vercelPayload) {
+    return vercelPayload.client_payload.git.sha;
+  }
+
+  if (!context.env.GITHUB_SHA) {
+    throw new Error(`GITHUB_SHA is missing`);
+  }
+
+  return context.env.GITHUB_SHA;
+}
+
 const service: Service = {
   name: "GitHub Actions",
   key: "github-actions",
@@ -188,11 +232,8 @@ const service: Service = {
   config: async (context) => {
     const { env } = context;
     const payload = readEventPayload(context);
-    const sha = process.env.GITHUB_SHA || null;
-
-    if (!sha) {
-      throw new Error(`GITHUB_SHA is missing`);
-    }
+    const vercelPayload = getVercelDeploymentPayload(payload);
+    const sha = getSha(context, vercelPayload);
 
     const pullRequest = payload
       ? getPullRequestFromPayload(payload)
@@ -209,6 +250,7 @@ const service: Service = {
         : null,
       nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}`,
       branch:
+        vercelPayload?.client_payload?.git?.ref ||
         getBranchFromContext(context) ||
         pullRequest?.head.ref ||
         (payload ? getBranchFromPayload(payload) : null) ||

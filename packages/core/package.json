@@ -53,6 +53,7 @@
     "@types/convict": "^6.1.6",
     "@types/debug": "^4.1.12",
     "@types/tmp": "^0.2.6",
+    "@vercel/repository-dispatch": "^0.1.0",
     "msw": "^2.11.3",
     "vitest": "catalog:"
   },
