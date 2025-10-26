@@ -1,4 +1,5 @@
 import type { TestResult } from "@playwright/test/reporter";
+import { METADATA_EXTENSION, PNG_EXTENSION } from "./util";
 
 export function getAttachmentName(name: string, type: string) {
   return `argos/${type}___${name}`;
@@ -10,10 +11,10 @@ function getOriginalAttachmentName(name: string) {
 
 export function getAttachmentFilename(name: string) {
   if (name.startsWith("argos/screenshot")) {
-    return `${getOriginalAttachmentName(name)}.png`;
+    return `${getOriginalAttachmentName(name)}${PNG_EXTENSION}`;
   }
   if (name.startsWith("argos/metadata")) {
-    return `${getOriginalAttachmentName(name)}.png.argos.json`;
+    return `${getOriginalAttachmentName(name)}${PNG_EXTENSION}${METADATA_EXTENSION}`;
   }
   throw new Error(`Unknown attachment name: ${name}`);
 }
