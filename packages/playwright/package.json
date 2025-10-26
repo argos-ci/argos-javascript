@@ -66,6 +66,7 @@
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test-e2e",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest src"
   }
 }

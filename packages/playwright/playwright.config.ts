@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 export default defineConfig({
+  testMatch: ["**/*.spec.ts"],
   use: {
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
