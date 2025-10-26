@@ -20,6 +20,11 @@ import {
 import { getMetadataFromTestCase } from "./metadata";
 import { debug } from "./debug";
 import { createDirectory, createTemporaryDirectory } from "@argos-ci/util";
+import {
+  getAutomaticScreenshotName,
+  METADATA_EXTENSION,
+  PNG_EXTENSION,
+} from "./util";
 
 /**
  * Dynamic build name.
@@ -91,19 +96,6 @@ async function getParallelFromConfig(
     nonce: argosConfig.parallelNonce,
     index: argosConfig.parallelIndex ?? config.shard.current,
   };
-}
-
-/**
- * Get the automatic screenshot name.
- */
-function getAutomaticScreenshotName(test: TestCase, result: TestResult) {
-  let name = test.titlePath().join(" ");
-  name += result.retry > 0 ? ` #${result.retry + 1}` : "";
-  name +=
-    result.status === "failed" || result.status === "timedOut"
-      ? " (failed)"
-      : "";
-  return name;
 }
 
 class ArgosReporter implements Reporter {
@@ -197,9 +189,9 @@ class ArgosReporter implements Reporter {
         if (checkIsAutomaticScreenshot(attachment)) {
           const metadata = await getMetadataFromTestCase(test, result);
           const name = getAutomaticScreenshotName(test, result);
-          const path = join(uploadDir, `${name}.png`);
+          const path = join(uploadDir, `${name}${PNG_EXTENSION}`);
           await Promise.all([
-            this.writeFile(path + ".argos.json", JSON.stringify(metadata)),
+            this.writeFile(path + METADATA_EXTENSION, JSON.stringify(metadata)),
             this.copyFile(attachment.path, path),
             this.copyTraceIfFound(result, path),
           ]);

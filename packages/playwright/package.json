@@ -56,7 +56,8 @@
   "devDependencies": {
     "@playwright/test": "^1.55.1",
     "@types/debug": "^4.1.12",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
   },
   "scripts": {
     "build": "tsup && cp ./src/index.cjs ./dist",
