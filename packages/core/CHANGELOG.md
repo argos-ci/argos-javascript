@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.3.1...@argos-ci/core@4.4.0) (2025-10-30)
+
+
+### Features
+
+* **storybook:** support Storybook v10 and Vitest 4 ([f988c7e](https://github.com/argos-ci/argos-javascript/commit/f988c7e4ecafb96a4a00be9389e1add505860df8)), closes [#239](https://github.com/argos-ci/argos-javascript/issues/239)
+
+
+
+
+
 ## [4.3.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.3.0...@argos-ci/core@4.3.1) (2025-10-24)
 
 

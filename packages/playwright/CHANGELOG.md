@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.1.10...@argos-ci/playwright@6.2.0) (2025-10-30)
+
+
+### Bug Fixes
+
+* **playwright:** fix automatic screenshot names too long ([ec5831d](https://github.com/argos-ci/argos-javascript/commit/ec5831dfc9987c2736ddd22ece603eae8b17d75c)), closes [#245](https://github.com/argos-ci/argos-javascript/issues/245)
+
+
+### Features
+
+* **storybook:** support Storybook v10 and Vitest 4 ([f988c7e](https://github.com/argos-ci/argos-javascript/commit/f988c7e4ecafb96a4a00be9389e1add505860df8)), closes [#239](https://github.com/argos-ci/argos-javascript/issues/239)
+
+
+
+
+
 ## [6.1.10](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.1.9...@argos-ci/playwright@6.1.10) (2025-10-24)
 
 **Note:** Version bump only for package @argos-ci/playwright
