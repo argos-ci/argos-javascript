@@ -1,19 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { join } from "node:path";
-// import { fileURLToPath } from "node:url";
-import { discoverScreenshots } from "./discovery";
+import { discoverSnapshots } from "./discovery";
 
-// const __dirname = fileURLToPath(new URL(".", import.meta.url));
-
-describe("#discoverScreenshots", () => {
+describe("#discoverSnapshots", () => {
   it("returns empty array if no screenshots are found", async () => {
-    const screenshots = await discoverScreenshots(["**/*.{png,jpg,jpeg}"], {
+    const screenshots = await discoverSnapshots(["**/*.{png,jpg,jpeg}"], {
       root: join(__dirname, "../../../__fixtures__/not-found"),
     });
     expect(screenshots).toEqual([]);
   });
   it("finds all images", async () => {
-    const screenshots = await discoverScreenshots(["**/*.{png,jpg,jpeg}"], {
+    const screenshots = await discoverSnapshots(["**/*.{png,jpg,jpeg}"], {
       root: join(__dirname, "../../../__fixtures__/screenshots"),
     });
     expect(screenshots).toEqual([
@@ -36,7 +33,7 @@ describe("#discoverScreenshots", () => {
   });
 
   it("ignores files using `ignore` option", async () => {
-    const screenshots = await discoverScreenshots(["**/*.{png,jpg,jpeg}"], {
+    const screenshots = await discoverSnapshots(["**/*.{png,jpg,jpeg}"], {
       root: join(__dirname, "../../../__fixtures__/screenshots"),
       ignore: ["**/alicia.jpg"],
     });

@@ -1,13 +1,16 @@
-import { resolve } from "node:path";
+import { extname, resolve } from "node:path";
 import glob from "fast-glob";
 import { debug } from "./debug";
 
-export const discoverScreenshots = async (
+/**
+ * Discover snapshots in the given root directory matching the provided patterns.
+ */
+export async function discoverSnapshots(
   patterns: string | string[],
   { root = process.cwd(), ignore }: { root?: string; ignore?: string[] } = {},
-): Promise<{ name: string; path: string }[]> => {
+): Promise<{ name: string; path: string }[]> {
   debug(
-    `Discovering screenshots with patterns: ${
+    `Discovering snapshots with patterns: ${
       Array.isArray(patterns) ? patterns.join(", ") : patterns
     } in ${root}`,
   );
@@ -20,4 +23,16 @@ export const discoverScreenshots = async (
       path,
     };
   });
-};
+}
+
+/**
+ * Check if the given filename corresponds to an Argos image.
+ */
+export function checkIsValidImageFile(filename: string): boolean {
+  const lowerFilename = extname(filename).toLowerCase();
+  return (
+    lowerFilename === ".png" ||
+    lowerFilename === ".jpg" ||
+    lowerFilename === ".jpeg"
+  );
+}
