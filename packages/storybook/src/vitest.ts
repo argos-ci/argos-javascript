@@ -30,7 +30,7 @@ export function setupArgos(api: { afterEach: typeof vitest.afterEach }) {
     }
 
     // Load vitest/browser using dynamic import to avoid loading it in non-Vitest environments.
-    const { server } = await import("@vitest/browser/context");
+    const { server } = await import("vitest/browser");
 
     // Expose the Story as global to be able to re-render it.
     (globalThis as any).__ARGOS_STORYBOOK_STORY = story;
@@ -76,7 +76,7 @@ export async function argosScreenshot(
   }
 
   // Load vitest/browser using dynamic import to avoid loading it in non-Vitest environments.
-  const { server } = await import("@vitest/browser/context");
+  const { server } = await import("vitest/browser");
   await server.commands.argosScreenshot({
     mode: "manual",
     name: `${story.id}/${name}`,
@@ -93,7 +93,7 @@ export async function argosScreenshot(
  */
 async function checkIsVitestEnv(): Promise<boolean> {
   try {
-    await import("@vitest/browser/context");
+    await import("vitest");
     return true;
   } catch {
     return false;

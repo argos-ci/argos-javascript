@@ -17,12 +17,12 @@ export default defineConfig([
     entry: ["src/vitest-setup-file.ts"],
     dts: false,
     format: ["esm"],
-    external: ["@vitest/browser/context", "vitest"],
+    external: ["vitest"],
   },
   {
     entry: ["src/vitest.ts"],
     dts: true,
     format: ["esm"],
-    external: ["@vitest/browser/context", "vitest"],
+    external: ["vitest"],
   },
 ]);
