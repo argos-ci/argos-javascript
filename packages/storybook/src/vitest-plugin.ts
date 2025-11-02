@@ -89,8 +89,19 @@ export const createArgosScreenshotCommand = (
               }
 
               if (fullPage) {
+                if (!iframe.contentWindow) {
+                  throw new Error(`Can't access iframe window`);
+                }
+                const viewportHeight =
+                  size === "default"
+                    ? iframe.contentWindow.innerHeight
+                    : size.height;
+
                 iframe.style.height = "auto";
-                iframe.style.height = `${iframe.contentDocument.body.offsetHeight}px`;
+                iframe.style.height =
+                  viewportHeight < iframe.contentDocument.body.offsetHeight
+                    ? `${iframe.contentDocument.body.offsetHeight}px`
+                    : "100%";
               } else if (size !== "default") {
                 iframe.style.height = "auto";
                 iframe.style.height = `${size.height}px`;

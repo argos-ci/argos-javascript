@@ -67,3 +67,15 @@ export const Small: Story = {
     label: "Button",
   },
 };
+
+export const FullPage: Story = {
+  args: {
+    primary: true,
+    label: "Button",
+  },
+  parameters: {
+    argos: {
+      fitToContent: false,
+    },
+  },
+};
