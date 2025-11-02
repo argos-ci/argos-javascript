@@ -1,22 +1,29 @@
 import { upload, type UploadParameters } from "@argos-ci/core";
-import type { Reporter, Vitest } from "vitest/node";
+import type { Vitest } from "vitest/node";
+import type { Reporter } from "vitest/reporters";
 
 export type ArgosReporterConfig = UploadParameters;
 
 export class ArgosReporter implements Reporter {
-  ctx!: Vitest;
+  vitest!: Vitest;
   config: ArgosReporterConfig;
 
   constructor(config: ArgosReporterConfig) {
     this.config = config;
   }
 
-  onInit(ctx: Vitest): void {
-    this.ctx = ctx;
+  onInit(vitest: Vitest): void {
+    this.vitest = vitest;
   }
 
+  // Compatibility for Vitest v3
   async onFinished() {
-    if (this.ctx.config.watch) {
+    await this.onTestRunEnd();
+  }
+
+  // Only on Vitest v4
+  async onTestRunEnd() {
+    if (this.vitest.config.watch) {
       return;
     }
     const res = await upload(this.config);
