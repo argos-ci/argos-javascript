@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.1.0...@argos-ci/storybook@5.1.1) (2025-11-02)
+
+
+### Bug Fixes
+
+* **storybook:** fix fullPage mode ([8b2c8e7](https://github.com/argos-ci/argos-javascript/commit/8b2c8e7ef2cd758b691de7c50cb05af6c31da182))
+* **storybook:** fix Vitest v4 compatibility ([f122789](https://github.com/argos-ci/argos-javascript/commit/f1227894b025a2020f8da3c78d31f40f6a9c730b))
+
+
+
+
+
 # [5.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.0.8...@argos-ci/storybook@5.1.0) (2025-10-30)
 
 
