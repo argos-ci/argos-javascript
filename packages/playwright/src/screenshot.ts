@@ -216,9 +216,9 @@ export async function argosScreenshot(
         ),
     });
 
-    await waitForReadiness(handler, options);
+    await waitForReadiness(handler, context);
     const afterEach = await beforeEach(handler, context);
-    await waitForReadiness(handler, options);
+    await waitForReadiness(handler, context);
 
     const [snapshotPath] = await Promise.all([
       (async () => {
