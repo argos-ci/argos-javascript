@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.4.0...@argos-ci/core@4.5.0) (2025-11-03)
+
+
+### Bug Fixes
+
+* **git:** improve Git behaviour on local repo ([591c476](https://github.com/argos-ci/argos-javascript/commit/591c47607beddeaa4e2e4873163a27767f81c339))
+
+
+### Features
+
+* **playwright:** support aria snapshots ([06fe7df](https://github.com/argos-ci/argos-javascript/commit/06fe7df8f2080146c1c3c01085fe7712555e3cd5))
+
+
+
+
+
 # [4.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.3.1...@argos-ci/core@4.4.0) (2025-10-30)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.1.1...@argos-ci/storybook@5.2.0) (2025-11-03)
+
+
+### Features
+
+* **playwright:** support aria snapshots ([06fe7df](https://github.com/argos-ci/argos-javascript/commit/06fe7df8f2080146c1c3c01085fe7712555e3cd5))
+
+
+
+
+
 ## [5.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.1.0...@argos-ci/storybook@5.1.1) (2025-11-02)
 
 

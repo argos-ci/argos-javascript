@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/api-client",
   "description": "Argos API Client library.",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
