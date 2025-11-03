@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.3.0...@argos-ci/playwright@6.3.1) (2025-11-03)
+
+
+### Bug Fixes
+
+* **playwright:** fix error in `argosScreenshot` ([ee2e163](https://github.com/argos-ci/argos-javascript/commit/ee2e163560061d92e385a30bbe7db2c669cd4e74))
+
+
+
+
+
 # [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.2.0...@argos-ci/playwright@6.3.0) (2025-11-03)
 
 
