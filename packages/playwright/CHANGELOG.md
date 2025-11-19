@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.3.1...@argos-ci/playwright@6.3.2) (2025-11-19)
+
+
+### Bug Fixes
+
+* **playwright:** fix missing exports from `@argos-ci/playwright` in CJS ([a62b95a](https://github.com/argos-ci/argos-javascript/commit/a62b95a0b34b5dee9f2a8e5654053d2aaff7ed06)), closes [#250](https://github.com/argos-ci/argos-javascript/issues/250)
+
+
+
+
+
 ## [6.3.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.3.0...@argos-ci/playwright@6.3.1) (2025-11-03)
 
 
