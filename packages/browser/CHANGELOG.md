@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@5.0.0...@argos-ci/browser@5.1.0) (2025-11-19)
+
+
+### Features
+
+* **viewports:** add more presets ([272d842](https://github.com/argos-ci/argos-javascript/commit/272d8428d9be13bc89092c74663f9e3567012126))
+
+
+
+
+
 # [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@4.2.1...@argos-ci/browser@5.0.0) (2025-08-02)
 
 
