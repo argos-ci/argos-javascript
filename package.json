@@ -18,7 +18,8 @@
     "typescript-eslint": "^8.46.2"
   },
   "scripts": {
-    "build": "cross-env NODE_ENV=production turbo run build",
+    "clean": "rm -rf packages/*/dist",
+    "build": "pnpm run clean && cross-env NODE_ENV=production turbo run build",
     "build-docs": "npm run check-types && typedoc",
     "format": "prettier --write .",
     "check-format:root": "prettier --ignore-unknown --check !packages/** .",
