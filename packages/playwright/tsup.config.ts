@@ -10,6 +10,7 @@ export default defineConfig([
   {
     entry: ["src/reporter.ts"],
     dts: true,
+    external: ["@playwright/test"],
     format: ["esm"],
   },
 ]);
