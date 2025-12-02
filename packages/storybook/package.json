@@ -25,7 +25,6 @@
     "access": "public"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
   "exports": {
     "./test-runner": {
       "types": "./dist/test-runner.d.ts",
