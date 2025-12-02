@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.2.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.2.4...@argos-ci/storybook@5.2.5) (2025-12-02)
+
+
+### Bug Fixes
+
+* **storybook:** remove wrong types field ([23d5e0e](https://github.com/argos-ci/argos-javascript/commit/23d5e0e1d80234c6a17d60b55b3eeec881f1c3d8)), closes [#254](https://github.com/argos-ci/argos-javascript/issues/254)
+
+
+
+
+
 ## [5.2.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.2.3...@argos-ci/storybook@5.2.4) (2025-11-29)
 
 **Note:** Version bump only for package @argos-ci/storybook
