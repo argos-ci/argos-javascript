@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { program } from "commander";
 import { uploadCommand } from "./commands/upload";
 import { finalizeCommand } from "./commands/finalize";
+import { skipCommand } from "./commands/skip";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -18,6 +19,7 @@ program
   .version(pkg.version);
 
 uploadCommand(program);
+skipCommand(program);
 finalizeCommand(program);
 
 if (!process.argv.slice(2).length) {

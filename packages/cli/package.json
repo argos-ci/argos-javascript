@@ -41,7 +41,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "e2e": "node e2e/upload.js",
+    "e2e": "node e2e/upload.js && node e2e/skip.js",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."

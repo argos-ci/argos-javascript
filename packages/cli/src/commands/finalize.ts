@@ -1,20 +1,22 @@
 import ora from "ora";
 import type { Command } from "commander";
 import { finalize } from "@argos-ci/core";
-import { parallelNonce } from "../options";
+import { parallelNonceOption, type ParallelNonceOption } from "../options";
+
+type FinalizeOptions = ParallelNonceOption;
 
 export function finalizeCommand(program: Command) {
   program
     .command("finalize")
     .description("Finalize pending parallel builds")
-    .addOption(parallelNonce)
-    .action(async (options) => {
+    .addOption(parallelNonceOption)
+    .action(async (options: FinalizeOptions) => {
       const spinner = ora("Finalizing builds").start();
       try {
         const result = await finalize({
-          parallel: {
-            nonce: options.parallelNonce,
-          },
+          parallel: options.parallelNonce
+            ? { nonce: options.parallelNonce }
+            : undefined,
         });
         spinner.succeed(
           result.builds.length === 0
