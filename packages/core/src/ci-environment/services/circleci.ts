@@ -45,6 +45,7 @@ const service: Service = {
       prHeadCommit: null,
       prBaseBranch: null,
       nonce: env.CIRCLE_WORKFLOW_ID || env.CIRCLE_BUILD_NUM || null,
+      mergeQueue: false,
     };
   },
   getMergeBaseCommitSha,

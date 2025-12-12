@@ -357,6 +357,7 @@ export async function upload(params: UploadParameters): Promise<{
       ciProvider: config.ciProvider,
       runId: config.runId,
       runAttempt: config.runAttempt,
+      mergeQueue: config.mergeQueue,
     },
   });
 

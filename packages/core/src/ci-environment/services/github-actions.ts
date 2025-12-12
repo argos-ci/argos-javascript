@@ -138,13 +138,15 @@ function getOriginalRepository(context: Context): string | null {
   return env.GITHUB_REPOSITORY || null;
 }
 
-function readEventPayload({ env }: Context): EventPayload | null {
+function readEventPayload({ env }: Context): null | EventPayload {
   if (!env.GITHUB_EVENT_PATH) {
     return null;
   }
+
   if (!existsSync(env.GITHUB_EVENT_PATH)) {
     return null;
   }
+
   return JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf-8"));
 }
 
@@ -188,26 +190,32 @@ type VercelDeploymentPayload = RepositoryDispatchContext["payload"];
  * Get a payload from a Vercel deployment "repository_dispatch"
  * @see https://vercel.com/docs/git/vercel-for-github#repository-dispatch-events
  */
-function getVercelDeploymentPayload(
-  payload: EventPayload | null,
-): VercelDeploymentPayload | null {
-  if (!payload) {
-    return null;
+function getVercelDeploymentPayload(payload: EventPayload | null) {
+  if (
+    process.env.GITHUB_EVENT_NAME === "repository_dispatch" &&
+    payload &&
+    "action" in payload &&
+    payload.action === "vercel.deployment.success"
+  ) {
+    return payload as unknown as VercelDeploymentPayload;
+  }
+  return null;
+}
+
+/**
+ * Get a merge group payload from a "merge_group" event.
+ */
+function getMergeGroupPayload(payload: EventPayload | null) {
+  if (
+    payload &&
+    process.env.GITHUB_EVENT_NAME === "merge_group" &&
+    "action" in payload &&
+    payload.action === "checks_requested"
+  ) {
+    return payload as unknown as webhooks.EmitterWebhookEvent<"merge_group.checks_requested">["payload"];
   }
 
-  if (process.env.GITHUB_EVENT_NAME !== "repository_dispatch") {
-    return null;
-  }
-
-  if (!("client_payload" in payload) || !("action" in payload)) {
-    return null;
-  }
-
-  if (payload.action !== "vercel.deployment.success") {
-    return null;
-  }
-
-  return payload as unknown as VercelDeploymentPayload;
+  return null;
 }
 
 function getSha(
@@ -233,6 +241,7 @@ const service: Service = {
     const { env } = context;
     const payload = readEventPayload(context);
     const vercelPayload = getVercelDeploymentPayload(payload);
+    const mergeGroupPayload = getMergeGroupPayload(payload);
     const sha = getSha(context, vercelPayload);
 
     const pullRequest =
@@ -259,6 +268,7 @@ const service: Service = {
       prNumber: pullRequest?.number || null,
       prHeadCommit: pullRequest?.head.sha ?? null,
       prBaseBranch: pullRequest?.base.ref ?? null,
+      mergeQueue: mergeGroupPayload?.action === "checks_requested",
     };
   },
   getMergeBaseCommitSha,
