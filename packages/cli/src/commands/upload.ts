@@ -2,7 +2,28 @@ import type { Command } from "commander";
 import { Option } from "commander";
 import { upload } from "@argos-ci/core";
 import ora from "ora";
-import { parallelNonce } from "../options";
+import {
+  buildNameOption,
+  parallelNonceOption,
+  tokenOption,
+  type BuildNameOption,
+  type ParallelNonceOption,
+  type TokenOption,
+} from "../options";
+
+type UploadOptions = BuildNameOption &
+  ParallelNonceOption &
+  TokenOption & {
+    files?: string[] | undefined;
+    ignore?: string[] | undefined;
+    mode?: "ci" | "monitoring" | undefined;
+    parallel?: boolean | undefined;
+    parallelTotal?: number | undefined;
+    parallelIndex?: number | undefined;
+    referenceBranch?: string | undefined;
+    referenceCommit?: string | undefined;
+    threshold?: number | undefined;
+  };
 
 export function uploadCommand(program: Command) {
   program
@@ -18,15 +39,8 @@ export function uploadCommand(program: Command) {
       "-i, --ignore <patterns...>",
       'One or more globs matching image file paths to ignore (ex: "**/*.png **/diff.jpg")',
     )
-    .addOption(
-      new Option("--token <token>", "Repository token").env("ARGOS_TOKEN"),
-    )
-    .addOption(
-      new Option(
-        "--build-name <string>",
-        "Name of the build, in case you want to run multiple Argos builds in a single CI job",
-      ).env("ARGOS_BUILD_NAME"),
-    )
+    .addOption(tokenOption)
+    .addOption(buildNameOption)
     .addOption(
       new Option(
         "--mode <string>",
@@ -48,7 +62,7 @@ export function uploadCommand(program: Command) {
         "The number of parallel nodes being ran",
       ).env("ARGOS_PARALLEL_TOTAL"),
     )
-    .addOption(parallelNonce)
+    .addOption(parallelNonceOption)
     .addOption(
       new Option(
         "--parallel-index <number>",
@@ -73,36 +87,38 @@ export function uploadCommand(program: Command) {
         "Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to 0.5",
       ).env("ARGOS_THRESHOLD"),
     )
-    .addOption(
-      new Option(
-        "--skipped",
-        "Mark this build as skipped. No screenshots are uploaded, and the commit status is marked as success.",
-      ).env("ARGOS_SKIPPED"),
-    )
-    .action(async (directory, options) => {
+    .action(async (directory: string, options: UploadOptions) => {
       const spinner = ora("Uploading screenshots").start();
       try {
+        const parallel = (() => {
+          if (!options.parallel) {
+            return undefined;
+          }
+          if (!options.parallelNonce) {
+            spinner.fail("--parallel-nonce is required if --parallel is set");
+            process.exit(1);
+          }
+          if (!options.parallelTotal) {
+            spinner.fail("--parallel-total is required if --parallel is set");
+            process.exit(1);
+          }
+          return {
+            nonce: options.parallelNonce,
+            total: options.parallelTotal,
+            index: options.parallelIndex,
+          };
+        })();
         const result = await upload({
           token: options.token,
           root: directory,
           buildName: options.buildName,
           files: options.files,
           ignore: options.ignore,
-          prNumber: options.pullRequest
-            ? Number(options.pullRequest)
-            : undefined,
-          parallel: options.parallel
-            ? {
-                nonce: options.parallelNonce,
-                total: options.parallelTotal,
-                index: options.parallelIndex,
-              }
-            : undefined,
+          parallel,
           referenceBranch: options.referenceBranch,
           referenceCommit: options.referenceCommit,
           mode: options.mode,
           threshold: options.threshold,
-          skipped: options.skipped,
         });
         spinner.succeed(`Build created: ${result.build.url}`);
       } catch (error) {

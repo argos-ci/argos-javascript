@@ -16,6 +16,7 @@ import {
 import { getArgosCoreSDKIdentifier } from "./version";
 import { getMergeBaseCommitSha, listParentCommits } from "./ci-environment";
 import { getSnapshotMimeType } from "./mime-type";
+import { skip } from "./skip";
 
 /**
  * Size of the chunks used to upload screenshots to Argos.
@@ -129,12 +130,6 @@ export interface UploadParameters {
         baseUrl: string;
       }
     | ((url: string) => string);
-
-  /**
-   * Mark this build as skipped.
-   * No screenshots are uploaded, and the commit status is marked as success.
-   */
-  skipped?: boolean;
 }
 
 interface Screenshot {
@@ -174,34 +169,8 @@ export async function upload(params: UploadParameters): Promise<{
   });
 
   if (config.skipped) {
-    const createBuildResponse = await apiClient.POST("/builds", {
-      body: {
-        commit: config.commit,
-        branch: config.branch,
-        name: config.buildName,
-        mode: config.mode,
-        parallel: config.parallel,
-        parallelNonce: config.parallelNonce,
-        prNumber: config.prNumber,
-        prHeadCommit: config.prHeadCommit,
-        referenceBranch: config.referenceBranch,
-        referenceCommit: config.referenceCommit,
-        argosSdk,
-        ciProvider: config.ciProvider,
-        runId: config.runId,
-        runAttempt: config.runAttempt,
-        skipped: true,
-        screenshotKeys: [],
-        pwTraceKeys: [],
-        parentCommits: [],
-      },
-    });
-
-    if (createBuildResponse.error) {
-      throwAPIError(createBuildResponse.error);
-    }
-
-    return { build: createBuildResponse.data.build, screenshots: [] };
+    const { build } = await skip(params);
+    return { build, screenshots: [] };
   }
 
   const previewUrlFormatter: UploadParameters["previewUrl"] =
