@@ -44,6 +44,7 @@ const service: Service = {
       prHeadCommit: null,
       prBaseBranch: null,
       nonce: env.TRAVIS_BUILD_ID || null,
+      mergeQueue: false,
     };
   },
   getMergeBaseCommitSha,

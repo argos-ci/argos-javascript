@@ -302,6 +302,8 @@ export interface operations {
                     runAttempt?: number | null;
                     /** @description Whether the build was skipped, not comparing anything and always succeeding */
                     skipped?: boolean | null;
+                    /** @description Whether the build has been created in a merge queue */
+                    mergeQueue?: boolean | null;
                 };
             };
         };

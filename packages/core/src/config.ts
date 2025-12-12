@@ -348,6 +348,11 @@ export interface Config {
    * No screenshots are uploaded, and the commit status is marked as success.
    */
   skipped?: boolean;
+
+  /**
+   * Whether the environment is a merge queue.
+   */
+  mergeQueue?: boolean;
 }
 
 function createConfig() {
@@ -403,6 +408,7 @@ export async function readConfig(options: Partial<Config> = {}) {
     ciProvider: ciEnv?.key || null,
     previewBaseUrl: defaultConfig.previewBaseUrl || null,
     skipped: options.skipped ?? defaultConfig.skipped ?? false,
+    mergeQueue: ciEnv?.mergeQueue ?? false,
   });
 
   if (!config.get("branch") || !config.get("commit")) {

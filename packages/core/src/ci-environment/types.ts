@@ -73,6 +73,11 @@ export interface CiEnvironment {
    * A unique identifier for the current run, combining runId and runAttempt.
    */
   nonce: string | null;
+
+  /**
+   * Weither the CI environment is a merge queue.
+   */
+  mergeQueue: boolean;
 }
 
 type CIConfig = Omit<CiEnvironment, "name" | "key">;
