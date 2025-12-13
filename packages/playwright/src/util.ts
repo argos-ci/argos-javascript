@@ -93,9 +93,9 @@ export async function getTestInfo() {
 export function checkIsPage(value: unknown): value is Page {
   return Boolean(
     value &&
-      typeof value === "object" &&
-      "bringToFront" in value &&
-      typeof value.bringToFront === "function",
+    typeof value === "object" &&
+    "bringToFront" in value &&
+    typeof value.bringToFront === "function",
   );
 }
 
@@ -105,9 +105,9 @@ export function checkIsPage(value: unknown): value is Page {
 export function checkIsElementHandle(value: unknown): value is ElementHandle {
   return Boolean(
     value &&
-      typeof value === "object" &&
-      "asElement" in value &&
-      typeof value.asElement === "function",
+    typeof value === "object" &&
+    "asElement" in value &&
+    typeof value.asElement === "function",
   );
 }
 

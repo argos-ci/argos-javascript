@@ -46,7 +46,7 @@
     "@types/debug": "^4.1.12",
     "@types/node": "catalog:",
     "openapi-typescript": "^7.10.1",
-    "p-retry": "^7.1.0"
+    "p-retry": "^7.1.1"
   },
   "dependencies": {
     "debug": "^4.4.3",

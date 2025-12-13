@@ -3,7 +3,7 @@ packages:
 
 catalog:
   '@types/node': ^20.0.0
-  vitest: ^4.0.5
+  vitest: ^4.0.15
 
 onlyBuiltDependencies:
   - '@swc/core'
