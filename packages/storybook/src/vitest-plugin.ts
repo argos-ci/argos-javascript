@@ -20,8 +20,7 @@ export type ArgosScreenshotCommandArgs = [
 ];
 
 export interface ArgosVitestPluginOptions
-  extends ArgosReporterConfig,
-    ArgosScreenshotOptions {
+  extends ArgosReporterConfig, ArgosScreenshotOptions {
   /**
    * Upload the report to Argos.
    * @default true
