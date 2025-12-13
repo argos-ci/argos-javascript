@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.2.1...@argos-ci/cli@4.0.0) (2025-12-13)
+
+
+### Features
+
+* separate skip command ([de8d4cf](https://github.com/argos-ci/argos-javascript/commit/de8d4cf1dc084eb16812d6f652b201251f9bc7b0))
+
+
+### BREAKING CHANGES
+
+* - `@argos-ci/cli`: `argos upload --skipped` is now `argos skip`
+- `@argos-ci/core`: `upload` no longer accepts `skipped` option, a new
+  `skip` method has been added instead
+
+
+
+
+
 ## [3.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@3.2.0...@argos-ci/cli@3.2.1) (2025-11-03)
 
 **Note:** Version bump only for package @argos-ci/cli

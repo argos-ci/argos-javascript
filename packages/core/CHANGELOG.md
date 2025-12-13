@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.5.0...@argos-ci/core@5.0.0) (2025-12-13)
+
+
+### Features
+
+* **core:** add support for GitHub merge queue ([d5488c8](https://github.com/argos-ci/argos-javascript/commit/d5488c845bb6c64f2b58f950ca0e755db87afab1))
+* separate skip command ([de8d4cf](https://github.com/argos-ci/argos-javascript/commit/de8d4cf1dc084eb16812d6f652b201251f9bc7b0))
+
+
+### BREAKING CHANGES
+
+* - `@argos-ci/cli`: `argos upload --skipped` is now `argos skip`
+- `@argos-ci/core`: `upload` no longer accepts `skipped` option, a new
+  `skip` method has been added instead
+
+
+
+
+
 # [4.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.4.0...@argos-ci/core@4.5.0) (2025-11-03)
 
 
