@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.15.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.14.0...@argos-ci/api-client@0.15.0) (2025-12-13)
+
+
+### Features
+
+* **core:** add support for GitHub merge queue ([d5488c8](https://github.com/argos-ci/argos-javascript/commit/d5488c845bb6c64f2b58f950ca0e755db87afab1))
+
+
+
+
+
 # [0.14.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.13.0...@argos-ci/api-client@0.14.0) (2025-11-03)
 
 
