@@ -18,19 +18,16 @@ type GitHubPullRequest = {
   };
 };
 
-/**
- * Get a pull request from a head sha.
- * Fetch the last 30 pull requests sorted by updated date
- * then try to find the one that matches the head sha.
- * If no pull request is found, return null.
- */
-async function getPullRequestFromHeadSha({ env }: Context, sha: string) {
-  debug("Fetching pull request number from head sha", sha);
+function getGitHubRepository({ env }: Context) {
   if (!env.GITHUB_REPOSITORY) {
     throw new Error("GITHUB_REPOSITORY is missing");
   }
+  return env.GITHUB_REPOSITORY;
+}
+
+function getGitHubToken({ env }: Context) {
   if (!env.GITHUB_TOKEN) {
-    // For security reasons, people doesn't want to expose their GITHUB_TOKEN
+    // For security reasons, people don't want to expose their GITHUB_TOKEN
     // That's why we allow to disable this warning.
     if (!env.DISABLE_GITHUB_TOKEN_WARNING) {
       console.log(
@@ -50,9 +47,49 @@ DISABLE_GITHUB_TOKEN_WARNING: true
     }
     return null;
   }
+
+  return env.GITHUB_TOKEN;
+}
+
+function getGhAPIHeaders(ctx: Context) {
+  const githubToken = getGitHubToken(ctx);
+  if (!githubToken) {
+    return null;
+  }
+  return {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${githubToken}`,
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+}
+
+async function fetchGitHubAPI<T>(ctx: Context, url: URL | string) {
+  const headers = getGhAPIHeaders(ctx);
+  if (!headers) {
+    return null;
+  }
+  const response = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch GitHub API: ${response.statusText}`);
+  }
+  return (await response.json()) as T;
+}
+
+/**
+ * Get a pull request from a head sha.
+ * Fetch the last 30 pull requests sorted by updated date
+ * then try to find the one that matches the head sha.
+ * If no pull request is found, return null.
+ */
+async function getPullRequestFromHeadSha(ctx: Context, sha: string) {
+  debug("Fetching pull request details from head sha", sha);
+  const githubRepository = getGitHubRepository(ctx);
   try {
     const url = new URL(
-      `https://api.github.com/repos/${env.GITHUB_REPOSITORY}/pulls`,
+      `https://api.github.com/repos/${githubRepository}/pulls`,
     );
     url.search = new URLSearchParams({
       state: "open",
@@ -60,18 +97,10 @@ DISABLE_GITHUB_TOKEN_WARNING: true
       per_page: "30",
       page: "1",
     }).toString();
-    const response = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch pull requests: ${response.statusText}`);
+    const result = await fetchGitHubAPI<GitHubPullRequest[]>(ctx, url);
+    if (!result) {
+      return null;
     }
-    const result = (await response.json()) as GitHubPullRequest[];
     if (result.length === 0) {
       debug("Aborting because no pull request found");
       return null;
@@ -84,7 +113,31 @@ DISABLE_GITHUB_TOKEN_WARNING: true
     debug("Aborting because no pull request found");
     return null;
   } catch (error) {
-    debug("Error while fetching pull request from head sha", error);
+    debug("Error while fetching pull request details from head sha", error);
+    return null;
+  }
+}
+
+/**
+ * Get a pull request from a PR number.
+ */
+async function getPullRequestFromPrNumber(ctx: Context, prNumber: number) {
+  debug("Fetching pull request details from pull request number", prNumber);
+  const githubRepository = getGitHubRepository(ctx);
+  const headers = getGhAPIHeaders(ctx);
+  if (!headers) {
+    return null;
+  }
+  try {
+    return await fetchGitHubAPI<GitHubPullRequest>(
+      ctx,
+      `https://api.github.com/repos/${githubRepository}/pulls/${prNumber}`,
+    );
+  } catch (error) {
+    debug(
+      "Error while fetching pull request details from pull request number",
+      error,
+    );
     return null;
   }
 }
@@ -103,6 +156,19 @@ function getBranchFromContext(context: Context): string | null {
   const branchRegex = /refs\/heads\/(.*)/;
   const matches = branchRegex.exec(env.GITHUB_REF);
   return matches?.[1] ?? null;
+}
+
+/**
+ * Get the PR number from a merge group branch.
+ * Example: gh-readonly-queue/master/pr-1529-c1c25caabaade7a8ddc1178c449b872b5d3e51a4
+ */
+function getPRNumberFromMergeGroupBranch(branch: string) {
+  const prMatch = /queue\/[^/]*\/pr-(\d+)-/.exec(branch);
+  if (prMatch) {
+    const prNumber = Number(prMatch[1]);
+    return prNumber;
+  }
+  return null;
 }
 
 function getBranchFromPayload(payload: EventPayload): string | null {
@@ -244,10 +310,23 @@ const service: Service = {
     const mergeGroupPayload = getMergeGroupPayload(payload);
     const sha = getSha(context, vercelPayload);
 
-    const pullRequest =
-      payload && !vercelPayload
-        ? getPullRequestFromPayload(payload)
-        : await getPullRequestFromHeadSha(context, sha);
+    const pullRequest = await (() => {
+      if (vercelPayload || !payload) {
+        return getPullRequestFromHeadSha(context, sha);
+      }
+
+      if (mergeGroupPayload) {
+        const prNumber = getPRNumberFromMergeGroupBranch(
+          mergeGroupPayload.merge_group.head_ref,
+        );
+        if (!prNumber) {
+          return null;
+        }
+        return getPullRequestFromPrNumber(context, prNumber);
+      }
+
+      return getPullRequestFromPayload(payload);
+    })();
 
     return {
       commit: sha,
@@ -260,6 +339,7 @@ const service: Service = {
         : null,
       nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}`,
       branch:
+        (mergeGroupPayload ? pullRequest?.head.ref : null) ||
         vercelPayload?.client_payload?.git?.ref ||
         getBranchFromContext(context) ||
         pullRequest?.head.ref ||
