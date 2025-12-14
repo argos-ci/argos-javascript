@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.0.1...@argos-ci/core@5.0.2) (2025-12-14)
+
+
+### Bug Fixes
+
+* **merge-queue:** extract PR in "merge_group" event ([e9d635c](https://github.com/argos-ci/argos-javascript/commit/e9d635c2392b7e504641da58586c26a0bd3d78f1))
+
+
+
+
+
 ## [5.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.0.0...@argos-ci/core@5.0.1) (2025-12-14)
 
 
