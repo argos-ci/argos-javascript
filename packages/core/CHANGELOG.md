@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.0.0...@argos-ci/core@5.0.1) (2025-12-14)
+
+
+### Bug Fixes
+
+* **core:** add "mergeQueue" to schema ([523f613](https://github.com/argos-ci/argos-javascript/commit/523f61318ce407e8ea600a30443cdd30ebc817ed))
+
+
+
+
+
 # [5.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@4.5.0...@argos-ci/core@5.0.0) (2025-12-13)
 
 
