@@ -208,6 +208,10 @@ const schema = {
     format: Boolean,
     default: false,
   },
+  mergeQueue: {
+    format: Boolean,
+    default: false,
+  },
 };
 
 export interface Config {
