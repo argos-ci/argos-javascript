@@ -8,3 +8,5 @@ dist/
 *storybook.log
 # Turborepo
 .turbo
+# NPM
+.npmrc
