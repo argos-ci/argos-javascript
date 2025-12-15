@@ -1,147 +1,78 @@
 import { existsSync, readFileSync } from "node:fs";
 import type { Service, Context } from "../types";
-import { debug } from "../../debug";
 import { getMergeBaseCommitSha, listParentCommits } from "../git";
 import type * as webhooks from "@octokit/webhooks";
 import type { RepositoryDispatchContext } from "@vercel/repository-dispatch/context";
+import {
+  getGitHubRepository,
+  getPRNumberFromMergeGroupBranch,
+  getPullRequestFromHeadSha,
+  getPullRequestFromPrNumber,
+  type GitHubPullRequest,
+} from "../github";
+import { debug } from "../../debug";
 
 type EventPayload = webhooks.EmitterWebhookEvent["payload"];
 
-type GitHubPullRequest = {
-  number: number;
-  head: {
-    ref: string;
-    sha: string;
-  };
-  base: {
-    ref: string;
-  };
-};
-
-function getGitHubRepository({ env }: Context) {
-  if (!env.GITHUB_REPOSITORY) {
-    throw new Error("GITHUB_REPOSITORY is missing");
-  }
-  return env.GITHUB_REPOSITORY;
-}
-
-function getGitHubToken({ env }: Context) {
-  if (!env.GITHUB_TOKEN) {
-    // For security reasons, people don't want to expose their GITHUB_TOKEN
-    // That's why we allow to disable this warning.
-    if (!env.DISABLE_GITHUB_TOKEN_WARNING) {
-      console.log(
-        `
-Argos couldn’t find a relevant pull request in the current environment.
-To resolve this, Argos requires a GITHUB_TOKEN to fetch the pull request associated with the head SHA. Please ensure the following environment variable is added:
-
-GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-
-For more details, check out the documentation: Read more at https://argos-ci.com/docs/run-on-preview-deployment
-
-If you want to disable this warning, you can set the following environment variable:
-
-DISABLE_GITHUB_TOKEN_WARNING: true
-`.trim(),
-      );
-    }
+/**
+ * Read the event payload.
+ */
+function readEventPayload({ env }: Context): null | EventPayload {
+  if (!env.GITHUB_EVENT_PATH) {
     return null;
   }
 
-  return env.GITHUB_TOKEN;
-}
-
-function getGhAPIHeaders(ctx: Context) {
-  const githubToken = getGitHubToken(ctx);
-  if (!githubToken) {
+  if (!existsSync(env.GITHUB_EVENT_PATH)) {
     return null;
   }
-  return {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${githubToken}`,
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
+
+  return JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf-8"));
 }
 
-async function fetchGitHubAPI<T>(ctx: Context, url: URL | string) {
-  const headers = getGhAPIHeaders(ctx);
-  if (!headers) {
-    return null;
+type VercelDeploymentPayload = RepositoryDispatchContext["payload"];
+
+/**
+ * Get a payload from a Vercel deployment "repository_dispatch"
+ * @see https://vercel.com/docs/git/vercel-for-github#repository-dispatch-events
+ */
+function getVercelDeploymentPayload(
+  payload: EventPayload | null,
+): VercelDeploymentPayload | null {
+  if (
+    process.env.GITHUB_EVENT_NAME === "repository_dispatch" &&
+    payload &&
+    "action" in payload &&
+    payload.action === "vercel.deployment.success"
+  ) {
+    return payload as unknown as VercelDeploymentPayload;
   }
-  const response = await fetch(url, {
-    headers,
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch GitHub API: ${response.statusText}`);
+  return null;
+}
+
+type MergeGroupEventPayload =
+  webhooks.EmitterWebhookEvent<"merge_group.checks_requested">["payload"];
+
+/**
+ * Get a merge group payload from a "merge_group" event.
+ */
+function getMergeGroupPayload(
+  payload: EventPayload | null,
+): MergeGroupEventPayload | null {
+  if (
+    payload &&
+    process.env.GITHUB_EVENT_NAME === "merge_group" &&
+    "action" in payload &&
+    payload.action === "checks_requested"
+  ) {
+    return payload as unknown as webhooks.EmitterWebhookEvent<"merge_group.checks_requested">["payload"];
   }
-  return (await response.json()) as T;
+
+  return null;
 }
 
 /**
- * Get a pull request from a head sha.
- * Fetch the last 30 pull requests sorted by updated date
- * then try to find the one that matches the head sha.
- * If no pull request is found, return null.
+ * Get the branch from the local context.
  */
-async function getPullRequestFromHeadSha(ctx: Context, sha: string) {
-  debug("Fetching pull request details from head sha", sha);
-  const githubRepository = getGitHubRepository(ctx);
-  try {
-    const url = new URL(
-      `https://api.github.com/repos/${githubRepository}/pulls`,
-    );
-    url.search = new URLSearchParams({
-      state: "open",
-      sort: "updated",
-      per_page: "30",
-      page: "1",
-    }).toString();
-    const result = await fetchGitHubAPI<GitHubPullRequest[]>(ctx, url);
-    if (!result) {
-      return null;
-    }
-    if (result.length === 0) {
-      debug("Aborting because no pull request found");
-      return null;
-    }
-    const matchingPr = result.find((pr) => pr.head.sha === sha);
-    if (matchingPr) {
-      debug("Pull request found", matchingPr);
-      return matchingPr;
-    }
-    debug("Aborting because no pull request found");
-    return null;
-  } catch (error) {
-    debug("Error while fetching pull request details from head sha", error);
-    return null;
-  }
-}
-
-/**
- * Get a pull request from a PR number.
- */
-async function getPullRequestFromPrNumber(ctx: Context, prNumber: number) {
-  debug("Fetching pull request details from pull request number", prNumber);
-  const githubRepository = getGitHubRepository(ctx);
-  const headers = getGhAPIHeaders(ctx);
-  if (!headers) {
-    return null;
-  }
-  try {
-    return await fetchGitHubAPI<GitHubPullRequest>(
-      ctx,
-      `https://api.github.com/repos/${githubRepository}/pulls/${prNumber}`,
-    );
-  } catch (error) {
-    debug(
-      "Error while fetching pull request details from pull request number",
-      error,
-    );
-    return null;
-  }
-}
-
 function getBranchFromContext(context: Context): string | null {
   const { env } = context;
 
@@ -159,18 +90,8 @@ function getBranchFromContext(context: Context): string | null {
 }
 
 /**
- * Get the PR number from a merge group branch.
- * Example: gh-readonly-queue/master/pr-1529-c1c25caabaade7a8ddc1178c449b872b5d3e51a4
+ * Get the branch from the payload.
  */
-function getPRNumberFromMergeGroupBranch(branch: string) {
-  const prMatch = /queue\/[^/]*\/pr-(\d+)-/.exec(branch);
-  if (prMatch) {
-    const prNumber = Number(prMatch[1]);
-    return prNumber;
-  }
-  return null;
-}
-
 function getBranchFromPayload(payload: EventPayload): string | null {
   if ("workflow_run" in payload && payload.workflow_run) {
     return payload.workflow_run.head_branch;
@@ -184,6 +105,54 @@ function getBranchFromPayload(payload: EventPayload): string | null {
   return null;
 }
 
+/**
+ * Get the branch.
+ */
+function getBranch(args: {
+  payload: EventPayload | null;
+  mergeGroupPayload: MergeGroupEventPayload | null;
+  vercelPayload: VercelDeploymentPayload | null;
+  pullRequest: GitHubPullRequest | null;
+  context: Context;
+}) {
+  const { payload, mergeGroupPayload, vercelPayload, pullRequest, context } =
+    args;
+
+  // If there's a merge group and a PR detected, use the PR branch.
+  if (mergeGroupPayload && pullRequest?.head.ref) {
+    return pullRequest.head.ref;
+  }
+
+  // If there's a Vercel payload, use it.
+  if (vercelPayload) {
+    return vercelPayload.client_payload.git.ref;
+  }
+
+  // Or from the payload.
+  if (payload) {
+    const fromPayload = getBranchFromPayload(payload);
+    if (fromPayload) {
+      return fromPayload;
+    }
+  }
+
+  // Or from the context (environment variables).
+  const fromContext = getBranchFromContext(context);
+  if (fromContext) {
+    return fromContext;
+  }
+
+  // Or from the PR if available.
+  if (pullRequest) {
+    return pullRequest.head.ref;
+  }
+
+  return null;
+}
+
+/**
+ * Get the repository either from payload or from environment variables.
+ */
 function getRepository(
   context: Context,
   payload: EventPayload | null,
@@ -196,32 +165,31 @@ function getRepository(
     }
   }
 
-  return getOriginalRepository(context);
+  return getGitHubRepository(context);
 }
 
-function getOriginalRepository(context: Context): string | null {
-  const { env } = context;
-  return env.GITHUB_REPOSITORY || null;
-}
-
-function readEventPayload({ env }: Context): null | EventPayload {
-  if (!env.GITHUB_EVENT_PATH) {
-    return null;
+/**
+ * Get the head sha.
+ */
+function getSha(
+  context: Context,
+  vercelPayload: VercelDeploymentPayload | null,
+): string {
+  if (vercelPayload) {
+    return vercelPayload.client_payload.git.sha;
   }
 
-  if (!existsSync(env.GITHUB_EVENT_PATH)) {
-    return null;
+  if (!context.env.GITHUB_SHA) {
+    throw new Error(`GITHUB_SHA is missing`);
   }
 
-  return JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf-8"));
+  return context.env.GITHUB_SHA;
 }
 
 /**
  * Get the pull request from an event payload.
  */
-function getPullRequestFromPayload(
-  payload: EventPayload,
-): GitHubPullRequest | null {
+function getPullRequestFromPayload(payload: EventPayload) {
   if (
     "pull_request" in payload &&
     payload.pull_request &&
@@ -250,53 +218,39 @@ function getPullRequestFromPayload(
   return null;
 }
 
-type VercelDeploymentPayload = RepositoryDispatchContext["payload"];
-
 /**
- * Get a payload from a Vercel deployment "repository_dispatch"
- * @see https://vercel.com/docs/git/vercel-for-github#repository-dispatch-events
+ * Get the pull request either from payload or local fetching.
  */
-function getVercelDeploymentPayload(payload: EventPayload | null) {
-  if (
-    process.env.GITHUB_EVENT_NAME === "repository_dispatch" &&
-    payload &&
-    "action" in payload &&
-    payload.action === "vercel.deployment.success"
-  ) {
-    return payload as unknown as VercelDeploymentPayload;
-  }
-  return null;
-}
+async function getPullRequest(args: {
+  payload: EventPayload | null;
+  vercelPayload: VercelDeploymentPayload | null;
+  mergeGroupPayload: MergeGroupEventPayload | null;
+  context: Context;
+  sha: string;
+}) {
+  const { payload, vercelPayload, mergeGroupPayload, context, sha } = args;
 
-/**
- * Get a merge group payload from a "merge_group" event.
- */
-function getMergeGroupPayload(payload: EventPayload | null) {
-  if (
-    payload &&
-    process.env.GITHUB_EVENT_NAME === "merge_group" &&
-    "action" in payload &&
-    payload.action === "checks_requested"
-  ) {
-    return payload as unknown as webhooks.EmitterWebhookEvent<"merge_group.checks_requested">["payload"];
+  if (vercelPayload || !payload) {
+    return getPullRequestFromHeadSha(context, sha);
   }
 
-  return null;
-}
-
-function getSha(
-  context: Context,
-  vercelPayload: VercelDeploymentPayload | null,
-): string {
-  if (vercelPayload) {
-    return vercelPayload.client_payload.git.sha;
+  if (mergeGroupPayload) {
+    const prNumber = getPRNumberFromMergeGroupBranch(
+      mergeGroupPayload.merge_group.head_ref,
+    );
+    if (!prNumber) {
+      debug(
+        `No PR found from merge group head ref: ${mergeGroupPayload.merge_group.head_ref}`,
+      );
+      return null;
+    }
+    debug(
+      `PR #${prNumber} found from merge group head ref (${mergeGroupPayload.merge_group.head_ref})`,
+    );
+    return getPullRequestFromPrNumber(context, prNumber);
   }
 
-  if (!context.env.GITHUB_SHA) {
-    throw new Error(`GITHUB_SHA is missing`);
-  }
-
-  return context.env.GITHUB_SHA;
+  return getPullRequestFromPayload(payload);
 }
 
 const service: Service = {
@@ -309,46 +263,36 @@ const service: Service = {
     const vercelPayload = getVercelDeploymentPayload(payload);
     const mergeGroupPayload = getMergeGroupPayload(payload);
     const sha = getSha(context, vercelPayload);
-
-    const pullRequest = await (() => {
-      if (vercelPayload || !payload) {
-        return getPullRequestFromHeadSha(context, sha);
-      }
-
-      if (mergeGroupPayload) {
-        const prNumber = getPRNumberFromMergeGroupBranch(
-          mergeGroupPayload.merge_group.head_ref,
-        );
-        if (!prNumber) {
-          return null;
-        }
-        return getPullRequestFromPrNumber(context, prNumber);
-      }
-
-      return getPullRequestFromPayload(payload);
-    })();
+    const pullRequest = await getPullRequest({
+      payload,
+      vercelPayload,
+      mergeGroupPayload,
+      sha,
+      context,
+    });
+    const branch = getBranch({
+      payload,
+      vercelPayload,
+      mergeGroupPayload,
+      context,
+      pullRequest,
+    });
 
     return {
       commit: sha,
       repository: getRepository(context, payload),
-      originalRepository: getOriginalRepository(context),
+      originalRepository: getGitHubRepository(context),
       jobId: env.GITHUB_JOB || null,
       runId: env.GITHUB_RUN_ID || null,
       runAttempt: env.GITHUB_RUN_ATTEMPT
         ? Number(env.GITHUB_RUN_ATTEMPT)
         : null,
       nonce: `${env.GITHUB_RUN_ID}-${env.GITHUB_RUN_ATTEMPT}`,
-      branch:
-        (mergeGroupPayload ? pullRequest?.head.ref : null) ||
-        vercelPayload?.client_payload?.git?.ref ||
-        getBranchFromContext(context) ||
-        pullRequest?.head.ref ||
-        (payload ? getBranchFromPayload(payload) : null) ||
-        null,
+      branch,
       prNumber: pullRequest?.number || null,
       prHeadCommit: pullRequest?.head.sha ?? null,
       prBaseBranch: pullRequest?.base.ref ?? null,
-      mergeQueue: mergeGroupPayload?.action === "checks_requested",
+      mergeQueue: Boolean(mergeGroupPayload),
     };
   },
   getMergeBaseCommitSha,
