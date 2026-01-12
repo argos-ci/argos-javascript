@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.7](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.2.6...@argos-ci/cypress@6.2.7) (2026-01-12)
+
+
+### Bug Fixes
+
+* **cypress:** support Cypress v15 ([f72d614](https://github.com/argos-ci/argos-javascript/commit/f72d61478e2cb3477e56a04e68fd6201b53fce21))
+
+
+
+
+
 ## [6.2.6](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.2.5...@argos-ci/cypress@6.2.6) (2025-12-15)
 
 **Note:** Version bump only for package @argos-ci/cypress
