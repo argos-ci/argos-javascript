@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@5.1.0...@argos-ci/browser@5.1.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* **stabilization:** fix image stabilization issues ([af15ab0](https://github.com/argos-ci/argos-javascript/commit/af15ab047a7444c7de733bbd036206929f81c879))
+
+
+
+
+
 # [5.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@5.0.0...@argos-ci/browser@5.1.0) (2025-11-19)
 
 
