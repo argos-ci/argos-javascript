@@ -6,13 +6,10 @@ import type { Plugin } from "..";
 export const plugin = {
   name: "waitForImages" as const,
   beforeEach() {
-    Array.from(document.images).every((img) => {
-      // Force sync decoding
+    Array.from(document.images).forEach((img) => {
       if (img.decoding !== "sync") {
         img.decoding = "sync";
       }
-
-      // Force eager loading
       if (img.loading !== "eager") {
         img.loading = "eager";
       }
@@ -21,23 +18,15 @@ export const plugin = {
   },
   wait: {
     for: () => {
-      const images = Array.from(document.images);
-
-      const results = images.map((img) => {
-        // Force sync decoding
+      return Array.from(document.images).every((img) => {
         if (img.decoding !== "sync") {
           img.decoding = "sync";
         }
-
-        // Force eager loading
         if (img.loading !== "eager") {
           img.loading = "eager";
         }
-
-        return img.complete;
+        return img.complete && img.naturalWidth > 0;
       });
-
-      return results.every((x) => x);
     },
     failureExplanation: "Some images have not been loaded",
   },
