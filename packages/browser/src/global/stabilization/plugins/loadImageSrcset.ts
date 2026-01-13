@@ -1,60 +1,132 @@
 import type { Plugin } from "..";
 
 /**
- * Force the reload of srcset on resize.
- * To ensure that if the viewport changes, it's the same behaviour
- * as if the page was reloaded.
+ * Force srcset to resolve to the biggest candidate for the current run.
+ * This collapses srcset to a single candidate while staying consistent with
+ * descriptor rules from the spec.
  */
 export const plugin = {
   name: "loadImageSrcset" as const,
   beforeEach(options) {
-    // If the user is not using viewports, do nothing.
     if (!options.viewports || options.viewports.length === 0) {
       return undefined;
     }
 
-    function getLargestSrcFromSrcset(srcset: string) {
-      // Parse srcset into array of {url, width}
-      const sources = srcset
+    type ParsedCandidate =
+      | { url: string; kind: "w"; value: number }
+      | { url: string; kind: "x"; value: number }
+      | { url: string; kind: "none"; value: 1 };
+
+    function parseSrcset(srcset: string): ParsedCandidate[] {
+      return srcset
         .split(",")
-        .map((item) => {
-          const [url, size] = item.trim().split(/\s+/);
-          if (!url) {
-            return null;
+        .reduce<ParsedCandidate[]>((candidates, rawPart) => {
+          const part = rawPart.trim();
+          if (!part) {
+            return candidates;
           }
-          // Only handle width descriptors (e.g., 800w)
-          const widthMatch = size && size.match(/^(\d+)w$/);
-          if (!widthMatch) {
-            return { url, width: 0 };
+
+          const tokens = part.split(/\s+/);
+          const maybeDescriptor =
+            tokens.length > 1 ? tokens[tokens.length - 1] : null;
+
+          if (maybeDescriptor && /^\d+w$/.test(maybeDescriptor)) {
+            const url = tokens.slice(0, -1).join(" ");
+            if (url) {
+              candidates.push({
+                url,
+                kind: "w",
+                value: Number.parseInt(maybeDescriptor.slice(0, -1), 10),
+              });
+            }
+            return candidates;
           }
-          const width = parseInt(widthMatch[1]!, 10);
-          return { url, width };
-        })
-        .filter((x) => x !== null);
 
-      if (sources.length === 0) {
-        return srcset;
-      }
+          if (maybeDescriptor && /^\d+\.?\d*x$/.test(maybeDescriptor)) {
+            const url = tokens.slice(0, -1).join(" ");
+            if (url) {
+              candidates.push({
+                url,
+                kind: "x",
+                value: Number.parseFloat(maybeDescriptor.slice(0, -1)),
+              });
+            }
+            return candidates;
+          }
 
-      // Find the source with the largest width
-      const largest = sources.reduce((max, curr) =>
-        curr.width > max.width ? curr : max,
-      );
+          const url = tokens[0] ?? "";
+          if (url) {
+            candidates.push({ url, kind: "none", value: 1 });
+          }
 
-      // Return only the largest source as srcset
-      return largest.url;
+          return candidates;
+        }, []);
     }
 
-    function forceSrcsetReload(img: Element) {
-      const srcset = img.getAttribute("srcset");
+    function pickLargestCandidate(
+      candidates: ParsedCandidate[],
+    ): ParsedCandidate | null {
+      let winner: ParsedCandidate | null = null;
+      let kind: ParsedCandidate["kind"] | null = null;
+
+      for (const candidate of candidates) {
+        if (kind !== null && candidate.kind !== kind) {
+          return null;
+        }
+
+        kind ??= candidate.kind;
+
+        if (winner === null || candidate.value > winner.value) {
+          winner = candidate;
+        }
+      }
+
+      return winner;
+    }
+
+    function candidateToSingleSrcset(
+      candidate: ParsedCandidate,
+      requireW: boolean,
+    ): string {
+      if (candidate.kind === "none") {
+        return requireW ? `${candidate.url} 1w` : candidate.url;
+      }
+
+      return `${candidate.url} ${candidate.value}${candidate.kind}`;
+    }
+
+    function forceSrcsetReload(el: Element): void {
+      const srcset = el.getAttribute("srcset");
       if (!srcset) {
         return;
       }
-      img.setAttribute("srcset", getLargestSrcFromSrcset(srcset));
+
+      const candidates = parseSrcset(srcset);
+      const chosen = pickLargestCandidate(candidates);
+      if (!chosen) {
+        return;
+      }
+
+      const requireW =
+        el.hasAttribute("sizes") ||
+        chosen.kind === "w" ||
+        candidates.some((c) => c.kind === "w");
+
+      el.setAttribute("srcset", "");
+
+      if (el instanceof HTMLImageElement) {
+        el.src = chosen.url;
+      }
+
+      void el.clientWidth;
+
+      el.setAttribute("srcset", candidateToSingleSrcset(chosen, requireW));
     }
 
     Array.from(document.querySelectorAll("img,source")).forEach(
       forceSrcsetReload,
     );
+
+    return undefined;
   },
 } satisfies Plugin;

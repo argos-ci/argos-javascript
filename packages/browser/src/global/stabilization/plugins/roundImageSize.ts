@@ -10,34 +10,33 @@ export const plugin = {
   name: "roundImageSize" as const,
   beforeEach() {
     Array.from(document.images).forEach((img) => {
-      // Skip images that are not loaded yet.
-      if (!img.complete) {
+      if (!img.complete || img.naturalWidth === 0) {
         return;
       }
 
-      // Backup the original width and height
-      img.setAttribute(BACKUP_ATTRIBUTE_WIDTH, img.style.width);
-      img.setAttribute(BACKUP_ATTRIBUTE_HEIGHT, img.style.height);
+      // Backup only once
+      if (!img.hasAttribute(BACKUP_ATTRIBUTE_WIDTH)) {
+        img.setAttribute(BACKUP_ATTRIBUTE_WIDTH, img.style.width);
+        img.setAttribute(BACKUP_ATTRIBUTE_HEIGHT, img.style.height);
+      }
 
-      // Set the width and height to the rounded values
       img.style.width = `${Math.round(img.offsetWidth)}px`;
       img.style.height = `${Math.round(img.offsetHeight)}px`;
     });
 
     return () => {
       Array.from(document.images).forEach((img) => {
-        const bckWidth = img.getAttribute(BACKUP_ATTRIBUTE_WIDTH);
-        const bckHeight = img.getAttribute(BACKUP_ATTRIBUTE_HEIGHT);
-
-        if (bckWidth === null && bckHeight === null) {
+        // Only restore if we actually backed up this image
+        if (!img.hasAttribute(BACKUP_ATTRIBUTE_WIDTH)) {
           return;
         }
 
-        // Restore the original width and height
+        const bckWidth = img.getAttribute(BACKUP_ATTRIBUTE_WIDTH);
+        const bckHeight = img.getAttribute(BACKUP_ATTRIBUTE_HEIGHT);
+
         img.style.width = bckWidth ?? "";
         img.style.height = bckHeight ?? "";
 
-        // Remove the backup attributes
         img.removeAttribute(BACKUP_ATTRIBUTE_WIDTH);
         img.removeAttribute(BACKUP_ATTRIBUTE_HEIGHT);
       });
