@@ -9,6 +9,6 @@ export const plugin = {
     for: () => {
       return document.fonts.status === "loaded";
     },
-    failureExplanation: "Some fonts have not been loaded",
+    failureExplanation: "Some fonts are still loading",
   },
 } satisfies Plugin;

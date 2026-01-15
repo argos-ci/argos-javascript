@@ -25,9 +25,12 @@ export const plugin = {
         if (img.loading !== "eager") {
           img.loading = "eager";
         }
-        return img.complete && img.naturalWidth > 0;
+        // Intentionally only check `img.complete` and not `naturalWidth > 0`.
+        // This allows screenshots/stabilization to proceed even when some images
+        // fail to load (e.g. 404s), so unavailable image resources do not block.
+        return img.complete;
       });
     },
-    failureExplanation: "Some images have not been loaded",
+    failureExplanation: "Some images are still loading",
   },
 } satisfies Plugin;
