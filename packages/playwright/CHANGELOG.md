@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.3.10...@argos-ci/playwright@6.4.0) (2026-01-24)
+
+
+### Features
+
+* **playwright:** allow to ignore upload failures ([479d30f](https://github.com/argos-ci/argos-javascript/commit/479d30fa2c3b763ed25020a833c43eb2c9417653))
+
+
+
+
+
 ## [6.3.10](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.3.9...@argos-ci/playwright@6.3.10) (2026-01-15)
 
 **Note:** Version bump only for package @argos-ci/playwright
