@@ -55,6 +55,12 @@ export type ArgosReporterOptions<T extends string[] = string[]> = Omit<
   uploadToArgos?: boolean;
 
   /**
+   * If true, the reporter will not fail the test suite when the upload fails.
+   * @default false
+   */
+  ignoreUploadFailures?: boolean;
+
+  /**
    * The name of the build in Argos.
    * Can be a string or a function that receives the test case and returns the build name.
    */
@@ -281,8 +287,17 @@ class ArgosReporter implements Reporter {
         console.log(chalk.green(`✅ Argos build created: ${res.build.url}`));
       }
     } catch (error) {
+      console.error(chalk.red(`❌ Error while creating the Argos build`));
       console.error(error);
-      return { status: "failed" as const };
+      if (!this.config.ignoreUploadFailures) {
+        return { status: "failed" as const };
+      } else {
+        console.warn(
+          chalk.yellow(
+            "⚠️  Upload failure ignored due to ignoreUploadFailures option",
+          ),
+        );
+      }
     }
     return;
   }
