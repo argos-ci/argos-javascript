@@ -19,9 +19,7 @@ export const Form = () => {
       onSubmit={(event) => {
         event.preventDefault();
         setSubmitted({
-          // @ts-expect-error fine
           email: event.target.email.value,
-          // @ts-expect-error fine
           password: event.target.password.value,
         });
       }}
