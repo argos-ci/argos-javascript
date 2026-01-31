@@ -97,4 +97,17 @@ describe("#readConfig", () => {
     });
     expect(config.token).toBe("arg-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
   });
+
+  it("reads subset from env", async () => {
+    process.env.ARGOS_SUBSET = "true";
+    expect((await readDummyConfig()).subset).toBe(true);
+    delete process.env.ARGOS_SUBSET;
+  });
+
+  it("subset passed as argument is prioritary over env variable", async () => {
+    process.env.ARGOS_SUBSET = "false";
+    const config = await readDummyConfig({ subset: true });
+    expect(config.subset).toBe(true);
+    delete process.env.ARGOS_SUBSET;
+  });
 });
