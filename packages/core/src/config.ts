@@ -212,6 +212,11 @@ const schema = {
     format: Boolean,
     default: false,
   },
+  subset: {
+    env: "ARGOS_SUBSET",
+    format: Boolean,
+    default: false,
+  },
 };
 
 export interface Config {
@@ -357,6 +362,12 @@ export interface Config {
    * Whether the environment is a merge queue.
    */
   mergeQueue?: boolean;
+
+  /**
+   * Whether this build contains only a subset of screenshots.
+   * This is useful when a build is created from an incomplete test suite where some tests are skipped.
+   */
+  subset?: boolean;
 }
 
 function createConfig() {

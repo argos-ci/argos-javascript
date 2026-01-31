@@ -23,6 +23,7 @@ type UploadOptions = BuildNameOption &
     referenceBranch?: string | undefined;
     referenceCommit?: string | undefined;
     threshold?: number | undefined;
+    subset?: boolean | undefined;
   };
 
 export function uploadCommand(program: Command) {
@@ -87,6 +88,12 @@ export function uploadCommand(program: Command) {
         "Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to 0.5",
       ).env("ARGOS_THRESHOLD"),
     )
+    .addOption(
+      new Option(
+        "--subset",
+        "Whether this build contains only a subset of screenshots.\nThis is useful when a build is created from an incomplete test suite where some tests are skipped.",
+      ).env("ARGOS_SUBSET"),
+    )
     .action(async (directory: string, options: UploadOptions) => {
       const spinner = ora("Uploading screenshots").start();
       try {
@@ -119,6 +126,7 @@ export function uploadCommand(program: Command) {
           referenceCommit: options.referenceCommit,
           mode: options.mode,
           threshold: options.threshold,
+          subset: options.subset,
         });
         spinner.succeed(`Build created: ${result.build.url}`);
       } catch (error) {
