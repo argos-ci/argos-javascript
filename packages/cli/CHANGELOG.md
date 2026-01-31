@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.0.5...@argos-ci/cli@4.1.0) (2026-01-31)
+
+
+### Features
+
+* add `subset` option ([191d6ce](https://github.com/argos-ci/argos-javascript/commit/191d6ce2516e52cc5e94def3ca74e7b86c657147))
+
+
+
+
+
 ## [4.0.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.0.4...@argos-ci/cli@4.0.5) (2026-01-24)
 
 **Note:** Version bump only for package @argos-ci/cli

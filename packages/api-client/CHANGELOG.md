@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.15.0...@argos-ci/api-client@0.16.0) (2026-01-31)
+
+
+### Features
+
+* add `subset` option ([191d6ce](https://github.com/argos-ci/argos-javascript/commit/191d6ce2516e52cc5e94def3ca74e7b86c657147))
+
+
+
+
+
 # [0.15.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.14.0...@argos-ci/api-client@0.15.0) (2025-12-13)
 
 

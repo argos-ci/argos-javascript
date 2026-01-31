@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.0.4...@argos-ci/core@5.1.0) (2026-01-31)
+
+
+### Features
+
+* add `subset` option ([191d6ce](https://github.com/argos-ci/argos-javascript/commit/191d6ce2516e52cc5e94def3ca74e7b86c657147))
+
+
+
+
+
 ## [5.0.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.0.3...@argos-ci/core@5.0.4) (2026-01-13)
 
 **Note:** Version bump only for package @argos-ci/core
