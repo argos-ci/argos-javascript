@@ -2,20 +2,20 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
+    "@commitlint/cli": "^20.4.0",
+    "@commitlint/config-conventional": "^20.4.0",
     "@eslint/js": "^9.39.2",
     "@vitest/eslint-plugin": "^1.6.6",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
-    "globals": "^17.1.0",
+    "globals": "^17.2.0",
     "lerna": "^9.0.3",
     "prettier": "^3.8.1",
     "tsup": "^8.5.1",
-    "turbo": "^2.7.5",
+    "turbo": "^2.8.1",
     "typedoc": "^0.28.16",
     "typescript": "5.9.3",
-    "typescript-eslint": "^8.53.1"
+    "typescript-eslint": "^8.54.0"
   },
   "scripts": {
     "clean": "rm -rf packages/*/dist",
@@ -33,5 +33,5 @@
   "engines": {
     "node": "22"
   },
-  "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
+  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
 }
