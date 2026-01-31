@@ -109,4 +109,32 @@ describe("#upload", () => {
       expect(reqCount).toBe(2);
     })();
   });
+
+  it("passes subset to create build", () => {
+    return server.boundary(async () => {
+      let receivedSubset: boolean | undefined;
+
+      server.use(
+        http.post("https://api.argos-ci.dev/builds", async ({ request }) => {
+          const body = (await request.json()) as { subset?: boolean };
+          receivedSubset = body.subset;
+          return HttpResponse.json({
+            build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
+            screenshots: [],
+          });
+        }),
+      );
+
+      await upload({
+        branch: "main",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        subset: true,
+      });
+
+      expect(receivedSubset).toBe(true);
+    })();
+  });
 });

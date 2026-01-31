@@ -423,6 +423,7 @@ export async function readConfig(options: Partial<Config> = {}) {
     ciProvider: ciEnv?.key || null,
     previewBaseUrl: defaultConfig.previewBaseUrl || null,
     skipped: options.skipped ?? defaultConfig.skipped ?? false,
+    subset: options.subset ?? defaultConfig.subset ?? false,
     mergeQueue: ciEnv?.mergeQueue ?? false,
   });
 
