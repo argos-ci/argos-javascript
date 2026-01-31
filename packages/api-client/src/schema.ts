@@ -43,8 +43,24 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["getBuild"];
         put: operations["updateBuild"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builds/{buildId}/diffs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getBuildDiffs"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -190,11 +206,17 @@ export interface components {
         };
         /** @description Build metadata */
         BuildMetadata: {
+            /** @description Test suite report */
             testReport?: {
-                /** @enum {string} */
+                /**
+                 * @description Status of the test suite
+                 * @enum {string}
+                 */
                 status: "passed" | "failed" | "timedout" | "interrupted";
                 stats?: {
+                    /** @description Date when the test suite started */
                     startTime?: string;
+                    /** @description Duration of the test suite in milliseconds */
                     duration?: number;
                 };
             };
@@ -206,6 +228,43 @@ export interface components {
             number: number;
             /** @description The status of the build */
             status: ("accepted" | "rejected") | ("no-changes" | "changes-detected") | ("expired" | "pending" | "progress" | "error" | "aborted");
+            /** @description The conclusion of the build */
+            conclusion: ("no-changes" | "changes-detected") | null;
+            /** @description Stats of the diffs present in the build */
+            stats: {
+                /** @description Added snapshots */
+                added: number;
+                /** @description Removed snapshots */
+                removed: number;
+                /** @description Unchanged snapshots */
+                unchanged: number;
+                /** @description Changed snapshots */
+                changed: number;
+                /** @description Ignored snapshots */
+                ignored: number;
+                /** @description Failure screenshots */
+                failure: number;
+                /** @description Retry failure screenshots */
+                retryFailure: number;
+                /** @description Total number of snapshots */
+                total: number;
+            } | null;
+            metadata: {
+                /** @description Test suite report */
+                testReport?: {
+                    /**
+                     * @description Status of the test suite
+                     * @enum {string}
+                     */
+                    status: "passed" | "failed" | "timedout" | "interrupted";
+                    stats?: {
+                        /** @description Date when the test suite started */
+                        startTime?: string;
+                        /** @description Duration of the test suite in milliseconds */
+                        duration?: number;
+                    };
+                };
+            } | null;
             /**
              * Format: uri
              * @description The URL of the build
@@ -232,12 +291,6 @@ export interface components {
                 message: string;
             }[];
         };
-        /** @description Project */
-        Project: {
-            id: string;
-            defaultBaseBranch: string;
-            hasRemoteContentAccess: boolean;
-        };
         /** @description Page information */
         PageInfo: {
             /** @description Total number of items */
@@ -246,6 +299,226 @@ export interface components {
             page: number;
             /** @description Number of items per page */
             perPage: number;
+        };
+        /** @description Snapshot diff */
+        SnapshotDiff: {
+            /** @description Unique identifier of the snapshot diff */
+            id: string;
+            /** @description Name of the snapshot diff */
+            name: string;
+            /**
+             * @description Status of the snapshot diff
+             * @enum {string}
+             */
+            status: "pending" | "removed" | "failure" | "added" | "changed" | "unchanged" | "retryFailure" | "ignored";
+            /** @description Similarity score between snapshots */
+            score: number | null;
+            /** @description Grouping key for the snapshot diff */
+            group: string | null;
+            /** @description Parent name of the snapshot (usually the story id) */
+            parentName: string | null;
+            /** @description URL of the diff image */
+            url: string | null;
+            base: {
+                /** @description Unique identifier of the snapshot */
+                id: string;
+                /** @description Name of the snapshot */
+                name: string;
+                metadata: {
+                    /**
+                     * @description Ignored. Can be set to get completions, validations and documentation in some editors.
+                     * @example https://api.argos-ci.com/v2/screenshot-metadata.json
+                     */
+                    $schema?: string;
+                    /** @description The URL of the page that was screenshotted */
+                    url?: string | null;
+                    /** @description An URL to an accessible preview of the screenshot */
+                    previewUrl?: string | null;
+                    viewport?: {
+                        /** @description The width of the viewport */
+                        width: number;
+                        /** @description The height of the viewport */
+                        height: number;
+                    } | null;
+                    /** @description The color scheme when the screenshot was taken */
+                    colorScheme?: ("light" | "dark") | null;
+                    /** @description The media type when the screenshot was taken */
+                    mediaType?: ("screen" | "print") | null;
+                    test?: ({
+                        /** @description The unique identifier of the test */
+                        id?: string | null;
+                        /** @description The title of the test */
+                        title: string;
+                        /** @description The path of titles leading to the test */
+                        titlePath: string[];
+                        /** @description The number of retries for the test */
+                        retries?: number | null;
+                        /** @description The current retry count */
+                        retry?: number | null;
+                        /** @description The repeat count for the test */
+                        repeat?: number | null;
+                        /** @description The location of the test in the source code */
+                        location?: {
+                            /** @description The located file */
+                            file: string;
+                            /** @description The line number in the file */
+                            line: number;
+                            /** @description The column number in the file */
+                            column: number;
+                        };
+                        /** @description Annotations associated to the test */
+                        annotations?: {
+                            /** @description The type of annotation */
+                            type: string;
+                            /** @description The description of the annotation */
+                            description?: string;
+                            /** @description The location of the annotation in the source code */
+                            location?: {
+                                /** @description The located file */
+                                file: string;
+                                /** @description The line number in the file */
+                                line: number;
+                                /** @description The column number in the file */
+                                column: number;
+                            };
+                        }[];
+                    } | null) | null;
+                    browser?: {
+                        /** @description The name of the browser */
+                        name: string;
+                        /** @description The version of the browser */
+                        version: string;
+                    } | null;
+                    /** @description The automation library that generated the screenshot */
+                    automationLibrary: {
+                        /** @description The name of the automation library */
+                        name: string;
+                        /** @description The version of the automation library */
+                        version: string;
+                    };
+                    /** @description The Argos SDK that generated the screenshot */
+                    sdk: {
+                        /** @description The name of the Argos SDK */
+                        name: string;
+                        /** @description The version of the Argos SDK */
+                        version: string;
+                    };
+                } | null;
+                /** @description Width of the screenshot in pixels */
+                width: number | null;
+                /** @description Height of the screenshot in pixels */
+                height: number | null;
+                /**
+                 * Format: uri
+                 * @description Public URL of the snapshot
+                 */
+                url: string;
+                /** @description Content type of the snapshot file */
+                contentType: string;
+            } | null;
+            head: {
+                /** @description Unique identifier of the snapshot */
+                id: string;
+                /** @description Name of the snapshot */
+                name: string;
+                metadata: {
+                    /**
+                     * @description Ignored. Can be set to get completions, validations and documentation in some editors.
+                     * @example https://api.argos-ci.com/v2/screenshot-metadata.json
+                     */
+                    $schema?: string;
+                    /** @description The URL of the page that was screenshotted */
+                    url?: string | null;
+                    /** @description An URL to an accessible preview of the screenshot */
+                    previewUrl?: string | null;
+                    viewport?: {
+                        /** @description The width of the viewport */
+                        width: number;
+                        /** @description The height of the viewport */
+                        height: number;
+                    } | null;
+                    /** @description The color scheme when the screenshot was taken */
+                    colorScheme?: ("light" | "dark") | null;
+                    /** @description The media type when the screenshot was taken */
+                    mediaType?: ("screen" | "print") | null;
+                    test?: ({
+                        /** @description The unique identifier of the test */
+                        id?: string | null;
+                        /** @description The title of the test */
+                        title: string;
+                        /** @description The path of titles leading to the test */
+                        titlePath: string[];
+                        /** @description The number of retries for the test */
+                        retries?: number | null;
+                        /** @description The current retry count */
+                        retry?: number | null;
+                        /** @description The repeat count for the test */
+                        repeat?: number | null;
+                        /** @description The location of the test in the source code */
+                        location?: {
+                            /** @description The located file */
+                            file: string;
+                            /** @description The line number in the file */
+                            line: number;
+                            /** @description The column number in the file */
+                            column: number;
+                        };
+                        /** @description Annotations associated to the test */
+                        annotations?: {
+                            /** @description The type of annotation */
+                            type: string;
+                            /** @description The description of the annotation */
+                            description?: string;
+                            /** @description The location of the annotation in the source code */
+                            location?: {
+                                /** @description The located file */
+                                file: string;
+                                /** @description The line number in the file */
+                                line: number;
+                                /** @description The column number in the file */
+                                column: number;
+                            };
+                        }[];
+                    } | null) | null;
+                    browser?: {
+                        /** @description The name of the browser */
+                        name: string;
+                        /** @description The version of the browser */
+                        version: string;
+                    } | null;
+                    /** @description The automation library that generated the screenshot */
+                    automationLibrary: {
+                        /** @description The name of the automation library */
+                        name: string;
+                        /** @description The version of the automation library */
+                        version: string;
+                    };
+                    /** @description The Argos SDK that generated the screenshot */
+                    sdk: {
+                        /** @description The name of the Argos SDK */
+                        name: string;
+                        /** @description The version of the Argos SDK */
+                        version: string;
+                    };
+                } | null;
+                /** @description Width of the screenshot in pixels */
+                width: number | null;
+                /** @description Height of the screenshot in pixels */
+                height: number | null;
+                /**
+                 * Format: uri
+                 * @description Public URL of the snapshot
+                 */
+                url: string;
+                /** @description Content type of the snapshot file */
+                contentType: string;
+            } | null;
+        };
+        /** @description Project */
+        Project: {
+            id: string;
+            defaultBaseBranch: string;
+            hasRemoteContentAccess: boolean;
         };
     };
     responses: never;
@@ -304,6 +577,11 @@ export interface operations {
                     skipped?: boolean | null;
                     /** @description Whether the build has been created in a merge queue */
                     mergeQueue?: boolean | null;
+                    /**
+                     * @description Indicates whether this build contains only a subset of screenshots.
+                     *     This is useful when a build is created from an incomplete test suite where some tests are skipped.
+                     */
+                    subset?: boolean | null;
                 };
             };
         };
@@ -449,6 +727,65 @@ export interface operations {
             };
         };
     };
+    getBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique identifier for the build */
+                buildId: components["schemas"]["BuildId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Build */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Build"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     updateBuild: {
         parameters: {
             query?: never;
@@ -520,6 +857,73 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getBuildDiffs: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+            };
+            header?: never;
+            path: {
+                /** @description A unique identifier for the build */
+                buildId: components["schemas"]["BuildId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of screenshot diffs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["SnapshotDiff"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

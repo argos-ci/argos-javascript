@@ -130,6 +130,13 @@ export interface UploadParameters {
         baseUrl: string;
       }
     | ((url: string) => string);
+
+  /**
+   * Whether this build contains only a subset of screenshots.
+   * This is useful when a build is created from an incomplete test suite where some tests are skipped.
+   * @default false
+   */
+  subset?: boolean;
 }
 
 interface Screenshot {
@@ -327,6 +334,7 @@ export async function upload(params: UploadParameters): Promise<{
       runId: config.runId,
       runAttempt: config.runAttempt,
       mergeQueue: config.mergeQueue,
+      subset: config.subset,
     },
   });
 
