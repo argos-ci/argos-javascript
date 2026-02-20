@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.11](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.2.10...@argos-ci/cypress@6.2.11) (2026-02-20)
+
+
+### Bug Fixes
+
+* **cypress:** fix invalid retries ([28aa0fb](https://github.com/argos-ci/argos-javascript/commit/28aa0fba18e105e0552c0f5745908fba17a12cb4))
+
+
+
+
+
 ## [6.2.10](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.2.9...@argos-ci/cypress@6.2.10) (2026-01-31)
 
 **Note:** Version bump only for package @argos-ci/cypress
