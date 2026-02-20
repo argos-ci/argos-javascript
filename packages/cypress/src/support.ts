@@ -131,6 +131,14 @@ function beforeEach(options: ArgosScreenshotOptions) {
   };
 }
 
+function getRetries(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 0;
+  }
+  const retries = Math.floor(value);
+  return retries < 0 ? 0 : retries;
+}
+
 /**
  * Wait for the UI to be ready before taking the screenshot.
  */
@@ -217,7 +225,7 @@ Cypress.Commands.add(
             titlePath: Cypress.currentTest.titlePath,
             retry: Cypress.currentRetry,
             // @ts-expect-error - private property
-            retries: cy.state("runnable")._retries,
+            retries: getRetries(cy.state("runnable")._retries),
           },
           browser: {
             name: Cypress.browser.name,
