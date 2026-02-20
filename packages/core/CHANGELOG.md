@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.1.0...@argos-ci/core@5.1.1) (2026-02-20)
+
+
+### Bug Fixes
+
+* **github:** fix commit in "pull_request_target" event ([da07b9e](https://github.com/argos-ci/argos-javascript/commit/da07b9ea887b118c7bc91f75c9673971c650d77f))
+
+
+
+
+
 # [5.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.0.4...@argos-ci/core@5.1.0) (2026-01-31)
 
 
