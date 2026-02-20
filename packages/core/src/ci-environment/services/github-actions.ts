@@ -174,13 +174,27 @@ function getRepository(
 function getSha(
   context: Context,
   vercelPayload: VercelDeploymentPayload | null,
+  payload: EventPayload | null,
 ): string {
+  // In "pull_request_target", the GITHUB_SHA is pointing to the base branch,
+  // so we use the pull request commit instead.
+  if (context.env.GITHUB_EVENT_NAME === "pull_request_target") {
+    if (!payload) {
+      throw new Error('Payload is missing in "pull_request_target" event');
+    }
+    const pullRequest = getPullRequestFromPayload(payload);
+    if (!pullRequest) {
+      throw new Error('Pull request missing in "pull_request_target" event');
+    }
+    return pullRequest.head.sha;
+  }
+
   if (vercelPayload) {
     return vercelPayload.client_payload.git.sha;
   }
 
   if (!context.env.GITHUB_SHA) {
-    throw new Error(`GITHUB_SHA is missing`);
+    throw new Error("GITHUB_SHA is missing");
   }
 
   return context.env.GITHUB_SHA;
@@ -262,7 +276,7 @@ const service: Service = {
     const payload = readEventPayload(context);
     const vercelPayload = getVercelDeploymentPayload(payload);
     const mergeGroupPayload = getMergeGroupPayload(payload);
-    const sha = getSha(context, vercelPayload);
+    const sha = getSha(context, vercelPayload, payload);
     const pullRequest = await getPullRequest({
       payload,
       vercelPayload,
