@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.2.12...@argos-ci/cypress@6.3.0) (2026-03-18)
+
+
+### Features
+
+* add tags support ([63d21fa](https://github.com/argos-ci/argos-javascript/commit/63d21fa8728cc5131ec1302bd17db939b15e34f5))
+
+
+
+
+
 ## [6.2.12](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.2.11...@argos-ci/cypress@6.2.12) (2026-02-20)
 
 **Note:** Version bump only for package @argos-ci/cypress

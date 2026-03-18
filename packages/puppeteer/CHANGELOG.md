@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@5.1.11...@argos-ci/puppeteer@5.2.0) (2026-03-18)
+
+
+### Features
+
+* add tags support ([63d21fa](https://github.com/argos-ci/argos-javascript/commit/63d21fa8728cc5131ec1302bd17db939b15e34f5))
+
+
+
+
+
 ## [5.1.11](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@5.1.10...@argos-ci/puppeteer@5.1.11) (2026-02-20)
 
 **Note:** Version bump only for package @argos-ci/puppeteer

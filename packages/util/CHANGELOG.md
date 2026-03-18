@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@3.2.0...@argos-ci/util@3.3.0) (2026-03-18)
+
+
+### Features
+
+* add tags support ([63d21fa](https://github.com/argos-ci/argos-javascript/commit/63d21fa8728cc5131ec1302bd17db939b15e34f5))
+
+
+
+
+
 # [3.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@3.1.1...@argos-ci/util@3.2.0) (2025-11-03)
 
 
