@@ -28,4 +28,11 @@ describe("argosScreenshot", () => {
     cy.visit("cypress/pages/index.html");
     cy.argosScreenshot("threshold-option", { threshold: 0.2 });
   });
+
+  it("supports tags option", () => {
+    cy.visit("cypress/pages/index.html");
+    cy.argosScreenshot("tags-option", {
+      tag: ["snapshot-tag"],
+    });
+  });
 });

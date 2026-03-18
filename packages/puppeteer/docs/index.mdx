@@ -69,6 +69,7 @@ Screenshots are stored in `screenshots/argos` folder, relative to current direct
 - `options.stabilize.waitForAriaBusy`: Wait for the `aria-busy` attribute to be removed from the document. Default to `true`.
 - `options.stabilize.waitForFonts`: Wait for fonts to be loaded. Default to `true`.
 - `options.stabilize.waitForImages`: Wait for images to be loaded. Default to `true`.
+- `options.tag`: Tag or array of tags to attach to the screenshot for filtering in Argos.
 
 Unlike [Puppeteer's `screenshot` method](https://playwright.dev/docs/api/class-page#page-screenshot), `argosScreenshot` set `fullPage` option to `true` by default. Feel free to override this option if you prefer partial screenshots of your pages.
 
