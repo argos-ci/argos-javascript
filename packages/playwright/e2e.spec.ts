@@ -183,6 +183,20 @@ test.describe("#argosScreenshot", () => {
       });
     });
   });
+
+  test.describe("with tags", () => {
+    test("works", async ({ page }) => {
+      await argosScreenshot(page, "tags-option", {
+        tag: ["snapshot-tag"],
+      });
+    });
+  });
+
+  test.describe("with Playwright test tags", { tag: ["@on-describe"] }, () => {
+    test("captures test tags", { tag: "@on-test" }, async ({ page }) => {
+      await argosScreenshot(page, "playwright-test-tags");
+    });
+  });
 });
 
 test.describe("#argosAriaSnapshot", () => {

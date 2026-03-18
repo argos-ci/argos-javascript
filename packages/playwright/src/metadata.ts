@@ -163,6 +163,7 @@ export async function getTestMetadata(
     id: testInfo.testId,
     title: testInfo.title,
     titlePath: testInfo.titlePath,
+    tags: testInfo.tags.length > 0 ? testInfo.tags : undefined,
     retry: testInfo.retry,
     retries: testInfo.project.retries,
     repeat: testInfo.repeatEachIndex,
@@ -184,6 +185,7 @@ export async function getTestMetadataFromTestCase(
   const testMetadata: ScreenshotMetadata["test"] = {
     title: testCase.title,
     titlePath: testCase.titlePath(),
+    tags: testCase.tags.length > 0 ? testCase.tags : undefined,
     retry: testResult.retry,
     retries: testCase.retries,
     repeat: testCase.repeatEachIndex,

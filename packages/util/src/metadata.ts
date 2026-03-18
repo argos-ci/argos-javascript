@@ -13,6 +13,8 @@ export type ScreenshotMetadata = {
   colorScheme?: ("light" | "dark") | null;
   /** @description The media type when the screenshot was taken */
   mediaType?: ("screen" | "print") | null;
+  /** @description Tags associated with the screenshot */
+  tags?: string[];
   test?:
     | ({
         /** @description The unique identifier of the test */
@@ -21,6 +23,8 @@ export type ScreenshotMetadata = {
         title: string;
         /** @description The path of titles leading to the test */
         titlePath: string[];
+        /** @description Tags associated with the test */
+        tags?: string[];
         /** @description The number of retries for the test */
         retries?: number | null;
         /** @description The current retry count */

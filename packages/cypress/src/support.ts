@@ -43,6 +43,11 @@ type ArgosScreenshotOptions = Partial<
    * @default true
    */
   stabilize?: boolean | StabilizationPluginOptions;
+
+  /**
+   * Tag or array of tags to attach to the screenshot.
+   */
+  tag?: string | string[];
 };
 
 declare global {
@@ -172,7 +177,7 @@ Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
   (subject, name, options = {}) => {
-    const { viewports, argosCSS: _argosCSS, ...cypressOptions } = options;
+    const { viewports, argosCSS: _argosCSS, tag, ...cypressOptions } = options;
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -242,6 +247,10 @@ Cypress.Commands.add(
         };
 
         metadata.transient = {};
+
+        if (tag) {
+          metadata.tags = Array.isArray(tag) ? tag : [tag];
+        }
 
         if (options.threshold !== undefined) {
           validateThreshold(options.threshold);

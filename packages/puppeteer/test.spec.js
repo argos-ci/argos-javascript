@@ -127,6 +127,12 @@ describe("argosScreenshot", () => {
     });
   });
 
+  it("supports tags option", async () => {
+    await argosScreenshot(page, "tags-option", {
+      tag: ["snapshot-tag"],
+    });
+  });
+
   describe("with cjs version", () => {
     it("works", async () => {
       await argosScreenshotCjs(page, "cjs");

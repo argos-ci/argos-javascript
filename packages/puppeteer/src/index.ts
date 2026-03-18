@@ -76,6 +76,11 @@ export type ArgosScreenshotOptions = Omit<
    * @default true
    */
   stabilize?: boolean | StabilizationPluginOptions;
+
+  /**
+   * Tag or array of tags to attach to the screenshot.
+   */
+  tag?: string | string[];
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -309,6 +314,10 @@ export async function argosScreenshot(
     };
 
     metadata.transient = {};
+
+    if (options?.tag) {
+      metadata.tags = Array.isArray(options.tag) ? options.tag : [options.tag];
+    }
 
     if (options?.threshold !== undefined) {
       validateThreshold(options.threshold);
