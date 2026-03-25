@@ -14,6 +14,7 @@ import {
   type StorybookGlobals,
 } from "./parameters";
 import type { ComposedStoryFn } from "storybook/internal/types";
+import { mergeTags } from "./tags";
 
 export type StorybookScreenshotContext<Handler extends Page | Frame> = {
   /**
@@ -39,6 +40,7 @@ export type StorybookScreenshotContext<Handler extends Page | Frame> = {
     id: string;
     parameters: Record<string, any>;
     globals: StorybookGlobals | null;
+    tags?: string[];
   };
 };
 
@@ -64,8 +66,10 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
    */
   options?: ArgosScreenshotOptions,
 ) {
+  const tags = mergeTags(context.story.tags, options?.tag);
   const argosOptions = {
     ...options,
+    tag: tags.length > 0 ? tags : undefined,
     // Disable aria-busy stabilization by default
     stabilize: options?.stabilize ?? {
       waitForAriaBusy: false,
@@ -153,7 +157,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
     await argosPlaywrightScreenshot(
       handler,
       composeName(context.name, getModeSuffix(currentMode)),
-      options,
+      argosOptions,
     );
   }
 

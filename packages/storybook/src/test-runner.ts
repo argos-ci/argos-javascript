@@ -9,6 +9,7 @@ import {
   getFitToContentFromParameters,
   type FitToContent,
 } from "./utils/parameters";
+import { mergeTags } from "./utils/tags";
 
 export type { ArgosStorybookParameters } from "./utils/parameters";
 export type { ArgosScreenshotOptions };
@@ -49,6 +50,7 @@ export async function argosScreenshot(
       story: {
         id: storyContext.id,
         parameters: storyContext.parameters,
+        tags: mergeTags(storyContext.tags, storyContext.parameters.tags),
         // We don't have access to globals in this context.
         globals: null,
       },

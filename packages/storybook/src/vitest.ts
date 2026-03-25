@@ -4,6 +4,7 @@ import type { ArgosScreenshotOptions } from "./utils/screenshot";
 import type { ArgosScreenshotCommandArgs } from "./vitest-plugin";
 import type { ArgosAttachment } from "@argos-ci/playwright";
 import type { StorybookGlobals } from "./utils/parameters";
+import { mergeTags } from "./utils/tags";
 
 export type { ArgosScreenshotOptions };
 
@@ -43,6 +44,7 @@ export function setupArgos(api: { afterEach: typeof vitest.afterEach }) {
         id: story.id,
         parameters: story.parameters,
         globals: story.globals,
+        tags: mergeTags(story.tags, story.parameters.tags),
       },
       test: {
         id: ctx.task.id,
@@ -66,6 +68,7 @@ export async function argosScreenshot(
     parameters: Record<string, any>;
     globals: StorybookGlobals | null;
     id: string;
+    tags?: string[];
   },
   name: string,
 ) {
@@ -84,6 +87,7 @@ export async function argosScreenshot(
       id: story.id,
       parameters: story.parameters,
       globals: story.globals,
+      tags: mergeTags(story.tags, story.parameters.tags),
     },
   });
 }
