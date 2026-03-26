@@ -270,6 +270,7 @@ export async function getPathAndMetadata(args: {
     colorScheme,
     mediaType,
     test: testMetadata,
+    story: overrides?.story,
     browser: {
       name: browserName,
       version: browserVersion,

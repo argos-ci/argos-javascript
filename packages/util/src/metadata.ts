@@ -58,6 +58,16 @@ export type ScreenshotMetadata = {
         }[];
       } | null)
     | null;
+  story?: {
+    /** @description Unique ID of the story */
+    id: string;
+    /** @description Tags attached to the story */
+    tags: string[];
+    /** @description Story mode */
+    mode?: string;
+    /** @description True if the story has a play function */
+    play?: boolean;
+  };
   browser?: {
     /** @description The name of the browser */
     name: string;
