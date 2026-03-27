@@ -1,4 +1,4 @@
-import pluginCypress from "eslint-plugin-cypress/flat";
+import pluginCypress from "eslint-plugin-cypress";
 import rootConfig from "../../eslint.config.mjs";
 
 export default [

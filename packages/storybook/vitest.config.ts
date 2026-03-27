@@ -5,7 +5,7 @@ import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
-import { argosVitestPlugin } from "@argos-ci/storybook/vitest-plugin";
+import { argosVitestPlugin } from "./dist/vitest-plugin.mjs";
 
 const dirname =
   typeof __dirname !== "undefined"

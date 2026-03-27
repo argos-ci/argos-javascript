@@ -1,14 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { argosScreenshot } from "./dist/index";
+import { argosScreenshot } from "./dist/index.mjs";
 import { argosScreenshot as typedArgosScreenshot } from "./src";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
-import { argosAriaSnapshot } from "./dist/index";
+import { argosAriaSnapshot } from "./dist/index.mjs";
 
 test.describe.configure({ mode: "serial" });
 const screenshotFolder = "screenshots";

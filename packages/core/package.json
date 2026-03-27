@@ -3,17 +3,16 @@
   "description": "Node.js SDK for visual testing with Argos.",
   "version": "5.1.2",
   "type": "module",
-  "main": "./dist/index.cjs",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs",
       "default": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "repository": {
     "type": "git",
     "url": "https://github.com/argos-ci/argos-javascript.git",
@@ -54,6 +53,7 @@
     "@types/convict": "^6.1.6",
     "@types/debug": "^4.1.13",
     "@types/mime-types": "^3.0.1",
+    "@types/node": "catalog:",
     "@types/tmp": "^0.2.6",
     "@vercel/repository-dispatch": "^0.1.0",
     "msw": "^2.12.14",

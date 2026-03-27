@@ -26,15 +26,14 @@
     "access": "public"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
   "exports": {
     "./support": {
-      "types": "./dist/support.d.ts",
-      "import": "./dist/support.js",
-      "default": "./dist/support.js"
+      "types": "./dist/support.d.mts",
+      "import": "./dist/support.mjs",
+      "default": "./dist/support.mjs"
     },
     "./task": {
-      "types": "./dist/task.d.ts",
+      "types": "./dist/task.d.mts",
       "import": "./dist/task.js",
       "require": "./dist/task.cjs",
       "default": "./dist/task.cjs"
