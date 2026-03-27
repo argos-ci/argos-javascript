@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.5.0...@argos-ci/playwright@6.6.0) (2026-03-27)
+
+
+### Features
+
+* **storybook:** extract story metadata ([1939699](https://github.com/argos-ci/argos-javascript/commit/1939699dbc470305297a1f9b21975de9e5b8b051))
+
+
+
+
+
 # [6.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@6.4.2...@argos-ci/playwright@6.5.0) (2026-03-18)
 
 

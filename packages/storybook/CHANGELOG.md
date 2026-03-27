@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.2.15...@argos-ci/storybook@5.3.0) (2026-03-27)
+
+
+### Features
+
+* **storybook:** extract story metadata ([1939699](https://github.com/argos-ci/argos-javascript/commit/1939699dbc470305297a1f9b21975de9e5b8b051))
+
+
+
+
+
 ## [5.2.15](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.2.14...@argos-ci/storybook@5.2.15) (2026-03-18)
 
 **Note:** Version bump only for package @argos-ci/storybook
