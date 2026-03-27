@@ -28,18 +28,18 @@
     "access": "public"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs",
       "default": "./dist/index.cjs"
     },
     "./reporter": {
-      "types": "./dist/reporter.d.ts",
-      "import": "./dist/reporter.js",
-      "default": "./dist/reporter.js"
+      "types": "./dist/reporter.d.mts",
+      "import": "./dist/reporter.mjs",
+      "default": "./dist/reporter.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -54,13 +54,13 @@
     "debug": "^4.4.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.1",
-    "@types/debug": "^4.1.12",
+    "@playwright/test": "^1.58.2",
+    "@types/debug": "^4.1.13",
     "@types/node": "catalog:",
     "vitest": "catalog:"
   },
   "scripts": {
-    "build": "tsup && cp ./src/index.cjs ./dist",
+    "build": "tsdown && cp ./src/index.cjs ./dist",
     "test-e2e": "pnpm exec -- playwright test",
     "build-e2e": "playwright install chromium --with-deps",
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test-e2e",

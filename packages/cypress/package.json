@@ -26,15 +26,14 @@
     "access": "public"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
   "exports": {
     "./support": {
-      "types": "./dist/support.d.ts",
-      "import": "./dist/support.js",
-      "default": "./dist/support.js"
+      "types": "./dist/support.d.mts",
+      "import": "./dist/support.mjs",
+      "default": "./dist/support.mjs"
     },
     "./task": {
-      "types": "./dist/task.d.ts",
+      "types": "./dist/task.d.mts",
       "import": "./dist/task.js",
       "require": "./dist/task.cjs",
       "default": "./dist/task.cjs"
@@ -55,11 +54,11 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "cypress": "^15.9.0",
-    "eslint-plugin-cypress": "^5.2.1"
+    "cypress": "^15.13.0",
+    "eslint-plugin-cypress": "^6.2.1"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "test-e2e": "pnpm exec cypress run",
     "build-e2e": "cypress install",
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test-e2e",

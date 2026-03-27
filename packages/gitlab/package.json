@@ -30,18 +30,18 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."

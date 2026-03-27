@@ -1,6 +1,6 @@
 /*
-!/dist/support.js
-!/dist/support.d.ts
-!/dist/task.js
+!/dist/support.mjs
+!/dist/support.d.mts
+!/dist/task.mjs
 !/dist/task.cjs
-!/dist/task.d.ts
+!/dist/task.d.mts

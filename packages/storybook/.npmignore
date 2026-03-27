@@ -1,9 +1,9 @@
 /*
 !dist/test-runner.cjs
-!dist/test-runner.d.ts
-!dist/test-runner.js
-!dist/vitest-plugin.d.ts
-!dist/vitest-plugin.js
-!dist/vitest-setup-file.js
-!dist/vitest.d.ts
-!dist/vitest.js
+!dist/test-runner.d.mts
+!dist/test-runner.mjs
+!dist/vitest-plugin.d.mts
+!dist/vitest-plugin.mjs
+!dist/vitest-setup-file.mjs
+!dist/vitest.d.mts
+!dist/vitest.mjs

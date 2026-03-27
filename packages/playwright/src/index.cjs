@@ -1,22 +1,22 @@
 async function argosAriaSnapshot(...args) {
-  const { argosAriaSnapshot } = await import("./index.js");
+  const { argosAriaSnapshot } = await import("./index.mjs");
   return argosAriaSnapshot(...args);
 }
 
 async function argosScreenshot(...args) {
-  const { argosScreenshot } = await import("./index.js");
+  const { argosScreenshot } = await import("./index.mjs");
   return argosScreenshot(...args);
 }
 
 function getCSPScriptHash(...args) {
   // Loading ESM using require works in Node.js v22.13.0+
-  const { getCSPScriptHash } = require("./index.js");
+  const { getCSPScriptHash } = require("./index.mjs");
   return getCSPScriptHash(...args);
 }
 
 function DO_NOT_USE_setMetadataConfig(...args) {
   // Loading ESM using require works in Node.js v22.13.0+
-  const { DO_NOT_USE_setMetadataConfig } = require("./index.js");
+  const { DO_NOT_USE_setMetadataConfig } = require("./index.mjs");
   return DO_NOT_USE_setMetadataConfig(...args);
 }
 

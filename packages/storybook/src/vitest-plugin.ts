@@ -189,7 +189,7 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
   const root = resolve(cwd, unresolvedRoot);
   const setupFile = resolve(
     dirname(fileURLToPath(import.meta.url)),
-    "./vitest-setup-file.js",
+    "./vitest-setup-file.mjs",
   );
   return {
     name: "@argos-ci/storybook/vitest-plugin",

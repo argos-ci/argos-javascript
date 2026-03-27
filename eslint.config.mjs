@@ -6,7 +6,7 @@ import globals from "globals";
 const config = tseslint.config(
   {
     name: "argos/global-ignores",
-    ignores: ["**/dist", "examples", "docs"],
+    ignores: ["**/dist", "examples", "docs", "**/storybook-static"],
   },
   {
     name: "argos/globals",

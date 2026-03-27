@@ -27,22 +27,22 @@
   "type": "module",
   "exports": {
     "./test-runner": {
-      "types": "./dist/test-runner.d.ts",
-      "import": "./dist/test-runner.js",
+      "types": "./dist/test-runner.d.mts",
+      "import": "./dist/test-runner.mjs",
       "require": "./dist/test-runner.cjs",
       "default": "./dist/test-runner.cjs"
     },
     "./vitest": {
-      "types": "./dist/vitest.d.ts",
-      "import": "./dist/vitest.js",
-      "default": "./dist/vitest.js"
+      "types": "./dist/vitest.d.mts",
+      "import": "./dist/vitest.mjs",
+      "default": "./dist/vitest.mjs"
     },
     "./vitest-plugin": {
-      "types": "./dist/vitest-plugin.d.ts",
-      "import": "./dist/vitest-plugin.js",
-      "default": "./dist/vitest-plugin.js"
+      "types": "./dist/vitest-plugin.d.mts",
+      "import": "./dist/vitest-plugin.mjs",
+      "default": "./dist/vitest-plugin.mjs"
     },
-    "./internal/vitest-setup-file": "./dist/vitest-setup-file.js",
+    "./internal/vitest-setup-file": "./dist/vitest-setup-file.mjs",
     "./package.json": "./package.json"
   },
   "engines": {
@@ -56,30 +56,30 @@
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/core": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "@storybook/addon-docs": "^10.2.3",
-    "@storybook/addon-links": "^10.2.3",
-    "@storybook/addon-themes": "^10.2.3",
-    "@storybook/addon-vitest": "^10.2.3",
-    "@storybook/react-vite": "^10.2.3",
-    "@storybook/test-runner": "^0.24.2",
-    "@types/react": "^19.2.10",
+    "@storybook/addon-docs": "^10.3.3",
+    "@storybook/addon-links": "^10.3.3",
+    "@storybook/addon-themes": "^10.3.3",
+    "@storybook/addon-vitest": "^10.3.3",
+    "@storybook/react-vite": "^10.3.3",
+    "@storybook/test-runner": "^0.24.3",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitest/browser": "^4.0.18",
-    "@vitest/browser-playwright": "^4.0.18",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
+    "@vitest/browser": "^4.1.2",
+    "@vitest/browser-playwright": "^4.1.2",
+    "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/ui": "^4.1.2",
     "http-server": "^14.1.1",
-    "playwright": "^1.58.1",
+    "playwright": "^1.58.2",
     "prop-types": "^15.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "storybook": "^10.2.3",
-    "storybook-addon-pseudo-states": "^10.2.3",
+    "storybook": "^10.3.3",
+    "storybook-addon-pseudo-states": "^10.3.3",
     "vitest": "catalog:",
-    "wait-on": "^9.0.3"
+    "wait-on": "^9.0.4"
   },
   "scripts": {
-    "build": "tsup && cp ./src/test-runner.cjs ./dist",
+    "build": "tsdown && cp ./src/test-runner.cjs ./dist",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test-storybook": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules test-storybook",
