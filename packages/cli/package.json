@@ -40,7 +40,7 @@
     "update-notifier": "^7.3.1"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "e2e": "node e2e/upload.js && node e2e/skip.js",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",

@@ -11,7 +11,7 @@
     "globals": "^17.4.0",
     "lerna": "^9.0.7",
     "prettier": "^3.8.1",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.21.6",
     "turbo": "^2.8.20",
     "typedoc": "^0.28.18",
     "typescript": "6.0.2",

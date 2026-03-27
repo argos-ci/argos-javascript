@@ -57,7 +57,7 @@
     "webdriverio": "^9.27.0"
   },
   "scripts": {
-    "build": "tsup && cp ./src/index.cjs ./dist",
+    "build": "tsdown && cp ./src/index.cjs ./dist",
     "test-e2e": "wdio run ./wdio.conf.ts",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-webdriverio-e2e-node-$NODE_VERSION-$OS\"",
     "e2e": "pnpm run test-e2e && pnpm run argos-upload",

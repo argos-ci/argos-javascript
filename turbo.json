@@ -9,7 +9,7 @@
         "$TURBO_ROOT$/tsconfig.json",
         "$TURBO_ROOT$/tsconfig.build.json",
         "tsconfig.json",
-        "tsup.config.ts",
+        "tsdown.config.ts",
         "package.json",
         "src/**"
       ]

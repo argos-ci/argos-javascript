@@ -56,7 +56,7 @@
     "puppeteer": "^24.40.0"
   },
   "scripts": {
-    "build": "tsup && cp ./src/index.cjs ./dist",
+    "build": "tsdown && cp ./src/index.cjs ./dist",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test-e2e": "pnpm run jest --runInBand",
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-puppeteer-e2e-node-$NODE_VERSION-$OS\"",

@@ -59,7 +59,7 @@
     "eslint-plugin-cypress": "^6.2.1"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "test-e2e": "pnpm exec cypress run",
     "build-e2e": "cypress install",
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test-e2e",
