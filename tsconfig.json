@@ -1,14 +1,20 @@
 {
-  "exclude": ["node_modules/**", "__fixtures__/screenshots/invalid.argos.json"],
+  "exclude": [
+    "./node_modules/**",
+    "./__fixtures__/screenshots/invalid.argos.json"
+  ],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "@argos-ci/*": ["packages/*/src"],
-      "@argos-ci/playwright/reporter": ["packages/playwright/src/reporter.ts"],
-      "@argos-ci/storybook/test-runner": ["packages/*/src/test-runner.ts"],
-      "@argos-ci/storybook/vitest": ["packages/*/src/vitest.ts"],
-      "@argos-ci/storybook/vitest-plugin": ["packages/*/src/vitest-plugin.ts"],
-      "@argos-ci/util/browser": ["packages/util/src/browser.ts"]
+      "@argos-ci/*": ["./packages/*/src"],
+      "@argos-ci/playwright/reporter": [
+        "./packages/playwright/src/reporter.ts"
+      ],
+      "@argos-ci/storybook/test-runner": ["./packages/*/src/test-runner.ts"],
+      "@argos-ci/storybook/vitest": ["./packages/*/src/vitest.ts"],
+      "@argos-ci/storybook/vitest-plugin": [
+        "./packages/*/src/vitest-plugin.ts"
+      ],
+      "@argos-ci/util/browser": ["./packages/util/src/browser.ts"]
     },
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
