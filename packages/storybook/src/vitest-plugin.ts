@@ -11,7 +11,8 @@ import {
 } from "./utils/parameters";
 import type { Frame } from "playwright";
 import { ArgosReporter, type ArgosReporterConfig } from "./vitest-reporter";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export type { ArgosScreenshotOptions };
 
@@ -186,7 +187,10 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
     ...otherOptions
   } = options ?? {};
   const root = resolve(cwd, unresolvedRoot);
-  const setupFile = resolve(import.meta.dirname, "./vitest-setup-file.js");
+  const setupFile = resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "./vitest-setup-file.js",
+  );
   return {
     name: "@argos-ci/storybook/vitest-plugin",
     configureVitest({ vitest, project }) {

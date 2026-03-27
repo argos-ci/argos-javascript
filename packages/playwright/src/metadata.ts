@@ -27,6 +27,7 @@ export type MetadataConfig = {
   playwrightLibraries: string[];
   url?: string;
   test?: ScreenshotMetadata["test"];
+  story?: ScreenshotMetadata["story"];
   viewport?: ScreenshotMetadata["viewport"];
 };
 

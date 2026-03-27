@@ -7,6 +7,7 @@ import {
 } from "@argos-ci/playwright";
 import type { Frame, Page, ViewportSize } from "playwright";
 import { getArgosStorybookVersion } from "./metadata";
+import { getStoryMetadata } from "./storyMetadata";
 import {
   getArgosParameters,
   getDefaultViewport,
@@ -37,6 +38,8 @@ export type StorybookScreenshotContext<Handler extends Page | Frame> = {
   }) => Promise<void>;
   story: {
     id: string;
+    tags?: string[];
+    play?: boolean;
     parameters: Record<string, any>;
     globals: StorybookGlobals | null;
   };
@@ -81,6 +84,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
     playwrightLibraries: context.playwrightLibraries,
     url: storyUrl,
     test: context.test,
+    story: getStoryMetadata(context.story),
   };
 
   const argosParameters = getArgosParameters(context.story.parameters);
@@ -107,6 +111,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
           metadata,
           options: argosOptions,
           suffix: getModeSuffix(name),
+          mode: name,
           globals: {
             ...context.story.globals,
             ...globals,
@@ -128,6 +133,7 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
         context,
         metadata,
         options: argosOptions,
+        mode: null,
         globals: context.story.globals ?? {},
       });
 
@@ -150,6 +156,12 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
     // If we take a screenshot while in the play function, we need to mark the story as rendered
     // else the story will be marked as rendered too late.
     await markStoryAsRendered(handler, context.story.id);
+
+    DO_NOT_USE_setMetadataConfig({
+      ...metadata,
+      story: getStoryMetadata(context.story, currentMode),
+    });
+
     await argosPlaywrightScreenshot(
       handler,
       composeName(context.name, getModeSuffix(currentMode)),
@@ -270,10 +282,11 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
   context: StorybookScreenshotContext<Handler>;
   options: ArgosScreenshotOptions;
   globals: StorybookGlobals;
+  mode: string | null;
   suffix?: string;
   metadata: MetadataConfig;
 }) {
-  const { handler, context, options, globals, metadata } = args;
+  const { handler, context, options, globals, metadata, mode } = args;
 
   await runStory({ handler, globals, storyId: context.story.id });
 
@@ -291,6 +304,7 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
 
   DO_NOT_USE_setMetadataConfig({
     ...metadata,
+    story: getStoryMetadata(context.story, mode),
     viewport: viewport && viewport !== "default" ? viewport : undefined,
   });
 

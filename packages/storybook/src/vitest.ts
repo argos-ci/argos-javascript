@@ -4,6 +4,7 @@ import type { ArgosScreenshotOptions } from "./utils/screenshot";
 import type { ArgosScreenshotCommandArgs } from "./vitest-plugin";
 import type { ArgosAttachment } from "@argos-ci/playwright";
 import type { StorybookGlobals } from "./utils/parameters";
+import { hasPlay, mergeTags } from "./utils/storyMetadata";
 
 export type { ArgosScreenshotOptions };
 
@@ -41,6 +42,8 @@ export function setupArgos(api: { afterEach: typeof vitest.afterEach }) {
       name: story.id,
       story: {
         id: story.id,
+        tags: mergeTags(story.tags, story.parameters.tags),
+        play: hasPlay(story),
         parameters: story.parameters,
         globals: story.globals,
       },
@@ -66,6 +69,8 @@ export async function argosScreenshot(
     parameters: Record<string, any>;
     globals: StorybookGlobals | null;
     id: string;
+    tags?: string[];
+    play?: unknown;
   },
   name: string,
 ) {
@@ -82,6 +87,8 @@ export async function argosScreenshot(
     name: `${story.id}/${name}`,
     story: {
       id: story.id,
+      tags: mergeTags(story.tags, story.parameters.tags),
+      play: hasPlay(story),
       parameters: story.parameters,
       globals: story.globals,
     },
