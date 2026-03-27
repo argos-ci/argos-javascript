@@ -43,13 +43,13 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@types/debug": "^4.1.12",
+    "@types/debug": "^4.1.13",
     "@types/node": "catalog:",
-    "openapi-typescript": "^7.10.1",
-    "p-retry": "^7.1.1"
+    "openapi-typescript": "^7.13.0",
+    "p-retry": "^8.0.0"
   },
   "dependencies": {
     "debug": "^4.4.3",
-    "openapi-fetch": "^0.15.0"
+    "openapi-fetch": "^0.17.0"
   }
 }

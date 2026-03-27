@@ -54,8 +54,8 @@
     "debug": "^4.4.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.1",
-    "@types/debug": "^4.1.12",
+    "@playwright/test": "^1.58.2",
+    "@types/debug": "^4.1.13",
     "@types/node": "catalog:",
     "vitest": "catalog:"
   },

@@ -42,7 +42,7 @@
   "dependencies": {
     "@argos-ci/api-client": "workspace:*",
     "@argos-ci/util": "workspace:*",
-    "convict": "^6.2.4",
+    "convict": "^6.2.5",
     "debug": "^4.4.3",
     "fast-glob": "^3.3.3",
     "mime-types": "^3.0.2",
@@ -52,11 +52,11 @@
   "devDependencies": {
     "@octokit/webhooks": "^14.2.0",
     "@types/convict": "^6.1.6",
-    "@types/debug": "^4.1.12",
+    "@types/debug": "^4.1.13",
     "@types/mime-types": "^3.0.1",
     "@types/tmp": "^0.2.6",
     "@vercel/repository-dispatch": "^0.1.0",
-    "msw": "^2.12.7",
+    "msw": "^2.12.14",
     "vitest": "catalog:"
   },
   "scripts": {
