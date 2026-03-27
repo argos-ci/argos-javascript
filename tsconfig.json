@@ -4,7 +4,6 @@
     "./__fixtures__/screenshots/invalid.argos.json"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@argos-ci/*": ["./packages/*/src"],
       "@argos-ci/playwright/reporter": [
