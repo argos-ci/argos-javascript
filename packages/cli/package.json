@@ -34,6 +34,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@argos-ci/api-client": "workspace:*",
     "@argos-ci/core": "workspace:*",
     "commander": "^14.0.3",
     "ora": "^9.3.0",
@@ -41,7 +42,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "e2e": "node e2e/upload.js && node e2e/skip.js",
+    "e2e": "node e2e/upload.js && node e2e/skip.js && node e2e/builds.js",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."
