@@ -53,6 +53,18 @@ const toInt = (value: string) => {
 
 const toFloat = (value: string) => parseFloat(value);
 
+const toNumberArray = (value: string | number[]) => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (value === "") {
+    return null;
+  }
+
+  return value.split(",").map(toInt);
+};
+
 convict.addFormat({
   name: "parallel-total",
   validate: minInteger(-1),
@@ -73,6 +85,24 @@ convict.addFormat({
     }
   },
   coerce: toFloat,
+});
+
+convict.addFormat({
+  name: "number-array",
+  validate: (value) => {
+    if (value === null) {
+      return;
+    }
+    if (!Array.isArray(value)) {
+      throw new Error("must be an array");
+    }
+    for (const item of value) {
+      if (!Number.isInteger(item)) {
+        throw new Error("must be an array of integers");
+      }
+    }
+  },
+  coerce: toNumberArray,
 });
 
 const schema = {
@@ -207,6 +237,12 @@ const schema = {
     env: "ARGOS_SKIPPED",
     format: Boolean,
     default: false,
+  },
+  mergeQueuePrNumbers: {
+    env: "ARGOS_MERGE_QUEUE_PRS",
+    format: "number-array",
+    default: null,
+    nullable: true,
   },
   mergeQueue: {
     format: Boolean,
@@ -359,9 +395,9 @@ export interface Config {
   skipped?: boolean;
 
   /**
-   * Whether the environment is a merge queue.
+   * Pull request numbers aggregated by the merge queue build.
    */
-  mergeQueue?: boolean;
+  mergeQueuePrNumbers?: number[] | null;
 
   /**
    * Whether this build contains only a subset of screenshots.
@@ -424,7 +460,11 @@ export async function readConfig(options: Partial<Config> = {}) {
     previewBaseUrl: defaultConfig.previewBaseUrl || null,
     skipped: options.skipped ?? defaultConfig.skipped ?? false,
     subset: options.subset ?? defaultConfig.subset ?? false,
-    mergeQueue: ciEnv?.mergeQueue ?? false,
+    mergeQueuePrNumbers:
+      options.mergeQueuePrNumbers ??
+      defaultConfig.mergeQueuePrNumbers ??
+      ciEnv?.mergeQueuePrNumbers ??
+      null,
   });
 
   if (!config.get("branch") || !config.get("commit")) {

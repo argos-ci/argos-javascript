@@ -137,6 +137,12 @@ export interface UploadParameters {
    * @default false
    */
   subset?: boolean;
+
+  /**
+   * Pull request numbers aggregated by the merge queue build.
+   * Providing this enables merge queue mode for the build.
+   */
+  mergeQueuePrNumbers?: number[];
 }
 
 interface Screenshot {
@@ -333,7 +339,9 @@ export async function upload(params: UploadParameters): Promise<{
       ciProvider: config.ciProvider,
       runId: config.runId,
       runAttempt: config.runAttempt,
-      mergeQueue: config.mergeQueue,
+      mergeQueue:
+        config.mergeQueuePrNumbers && config.mergeQueuePrNumbers.length > 0,
+      mergeQueuePrNumbers: config.mergeQueuePrNumbers,
       subset: config.subset,
     },
   });

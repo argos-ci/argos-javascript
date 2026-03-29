@@ -35,7 +35,6 @@ const service: Service = {
       prHeadCommit: null,
       prBaseBranch: null,
       nonce: null,
-      mergeQueue: false,
     };
   },
   getMergeBaseCommitSha,

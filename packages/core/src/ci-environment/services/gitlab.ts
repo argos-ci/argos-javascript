@@ -35,7 +35,6 @@ const service: Service = {
       prHeadCommit: null,
       prBaseBranch: null,
       nonce: env.CI_PIPELINE_ID || null,
-      mergeQueue: false,
     };
   },
   getMergeBaseCommitSha,

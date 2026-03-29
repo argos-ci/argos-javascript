@@ -110,4 +110,18 @@ describe("#readConfig", () => {
     expect(config.subset).toBe(true);
     delete process.env.ARGOS_SUBSET;
   });
+
+  it("reads merge queue pr numbers from env", async () => {
+    process.env.ARGOS_MERGE_QUEUE_PRS = "101,102";
+    const config = await readDummyConfig();
+    expect(config.mergeQueuePrNumbers).toEqual([101, 102]);
+    delete process.env.ARGOS_MERGE_QUEUE_PRS;
+  });
+
+  it("merge queue pr numbers passed as argument is prioritary over env variable", async () => {
+    process.env.ARGOS_MERGE_QUEUE_PRS = "101";
+    const config = await readDummyConfig({ mergeQueuePrNumbers: [202, 203] });
+    expect(config.mergeQueuePrNumbers).toEqual([202, 203]);
+    delete process.env.ARGOS_MERGE_QUEUE_PRS;
+  });
 });

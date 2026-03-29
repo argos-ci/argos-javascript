@@ -8,6 +8,8 @@ type CreateBuildRequestBody = {
   name?: string | null;
   parallel?: boolean | null;
   parallelNonce?: string | null;
+  mergeQueue?: boolean | null;
+  mergeQueuePrNumbers?: number[] | null;
 };
 type CreateBuildResponseBody = {
   build: {
