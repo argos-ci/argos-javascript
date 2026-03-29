@@ -33,7 +33,6 @@ const service: Service = {
       prHeadCommit: null,
       prBaseBranch: null,
       nonce: env.BITRISEIO_PIPELINE_ID || null,
-      mergeQueue: false,
     };
   },
   getMergeBaseCommitSha,

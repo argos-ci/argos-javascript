@@ -139,7 +139,7 @@ export interface components {
                 colorScheme?: ("light" | "dark") | null;
                 /** @description The media type when the screenshot was taken */
                 mediaType?: ("screen" | "print") | null;
-                test?: ({
+                test?: {
                     /** @description The unique identifier of the test */
                     id?: string | null;
                     /** @description The title of the test */
@@ -177,7 +177,9 @@ export interface components {
                             column: number;
                         };
                     }[];
-                } | null) | null;
+                    /** @description Tags associated to the test */
+                    tags?: string[];
+                } | null;
                 browser?: {
                     /** @description The name of the browser */
                     name: string;
@@ -198,6 +200,19 @@ export interface components {
                     /** @description The version of the Argos SDK */
                     version: string;
                 };
+                /** @description Storybook story metadata */
+                story?: {
+                    /** @description Unique ID of the story */
+                    id: string;
+                    /** @description Tags attached to the story */
+                    tags?: string[];
+                    /** @description Story mode */
+                    mode?: string;
+                    /** @description True if the story has a play function */
+                    play?: boolean;
+                } | null;
+                /** @description Tags associated to the screenshot */
+                tags?: string[];
             } | null;
             pwTraceKey?: string | null;
             threshold?: number | null;
@@ -226,6 +241,10 @@ export interface components {
             id: components["schemas"]["BuildId"];
             /** @description The build number */
             number: number;
+            /** @description The head reference of the build */
+            head: components["schemas"]["BuildGitReference"];
+            /** @description The base reference of the build */
+            base: components["schemas"]["BuildGitReference"] | null;
             /** @description The status of the build */
             status: ("accepted" | "rejected") | ("no-changes" | "changes-detected") | ("expired" | "pending" | "progress" | "error" | "aborted");
             /** @description The conclusion of the build */
@@ -283,6 +302,13 @@ export interface components {
                     state: "pending" | "running" | "success" | "failed" | "canceled";
                 };
             } | null;
+        };
+        /** @description Git reference */
+        BuildGitReference: {
+            /** @description The commit SHA */
+            sha: components["schemas"]["Sha1Hash"];
+            /** @description The branch name */
+            branch: string;
         };
         /** @description Error response */
         Error: {
@@ -344,7 +370,7 @@ export interface components {
                     colorScheme?: ("light" | "dark") | null;
                     /** @description The media type when the screenshot was taken */
                     mediaType?: ("screen" | "print") | null;
-                    test?: ({
+                    test?: {
                         /** @description The unique identifier of the test */
                         id?: string | null;
                         /** @description The title of the test */
@@ -382,7 +408,9 @@ export interface components {
                                 column: number;
                             };
                         }[];
-                    } | null) | null;
+                        /** @description Tags associated to the test */
+                        tags?: string[];
+                    } | null;
                     browser?: {
                         /** @description The name of the browser */
                         name: string;
@@ -403,6 +431,19 @@ export interface components {
                         /** @description The version of the Argos SDK */
                         version: string;
                     };
+                    /** @description Storybook story metadata */
+                    story?: {
+                        /** @description Unique ID of the story */
+                        id: string;
+                        /** @description Tags attached to the story */
+                        tags?: string[];
+                        /** @description Story mode */
+                        mode?: string;
+                        /** @description True if the story has a play function */
+                        play?: boolean;
+                    } | null;
+                    /** @description Tags associated to the screenshot */
+                    tags?: string[];
                 } | null;
                 /** @description Width of the screenshot in pixels */
                 width: number | null;
@@ -441,7 +482,7 @@ export interface components {
                     colorScheme?: ("light" | "dark") | null;
                     /** @description The media type when the screenshot was taken */
                     mediaType?: ("screen" | "print") | null;
-                    test?: ({
+                    test?: {
                         /** @description The unique identifier of the test */
                         id?: string | null;
                         /** @description The title of the test */
@@ -479,7 +520,9 @@ export interface components {
                                 column: number;
                             };
                         }[];
-                    } | null) | null;
+                        /** @description Tags associated to the test */
+                        tags?: string[];
+                    } | null;
                     browser?: {
                         /** @description The name of the browser */
                         name: string;
@@ -500,6 +543,19 @@ export interface components {
                         /** @description The version of the Argos SDK */
                         version: string;
                     };
+                    /** @description Storybook story metadata */
+                    story?: {
+                        /** @description Unique ID of the story */
+                        id: string;
+                        /** @description Tags attached to the story */
+                        tags?: string[];
+                        /** @description Story mode */
+                        mode?: string;
+                        /** @description True if the story has a play function */
+                        play?: boolean;
+                    } | null;
+                    /** @description Tags associated to the screenshot */
+                    tags?: string[];
                 } | null;
                 /** @description Width of the screenshot in pixels */
                 width: number | null;
@@ -577,6 +633,8 @@ export interface operations {
                     skipped?: boolean | null;
                     /** @description Whether the build has been created in a merge queue */
                     mergeQueue?: boolean | null;
+                    /** @description Pull request numbers aggregated by the merge queue build. Requires `mergeQueue` to be `true`. */
+                    mergeQueuePrNumbers?: number[] | null;
                     /**
                      * @description Indicates whether this build contains only a subset of screenshots.
                      *     This is useful when a build is created from an incomplete test suite where some tests are skipped.
@@ -987,7 +1045,8 @@ export interface operations {
                 perPage?: string;
                 /** @description Page number */
                 page?: string;
-                commit?: components["schemas"]["Sha1Hash"];
+                head?: string;
+                headSha?: components["schemas"]["Sha1Hash"];
                 /** @description Only return the latest builds created, unique by name and commit. */
                 distinctName?: string;
             };

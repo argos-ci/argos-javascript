@@ -70,6 +70,31 @@ function getMergeGroupPayload(
   return null;
 }
 
+function getMergeQueuePrNumbers(args: {
+  mergeGroupPayload: MergeGroupEventPayload | null;
+  pullRequest: GitHubPullRequest | null;
+}): number[] | null {
+  const { mergeGroupPayload, pullRequest } = args;
+
+  if (!mergeGroupPayload) {
+    return null;
+  }
+
+  if (pullRequest) {
+    return [pullRequest.number];
+  }
+
+  // Preserve the merge queue signal even if PR lookup fails by deriving the
+  // PR number from the merge group branch when possible.
+  const headRef = mergeGroupPayload.merge_group.head_ref;
+  const prNumberFromBranch = getPRNumberFromMergeGroupBranch(headRef);
+  if (prNumberFromBranch != null) {
+    return [prNumberFromBranch];
+  }
+
+  return [];
+}
+
 /**
  * Get the branch from the local context.
  */
@@ -306,7 +331,10 @@ const service: Service = {
       prNumber: pullRequest?.number || null,
       prHeadCommit: pullRequest?.head.sha ?? null,
       prBaseBranch: pullRequest?.base.ref ?? null,
-      mergeQueue: Boolean(mergeGroupPayload),
+      mergeQueuePrNumbers: getMergeQueuePrNumbers({
+        mergeGroupPayload,
+        pullRequest,
+      }),
     };
   },
   getMergeBaseCommitSha,

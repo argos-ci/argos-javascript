@@ -75,9 +75,9 @@ export interface CiEnvironment {
   nonce: string | null;
 
   /**
-   * Weither the CI environment is a merge queue.
+   * Pull request numbers aggregated by the merge queue build.
    */
-  mergeQueue: boolean;
+  mergeQueuePrNumbers?: number[] | null;
 }
 
 type CIConfig = Omit<CiEnvironment, "name" | "key">;

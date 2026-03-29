@@ -137,4 +137,38 @@ describe("#upload", () => {
       expect(receivedSubset).toBe(true);
     })();
   });
+
+  it("passes merge queue data to create build", () => {
+    return server.boundary(async () => {
+      let receivedMergeQueue: boolean | undefined;
+      let receivedMergeQueuePrNumbers: number[] | undefined;
+
+      server.use(
+        http.post("https://api.argos-ci.dev/builds", async ({ request }) => {
+          const body = (await request.json()) as {
+            mergeQueue?: boolean;
+            mergeQueuePrNumbers?: number[];
+          };
+          receivedMergeQueue = body.mergeQueue;
+          receivedMergeQueuePrNumbers = body.mergeQueuePrNumbers;
+          return HttpResponse.json({
+            build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
+            screenshots: [],
+          });
+        }),
+      );
+
+      await upload({
+        branch: "main",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        mergeQueuePrNumbers: [12, 34],
+      });
+
+      expect(receivedMergeQueue).toBe(true);
+      expect(receivedMergeQueuePrNumbers).toEqual([12, 34]);
+    })();
+  });
 });

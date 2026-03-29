@@ -32,7 +32,6 @@ const service: Service = {
       prHeadCommit: null,
       prBaseBranch: null,
       nonce: env.BUILDKITE_BUILD_ID || null,
-      mergeQueue: false,
     };
   },
   getMergeBaseCommitSha,
