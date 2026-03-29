@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.1.3...@argos-ci/cli@4.1.4) (2026-03-29)
+
+**Note:** Version bump only for package @argos-ci/cli
+
+
+
+
+
 ## [4.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.1.2...@argos-ci/cli@4.1.3) (2026-03-27)
 
 **Note:** Version bump only for package @argos-ci/cli

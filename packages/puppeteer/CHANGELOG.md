@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.2.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@5.2.1...@argos-ci/puppeteer@5.2.2) (2026-03-29)
+
+**Note:** Version bump only for package @argos-ci/puppeteer
+
+
+
+
+
 ## [5.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/puppeteer@5.2.0...@argos-ci/puppeteer@5.2.1) (2026-03-27)
 
 **Note:** Version bump only for package @argos-ci/puppeteer

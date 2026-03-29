@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/gitlab@0.4.4...@argos-ci/gitlab@0.5.0) (2026-03-29)
+
+
+### Features
+
+* **merge-queue:** support custom merge queue systems ([#280](https://github.com/argos-ci/argos-javascript/issues/280)) ([05a253c](https://github.com/argos-ci/argos-javascript/commit/05a253c2495f7f1ffc124148b77fb965b2928b9d))
+
+
+
+
+
 ## [0.4.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/gitlab@0.4.3...@argos-ci/gitlab@0.4.4) (2026-03-27)
 
 **Note:** Version bump only for package @argos-ci/gitlab

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.1.3...@argos-ci/core@5.2.0) (2026-03-29)
+
+
+### Features
+
+* **merge-queue:** support custom merge queue systems ([#280](https://github.com/argos-ci/argos-javascript/issues/280)) ([05a253c](https://github.com/argos-ci/argos-javascript/commit/05a253c2495f7f1ffc124148b77fb965b2928b9d))
+
+
+
+
+
 ## [5.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.1.2...@argos-ci/core@5.1.3) (2026-03-27)
 
 **Note:** Version bump only for package @argos-ci/core
