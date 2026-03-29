@@ -90,7 +90,7 @@ describe("#readConfig", () => {
     );
   });
 
-  it("token passed as argument is prioritary over env variable", async () => {
+  it("token passed as argument is takes priority over env variable", async () => {
     process.env.ARGOS_TOKEN = "env-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     const config = await readDummyConfig({
       token: "arg-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
@@ -104,7 +104,7 @@ describe("#readConfig", () => {
     delete process.env.ARGOS_SUBSET;
   });
 
-  it("subset passed as argument is prioritary over env variable", async () => {
+  it("subset passed as argument is takes priority over env variable", async () => {
     process.env.ARGOS_SUBSET = "false";
     const config = await readDummyConfig({ subset: true });
     expect(config.subset).toBe(true);
@@ -118,7 +118,7 @@ describe("#readConfig", () => {
     delete process.env.ARGOS_MERGE_QUEUE_PRS;
   });
 
-  it("merge queue pr numbers passed as argument is prioritary over env variable", async () => {
+  it("merge queue pr numbers passed as argument is takes priority over env variable", async () => {
     process.env.ARGOS_MERGE_QUEUE_PRS = "101";
     const config = await readDummyConfig({ mergeQueuePrNumbers: [202, 203] });
     expect(config.mergeQueuePrNumbers).toEqual([202, 203]);

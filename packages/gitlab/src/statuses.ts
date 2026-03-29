@@ -20,7 +20,7 @@ async function run(input: {
     params: {
       query: {
         distinctName: "true",
-        commit,
+        headSha: commit,
       },
     },
   });

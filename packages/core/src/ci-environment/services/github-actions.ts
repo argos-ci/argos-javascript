@@ -84,7 +84,14 @@ function getMergeQueuePrNumbers(args: {
     return [pullRequest.number];
   }
 
-  // Preserve the merge queue signal even if PR lookup fails.
+  // Preserve the merge queue signal even if PR lookup fails by deriving the
+  // PR number from the merge group branch when possible.
+  const headRef = mergeGroupPayload.merge_group.head_ref;
+  const prNumberFromBranch = getPRNumberFromMergeGroupBranch(headRef);
+  if (prNumberFromBranch != null) {
+    return [prNumberFromBranch];
+  }
+
   return [];
 }
 

@@ -339,8 +339,7 @@ export async function upload(params: UploadParameters): Promise<{
       ciProvider: config.ciProvider,
       runId: config.runId,
       runAttempt: config.runAttempt,
-      mergeQueue:
-        config.mergeQueuePrNumbers && config.mergeQueuePrNumbers.length > 0,
+      mergeQueue: Boolean(config.mergeQueuePrNumbers),
       mergeQueuePrNumbers: config.mergeQueuePrNumbers,
       subset: config.subset,
     },

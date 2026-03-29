@@ -53,7 +53,7 @@ const toInt = (value: string) => {
 
 const toFloat = (value: string) => parseFloat(value);
 
-const toNumberArray = (value: string | number[]) => {
+const toIntArray = (value: string | number[]) => {
   if (Array.isArray(value)) {
     return value;
   }
@@ -88,7 +88,7 @@ convict.addFormat({
 });
 
 convict.addFormat({
-  name: "number-array",
+  name: "int-array",
   validate: (value) => {
     if (value === null) {
       return;
@@ -102,7 +102,7 @@ convict.addFormat({
       }
     }
   },
-  coerce: toNumberArray,
+  coerce: toIntArray,
 });
 
 const schema = {
@@ -240,7 +240,7 @@ const schema = {
   },
   mergeQueuePrNumbers: {
     env: "ARGOS_MERGE_QUEUE_PRS",
-    format: "number-array",
+    format: "int-array",
     default: null,
     nullable: true,
   },
