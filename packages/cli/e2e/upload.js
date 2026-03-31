@@ -1,14 +1,18 @@
-import { exec } from "node:child_process";
+import { assert, run } from "./utils.js";
 
-exec(
-  `node bin/argos-cli.js upload ../../__fixtures__ --build-name "argos-cli-e2e-node-${process.env.NODE_VERSION}-${process.env.OS}"`,
-  (err, stdout, stderr) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
+const buildName = `argos-cli-e2e-node-${process.env.NODE_VERSION}-${process.env.OS}`;
 
-    console.log(stdout);
-    console.error(stderr);
-  },
+const uploadResult = run([
+  "upload",
+  "../../__fixtures__",
+  "--build-name",
+  buildName,
+]);
+
+console.log(uploadResult.stdout);
+console.error(uploadResult.stderr);
+
+const buildUrlMatch = uploadResult.combined.match(
+  /https?:\/\/\S+\/builds\/\d+/,
 );
+assert(buildUrlMatch, "upload returns a full build URL");

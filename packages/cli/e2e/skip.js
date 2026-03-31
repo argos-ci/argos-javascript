@@ -1,14 +1,11 @@
-import { exec } from "node:child_process";
+import { assert, run } from "./utils.js";
 
-exec(
-  `node bin/argos-cli.js skip --build-name "argos-cli-e2e-skipped-node-${process.env.NODE_VERSION}-${process.env.OS}"`,
-  (err, stdout, stderr) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
+const buildName = `argos-cli-e2e-skipped-node-${process.env.NODE_VERSION}-${process.env.OS}`;
 
-    console.log(stdout);
-    console.error(stderr);
-  },
-);
+const skipResult = run(["skip", "--build-name", buildName]);
+
+console.log(skipResult.stdout);
+console.error(skipResult.stderr);
+
+const buildNumberMatch = skipResult.combined.match(/\/builds\/(\d+)/);
+assert(buildNumberMatch, "skip returns a build URL");
