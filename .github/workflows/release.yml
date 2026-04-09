@@ -2,6 +2,15 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Release type"
+        required: true
+        default: "normal"
+        type: choice
+        options:
+          - normal
+          - canary
 
 permissions:
   contents: write
@@ -33,7 +42,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Publish
-        run: npm run release -- --yes
+        run: |
+          if [ "${{ github.event.inputs.release_type }}" = "canary" ]; then
+            npm run release-canary -- --yes
+          else
+            npm run release -- --yes
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
