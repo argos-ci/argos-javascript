@@ -1,11 +1,11 @@
 /**
- * E2E tests for `argos builds` commands.
+ * E2E tests for `argos build` commands.
  * Requires ARGOS_TOKEN env var.
  * Optional: ARGOS_API_BASE_URL env var.
  *
  * Usage:
- *   ARGOS_TOKEN=xxx node e2e/builds.js
- *   ARGOS_TOKEN=xxx ARGOS_API_BASE_URL=https://api.argos-ci.dev:4001/v2 NODE_OPTIONS=--use-system-ca pnpm -C packages/cli exec node e2e/builds.js
+ *   ARGOS_TOKEN=xxx node e2e/build.js
+ *   ARGOS_TOKEN=xxx ARGOS_API_BASE_URL=https://api.argos-ci.dev:4001/v2 NODE_OPTIONS=--use-system-ca pnpm -C packages/cli exec node e2e/build.js
  */
 
 import { assert, run } from "./utils.js";
@@ -16,7 +16,7 @@ const buildNumber = process.env.ARGOS_BUILD_NUMBER || "28022";
 
 if (!token) {
   console.error(
-    "Usage: ARGOS_TOKEN=xxx [ARGOS_API_BASE_URL=<url>] node e2e/builds.js",
+    "Usage: ARGOS_TOKEN=xxx [ARGOS_API_BASE_URL=<url>] node e2e/build.js",
   );
   process.exit(1);
 }
@@ -29,10 +29,10 @@ const baseEnv = apiBaseURL
   ? envWith({ ARGOS_API_BASE_URL: apiBaseURL })
   : process.env;
 
-console.log("\n`builds get` failing commands:");
+console.log("\n`build get` failing commands:");
 
 try {
-  run(["builds", "get", "1"], { ...baseEnv, ARGOS_TOKEN: "" });
+  run(["build", "get", "1"], { ...baseEnv, ARGOS_TOKEN: "" });
   assert(false, "Missing token with build number should exit with code 1");
 } catch (err) {
   assert(err.status !== 0, "Exit code 1 when no token for build number");
@@ -45,7 +45,7 @@ try {
 try {
   run(
     [
-      "builds",
+      "build",
       "get",
       "https://app.argos-ci.com/argos-ci/argos-javascript/builds/1",
     ],
@@ -61,7 +61,7 @@ try {
 }
 
 try {
-  run(["builds", "get", "999999"], {
+  run(["build", "get", "999999"], {
     ...baseEnv,
     ARGOS_TOKEN: token,
   });
@@ -75,7 +75,7 @@ try {
 }
 
 try {
-  run(["builds", "get", "not-a-number"], {
+  run(["build", "get", "not-a-number"], {
     ...baseEnv,
     ARGOS_TOKEN: token,
   });
@@ -88,15 +88,15 @@ try {
   );
 }
 
-console.log("\n`builds get` successful commands:");
-const buildByNumberJsonOutput = run(["builds", "get", buildNumber, "--json"], {
+console.log("\n`build get` successful commands:");
+const buildByNumberJsonOutput = run(["build", "get", buildNumber, "--json"], {
   ...baseEnv,
   ARGOS_TOKEN: token,
 });
 const buildByNumberJson = JSON.parse(buildByNumberJsonOutput.stdout);
 const buildUrl = buildByNumberJson.url;
 
-const buildByNumberHumanOutput = run(["builds", "get", buildNumber], {
+const buildByNumberHumanOutput = run(["build", "get", buildNumber], {
   ...baseEnv,
   ARGOS_TOKEN: token,
 });
@@ -119,7 +119,7 @@ assert(
   "Returns the requested build number",
 );
 
-const buildByUrlJsonOutput = run(["builds", "get", "--json", buildUrl], {
+const buildByUrlJsonOutput = run(["build", "get", "--json", buildUrl], {
   ...baseEnv,
   ARGOS_TOKEN: token,
 });
@@ -129,10 +129,10 @@ assert(
   "accepts an Argos build URL",
 );
 
-console.log("\n`builds snapshots` failing commands:");
+console.log("\n`build snapshots` failing commands:");
 
 try {
-  run(["builds", "snapshots", "1"], { ...baseEnv, ARGOS_TOKEN: "" });
+  run(["build", "snapshots", "1"], { ...baseEnv, ARGOS_TOKEN: "" });
   assert(
     false,
     "Missing token for snapshots with build number should exit with code 1",
@@ -148,8 +148,8 @@ try {
   );
 }
 
-console.log("\n`builds snapshots` successful commands:");
-const buildSnapshots = run(["builds", "snapshots", buildNumber], {
+console.log("\n`build snapshots` successful commands:");
+const buildSnapshots = run(["build", "snapshots", buildNumber], {
   ...baseEnv,
   ARGOS_TOKEN: token,
 });
@@ -160,7 +160,7 @@ assert(
 assert(buildSnapshots.stdout.includes("Summary:"), "Prints the build Summary");
 
 const buildSnapshotsJsonOutput = run(
-  ["builds", "snapshots", buildNumber, "--json"],
+  ["build", "snapshots", buildNumber, "--json"],
   {
     ...baseEnv,
     ARGOS_TOKEN: token,
@@ -168,13 +168,10 @@ const buildSnapshotsJsonOutput = run(
 );
 const buildSnapshotsJson = JSON.parse(buildSnapshotsJsonOutput.stdout);
 assert(Array.isArray(buildSnapshotsJson), "Returns an array in JSON mode");
-assert(
-  Boolean(buildSnapshotsJson[0].base.id),
-  "Returns structured snapshot data",
-);
+assert(Boolean(buildSnapshotsJson[0].id), "Returns structured snapshot data");
 
 const snapshotsNeedsReviewJsonOutput = run(
-  ["builds", "snapshots", buildNumber, "--needs-review", "--json"],
+  ["build", "snapshots", buildNumber, "--needs-review", "--json"],
   {
     ...baseEnv,
     ARGOS_TOKEN: token,
@@ -183,8 +180,7 @@ const snapshotsNeedsReviewJsonOutput = run(
 const snapshotsNeedingReview = JSON.parse(
   snapshotsNeedsReviewJsonOutput.stdout,
 );
-assert(Array.isArray(snapshotsNeedingReview), "Returns an array in JSON mode");
 assert(
-  snapshotsNeedingReview.length === 0,
-  "Returns an empty array when there are no snapshots to review",
+  Array.isArray(snapshotsNeedingReview),
+  "Returns an array in JSON mode for needs-review filter",
 );

@@ -35,13 +35,13 @@ Auth resolves: `--token` flag > `ARGOS_TOKEN` env var.
 
 ## Available Commands
 
-| Command                  | What it does                     |
-| ------------------------ | -------------------------------- |
-| `builds get <ref>`       | Fetch build metadata             |
-| `builds snapshots <ref>` | Fetch snapshot diffs for a build |
-| `upload <dir>`           | Upload screenshots to Argos      |
-| `finalize`               | Finalize a parallel build        |
-| `skip`                   | Mark a build as skipped          |
+| Command                 | What it does                     |
+| ----------------------- | -------------------------------- |
+| `build get <ref>`       | Fetch build metadata             |
+| `build snapshots <ref>` | Fetch snapshot diffs for a build |
+| `upload <dir>`          | Upload screenshots to Argos      |
+| `finalize`              | Finalize a parallel build        |
+| `skip`                  | Mark a build as skipped          |
 
 Read the matching reference file for detailed flags and output shapes.
 
@@ -50,10 +50,10 @@ Read the matching reference file for detailed flags and output shapes.
 **Review a build (fetch metadata first, then diffs that need review):**
 
 ```bash
-argos builds get 72652
-argos builds snapshots 72652 --needs-review
-argos builds get 72652 --json
-argos builds snapshots 72652 --needs-review --json
+argos build get 72652
+argos build snapshots 72652 --needs-review
+argos build get 72652 --json
+argos build snapshots 72652 --needs-review --json
 ```
 
 **Upload screenshots in CI:**
@@ -71,6 +71,6 @@ argos finalize --parallel-nonce $CI_PIPELINE_ID
 
 ## When to Load References
 
-- **Fetching build data or reviewing snapshots** → [references/builds.md](references/builds.md)
+- **Fetching build data or reviewing snapshots** → [references/build.md](references/build.md)
 - **Uploading screenshots or finalizing parallel builds** → [references/upload.md](references/upload.md)
 - **Skipping a build** → [references/skip.md](references/skip.md)

@@ -16,14 +16,26 @@ async function run(input: {
 }) {
   const { argosClient, gitlabClient, gitlabProjectId, pullInterval, commit } =
     input;
-  const { data, error } = await argosClient.GET("/project/builds", {
-    params: {
-      query: {
-        distinctName: "true",
-        headSha: commit,
+
+  const { data: project, error: projectError } =
+    await argosClient.GET("/project");
+  if (projectError) {
+    console.error(projectError);
+    throw new Error(projectError.error);
+  }
+
+  const { data, error } = await argosClient.GET(
+    "/projects/{owner}/{project}/builds",
+    {
+      params: {
+        path: { owner: project.account.slug, project: project.name },
+        query: {
+          distinctName: "true",
+          headSha: commit,
+        },
       },
     },
-  });
+  );
 
   if (error) {
     console.error(error);
