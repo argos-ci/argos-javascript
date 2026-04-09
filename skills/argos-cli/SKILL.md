@@ -2,9 +2,9 @@
 name: argos-cli
 description: >
   Operate the Argos visual regression platform from the terminal — fetch build
-  metadata, review snapshot diffs, upload screenshots, and manage CI builds via
-  the `argos` CLI. Use when the user wants to run Argos commands in the shell,
-  scripts, or CI/CD pipelines, or when reviewing visual regression builds.
+  metadata, inspect snapshot diffs, upload screenshots, and manage CI builds
+  via the `argos` CLI. Use when the user wants to run Argos commands in the
+  shell, scripts, or CI/CD pipelines.
   Always load this skill before running `argos` commands — it contains the flag
   contract and output shapes that prevent silent failures.
 license: MIT
@@ -19,14 +19,8 @@ argument-hint: Requires `ARGOS_TOKEN` or an explicit `--token` when running auth
 
 ## Agent Protocol
 
-The CLI writes errors to stderr. Some commands support both human-readable text
-and JSON output.
-
-**Rules for agents:**
-
 - Supply `--token` or set `ARGOS_TOKEN`. The CLI exits with code 1 if no token is found.
-- Exit `0` = success, `1` = error.
-- All errors go to stderr: `Error: <message>`
+- Exit `0` = success, `1` = error. All errors go to stderr: `Error: <message>`
 - Use `--json` whenever stdout will be parsed by a script or agent.
 
 ## Authentication
@@ -35,26 +29,48 @@ Auth resolves: `--token` flag > `ARGOS_TOKEN` env var.
 
 ## Available Commands
 
-| Command                  | What it does                     |
-| ------------------------ | -------------------------------- |
-| `builds get <ref>`       | Fetch build metadata             |
-| `builds snapshots <ref>` | Fetch snapshot diffs for a build |
-| `upload <dir>`           | Upload screenshots to Argos      |
-| `finalize`               | Finalize a parallel build        |
-| `skip`                   | Mark a build as skipped          |
+| Command                 | What it does                     |
+| ----------------------- | -------------------------------- |
+| `build get <ref>`       | Fetch build metadata             |
+| `build snapshots <ref>` | Fetch snapshot diffs for a build |
+| `upload <dir>`          | Upload screenshots to Argos      |
+| `finalize`              | Finalize a parallel build        |
+| `skip`                  | Mark a build as skipped          |
 
-Read the matching reference file for detailed flags and output shapes.
+## Build Status Reference
 
-## Common Patterns
+| Status             | Terminal? | Meaning                             |
+| ------------------ | --------- | ----------------------------------- |
+| `no-changes`       | ✅        | All snapshots identical to baseline |
+| `accepted`         | ✅        | All changes approved                |
+| `rejected`         | ✅        | Changes explicitly rejected         |
+| `changes-detected` | ✅        | Diffs found, awaiting decision      |
+| `error`            | ✅        | Build processing failed             |
+| `aborted`          | ✅        | Build was cancelled                 |
+| `expired`          | ✅        | Build expired before completion     |
+| `pending`          | ⏳        | Waiting for screenshots to arrive   |
+| `progress`         | ⏳        | Screenshots are being compared      |
 
-**Review a build (fetch metadata first, then diffs that need review):**
+Only `no-changes` and `accepted` are all-clear terminal states. For review
+decision-making, keep the PR-review triage logic in the dedicated Argos review
+skill rather than here.
+
+## Snapshot Inspection
+
+Use the CLI to fetch the build and the raw diffs that need attention:
 
 ```bash
-argos builds get 72652
-argos builds snapshots 72652 --needs-review
-argos builds get 72652 --json
-argos builds snapshots 72652 --needs-review --json
+argos build get <buildReference> --json
+argos build snapshots <buildReference> --needs-review --json
 ```
+
+This skill is the command-and-output reference for those operations. If you need
+the full "review an Argos build as part of a PR review" workflow, keep that in
+the dedicated public Argos review skill rather than here.
+
+---
+
+## Common Patterns
 
 **Upload screenshots in CI:**
 
@@ -69,8 +85,10 @@ argos upload ./screenshots --parallel-nonce $CI_PIPELINE_ID --parallel-index $CI
 argos finalize --parallel-nonce $CI_PIPELINE_ID
 ```
 
+---
+
 ## When to Load References
 
-- **Fetching build data or reviewing snapshots** → [references/builds.md](references/builds.md)
+- **Fetching build data or reviewing snapshots** → [references/build.md](references/build.md)
 - **Uploading screenshots or finalizing parallel builds** → [references/upload.md](references/upload.md)
 - **Skipping a build** → [references/skip.md](references/skip.md)

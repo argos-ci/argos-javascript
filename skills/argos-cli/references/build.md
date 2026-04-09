@@ -1,10 +1,10 @@
-# builds
+# build
 
-Detailed flag specifications for `argos builds` commands.
+Detailed flag specifications for `argos build` commands.
 
 ---
 
-## builds get
+## build get
 
 Fetch build metadata. Use `--json` for machine-readable output.
 
@@ -21,9 +21,9 @@ Example:
 
 ```text
 Build #72652
-Status: failure (changes-detected)
+Status: changes-detected
 Snapshots: total 42, changed 3, added 1, removed 0, unchanged 38
-Conclusion: rejected
+Conclusion: changes-detected
 Branch: main
 Commit: abc123
 Base branch: main
@@ -33,35 +33,31 @@ URL: https://app.argos-ci.com/...
 
 Use `--json` whenever another tool needs to parse stdout.
 
-**`--json` output:**
+**`--json` output:** The full Build object from the OpenAPI spec:
 
 ```json
 {
   "id": "<uuid>",
   "number": 72652,
-  "status": "success" | "failure" | "pending",
-  "rawStatus": "accepted" | "no-changes" | "rejected" | "changes-detected" | "expired" | "error" | "aborted" | "pending" | "progress",
-  "conclusion": "accepted" | "rejected" | null,
-  "branch": "main",
-  "commit": "<sha>",
-  "baseBranch": "main",
-  "baseCommit": "<sha>",
+  "head": { "sha": "<sha>", "branch": "main" },
+  "base": { "sha": "<sha>", "branch": "main" },
+  "status": "accepted" | "no-changes" | "rejected" | "changes-detected" | "expired" | "error" | "aborted" | "pending" | "progress",
+  "conclusion": "no-changes" | "changes-detected" | null,
+  "stats": { "total": 42, "changed": 3, "added": 1, "removed": 0, "unchanged": 38, "ignored": 0, "failure": 0, "retryFailure": 0 },
+  "metadata": { "testReport": null },
   "url": "https://app.argos-ci.com/...",
-  "stats": { "total": 42, "changed": 3, "added": 1, "removed": 0, "unchanged": 38 },
-  "testReport": null,
   "notification": null
 }
 ```
 
-**Status mapping:**
+**Status values:**
 
-- `success` → `accepted` or `no-changes`
-- `failure` → `rejected`, `changes-detected`, `expired`, `error`, or `aborted`
-- `pending` → all other statuses
+- Terminal statuses: `accepted`, `no-changes`, `rejected`, `changes-detected`, `expired`, `error`, `aborted`
+- Pending statuses: `pending`, `progress`
 
 ---
 
-## builds snapshots
+## build snapshots
 
 Fetch snapshot diffs for a build. Use `--json` for machine-readable output.
 
@@ -86,7 +82,9 @@ Summary: changed 2, added 1
 
 homepage / desktop [changed]
   Review: https://app.argos-ci.com/.../<snapshot-id>
-  Diff image: https://cdn.argos-ci.com/...
+  Mask: https://cdn.argos-ci.com/...
+  Base file: https://cdn.argos-ci.com/...
+  Head file: https://cdn.argos-ci.com/...
   Score: 0.042
   Group: homepage
 ```
@@ -95,7 +93,7 @@ Use `--json` whenever another tool needs to parse stdout.
 
 If `--needs-review` is passed, the API returns only diffs that need review.
 
-**`--json` output:** Array of snapshot diff objects:
+**`--json` output:** Raw array of SnapshotDiff objects from the OpenAPI spec:
 
 ```json
 [
@@ -104,27 +102,17 @@ If `--needs-review` is passed, the API returns only diffs that need review.
     "name": "homepage / desktop",
     "status": "changed" | "added" | "removed" | "unchanged" | "pending" | "failure" | "ignored" | "retryFailure",
     "score": 0.042,
-    "buildUrl": "https://app.argos-ci.com/...",
-    "reviewUrl": "https://app.argos-ci.com/.../<snapshot-id>",
-    "diffImageUrl": "https://cdn.argos-ci.com/...",
     "group": "homepage",
     "parentName": null,
+    "url": "https://cdn.argos-ci.com/...",
     "base": {
       "id": "<uuid>",
       "name": "homepage / desktop",
-      "imageUrl": "https://cdn.argos-ci.com/...",
-      "contentType": "image/png",
+      "metadata": { ... },
       "width": 1280,
       "height": 800,
-      "pageUrl": "https://example.com",
-      "previewUrl": null,
-      "viewport": { "width": 1280, "height": 800 },
-      "browser": { "name": "chromium", "version": "120.0" },
-      "automationLibrary": null,
-      "sdk": null,
-      "test": null,
-      "story": null,
-      "tags": null
+      "url": "https://cdn.argos-ci.com/...",
+      "contentType": "image/png"
     },
     "head": { ... }
   }
@@ -133,7 +121,8 @@ If `--needs-review` is passed, the API returns only diffs that need review.
 
 **Notes:**
 
-- `diffImageUrl` is the visual diff overlay — the most efficient signal for automated review.
+- `url` on the diff is the mask (visual diff overlay) — the most efficient signal for automated review.
+- `base.url` / `head.url` are the snapshot file URLs (can be images or YAML for Aria snapshots).
 - `score` ranges from `0` (identical) to `1` (completely different). `null` for added/removed snapshots.
 - `base` is `null` for `added` snapshots; `head` is `null` for `removed` snapshots.
 - Paginates automatically — all results are returned in a single call.
