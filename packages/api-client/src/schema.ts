@@ -43,24 +43,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getBuild"];
+        get?: never;
         put: operations["updateBuild"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builds/{buildId}/diffs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getBuildDiffs"];
-        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -84,14 +68,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/project/builds": {
+    "/projects/{owner}/{project}/builds": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getAuthProjectBuilds"];
+        get: operations["getProjectBuilds"];
         put?: never;
         post?: never;
         delete?: never;
@@ -100,14 +84,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/project/builds/{buildNumber}": {
+    "/projects/{owner}/{project}/builds/{buildNumber}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getAuthBuildByNumber"];
+        get: operations["getBuildByNumber"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/diffs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getBuildDiffs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -589,6 +589,12 @@ export interface components {
         /** @description Project */
         Project: {
             id: string;
+            /** @description Account that owns the project */
+            account: {
+                id: string;
+                slug: string;
+            };
+            name: string;
             defaultBaseBranch: string;
             hasRemoteContentAccess: boolean;
         };
@@ -801,65 +807,6 @@ export interface operations {
             };
         };
     };
-    getBuild: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique identifier for the build */
-                buildId: components["schemas"]["BuildId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Build */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Build"];
-                };
-            };
-            /** @description Invalid parameters */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
     updateBuild: {
         parameters: {
             query?: never;
@@ -956,11 +903,17 @@ export interface operations {
                 perPage?: string;
                 /** @description Page number */
                 page?: string;
+                /** @description Only include diffs that need review */
+                needsReview?: boolean;
             };
             header?: never;
             path: {
-                /** @description A unique identifier for the build */
-                buildId: components["schemas"]["BuildId"];
+                /** @description The account slug (owner) */
+                owner: string;
+                /** @description The project name */
+                project: string;
+                /** @description The build number */
+                buildNumber: number;
             };
             cookie?: never;
         };
@@ -1054,7 +1007,7 @@ export interface operations {
             };
         };
     };
-    getAuthProjectBuilds: {
+    getProjectBuilds: {
         parameters: {
             query?: {
                 /** @description Number of items per page (max 100) */
@@ -1067,7 +1020,12 @@ export interface operations {
                 distinctName?: string;
             };
             header?: never;
-            path?: never;
+            path: {
+                /** @description The account slug (owner) */
+                owner: string;
+                /** @description The project name */
+                project: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -1113,11 +1071,15 @@ export interface operations {
             };
         };
     };
-    getAuthBuildByNumber: {
+    getBuildByNumber: {
         parameters: {
             query?: never;
             header?: never;
             path: {
+                /** @description The account slug (owner) */
+                owner: string;
+                /** @description The project name */
+                project: string;
                 /** @description The build number */
                 buildNumber: number;
             };
