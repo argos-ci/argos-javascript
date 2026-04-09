@@ -108,6 +108,10 @@ importers:
       update-notifier:
         specifier: ^7.3.1
         version: 7.3.1
+    devDependencies:
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.2(@types/node@25.5.0)(@vitest/browser-playwright@4.1.2)(@vitest/ui@4.1.2)(msw@2.12.14(@types/node@25.5.0)(typescript@6.0.2))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
 
   packages/core:
     dependencies:
