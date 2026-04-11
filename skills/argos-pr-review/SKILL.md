@@ -217,3 +217,18 @@ expected UI outcome of the PR.
 - Use the PR diff and test code to confirm whether the visual change matches the code.
 - Load [references/baseline.md](references/baseline.md) when the review depends on baseline selection or orphan build semantics.
 - Load [references/flaky-fixes.md](references/flaky-fixes.md) when you need concrete remediation examples for flaky captures.
+
+## Authentication
+
+The CLI requires an Argos token. Check in this order:
+
+1. `--token <token>` flag
+2. `ARGOS_TOKEN` environment variable
+3. Token stored locally via `argos login`
+
+If none is found, the CLI will error. Run `argos login` once to authenticate via browser — no manual token copy-paste needed:
+
+```bash
+argos login
+# Opens browser → authorize → token saved automatically
+```
