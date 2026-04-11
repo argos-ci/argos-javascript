@@ -12,7 +12,7 @@ metadata:
   author: argos-ci
   homepage: https://argos-ci.com
   source: https://github.com/argos-ci/argos-javascript
-argument-hint: Requires `ARGOS_TOKEN` or an explicit `--token` when running authenticated `argos` commands.
+argument-hint: Requires `ARGOS_TOKEN`, an explicit `--token`, or a locally stored token from `argos login` where supported.
 ---
 
 # Argos CLI
@@ -24,19 +24,23 @@ and JSON output.
 
 **Rules for agents:**
 
-- Supply `--token` or set `ARGOS_TOKEN`. The CLI exits with code 1 if no token is found.
+- Supply `--token`, set `ARGOS_TOKEN`, or use a stored token from `argos login` where supported. The CLI exits with code 1 if no token is found.
 - Exit `0` = success, `1` = error.
 - All errors go to stderr: `Error: <message>`
 - Use `--json` whenever stdout will be parsed by a script or agent.
 
 ## Authentication
 
-Auth resolves: `--token` flag > `ARGOS_TOKEN` env var.
+Auth for build read commands resolves: `--token` flag > `ARGOS_TOKEN` env var > token saved by `argos login`.
+
+Auth for upload, skip, and finalize follows the CI/core auth path. Use `--token`, `ARGOS_TOKEN`, or tokenless CI auth where supported; do not rely on `argos login` for CI uploads.
 
 ## Available Commands
 
 | Command                 | What it does                     |
 | ----------------------- | -------------------------------- |
+| `login`                 | Store a local Argos API token    |
+| `logout`                | Remove the stored local token    |
 | `build get <ref>`       | Fetch build metadata             |
 | `build snapshots <ref>` | Fetch snapshot diffs for a build |
 | `upload <dir>`          | Upload screenshots to Argos      |
@@ -46,6 +50,14 @@ Auth resolves: `--token` flag > `ARGOS_TOKEN` env var.
 Read the matching reference file for detailed flags and output shapes.
 
 ## Common Patterns
+
+**Log in locally for build review commands:**
+
+```bash
+argos login
+argos build get 72652
+argos build snapshots 72652 --needs-review
+```
 
 **Review a build (fetch metadata first, then diffs that need review):**
 
@@ -71,6 +83,7 @@ argos finalize --parallel-nonce $CI_PIPELINE_ID
 
 ## When to Load References
 
+- **Logging in or out locally** -> [references/login.md](references/login.md)
 - **Fetching build data or reviewing snapshots** → [references/build.md](references/build.md)
 - **Uploading screenshots or finalizing parallel builds** → [references/upload.md](references/upload.md)
 - **Skipping a build** → [references/skip.md](references/skip.md)

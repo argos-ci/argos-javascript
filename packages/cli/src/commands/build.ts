@@ -3,17 +3,19 @@ import { Option } from "commander";
 import { createClient, throwAPIError } from "@argos-ci/api-client";
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { tokenOption, type TokenOption } from "../options";
+import { getStoredToken } from "../auth";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
 type Project = ArgosAPISchema.components["schemas"]["Project"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
 
-function getToken(options: TokenOption): string {
-  const token = options.token ?? process.env["ARGOS_TOKEN"];
+async function getTokenOrThrow(options: TokenOption): Promise<string> {
+  const token =
+    options.token ?? process.env["ARGOS_TOKEN"] ?? (await getStoredToken());
   if (!token) {
     console.error(
-      "Error: No Argos token found. Use --token or set ARGOS_TOKEN.",
+      "Error: No Argos token found. Use --token, set ARGOS_TOKEN, or run `argos login`.",
     );
     process.exit(1);
   }
@@ -24,11 +26,9 @@ function getAPIBaseURL(): string | undefined {
   return process.env["ARGOS_API_BASE_URL"];
 }
 
-function createBuildsClient(options: TokenOption) {
-  return createClient({
-    authToken: getToken(options),
-    baseUrl: getAPIBaseURL(),
-  });
+async function createBuildsClient(options: TokenOption) {
+  const authToken = await getTokenOrThrow(options);
+  return createClient({ authToken, baseUrl: getAPIBaseURL() });
 }
 
 function isBuildPending(build: Build): boolean {
@@ -268,7 +268,7 @@ export function buildCommand(program: Command) {
         options: TokenOption & { json?: boolean },
       ) => {
         const buildNumber = parseBuildReferenceOrExit(buildReference);
-        const client = createBuildsClient(options);
+        const client = await createBuildsClient(options);
         const project = await fetchProject(client);
         const build = await fetchBuildByNumber(
           client,
@@ -297,7 +297,7 @@ export function buildCommand(program: Command) {
         options: TokenOption & { needsReview?: boolean; json?: boolean },
       ) => {
         const buildNumber = parseBuildReferenceOrExit(buildReference);
-        const client = createBuildsClient(options);
+        const client = await createBuildsClient(options);
         const project = await fetchProject(client);
         const build = await fetchBuildByNumber(
           client,
