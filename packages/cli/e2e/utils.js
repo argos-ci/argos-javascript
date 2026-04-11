@@ -28,10 +28,12 @@ export function run(args, env = process.env) {
   };
 }
 
-export function assert(condition, message) {
-  if (!condition) {
-    console.error(`✘ FAIL: ${message}`);
-    process.exit(1);
+export function getRequiredEnv(name) {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
   }
-  console.log(`✔ PASS: ${message}`);
+
+  return value;
 }

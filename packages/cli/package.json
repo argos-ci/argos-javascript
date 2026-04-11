@@ -40,9 +40,12 @@
     "ora": "^9.3.0",
     "update-notifier": "^7.3.1"
   },
+  "devDependencies": {
+    "vitest": "catalog:"
+  },
   "scripts": {
     "build": "tsdown",
-    "e2e": "node e2e/upload.js && node e2e/skip.js && node e2e/build.js",
+    "e2e": "vitest",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."
