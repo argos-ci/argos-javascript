@@ -37,15 +37,17 @@ Auth for upload, skip, and finalize follows the CI/core auth path. Use `--token`
 
 ## Available Commands
 
-| Command                 | What it does                     |
-| ----------------------- | -------------------------------- |
-| `login`                 | Store a local Argos API token    |
-| `logout`                | Remove the stored local token    |
-| `build get <ref>`       | Fetch build metadata             |
-| `build snapshots <ref>` | Fetch snapshot diffs for a build |
-| `upload <dir>`          | Upload screenshots to Argos      |
-| `finalize`              | Finalize a parallel build        |
-| `skip`                  | Mark a build as skipped          |
+| Command                      | What it does                          |
+| ---------------------------- | ------------------------------------- |
+| `login`                      | Store a local Argos user access token |
+| `logout`                     | Remove the stored local token         |
+| `build get <ref>`            | Fetch build metadata                  |
+| `build snapshots <ref>`      | Fetch snapshot diffs for a build      |
+| `build review approve <ref>` | Approve a build                       |
+| `build review reject <ref>`  | Reject a build                        |
+| `upload <dir>`               | Upload screenshots to Argos           |
+| `finalize`                   | Finalize a parallel build             |
+| `skip`                       | Mark a build as skipped               |
 
 Read the matching reference file for detailed flags and output shapes.
 

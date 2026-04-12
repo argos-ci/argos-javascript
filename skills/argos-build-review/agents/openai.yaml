@@ -1,0 +1,4 @@
+interface:
+  display_name: "Argos Build Review"
+  short_description: "Inspect snapshot diffs and approve or reject an Argos build"
+  default_prompt: "Use $argos-build-review to review this Argos build and decide whether to approve or reject it."

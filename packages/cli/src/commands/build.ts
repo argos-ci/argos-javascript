@@ -9,6 +9,13 @@ type Build = ArgosAPISchema.components["schemas"]["Build"];
 type Project = ArgosAPISchema.components["schemas"]["Project"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
+type ReviewState = "approved" | "rejected";
+type CreateReviewOperation = ArgosAPISchema.operations["createReview"];
+type CreateReviewBody =
+  CreateReviewOperation["requestBody"]["content"]["application/json"];
+type ReviewConclusion = CreateReviewBody["conclusion"];
+type Review =
+  CreateReviewOperation["responses"][200]["content"]["application/json"];
 
 async function getTokenOrThrow(options: TokenOption): Promise<string> {
   const token =
@@ -148,6 +155,17 @@ function printSnapshots(diffs: SnapshotDiff[], build: Build) {
   console.log(lines.slice(0, -1).join("\n"));
 }
 
+function toReviewConclusion(reviewState: ReviewState): ReviewConclusion {
+  return reviewState === "approved" ? "APPROVE" : "REQUEST_CHANGES";
+}
+
+function printReview(review: Review, buildNumber: number, state: ReviewState) {
+  const label = state === "approved" ? "Approved" : "Rejected";
+  console.log(`${label} build #${buildNumber}.`);
+  console.log(`Review: ${review.id}`);
+  console.log(`State: ${review.state}`);
+}
+
 async function fetchAllDiffs(
   client: ReturnType<typeof createClient>,
   project: Project,
@@ -248,6 +266,83 @@ async function fetchBuildByNumber(
   return data;
 }
 
+async function reviewBuildByNumber(
+  client: ReturnType<typeof createClient>,
+  project: Project,
+  buildNumber: number,
+  state: ReviewState,
+  options: {
+    diffReviews: { id: string; state: ReviewState }[];
+  },
+): Promise<Review> {
+  const { data, error, response } = await client.POST(
+    "/projects/{owner}/{project}/builds/{buildNumber}/reviews",
+    {
+      params: {
+        path: {
+          owner: project.account.slug,
+          project: project.name,
+          buildNumber: String(buildNumber),
+        },
+      },
+      body: {
+        conclusion: toReviewConclusion(state),
+        snapshots: options.diffReviews.map((diffReview) => ({
+          id: diffReview.id,
+          conclusion: toReviewConclusion(diffReview.state),
+        })),
+      },
+    },
+  );
+
+  if (error) {
+    if (response.status === 401) {
+      console.error(
+        "Error: Review requires user authentication. Run `argos login` first.",
+      );
+      process.exit(1);
+    }
+    if (response.status === 403) {
+      console.error("Error: You do not have permission to review this build.");
+      process.exit(1);
+    }
+    if (response.status === 404) {
+      console.error(`Error: Build not found.`);
+      process.exit(1);
+    }
+    throwAPIError(error);
+  }
+
+  if (!data) {
+    console.error("Error: Unexpected empty response from API.");
+    process.exit(1);
+  }
+
+  return data;
+}
+
+function parseDiffReviewOrExit(value: string): {
+  id: string;
+  state: ReviewState;
+} {
+  const sep = value.lastIndexOf("=");
+  if (sep === -1) {
+    console.error(
+      `Error: --diff value must be in the format "<diffId>=<approved|rejected>", got "${value}".`,
+    );
+    process.exit(1);
+  }
+  const id = value.slice(0, sep);
+  const rawState = value.slice(sep + 1);
+  if (rawState !== "approved" && rawState !== "rejected") {
+    console.error(
+      `Error: --diff state must be "approved" or "rejected", got "${rawState}".`,
+    );
+    process.exit(1);
+  }
+  return { id, state: rawState };
+}
+
 export function buildCommand(program: Command) {
   const build = program.command("build").description("Manage Argos builds");
   const createJsonOption = () =>
@@ -283,6 +378,61 @@ export function buildCommand(program: Command) {
         printBuild(build);
       },
     );
+
+  const review = build
+    .command("review")
+    .description("Submit a review decision for a build");
+
+  const createDiffOption = () =>
+    new Option(
+      "--diff <diffId=state>",
+      'Review an individual snapshot diff. Format: "<diffId>=<approved|rejected>". Can be repeated.',
+    ).argParser(
+      (value, previous: { id: string; state: ReviewState }[] = []) => {
+        return [...previous, parseDiffReviewOrExit(value)];
+      },
+    );
+
+  for (const state of ["approve", "reject"] as const) {
+    const reviewState: ReviewState =
+      state === "approve" ? "approved" : "rejected";
+    review
+      .command(`${state}`)
+      .description(
+        `${state === "approve" ? "Approve" : "Reject"} a build — requires a user token from \`argos login\``,
+      )
+      .argument("<buildReference>", "Build number or Argos build URL")
+      .addOption(tokenOption)
+      .addOption(createJsonOption())
+      .addOption(createDiffOption())
+      .action(
+        async (
+          buildReference: string,
+          options: TokenOption & {
+            json?: boolean;
+            diff?: { id: string; state: ReviewState }[];
+          },
+        ) => {
+          const buildNumber = parseBuildReferenceOrExit(buildReference);
+          const client = await createBuildsClient(options);
+          const project = await fetchProject(client);
+          const review = await reviewBuildByNumber(
+            client,
+            project,
+            buildNumber,
+            reviewState,
+            { diffReviews: options.diff ?? [] },
+          );
+
+          if (options.json) {
+            console.log(JSON.stringify(review, null, 2));
+            return;
+          }
+
+          printReview(review, buildNumber, reviewState);
+        },
+      );
+  }
 
   build
     .command("snapshots")
