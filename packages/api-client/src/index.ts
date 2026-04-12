@@ -10,12 +10,15 @@ export type ArgosAPIClient = ReturnType<typeof createClient>;
 /**
  * Create Argos API client.
  */
-export function createClient(options: { baseUrl?: string; authToken: string }) {
-  const { baseUrl } = options || {};
+export function createClient(options?: {
+  baseUrl?: string;
+  authToken?: string;
+}) {
+  const { baseUrl, authToken } = options || {};
   return createFetchClient<paths>({
     baseUrl: baseUrl || "https://api.argos-ci.com/v2/",
     headers: {
-      Authorization: `Bearer ${options.authToken}`,
+      Authorization: authToken ? `Bearer ${authToken}` : undefined,
     },
     fetch: (input) => {
       return pRetry(
