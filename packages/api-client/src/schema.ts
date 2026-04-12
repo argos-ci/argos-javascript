@@ -36,6 +36,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/cli/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exchange CLI authorization code for a token
+         * @description Called by the CLI to exchange a PKCE authorization code for an API token.
+         */
+        post: operations["exchangeCliToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/project": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAuthProject"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builds/{buildId}": {
         parameters: {
             query?: never;
@@ -52,14 +88,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/project": {
+    "/projects/{owner}/{project}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getAuthProject"];
+        get: operations["getProject"];
         put?: never;
         post?: never;
         delete?: never;
@@ -91,7 +127,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getBuildByNumber"];
+        get: operations["getBuild"];
         put?: never;
         post?: never;
         delete?: never;
@@ -110,6 +146,23 @@ export interface paths {
         get: operations["getBuildDiffs"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a review on a specified build */
+        post: operations["createReview"];
         delete?: never;
         options?: never;
         head?: never;
@@ -252,11 +305,15 @@ export interface components {
                 };
             };
         };
+        /**
+         * @description The build number
+         * @example 42
+         */
+        BuildNumber: string;
         /** @description Build */
         Build: {
             id: components["schemas"]["BuildId"];
-            /** @description The build number */
-            number: number;
+            number: components["schemas"]["BuildNumberOutput"];
             /** @description The head reference of the build */
             head: components["schemas"]["BuildGitReference"];
             /** @description The base reference of the build */
@@ -332,6 +389,19 @@ export interface components {
             details?: {
                 message: string;
             }[];
+        };
+        /** @description Project */
+        Project: {
+            id: string;
+            account: components["schemas"]["Account"];
+            name: string;
+            defaultBaseBranch: string;
+            hasRemoteContentAccess: boolean;
+        };
+        /** @description Account */
+        Account: {
+            id: string;
+            slug: string;
         };
         /** @description Page information */
         PageInfo: {
@@ -586,18 +656,11 @@ export interface components {
                 contentType: string;
             } | null;
         };
-        /** @description Project */
-        Project: {
-            id: string;
-            /** @description Account that owns the project */
-            account: {
-                id: string;
-                slug: string;
-            };
-            name: string;
-            defaultBaseBranch: string;
-            hasRemoteContentAccess: boolean;
-        };
+        /**
+         * @description The build number
+         * @example 42
+         */
+        BuildNumberOutput: unknown;
     };
     responses: never;
     parameters: never;
@@ -807,6 +870,103 @@ export interface operations {
             };
         };
     };
+    exchangeCliToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description PKCE authorization code from the login flow */
+                    code: string;
+                    /** @description PKCE code verifier matching the code challenge */
+                    code_verifier: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Token exchange successful */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Argos API token for CLI use */
+                        token: string;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getAuthProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     updateBuild: {
         parameters: {
             query?: never;
@@ -896,6 +1056,215 @@ export interface operations {
             };
         };
     };
+    getProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getProjectBuilds: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                head?: string;
+                headSha?: components["schemas"]["Sha1Hash"];
+                /** @description Only return the latest builds created, unique by name and commit. */
+                distinctName?: string;
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of builds */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["Build"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Build */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Build"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getBuildDiffs: {
         parameters: {
             query?: {
@@ -903,17 +1272,15 @@ export interface operations {
                 perPage?: string;
                 /** @description Page number */
                 page?: string;
-                /** @description Only include diffs that need review */
-                needsReview?: boolean;
+                /** @description Only return diffs that require review. Matches `changed`, `added`, and `removed`, except `removed` is excluded for subset builds. */
+                needsReview?: string;
             };
             header?: never;
             path: {
-                /** @description The account slug (owner) */
                 owner: string;
-                /** @description The project name */
                 project: string;
                 /** @description The build number */
-                buildNumber: number;
+                buildNumber: components["schemas"]["BuildNumber"];
             };
             cookie?: never;
         };
@@ -969,88 +1336,56 @@ export interface operations {
             };
         };
     };
-    getAuthProject: {
+    createReview: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Project */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Project"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    getProjectBuilds: {
-        parameters: {
-            query?: {
-                /** @description Number of items per page (max 100) */
-                perPage?: string;
-                /** @description Page number */
-                page?: string;
-                head?: string;
-                headSha?: components["schemas"]["Sha1Hash"];
-                /** @description Only return the latest builds created, unique by name and commit. */
-                distinctName?: string;
-            };
-            header?: never;
             path: {
-                /** @description The account slug (owner) */
                 owner: string;
-                /** @description The project name */
                 project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Overall review conclusion for the build: "APPROVE" or "REQUEST_CHANGES"
+                     * @enum {string}
+                     */
+                    conclusion: "APPROVE" | "REQUEST_CHANGES";
+                    /**
+                     * @description Optional per-snapshot review decisions. When omitted, only the build-level review is recorded.
+                     * @default []
+                     */
+                    snapshots?: {
+                        /** @description The ID of the snapshot to review */
+                        id: string;
+                        /**
+                         * @description Review conclusion for this individual snapshot: "APPROVE" or "REQUEST_CHANGES"
+                         * @enum {string}
+                         */
+                        conclusion: "APPROVE" | "REQUEST_CHANGES";
+                    }[];
+                };
+            };
+        };
         responses: {
-            /** @description List of builds */
+            /** @description Review submitted successfully — returns the review */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        pageInfo: components["schemas"]["PageInfo"];
-                        results: components["schemas"]["Build"][];
+                        id: string;
+                        /** @enum {string} */
+                        state: "approved" | "rejected";
                     };
                 };
             };
-            /** @description Invalid parameters */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -1060,53 +1395,8 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description Server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    getBuildByNumber: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The account slug (owner) */
-                owner: string;
-                /** @description The project name */
-                project: string;
-                /** @description The build number */
-                buildNumber: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Build */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Build"];
-                };
-            };
-            /** @description Invalid parameters */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1133,5 +1423,5 @@ export interface operations {
                 };
             };
         };
-    }
+    };
 }

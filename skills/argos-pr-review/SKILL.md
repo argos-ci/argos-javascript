@@ -220,7 +220,7 @@ expected UI outcome of the PR.
 
 ## Authentication
 
-The CLI requires an Argos token. Check in this order:
+For PR review commands (`argos build get`, `argos build snapshots`), the CLI resolves the token in this order:
 
 1. `--token <token>` flag
 2. `ARGOS_TOKEN` environment variable
@@ -232,3 +232,5 @@ If none is found, the CLI will error. Run `argos login` once to authenticate via
 argos login
 # Opens browser → authorize → token saved automatically
 ```
+
+> Note: `argos login` is only for interactive, human use (PR review workflows). CI commands like `upload`, `finalize`, and `skip` use `ARGOS_TOKEN`, `--token`, or tokenless CI auth — do not rely on `argos login` for those.

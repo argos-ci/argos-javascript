@@ -15,7 +15,7 @@ Authenticate a local machine by opening the Argos web app in a browser and stori
 **Flow:**
 
 1. Starts a local HTTP callback server on `127.0.0.1` using a random available port.
-2. Opens `${ARGOS_APP_BASE_URL}/auth/cli?port=<port>&state=<state>` in the system browser.
+2. Opens `${ARGOS_APP_BASE_URL}/auth/cli?port=<port>&state=<state>&pkce=<codeChallenge>` in the system browser.
 3. Waits for the browser callback at `/callback`.
 4. Verifies the returned `state`.
 5. Saves the returned token to `~/.config/argos-ci/config.json`.
@@ -27,7 +27,7 @@ If the browser does not open automatically, the CLI prints the login URL so it c
 ```text
 Opening browser for authentication…
 If the browser doesn't open, visit:
-  https://app.argos-ci.com/auth/cli?port=<port>&state=<state>
+  https://app.argos-ci.com/auth/cli?port=<port>&state=<state>&pkce=<codeChallenge>
 
 Logged in to Argos successfully.
 ```
@@ -42,7 +42,7 @@ The browser callback page shows either "Authorization successful" or "Authorizat
 
 **Notes:**
 
-- `ARGOS_APP_BASE_URL` can override the web app URL. It defaults to `https://app.argos-ci.com`.
+- The login command is designed for interactive, human use only. Do not use it in CI pipelines.
 - The saved config file is written with mode `0600`.
 - The stored token is used by `argos build get` and `argos build snapshots` after `--token` and `ARGOS_TOKEN`.
 - Do not use `argos login` as a CI auth strategy. CI upload/skip/finalize commands should use `ARGOS_TOKEN`, `--token`, or tokenless CI auth where supported.

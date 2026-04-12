@@ -12,7 +12,7 @@ type SnapshotDiffStatus = SnapshotDiff["status"];
 
 async function getTokenOrThrow(options: TokenOption): Promise<string> {
   const token =
-    options.token ?? process.env["ARGOS_TOKEN"] ?? (await getStoredToken());
+    options.token || process.env["ARGOS_TOKEN"] || (await getStoredToken());
   if (!token) {
     console.error(
       "Error: No Argos token found. Use --token, set ARGOS_TOKEN, or run `argos login`.",
@@ -171,7 +171,7 @@ async function fetchAllDiffs(
           path: {
             owner: project.account.slug,
             project: project.name,
-            buildNumber,
+            buildNumber: String(buildNumber),
           },
           query: query as never,
         },
@@ -226,7 +226,7 @@ async function fetchBuildByNumber(
         path: {
           owner: project.account.slug,
           project: project.name,
-          buildNumber,
+          buildNumber: String(buildNumber),
         },
       },
     },
@@ -320,7 +320,7 @@ export function buildCommand(program: Command) {
           return;
         }
 
-        const diffs = await fetchAllDiffs(client, project, build.number, {
+        const diffs = await fetchAllDiffs(client, project, buildNumber, {
           needsReview: Boolean(options.needsReview),
         });
 
