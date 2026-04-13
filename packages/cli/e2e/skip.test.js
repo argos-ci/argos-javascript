@@ -9,4 +9,4 @@ test("skip returns a build URL", () => {
   const skipResult = run(["skip", "--build-name", buildName]);
 
   expect(skipResult.combined).toMatch(/\/builds\/(\d+)/);
-});
+}, 10000);

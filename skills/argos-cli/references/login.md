@@ -44,7 +44,7 @@ The browser callback page shows either "Authorization successful" or "Authorizat
 
 - The login command is designed for interactive, human use only. Do not use it in CI pipelines.
 - The saved config file is written with mode `0600`.
-- The stored token is used by `argos build get` and `argos build snapshots` after `--token` and `ARGOS_TOKEN`.
+- The stored token is used by `argos build review` when no `--token` flag or `ARGOS_TOKEN` env var is set.
 - Do not use `argos login` as a CI auth strategy. CI upload/skip/finalize commands should use `ARGOS_TOKEN`, `--token`, or tokenless CI auth where supported.
 
 ---

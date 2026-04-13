@@ -46,7 +46,7 @@ the screenshots.
 
 ### 2. Inspect the build status
 
-Use the Argos CLI with the build URL or build number.
+Use the Argos CLI with the build URL or build number. Fetch metadata first:
 
 ```bash
 argos build get <buildReference> --json
@@ -108,10 +108,15 @@ Pay special attention to:
 
 If the page is clearly captured mid-load, report it as flaky even if the branch name sounds related to loading or data changes.
 
-### 7. Report the result in the PR review
+### 7. Submit or report the result
 
-- If everything looks intentional, say the visual result appears consistent with the PR intent.
-- If you find a regression, call it out with the Argos build URL, the affected snapshot names, and the mismatch between the intended change and the rendered result.
+- If everything looks intentional, approve the build:
+  `argos build review <buildReference> --conclusion approve`.
+  For build-number references, add `--project owner/project`.
+- If you find a regression, request changes:
+  `argos build review <buildReference> --conclusion request-changes`.
+  For build-number references, add `--project owner/project`.
+- In the PR review, call out regressions with the Argos build URL, the affected snapshot names, and the mismatch between the intended change and the rendered result.
 - If you find flakiness, explain the signal and recommend a stabilization fix before approval.
 - When relevant, mention both the code evidence and the screenshot evidence in the same finding.
 
@@ -211,7 +216,12 @@ expected UI outcome of the PR.
 
 ## Tooling
 
-- Prefer the Argos CLI for build metadata and snapshot enumeration.
+- Use `argos build get` and `argos build snapshots --needs-review` to inspect
+  the build before making a decision.
+- Use `argos build review <buildReference> --conclusion approve` or
+  `argos build review <buildReference> --conclusion request-changes` to create
+  the Argos build review. Add `--project owner/project` when passing a build
+  number instead of a full build URL.
 - Use `--json` when parsing CLI output.
 - Read the PR title, description, linked context, and code diff before relying on screenshots.
 - Use the PR diff and test code to confirm whether the visual change matches the code.
@@ -220,13 +230,18 @@ expected UI outcome of the PR.
 
 ## Authentication
 
-For PR review commands (`argos build get`, `argos build snapshots`), the CLI resolves the token in this order:
+For build inspection (`argos build get`, `argos build snapshots`):
 
 1. `--token <token>` flag
 2. `ARGOS_TOKEN` environment variable
-3. Token stored locally via `argos login`
 
-If none is found, the CLI will error. Run `argos login` once to authenticate via browser — no manual token copy-paste needed:
+Both are project tokens.
+
+Creating a review requires a personal access token. For review submission (`argos build review`), auth resolves: `--token` flag > `ARGOS_TOKEN` env var > token stored by `argos login`.
+
+When `<buildReference>` is a build number (not a full URL), `--project owner/project` is also required to identify the Argos project.
+
+If no token is found, the CLI will error. Run `argos login` once to authenticate via browser — no manual token copy-paste needed:
 
 ```bash
 argos login

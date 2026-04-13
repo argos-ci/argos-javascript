@@ -126,3 +126,44 @@ If `--needs-review` is passed, the API returns only diffs that need review.
 - `score` ranges from `0` (identical) to `1` (completely different). `null` for added/removed snapshots.
 - `base` is `null` for `added` snapshots; `head` is `null` for `removed` snapshots.
 - Paginates automatically — all results are returned in a single call.
+
+---
+
+## build review
+
+Create a review on a build. Use `--json` for machine-readable output.
+
+**Argument:** `<buildReference>` — Build number or Argos build URL
+
+| Flag                        | Type    | Required | Description                                                             |
+| --------------------------- | ------- | -------- | ----------------------------------------------------------------------- |
+| `--conclusion <conclusion>` | string  | Yes      | Overall review conclusion for the build: `approve` or `request-changes` |
+| `--project <project>`       | string  | Cond.    | Project path (`owner/project`), required for build-number refs          |
+| `--token <token>`           | string  | No       | Override token (must be a personal access token for review)             |
+| `--json`                    | boolean | No       | Emit machine-readable JSON instead of human-readable text               |
+
+Inspect the build first with `build get` and `build snapshots --needs-review`,
+then submit the review decision.
+
+Creating a review requires a personal access token. Auth resolves: `--token` flag > `ARGOS_TOKEN` env var > token stored by `argos login`. When `<buildReference>` is a build number, `--project owner/project` is required. A full build URL already contains the project reference.
+
+**Default output:** Human-readable review summary.
+
+Example:
+
+```text
+Review #review_123
+State: approved
+Build: #72652
+```
+
+**`--json` output:** Review object returned by the API:
+
+```json
+{
+  "id": "<uuid>",
+  "state": "approved"
+}
+```
+
+`--conclusion request-changes` returns `"state": "rejected"`.
