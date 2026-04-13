@@ -217,3 +217,20 @@ expected UI outcome of the PR.
 - Use the PR diff and test code to confirm whether the visual change matches the code.
 - Load [references/baseline.md](references/baseline.md) when the review depends on baseline selection or orphan build semantics.
 - Load [references/flaky-fixes.md](references/flaky-fixes.md) when you need concrete remediation examples for flaky captures.
+
+## Authentication
+
+For PR review commands (`argos build get`, `argos build snapshots`), the CLI resolves the token in this order:
+
+1. `--token <token>` flag
+2. `ARGOS_TOKEN` environment variable
+3. Token stored locally via `argos login`
+
+If none is found, the CLI will error. Run `argos login` once to authenticate via browser — no manual token copy-paste needed:
+
+```bash
+argos login
+# Opens browser → authorize → token saved automatically
+```
+
+> Note: `argos login` is only for interactive, human use (PR review workflows). CI commands like `upload`, `finalize`, and `skip` use `ARGOS_TOKEN`, `--token`, or tokenless CI auth — do not rely on `argos login` for those.
