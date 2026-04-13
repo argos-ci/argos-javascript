@@ -17,4 +17,4 @@ test("upload returns a full build URL", () => {
   console.error(uploadResult.stderr);
 
   expect(uploadResult.combined).toMatch(/https?:\/\/\S+\/builds\/\d+/);
-});
+}, 10000);

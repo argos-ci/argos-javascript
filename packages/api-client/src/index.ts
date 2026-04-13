@@ -52,13 +52,18 @@ export class APIError extends Error {
 /**
  * Handle API errors.
  */
-export function throwAPIError(error: components["schemas"]["Error"]): never {
+export function formatAPIError(error: components["schemas"]["Error"]): string {
   debug("API error", error);
   const detailMessage = error.details
     ?.map((detail) => detail.message)
     .join(", ");
 
-  throw new APIError(
-    detailMessage ? `${error.error}: ${detailMessage}` : error.error,
-  );
+  return detailMessage ? `${error.error}: ${detailMessage}` : error.error;
+}
+
+/**
+ * Handle API errors.
+ */
+export function throwAPIError(error: components["schemas"]["Error"]): never {
+  throw new APIError(formatAPIError(error));
 }

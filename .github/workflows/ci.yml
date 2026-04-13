@@ -89,6 +89,7 @@ jobs:
         run: pnpm exec -- turbo run e2e --filter=@argos-ci/core --filter=@argos-ci/cli
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          USER_ACCESS_TOKEN: ${{ secrets.USER_ACCESS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
           OS: ${{ matrix.os }}
 
