@@ -1,6 +1,10 @@
 import type { Command } from "commander";
 import { Option } from "commander";
-import { createClient, throwAPIError } from "@argos-ci/api-client";
+import {
+  createClient,
+  formatAPIError,
+  throwAPIError,
+} from "@argos-ci/api-client";
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { tokenOption, type TokenOption } from "../options";
 import { getStoredToken } from "../auth";
@@ -9,8 +13,24 @@ type Build = ArgosAPISchema.components["schemas"]["Build"];
 type Project = ArgosAPISchema.components["schemas"]["Project"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
+type ReviewConclusion =
+  ArgosAPISchema.operations["createReview"]["requestBody"]["content"]["application/json"]["conclusion"];
+type Review =
+  ArgosAPISchema.operations["createReview"]["responses"]["200"]["content"]["application/json"];
 
-async function getTokenOrThrow(options: TokenOption): Promise<string> {
+type ParsedBuildReference = {
+  buildNumber: number;
+  owner?: string;
+  project?: string;
+};
+
+const reviewConclusions = {
+  approve: "APPROVE",
+  "request-changes": "REQUEST_CHANGES",
+} satisfies Record<string, ReviewConclusion>;
+type ReviewConclusionOption = keyof typeof reviewConclusions;
+
+async function getTokenOrExit(options: TokenOption): Promise<string> {
   const token =
     options.token || process.env["ARGOS_TOKEN"] || (await getStoredToken());
   if (!token) {
@@ -26,29 +46,42 @@ function getAPIBaseURL(): string | undefined {
   return process.env["ARGOS_API_BASE_URL"];
 }
 
-async function createBuildsClient(options: TokenOption) {
-  const authToken = await getTokenOrThrow(options);
-  return createClient({ authToken, baseUrl: getAPIBaseURL() });
+function getProjectTokenOrExit(options: TokenOption): string {
+  const projectToken = options.token || process.env["ARGOS_TOKEN"];
+  if (!projectToken) {
+    console.error(
+      "Error: No Argos project token found. Use --token or set ARGOS_TOKEN.",
+    );
+    process.exit(1);
+  }
+  return projectToken;
 }
 
 function isBuildPending(build: Build): boolean {
   return build.status === "pending" || build.status === "progress";
 }
 
-function parseBuildReferenceOrExit(buildReference: string): number {
+function parseBuildReferenceDetailsOrExit(
+  buildReference: string,
+): ParsedBuildReference {
   const parsedBuildNumber = Number(buildReference);
   if (
     Number.isFinite(parsedBuildNumber) &&
     Number.isInteger(parsedBuildNumber)
   ) {
-    return parsedBuildNumber;
+    return { buildNumber: parsedBuildNumber };
   }
 
   const urlMatch = buildReference.match(
-    /^https:\/\/app\.argos-ci\.(?:com|dev(?::\d+)?)\/.+\/builds\/(\d+)(?:\/?$|[?#])/,
+    /^https:\/\/app\.argos-ci\.(?:com|dev(?::\d+)?)\/(?<owner>[^/?#]+)\/(?<project>[^/?#]+)\/builds\/(?<buildNumber>\d+)(?:\/?$|[?#])/,
   );
-  if (urlMatch) {
-    return Number(urlMatch[1]);
+
+  if (urlMatch?.groups) {
+    return {
+      owner: urlMatch.groups.owner,
+      project: urlMatch.groups.project,
+      buildNumber: Number(urlMatch.groups.buildNumber),
+    };
   }
 
   console.error(
@@ -116,7 +149,6 @@ function printBuild(build: Build) {
     `Base commit: ${formatValue(build.base?.sha)}`,
     `URL: ${build.url}`,
   ];
-
   console.log(lines.join("\n"));
 }
 
@@ -144,8 +176,21 @@ function printSnapshots(diffs: SnapshotDiff[], build: Build) {
       ];
     }),
   ];
-
   console.log(lines.slice(0, -1).join("\n"));
+}
+
+function printReview(review: Review, buildNumber: number) {
+  const lines = [
+    `Review #${review.id}`,
+    `State: ${review.state}`,
+    `Build: #${buildNumber}`,
+  ];
+  console.log(lines.join("\n"));
+}
+
+function createProjectClient(options: TokenOption) {
+  const projectToken = getProjectTokenOrExit(options);
+  return createClient({ authToken: projectToken, baseUrl: getAPIBaseURL() });
 }
 
 async function fetchAllDiffs(
@@ -267,8 +312,9 @@ export function buildCommand(program: Command) {
         buildReference: string,
         options: TokenOption & { json?: boolean },
       ) => {
-        const buildNumber = parseBuildReferenceOrExit(buildReference);
-        const client = await createBuildsClient(options);
+        const { buildNumber } =
+          parseBuildReferenceDetailsOrExit(buildReference);
+        const client = createProjectClient(options);
         const project = await fetchProject(client);
         const build = await fetchBuildByNumber(
           client,
@@ -296,8 +342,9 @@ export function buildCommand(program: Command) {
         buildReference: string,
         options: TokenOption & { needsReview?: boolean; json?: boolean },
       ) => {
-        const buildNumber = parseBuildReferenceOrExit(buildReference);
-        const client = await createBuildsClient(options);
+        const { buildNumber } =
+          parseBuildReferenceDetailsOrExit(buildReference);
+        const client = createProjectClient(options);
         const project = await fetchProject(client);
         const build = await fetchBuildByNumber(
           client,
@@ -330,6 +377,97 @@ export function buildCommand(program: Command) {
         }
 
         printSnapshots(diffs, build);
+      },
+    );
+
+  build
+    .command("review")
+    .description("Create a review on a build")
+    .argument("<buildReference>", "Build number or Argos build URL")
+    .addOption(
+      new Option(
+        "--conclusion <conclusion>",
+        'Overall review conclusion for the build: "approve" or "request-changes"',
+      )
+        .choices(Object.keys(reviewConclusions))
+        .makeOptionMandatory(),
+    )
+    .option("--project <project>", "Project path in owner/project format")
+    .addOption(tokenOption)
+    .addOption(createJsonOption())
+    .action(
+      async (
+        buildReference: string,
+        options: TokenOption & {
+          conclusion: ReviewConclusionOption;
+          project?: string;
+          json?: boolean;
+        },
+      ) => {
+        const conclusion = reviewConclusions[options.conclusion];
+        const buildReferenceDetails =
+          parseBuildReferenceDetailsOrExit(buildReference);
+
+        let owner: string;
+        let project: string;
+
+        if (buildReferenceDetails.owner && buildReferenceDetails.project) {
+          owner = buildReferenceDetails.owner;
+          project = buildReferenceDetails.project;
+        } else if (options.project) {
+          const parts = options.project.split("/");
+          if (parts.length !== 2 || !parts[0] || !parts[1]) {
+            console.error(
+              "Error: --project must be in the format 'owner/project'.",
+            );
+            process.exit(1);
+          }
+          [owner, project] = parts;
+        } else {
+          console.error(
+            "Error: --project <owner/project> is required for build-number references.",
+          );
+          process.exit(1);
+        }
+
+        const authToken = await getTokenOrExit(options);
+        const client = createClient({ authToken, baseUrl: getAPIBaseURL() });
+        const { data, error } = await client.POST(
+          "/projects/{owner}/{project}/builds/{buildNumber}/reviews",
+          {
+            params: {
+              path: {
+                owner,
+                project,
+                buildNumber: String(buildReferenceDetails.buildNumber),
+              },
+            },
+            body: { conclusion },
+          },
+        );
+
+        if (error) {
+          const message = formatAPIError(error);
+          throw new Error(
+            [
+              `Failed to create review for ${owner}/${project} build #${buildReferenceDetails.buildNumber}: ${message}`,
+              "Make sure the token passed with --token is a user access token with access to this project.",
+              "Project tokens from ARGOS_TOKEN can read build data, but they cannot create reviews.",
+            ].join("\n"),
+          );
+        }
+
+        if (!data) {
+          console.error("Error: Unexpected empty response from API.");
+          process.exit(1);
+        }
+
+        if (options.json) {
+          console.log(JSON.stringify(data, null, 2));
+          return;
+        }
+
+        printReview(data, buildReferenceDetails.buildNumber);
       },
     );
 }

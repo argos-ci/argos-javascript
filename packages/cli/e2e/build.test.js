@@ -1,15 +1,18 @@
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { beforeAll, describe, expect, test } from "vitest";
 
 import { getRequiredEnv, run } from "./utils.js";
 
-const token = getRequiredEnv("ARGOS_TOKEN");
-const apiBaseURL = process.env.ARGOS_API_BASE_URL;
-const buildNumber = process.env.ARGOS_BUILD_NUMBER || "28022";
+const userAccessToken = getRequiredEnv("USER_ACCESS_TOKEN");
+const buildNumber = process.env.ARGOS_BUILD_NUMBER || "27748";
 
 const baseEnv = {
   ...process.env,
-  ...(apiBaseURL ? { ARGOS_API_BASE_URL: apiBaseURL } : {}),
-  ARGOS_TOKEN: token,
+  HOME: mkdtempSync(join(tmpdir(), "argos-cli-e2e-")),
+  ARGOS_API_BASE_URL: process.env.ARGOS_API_BASE_URL,
+  ARGOS_TOKEN: getRequiredEnv("ARGOS_TOKEN"),
 };
 
 function expectRunToFail(args, overrideEnv) {
@@ -26,12 +29,17 @@ function expectRunToFail(args, overrideEnv) {
 
 let build;
 let buildUrl;
+let projectPath;
 
 beforeAll(() => {
   build = JSON.parse(
     run(["build", "get", buildNumber, "--json"], baseEnv).stdout,
   );
   buildUrl = build.url;
+  const urlMatch = buildUrl.match(
+    /app\.argos-ci\.(?:com|dev(?::\d+)?)\/([^/?#]+)\/([^/?#]+)\/builds\//,
+  );
+  projectPath = urlMatch ? `${urlMatch[1]}/${urlMatch[2]}` : null;
 });
 
 describe("argos build get", () => {
@@ -39,7 +47,7 @@ describe("argos build get", () => {
     const error = expectRunToFail(["build", "get", "1"], { ARGOS_TOKEN: "" });
 
     expect(error.status).not.toBe(0);
-    expect(error.stderr).toContain("No Argos token found");
+    expect(error.stderr).toContain("No Argos project token found");
   });
 
   test("fails when token is missing for a build URL", () => {
@@ -53,7 +61,7 @@ describe("argos build get", () => {
     );
 
     expect(error.status).not.toBe(0);
-    expect(error.stderr).toContain("No Argos token found");
+    expect(error.stderr).toContain("No Argos project token found");
   });
 
   test("fails for an unknown build number", () => {
@@ -108,7 +116,7 @@ describe("argos build snapshots", () => {
     });
 
     expect(error.status).not.toBe(0);
-    expect(error.stderr).toContain("No Argos token found");
+    expect(error.stderr).toContain("No Argos project token found");
   });
 
   test("prints human-readable snapshot data", () => {
@@ -137,7 +145,6 @@ describe("argos build snapshots", () => {
       baseEnv,
     );
     const buildSnapshotsJson = JSON.parse(buildSnapshotsJsonOutput.stdout);
-
     expect(Array.isArray(buildSnapshotsJson)).toBe(true);
   });
 
@@ -151,5 +158,119 @@ describe("argos build snapshots", () => {
     );
 
     expect(Array.isArray(snapshotsNeedingReview)).toBe(true);
+  });
+});
+
+describe("argos build review", () => {
+  test("fails when conclusion is missing", () => {
+    const error = expectRunToFail(["build", "review", buildNumber]);
+
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain(
+      "required option '--conclusion <conclusion>' not specified",
+    );
+  });
+
+  test("fails when conclusion is invalid", () => {
+    const error = expectRunToFail([
+      "build",
+      "review",
+      buildNumber,
+      "--conclusion",
+      "maybe",
+    ]);
+
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain(
+      "option '--conclusion <conclusion>' argument 'maybe' is invalid",
+    );
+  });
+
+  test("fails when build number used without --project", () => {
+    const error = expectRunToFail([
+      "build",
+      "review",
+      buildNumber,
+      "--conclusion",
+      "approve",
+    ]);
+
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain(
+      "--project <owner/project> is required for build-number references",
+    );
+  });
+
+  test("fails when no token is provided", () => {
+    const noTokenHome = mkdtempSync(join(tmpdir(), "argos-cli-e2e-no-token-"));
+    const error = expectRunToFail(
+      ["build", "review", buildUrl, "--conclusion", "approve"],
+      { ARGOS_TOKEN: "", HOME: noTokenHome },
+    );
+
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain("No Argos token found");
+  });
+
+  test("creates an approved review in JSON mode", () => {
+    const buildReviewJsonOutput = run(
+      [
+        "build",
+        "review",
+        buildNumber,
+        "--project",
+        projectPath,
+        "--token",
+        userAccessToken,
+        "--conclusion",
+        "approve",
+        "--json",
+      ],
+      baseEnv,
+    );
+    const buildReviewJson = JSON.parse(buildReviewJsonOutput.stdout);
+
+    expect(buildReviewJson.id).toBeDefined();
+    expect(buildReviewJson.state).toBe("approved");
+  });
+
+  test("prints human-readable review data", () => {
+    const buildReview = run(
+      [
+        "build",
+        "review",
+        buildNumber,
+        "--project",
+        projectPath,
+        "--token",
+        userAccessToken,
+        "--conclusion",
+        "approve",
+      ],
+      baseEnv,
+    );
+
+    expect(buildReview.stdout).toContain("Review #");
+    expect(buildReview.stdout).toContain("State: approved");
+    expect(buildReview.stdout).toContain(`Build: #${buildNumber}`);
+  });
+
+  test("accepts an Argos build URL", () => {
+    const buildReviewJsonOutput = run(
+      [
+        "build",
+        "review",
+        buildUrl,
+        "--token",
+        userAccessToken,
+        "--conclusion",
+        "approve",
+        "--json",
+      ],
+      baseEnv,
+    );
+    const buildReviewJson = JSON.parse(buildReviewJsonOutput.stdout);
+    expect(buildReviewJson.id).toBeDefined();
+    expect(buildReviewJson.state).toBe("approved");
   });
 });

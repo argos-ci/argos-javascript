@@ -54,6 +54,7 @@
       "cache": false,
       "env": [
         "ARGOS_TOKEN",
+        "USER_ACCESS_TOKEN",
         "ARGOS_BUILD_NUMBER",
         "NODE_VERSION",
         "OS",
