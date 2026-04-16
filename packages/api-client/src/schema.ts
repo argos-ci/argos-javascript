@@ -20,6 +20,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/deployments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createDeployment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/deployments/{deploymentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getDeployment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/deployments/{deploymentId}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["finalizeDeployment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/deployments/resolve/{domain}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["resolveDeploymentDomain"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builds/finalize": {
         parameters: {
             query?: never;
@@ -175,6 +239,7 @@ export interface components {
     schemas: {
         /** @description SHA1 hash */
         Sha1Hash: string;
+        GitBranch: string;
         /** @description SHA256 hash */
         Sha256Hash: string;
         /**
@@ -683,7 +748,7 @@ export interface operations {
                     /** @description The commit the build is running on */
                     commit: components["schemas"]["Sha1Hash"];
                     /** @description The branch the build is running on */
-                    branch: string;
+                    branch: components["schemas"]["GitBranch"];
                     /** @description Keys of screenshot files */
                     screenshotKeys: components["schemas"]["Sha256Hash"][];
                     /** @description Keys of Playwright trace files */
@@ -770,6 +835,277 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createDeployment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description The commit SHA */
+                    commit: components["schemas"]["Sha1Hash"];
+                    /** @description The branch name */
+                    branch: components["schemas"]["GitBranch"];
+                    /** @description The pull request number */
+                    prNumber?: number | null;
+                    /**
+                     * @description The deployment environment
+                     * @default preview
+                     * @enum {string}
+                     */
+                    environment?: "preview" | "production";
+                    /** @description List of files to deploy */
+                    files: {
+                        path: string;
+                        hash: components["schemas"]["Sha256Hash"];
+                        size: number;
+                        contentType: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Deployment created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        deploymentId: string;
+                        uploadFiles: {
+                            path: string;
+                            hash: string;
+                            /** Format: uri */
+                            uploadUrl: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getDeployment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The deployment ID */
+                deploymentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deployment details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        status: "pending" | "ready" | "error";
+                        /** @enum {string} */
+                        environment: "preview" | "production";
+                        branch: components["schemas"]["GitBranch"];
+                        commitSha: components["schemas"]["Sha256Hash"];
+                        /** Format: uri */
+                        url: string;
+                        createdAt: string;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    finalizeDeployment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The deployment ID */
+                deploymentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deployment finalized */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        status: "pending" | "ready" | "error";
+                        /** @enum {string} */
+                        environment: "preview" | "production";
+                        branch: components["schemas"]["GitBranch"];
+                        commitSha: components["schemas"]["Sha256Hash"];
+                        /** Format: uri */
+                        url: string;
+                        createdAt: string;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resolveDeploymentDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A deployment domain or URL */
+                domain: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deployment domain resolved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        deploymentId: string;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -7,6 +7,7 @@ import { finalizeCommand } from "./commands/finalize";
 import { skipCommand } from "./commands/skip";
 import { buildCommand } from "./commands/build";
 import { loginCommand } from "./commands/login";
+import { publishCommand } from "./commands/publish";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -25,6 +26,7 @@ skipCommand(program);
 finalizeCommand(program);
 buildCommand(program);
 loginCommand(program);
+publishCommand(program);
 
 if (!process.argv.slice(2).length) {
   program.outputHelp();
