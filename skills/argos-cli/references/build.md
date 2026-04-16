@@ -145,7 +145,19 @@ Create a review on a build. Use `--json` for machine-readable output.
 Inspect the build first with `build get` and `build snapshots --needs-review`,
 then submit the review decision.
 
-Creating a review requires a personal access token. Auth resolves: `--token` flag > `ARGOS_TOKEN` env var > token stored by `argos login`. When `<buildReference>` is a build number, `--project owner/project` is required. A full build URL already contains the project reference.
+Before running `build get` or `build snapshots`, ensure a CLI token is available
+without printing its value. Check `ARGOS_TOKEN` first, or use an explicit
+`--token <token>` value. If no CLI token is available, ask the user to provide
+`ARGOS_TOKEN` or `--token`. If the user does not provide one, stop before
+running Argos CLI commands.
+
+Creating a review requires a personal access token. Check whether one is stored
+in `~/.config/argos-ci/config.json` under the `token` field. If no personal
+access token is available, do not post the review on Argos; give the conclusion
+and evidence to the user instead, because CLI access is not sufficient to create
+the review. Do not use project tokens for review creation. When
+`<buildReference>` is a build number, `--project owner/project` is required. A
+full build URL already contains the project reference.
 
 **Default output:** Human-readable review summary.
 

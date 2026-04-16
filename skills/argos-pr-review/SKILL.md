@@ -44,32 +44,58 @@ Before opening snapshot diffs, inspect:
 Form a working hypothesis for the intended user-facing change before relying on
 the screenshots.
 
-### 2. Inspect the build status
+### 2. Resolve Argos authentication
+
+Before running Argos CLI commands, separate build inspection access from review
+submission access.
+
+1. For build inspection, check whether `ARGOS_TOKEN` is already set in the
+   environment or whether a token was provided with `--token`, without printing
+   the token value.
+2. If no CLI token is available, ask the user to provide `ARGOS_TOKEN` or a
+   `--token` value. If the user does not provide one, stop before running Argos
+   CLI commands.
+3. For review submission, check whether a personal access token is stored in
+   `~/.config/argos-ci/config.json` under the `token` field.
+4. If no personal access token is available, do not post the review on the Argos
+   build. Finish by giving the review conclusion and evidence to the user
+   instead, because CLI access is not sufficient to create the review.
+
+The Argos CLI needs a token to access build data. `argos build get` and
+`argos build snapshots` require `ARGOS_TOKEN` or `--token`.
+
+Do not print tokens in logs, command summaries, or review text.
+
+### 3. Inspect the build status
 
 Use the Argos CLI with the build URL or build number. Fetch metadata first:
 
 ```bash
-argos build get <buildReference> --json
+ARGOS_TOKEN=<token> argos build get <buildReference> --json
+# or
+argos build get <buildReference> --token <token> --json
 ```
 
 Use the build status to decide the next review step:
 
-| Status             | Review meaning                              | Next step                                      |
-| ------------------ | ------------------------------------------- | ---------------------------------------------- |
-| `accepted`         | Diffs already approved                      | No visual review needed                        |
-| `no-changes`       | No visual diff against baseline             | No visual review needed                        |
-| `pending`          | Build is not ready yet                      | Wait and check again                           |
-| `progress`         | Comparison is still running                 | Wait and check again                           |
-| `changes-detected` | Screenshots need a decision                 | Fetch snapshots and inspect them               |
-| `rejected`         | A prior decision already rejected the build | Do not approve without understanding why       |
-| `error`            | Build processing failed                     | Do not approve until the failure is understood |
-| `aborted`          | Build did not complete normally             | Do not approve until the reason is understood  |
-| `expired`          | Build was not completed in time             | Do not approve until a valid build exists      |
+| Status             | Review meaning                              | Next step                                             |
+| ------------------ | ------------------------------------------- | ----------------------------------------------------- |
+| `accepted`         | Diffs already approved                      | No visual review needed                               |
+| `no-changes`       | No visual diff against baseline             | No visual review needed                               |
+| `pending`          | Build is not ready yet                      | Stop and report that the build cannot be reviewed yet |
+| `progress`         | Comparison is still running                 | Stop and report that the build cannot be reviewed yet |
+| `changes-detected` | Screenshots need a decision                 | Fetch snapshots and inspect them                      |
+| `rejected`         | A prior decision already rejected the build | Do not approve without understanding why              |
+| `error`            | Build processing failed                     | Do not approve until the failure is understood        |
+| `aborted`          | Build did not complete normally             | Do not approve until the reason is understood         |
+| `expired`          | Build was not completed in time             | Do not approve until a valid build exists             |
 
-### 3. Fetch only snapshots that need review
+### 4. Fetch only snapshots that need review
 
 ```bash
-argos build snapshots <buildReference> --needs-review --json
+ARGOS_TOKEN=<token> argos build snapshots <buildReference> --needs-review --json
+# or
+argos build snapshots <buildReference> --token <token> --needs-review --json
 ```
 
 For each diff, inspect:
@@ -79,7 +105,7 @@ For each diff, inspect:
 - the new screenshot `head.url`
 - metadata in `head.metadata`
 
-### 4. Compare screenshots against intended change
+### 5. Compare screenshots against intended change
 
 For each changed snapshot, ask:
 
@@ -89,13 +115,13 @@ For each changed snapshot, ask:
 - does the screenshot contradict the claimed intent in the PR description or
   linked ticket?
 
-### 5. Decide whether the change is intentional, broken, or flaky
+### 6. Decide whether the change is intentional, broken, or flaky
 
 - Intentional change: the new screenshot matches the code change and the UI is stable.
 - Regression: layout break, wrong state, missing content, wrong theme, clipped content, incorrect data, or an unexpected removed snapshot.
 - Flaky capture: loading indicator, partially rendered content, animation frame, dynamic content drift, or the same transient state captured in multiple browsers.
 
-### 6. Always check for flake signals
+### 7. Always check for flake signals
 
 Pay special attention to:
 
@@ -108,14 +134,25 @@ Pay special attention to:
 
 If the page is clearly captured mid-load, report it as flaky even if the branch name sounds related to loading or data changes.
 
-### 7. Submit or report the result
+### 8. Submit or report the result
 
+- Before submitting, briefly state the inferred PR intent, the snapshots
+  reviewed, the approval or rejection evidence, and the exact conclusion.
+- Only submit the Argos review if a personal access token is available from
+  `~/.config/argos-ci/config.json` or another explicit personal-token source.
 - If everything looks intentional, approve the build:
-  `argos build review <buildReference> --conclusion approve`.
+  `argos build review <buildReference> --token <personal-token> --conclusion approve --json`.
   For build-number references, add `--project owner/project`.
 - If you find a regression, request changes:
-  `argos build review <buildReference> --conclusion request-changes`.
+  `argos build review <buildReference> --token <personal-token> --conclusion request-changes --json`.
   For build-number references, add `--project owner/project`.
+- Do not use project tokens for review creation.
+- If no personal access token is available, do not post the review on Argos.
+  Give the user the conclusion, the evidence, and say that posting was skipped
+  because the CLI does not have sufficient access.
+- If blocked unexpectedly, report the exact command, the exact error, and
+  whether the token was missing, unreadable, rejected, or insufficiently
+  privileged.
 - In the PR review, call out regressions with the Argos build URL, the affected snapshot names, and the mismatch between the intended change and the rendered result.
 - If you find flakiness, explain the signal and recommend a stabilization fix before approval.
 - When relevant, mention both the code evidence and the screenshot evidence in the same finding.
@@ -235,13 +272,22 @@ For build inspection (`argos build get`, `argos build snapshots`):
 1. `--token <token>` flag
 2. `ARGOS_TOKEN` environment variable
 
-Both are project tokens.
+These commands require an explicit token. If no CLI token is available, ask the
+user to provide `ARGOS_TOKEN` or `--token`. If the user does not provide one,
+stop before running Argos CLI commands.
 
-Creating a review requires a personal access token. For review submission (`argos build review`), auth resolves: `--token` flag > `ARGOS_TOKEN` env var > token stored by `argos login`.
+Creating a review requires a personal access token. For review submission
+(`argos build review`), check for a personal token in
+`~/.config/argos-ci/config.json` under the `token` field. If no personal access
+token is available, do not post the review on Argos; give the conclusion and
+evidence to the user instead.
 
 When `<buildReference>` is a build number (not a full URL), `--project owner/project` is also required to identify the Argos project.
 
-If no token is found, the CLI will error. Run `argos login` once to authenticate via browser — no manual token copy-paste needed:
+If no CLI token is found for build inspection, the CLI will error. For agent
+workflows, ask the user to provide `ARGOS_TOKEN` or `--token` before running
+build inspection commands. For interactive human setup of review submission,
+run `argos login` once to authenticate via browser:
 
 ```bash
 argos login
