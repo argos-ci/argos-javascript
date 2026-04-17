@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.2.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.2.0...@argos-ci/core@5.2.1) (2026-04-17)
+
+**Note:** Version bump only for package @argos-ci/core
+
+
+
+
+
 # [5.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@5.1.3...@argos-ci/core@5.2.0) (2026-03-29)
 
 

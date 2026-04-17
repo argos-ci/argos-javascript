@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.1.4...@argos-ci/cli@4.2.0) (2026-04-17)
+
+
+### Features
+
+* **cli:** add builds commands ([b2fbf3e](https://github.com/argos-ci/argos-javascript/commit/b2fbf3ec8a44a074fa871de6ada720bad60e37e0))
+* **cli:** add login command ([add22e0](https://github.com/argos-ci/argos-javascript/commit/add22e031b04c7ec256902e06ddcdfd75ed8fe61))
+* **cli:** fix review comments ([b05fb9b](https://github.com/argos-ci/argos-javascript/commit/b05fb9bf9279e861f97f30c369a93929d0af54ec))
+* **cli:** review build command ([0712094](https://github.com/argos-ci/argos-javascript/commit/0712094ba78777498cb0d165a26a0b16d4f92f17))
+* **cli:** use new endpoint in build command ([7617772](https://github.com/argos-ci/argos-javascript/commit/76177722b78d6531260430fad6e92d9b1b6cf6e3))
+
+
+
+
+
 ## [4.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.1.3...@argos-ci/cli@4.1.4) (2026-03-29)
 
 **Note:** Version bump only for package @argos-ci/cli

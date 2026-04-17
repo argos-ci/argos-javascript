@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/gitlab@0.5.0...@argos-ci/gitlab@0.6.0) (2026-04-17)
+
+
+### Features
+
+* **cli:** use new endpoint in build command ([7617772](https://github.com/argos-ci/argos-javascript/commit/76177722b78d6531260430fad6e92d9b1b6cf6e3))
+
+
+
+
+
 # [0.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/gitlab@0.4.4...@argos-ci/gitlab@0.5.0) (2026-03-29)
 
 
