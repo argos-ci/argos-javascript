@@ -31,9 +31,26 @@ and JSON output.
 
 ## Authentication
 
-Auth for build read commands resolves: `--token` flag > `ARGOS_TOKEN` env var. Both are project tokens.
+Before running Argos CLI commands, separate build inspection access from review
+submission access without printing any token value:
 
-Creating a review requires a personal access token. For `build review`, auth resolves: `--token` flag > `ARGOS_TOKEN` env var > token stored by `argos login`.
+1. For build inspection, check whether `ARGOS_TOKEN` is already set in the
+   environment or whether a token was provided with `--token`.
+2. If no CLI token is available, ask the user to provide `ARGOS_TOKEN` or a
+   `--token` value. If the user does not provide one, stop before running Argos
+   CLI commands.
+3. For review submission, check whether a personal access token is stored in
+   `~/.config/argos-ci/config.json` under the `token` field.
+4. If no personal access token is available, do not post the review on the Argos
+   build. Give the conclusion and evidence to the user instead, because CLI
+   access is not sufficient to create the review.
+
+Auth for build read commands (`build get`, `build snapshots`) resolves:
+`--token` flag > `ARGOS_TOKEN` env var.
+
+Creating a review requires a personal access token. For `build review`, auth
+must use a personal token, such as the token stored by `argos login` in
+`~/.config/argos-ci/config.json`. Do not use project tokens for review creation.
 
 When `<buildReference>` is a build number (not a full URL), `--project owner/project` is also required to identify the Argos project. A full build URL already contains the owner and project.
 
@@ -66,9 +83,9 @@ argos build review 72652 --project argos-ci/argos-javascript --conclusion approv
 **Review a build (fetch metadata first, then diffs that need review):**
 
 ```bash
-argos build get 72652 --json
-argos build snapshots 72652 --needs-review --json
-argos build review 72652 --project argos-ci/argos-javascript --conclusion approve
+ARGOS_TOKEN=<token> argos build get 72652 --project argos-ci/argos-javascript --json
+ARGOS_TOKEN=<token> argos build snapshots 72652 --project argos-ci/argos-javascript --needs-review --json
+argos build review 72652 --project argos-ci/argos-javascript --token <personal-token> --conclusion approve --json
 ```
 
 Use `build review ... --conclusion request-changes` when the visual diffs reveal a regression. When passing a full build URL, `--project` is not needed.
