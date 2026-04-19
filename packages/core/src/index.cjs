@@ -12,3 +12,13 @@ exports.readConfig = async (...args) => {
   const { readConfig } = await import("./index.mjs");
   return readConfig(...args);
 };
+
+exports.deploy = async (...args) => {
+  const { deploy } = await import("./index.mjs");
+  return deploy(...args);
+};
+
+exports.skip = async (...args) => {
+  const { skip } = await import("./index.mjs");
+  return skip(...args);
+};
