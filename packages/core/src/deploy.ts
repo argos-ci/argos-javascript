@@ -59,7 +59,8 @@ export interface DeployParameters {
  * Deploy a static site (e.g. Storybook) to Argos.
  */
 export async function deploy(params: DeployParameters) {
-  debug("Starting upload with params", params);
+  const { token: _token, ...debugParams } = params;
+  debug("Starting deploy with params", debugParams);
 
   // Read config
   const config = await getConfigFromOptions(params);
@@ -100,6 +101,7 @@ export async function deploy(params: DeployParameters) {
       };
     }),
   );
+  const filesByPath = new Map(files.map((file) => [file.path, file]));
 
   debug("Creating deployment");
   const createResponse = await apiClient.POST("/deployments", {
@@ -127,7 +129,7 @@ export async function deploy(params: DeployParameters) {
   );
 
   const uploads = filesToUpload.map(({ path, uploadUrl }) => {
-    const file = files.find((f) => f.path === path);
+    const file = filesByPath.get(path);
     if (!file) {
       throw new Error(`Invariant: file not found for path: ${path}`);
     }
