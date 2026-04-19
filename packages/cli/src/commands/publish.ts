@@ -14,12 +14,16 @@ type PublishOptions = TokenOption & {
 
 function parsePrNumber(value: string) {
   if (!/^\d+$/.test(value)) {
-    throw new InvalidArgumentError("pull request number must be a positive integer");
+    throw new InvalidArgumentError(
+      "pull request number must be a positive integer",
+    );
   }
 
   const prNumber = Number(value);
   if (!Number.isSafeInteger(prNumber) || prNumber <= 0) {
-    throw new InvalidArgumentError("pull request number must be a positive integer");
+    throw new InvalidArgumentError(
+      "pull request number must be a positive integer",
+    );
   }
 
   return prNumber;
