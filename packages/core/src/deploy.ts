@@ -50,7 +50,6 @@ export interface DeployParameters {
 
   /**
    * Deployment environment.
-   * @default "preview"
    */
   environment?: "preview" | "production";
 }

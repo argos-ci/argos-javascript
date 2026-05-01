@@ -870,8 +870,7 @@ export interface operations {
                     /** @description The pull request number */
                     prNumber?: number | null;
                     /**
-                     * @description The deployment environment
-                     * @default preview
+                     * @description The deployment environment. When omitted, it is inferred from `branch`: branches matching the configured production-branch glob are treated as `production`; all others default to `preview`.
                      * @enum {string}
                      */
                     environment?: "preview" | "production";
