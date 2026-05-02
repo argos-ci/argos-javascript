@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.2.0...@argos-ci/cli@4.3.0) (2026-05-02)
+
+
+### Features
+
+* **deploy:** allow to deploy a static build ([#292](https://github.com/argos-ci/argos-javascript/issues/292)) ([4f1cfa9](https://github.com/argos-ci/argos-javascript/commit/4f1cfa9db40cef760779b553b622524abcf6b199))
+* **deploy:** finalize deploy command ([#293](https://github.com/argos-ci/argos-javascript/issues/293)) ([5d29a15](https://github.com/argos-ci/argos-javascript/commit/5d29a153a04bdac28310d1f14f90dadbad7a7115))
+
+
+
+
+
 # [4.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@4.1.4...@argos-ci/cli@4.2.0) (2026-04-17)
 
 
