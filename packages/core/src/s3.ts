@@ -12,7 +12,6 @@ export async function uploadFile(input: UploadInput): Promise<void> {
     method: "PUT",
     headers: {
       "Content-Type": input.contentType,
-      "Content-Length": file.length.toString(),
     },
     signal: AbortSignal.timeout(30_000),
     body: new Uint8Array(file),
