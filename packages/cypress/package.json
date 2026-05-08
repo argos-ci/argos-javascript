@@ -34,7 +34,7 @@
     },
     "./task": {
       "types": "./dist/task.d.mts",
-      "import": "./dist/task.js",
+      "import": "./dist/task.mjs",
       "require": "./dist/task.cjs",
       "default": "./dist/task.cjs"
     },
