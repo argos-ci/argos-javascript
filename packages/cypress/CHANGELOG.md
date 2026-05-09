@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.6](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.3.5...@argos-ci/cypress@6.3.6) (2026-05-09)
+
+
+### Bug Fixes
+
+* **cypress:** correct ESM `/task` import ([#295](https://github.com/argos-ci/argos-javascript/issues/295)) ([80da601](https://github.com/argos-ci/argos-javascript/commit/80da601d0c8c0e340fc16e6ac714f9047bcffeab))
+
+
+
+
+
 ## [6.3.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cypress@6.3.4...@argos-ci/cypress@6.3.5) (2026-05-03)
 
 **Note:** Version bump only for package @argos-ci/cypress
