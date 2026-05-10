@@ -32,7 +32,7 @@
   },
   "types": "./dist/index.d.mts",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build-schema-types": "openapi-typescript https://api.argos-ci.com/v2/openapi.yaml -o src/schema.ts",
