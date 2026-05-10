@@ -50,10 +50,10 @@
     "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
     "expect-puppeteer": "^11.0.0",
-    "jest": "^30.3.0",
+    "jest": "^30.4.2",
     "jest-light-runner": "^0.7.11",
     "jest-puppeteer": "^11.0.0",
-    "puppeteer": "^24.40.0"
+    "puppeteer": "^24.43.0"
   },
   "scripts": {
     "build": "tsdown && cp ./src/index.cjs ./dist",
