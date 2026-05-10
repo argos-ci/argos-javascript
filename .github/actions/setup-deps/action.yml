@@ -4,7 +4,7 @@ inputs:
   node-version:
     description: "Node.js version"
     required: false
-    default: latest
+    default: lts/*
 runs:
   using: "composite"
   steps:

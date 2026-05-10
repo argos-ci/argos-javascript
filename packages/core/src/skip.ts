@@ -1,7 +1,7 @@
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { createClient, throwAPIError } from "@argos-ci/api-client";
 import { getConfigFromOptions } from "./config";
-import { getAuthToken } from "./auth";
+import { resolveArgosToken } from "./auth";
 import { getArgosCoreSDKIdentifier } from "./version";
 import type { UploadParameters } from "./upload";
 
@@ -27,7 +27,7 @@ export async function skip(
     getArgosCoreSDKIdentifier(),
   ]);
 
-  const authToken = getAuthToken(config);
+  const authToken = await resolveArgosToken(config);
 
   const apiClient = createClient({
     baseUrl: config.apiBaseUrl,

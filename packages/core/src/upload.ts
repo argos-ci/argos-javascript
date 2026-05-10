@@ -4,7 +4,7 @@ import { getConfigFromOptions } from "./config";
 import { discoverSnapshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
-import { getAuthToken } from "./auth";
+import { resolveArgosToken } from "./auth";
 import { uploadFile } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
@@ -174,7 +174,7 @@ export async function upload(params: UploadParameters): Promise<{
     getArgosCoreSDKIdentifier(),
   ]);
 
-  const authToken = getAuthToken(config);
+  const authToken = await resolveArgosToken(config);
 
   const apiClient = createClient({
     baseUrl: config.apiBaseUrl,

@@ -46,7 +46,8 @@
   },
   "scripts": {
     "build": "tsdown",
-    "e2e": "vitest",
+    "e2e": "vitest --tags-filter=\"not oidc\"",
+    "e2e-oidc": "vitest e2e/upload-oidc.test.js",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."

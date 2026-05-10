@@ -10,3 +10,5 @@ dist/
 .turbo
 # NPM
 .npmrc
+# Claude
+.claude/settings.local.json

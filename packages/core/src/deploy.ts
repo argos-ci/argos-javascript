@@ -7,7 +7,7 @@ import { hashFile } from "./hashing";
 import { uploadFile } from "./s3";
 import { chunk } from "./util/chunk";
 import { debug } from "./debug";
-import { getAuthToken } from "./auth";
+import { resolveArgosToken } from "./auth";
 import { getConfigFromOptions } from "./config";
 
 const CHUNK_SIZE = 10;
@@ -64,7 +64,7 @@ export async function deploy(params: DeployParameters) {
   // Read config
   const config = await getConfigFromOptions(params);
 
-  const authToken = getAuthToken(config);
+  const authToken = await resolveArgosToken(config);
 
   const apiClient = createClient({
     baseUrl: config.apiBaseUrl,

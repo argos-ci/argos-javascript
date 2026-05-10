@@ -12,6 +12,7 @@ env:
 
 jobs:
   lint:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,6 +25,7 @@ jobs:
         run: npm run lint
 
   check-types:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -36,6 +38,7 @@ jobs:
         run: npm run check-types
 
   check-format:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,6 +51,7 @@ jobs:
         run: npm run check-format
 
   unit:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -68,6 +72,7 @@ jobs:
         run: npm run test
 
   e2e-core:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -93,11 +98,36 @@ jobs:
           NODE_VERSION: ${{ matrix.node-version }}
           OS: ${{ matrix.os }}
 
+  e2e-core-oidc:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+
+      - name: Build
+        run: pnpm exec -- turbo run build --filter=@argos-ci/cli
+
+      - name: Run OIDC upload e2e
+        run: pnpm --filter=@argos-ci/cli run e2e-oidc
+        env:
+          NODE_VERSION: current
+          OS: ubuntu-latest
+
   e2e-cypress:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
-        node-version: [current]
+        node-version: [lts/*]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -119,10 +149,11 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-playwright:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
-        node-version: [current]
+        node-version: [lts/*]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -144,10 +175,11 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-puppeteer:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
-        node-version: [current]
+        node-version: [lts/*]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -169,10 +201,11 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-webdriverio:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22]
+        node-version: [lts/*]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -194,10 +227,11 @@ jobs:
           OS: ${{ matrix.os }}
 
   e2e-storybook:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
-        node-version: [current]
+        node-version: [lts/*]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
