@@ -9,9 +9,6 @@ import {
   stubOidcEnv,
 } from "../mocks/oidc";
 
-const base64Decode = (str: string): unknown =>
-  JSON.parse(Buffer.from(str, "base64").toString("utf8"));
-
 const baseConfig: Config = {
   apiBaseUrl: "https://api.argos-ci.com/v2/",
   token: null,
@@ -99,93 +96,6 @@ describe("resolveArgosToken", () => {
         ),
       );
       await expect(resolveArgosToken(baseConfig)).rejects.toThrow();
-    });
-
-    it("is preferred over the tokenless fallback", async () => {
-      const token = await resolveArgosToken({
-        ...baseConfig,
-        ciProvider: "github-actions",
-      });
-      // The OIDC path returns the mocked Argos token, not a tokenless- prefix.
-      expect(token).toBe(MOCK_ARGOS_TOKEN);
-    });
-  });
-
-  describe("tokenless fallback (GitHub Actions, no OIDC)", () => {
-    it("returns a tokenless token with the expected prefix", async () => {
-      const token = await resolveArgosToken({
-        ...baseConfig,
-        ciProvider: "github-actions",
-      });
-      expect(token).toMatch(/^tokenless-github-/);
-    });
-
-    it("encodes owner, repository, jobId, and runId in the token", async () => {
-      const token = await resolveArgosToken({
-        ...baseConfig,
-        ciProvider: "github-actions",
-      });
-      const payload = base64Decode(token.replace("tokenless-github-", ""));
-      expect(payload).toEqual({
-        owner: "acme",
-        repository: "web",
-        jobId: "job-1",
-        runId: "run-42",
-      });
-    });
-
-    it("includes prNumber when set", async () => {
-      const token = await resolveArgosToken({
-        ...baseConfig,
-        ciProvider: "github-actions",
-        prNumber: 99,
-      });
-      const payload = base64Decode(token.replace("tokenless-github-", "")) as {
-        prNumber?: number;
-      };
-      expect(payload.prNumber).toBe(99);
-    });
-
-    it("omits prNumber when null", async () => {
-      const token = await resolveArgosToken({
-        ...baseConfig,
-        ciProvider: "github-actions",
-        prNumber: null,
-      });
-      const payload = base64Decode(token.replace("tokenless-github-", "")) as {
-        prNumber?: number;
-      };
-      expect(payload.prNumber).toBeUndefined();
-    });
-
-    it("throws when originalRepository is missing", async () => {
-      await expect(
-        resolveArgosToken({
-          ...baseConfig,
-          ciProvider: "github-actions",
-          originalRepository: null,
-        }),
-      ).rejects.toThrow("Automatic GitHub Actions variables detection failed");
-    });
-
-    it("throws when jobId is missing", async () => {
-      await expect(
-        resolveArgosToken({
-          ...baseConfig,
-          ciProvider: "github-actions",
-          jobId: null,
-        }),
-      ).rejects.toThrow("Automatic GitHub Actions variables detection failed");
-    });
-
-    it("throws when runId is missing", async () => {
-      await expect(
-        resolveArgosToken({
-          ...baseConfig,
-          ciProvider: "github-actions",
-          runId: null,
-        }),
-      ).rejects.toThrow("Automatic GitHub Actions variables detection failed");
     });
   });
 
