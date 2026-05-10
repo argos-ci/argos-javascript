@@ -38,7 +38,7 @@
     "@argos-ci/core": "workspace:*",
     "commander": "^14.0.3",
     "open": "^11.0.0",
-    "ora": "^9.3.0",
+    "ora": "^9.4.0",
     "update-notifier": "^7.3.1"
   },
   "devDependencies": {
