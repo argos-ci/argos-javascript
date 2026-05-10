@@ -19,4 +19,9 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
+  axios: ^1.16.0
   esbuild: ^0.25.10
+  serialize-javascript: ^7.0.3
+  undici: 8.1.0
+  vite: ^7.3.2
+
