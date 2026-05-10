@@ -120,6 +120,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/github-actions/oidc/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exchange a GitHub Actions OIDC token for an Argos token
+         * @description Called by GitHub Actions to exchange an OIDC token for a short-lived Argos project token.
+         */
+        post: operations["exchangeGitHubActionsOidcToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project": {
         parameters: {
             query?: never;
@@ -1091,6 +1111,11 @@ export interface operations {
                 content: {
                     "application/json": {
                         deploymentId: string;
+                        projectId: string;
+                        /** @enum {string} */
+                        environment: "preview" | "production";
+                        /** @enum {string} */
+                        visibility: "private" | "public";
                     };
                 };
             };
@@ -1246,6 +1271,82 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exchangeGitHubActionsOidcToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description GitHub Actions OIDC token */
+                    oidcToken: string;
+                    /** @description GitHub repository in owner/name format */
+                    repository?: string;
+                    /** @description Expected commit SHA */
+                    commit?: components["schemas"]["Sha1Hash"];
+                    /** @description Expected branch name */
+                    branch?: string;
+                    /** @description Expected pull request number */
+                    pullRequestNumber?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Token exchange successful */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Short-lived Argos project token */
+                        token: string;
+                        /** @description Token expiration date as an ISO string */
+                        expiresAt: string;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

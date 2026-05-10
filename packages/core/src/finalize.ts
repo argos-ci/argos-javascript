@@ -1,5 +1,5 @@
 import { createClient, throwAPIError } from "@argos-ci/api-client";
-import { getAuthToken } from "./auth";
+import { resolveArgosToken } from "./auth";
 import { readConfig } from "./config";
 
 export type FinalizeParameters = {
@@ -15,7 +15,7 @@ export async function finalize(params: FinalizeParameters) {
   const config = await readConfig({
     parallelNonce: params.parallel?.nonce,
   });
-  const authToken = getAuthToken(config);
+  const authToken = await resolveArgosToken(config);
 
   const apiClient = createClient({
     baseUrl: config.apiBaseUrl,

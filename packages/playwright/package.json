@@ -61,7 +61,7 @@
   },
   "scripts": {
     "build": "tsdown && cp ./src/index.cjs ./dist",
-    "test-e2e": "pnpm exec -- playwright test",
+    "test-e2e": "playwright test",
     "build-e2e": "playwright install chromium --with-deps",
     "e2e": "UPLOAD_TO_ARGOS=true pnpm run test-e2e",
     "check-types": "tsc",

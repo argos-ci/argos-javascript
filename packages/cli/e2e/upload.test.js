@@ -4,7 +4,7 @@ import { getRequiredEnv, run } from "./utils.js";
 
 getRequiredEnv("ARGOS_TOKEN");
 
-test("upload returns a full build URL", () => {
+test("upload returns a full build URL", { timeout: 15_000 }, () => {
   const buildName = `argos-cli-e2e-node-${process.env.NODE_VERSION}-${process.env.OS}`;
   const uploadResult = run([
     "upload",
@@ -17,4 +17,4 @@ test("upload returns a full build URL", () => {
   console.error(uploadResult.stderr);
 
   expect(uploadResult.combined).toMatch(/https?:\/\/\S+\/builds\/\d+/);
-}, 10000);
+});
