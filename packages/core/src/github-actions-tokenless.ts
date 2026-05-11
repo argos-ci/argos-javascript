@@ -27,7 +27,7 @@ function getTokenlessBearerToken(
 
   if (!repository || !jobId || !runId) {
     throw new Error(
-      `Automatic GitHub Actions variables detection failed. Please add the 'ARGOS_TOKEN'`,
+      `Automatic GitHub Actions variables detection failed. Please set ARGOS_TOKEN.`,
     );
   }
 
