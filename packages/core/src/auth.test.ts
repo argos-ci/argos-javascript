@@ -32,7 +32,7 @@ const baseConfig: Config = {
   runId: "run-42",
   runAttempt: null,
   prNumber: null,
-  prHeadCommit: null,
+  prHeadCommit: "abc123def456abc123def456abc123def456abc1",
   prBaseBranch: null,
   mode: null,
   ciProvider: null,
