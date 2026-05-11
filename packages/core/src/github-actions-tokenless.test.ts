@@ -16,30 +16,53 @@ const base64Decode = (str: string): unknown =>
 const server = setupOidcServer();
 
 describe("isGitHubActionsTokenlessAvailable", () => {
-  it("returns true when ciProvider is github-actions and ARGOS_TOKEN is absent", () => {
+  const prHeadCommit = "abc123def456abc123def456abc123def456abc1";
+
+  it("returns true when ciProvider is github-actions, prHeadCommit is set and ARGOS_TOKEN is absent", () => {
     vi.stubEnv("ARGOS_TOKEN", "");
     expect(
-      isGitHubActionsTokenlessAvailable({ ciProvider: "github-actions" }),
+      isGitHubActionsTokenlessAvailable({
+        ciProvider: "github-actions",
+        prHeadCommit,
+      }),
     ).toBe(true);
   });
 
   it("returns false when ARGOS_TOKEN is set", () => {
     vi.stubEnv("ARGOS_TOKEN", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     expect(
-      isGitHubActionsTokenlessAvailable({ ciProvider: "github-actions" }),
+      isGitHubActionsTokenlessAvailable({
+        ciProvider: "github-actions",
+        prHeadCommit,
+      }),
     ).toBe(false);
   });
 
   it("returns false when ciProvider is not github-actions", () => {
     vi.stubEnv("ARGOS_TOKEN", "");
-    expect(isGitHubActionsTokenlessAvailable({ ciProvider: "gitlab-ci" })).toBe(
-      false,
-    );
+    expect(
+      isGitHubActionsTokenlessAvailable({
+        ciProvider: "gitlab-ci",
+        prHeadCommit,
+      }),
+    ).toBe(false);
   });
 
   it("returns false when ciProvider is null", () => {
     vi.stubEnv("ARGOS_TOKEN", "");
-    expect(isGitHubActionsTokenlessAvailable({ ciProvider: null })).toBe(false);
+    expect(
+      isGitHubActionsTokenlessAvailable({ ciProvider: null, prHeadCommit }),
+    ).toBe(false);
+  });
+
+  it("returns false when prHeadCommit is missing", () => {
+    vi.stubEnv("ARGOS_TOKEN", "");
+    expect(
+      isGitHubActionsTokenlessAvailable({
+        ciProvider: "github-actions",
+        prHeadCommit: null,
+      }),
+    ).toBe(false);
   });
 });
 
@@ -49,7 +72,7 @@ describe("exchangeGitHubActionsTokenlessToken", () => {
     jobId: "job-1",
     runId: "run-42",
     prNumber: null,
-    commit: "abc123def456abc123def456abc123def456abc1",
+    prHeadCommit: "abc123def456abc123def456abc123def456abc1",
     branch: "main",
   };
 
@@ -88,6 +111,17 @@ describe("exchangeGitHubActionsTokenlessToken", () => {
     ).rejects.toThrow("Automatic GitHub Actions variables detection failed");
   });
 
+  it("throws when prHeadCommit is missing", async () => {
+    await expect(
+      exchangeGitHubActionsTokenlessToken({
+        apiBaseUrl: "https://api.argos-ci.com/v2/",
+        config: { ...baseConfig, prHeadCommit: null },
+      }),
+    ).rejects.toThrow(
+      "GitHub PR head commit is required for tokenless authentication",
+    );
+  });
+
   it("throws when the Argos API exchange returns an error", async () => {
     server.use(
       http.post(
@@ -123,7 +157,7 @@ describe("exchangeGitHubActionsTokenlessToken", () => {
       config: { ...baseConfig, prNumber: 99 },
     });
 
-    expect(capturedBody.commit).toBe(baseConfig.commit);
+    expect(capturedBody.commit).toBe(baseConfig.prHeadCommit);
     expect(capturedBody.branch).toBe(baseConfig.branch);
     expect(typeof capturedBody.tokenlessToken).toBe("string");
     const bearer = capturedBody.tokenlessToken as string;
