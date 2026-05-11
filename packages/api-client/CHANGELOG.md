@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.20.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.19.0...@argos-ci/api-client@0.20.0) (2026-05-11)
+
+
+### Features
+
+* make GitHub tokenless auth more secure ([#301](https://github.com/argos-ci/argos-javascript/issues/301)) ([41b62d0](https://github.com/argos-ci/argos-javascript/commit/41b62d01df05cae2fb5d6145b4f62ccb65aebc4e))
+* require Node.js v22+ ([460a431](https://github.com/argos-ci/argos-javascript/commit/460a431ffb003a743bfab8af6e8451da45483bfd))
+* support GitHub Actions OIDC authentication ([#296](https://github.com/argos-ci/argos-javascript/issues/296)) ([a8956ce](https://github.com/argos-ci/argos-javascript/commit/a8956ce7a9ff37f3ccbc3440b811083ada675daf))
+
+
+### BREAKING CHANGES
+
+* Node.js 22+ required
+
+
+
+
+
 # [0.19.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.18.0...@argos-ci/api-client@0.19.0) (2026-05-02)
 
 

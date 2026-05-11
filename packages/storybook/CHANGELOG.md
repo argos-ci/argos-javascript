@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.3.4...@argos-ci/storybook@6.0.0) (2026-05-11)
+
+
+### Features
+
+* require Node.js v22+ ([460a431](https://github.com/argos-ci/argos-javascript/commit/460a431ffb003a743bfab8af6e8451da45483bfd))
+
+
+### BREAKING CHANGES
+
+* Node.js 22+ required
+
+
+
+
+
 ## [5.3.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.3.3...@argos-ci/storybook@5.3.4) (2026-05-03)
 
 **Note:** Version bump only for package @argos-ci/storybook
