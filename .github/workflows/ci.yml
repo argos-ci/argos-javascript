@@ -122,6 +122,26 @@ jobs:
           NODE_VERSION: current
           OS: ubuntu-latest
 
+  e2e-core-tokenless:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+
+      - name: Build
+        run: pnpm exec -- turbo run build --filter=@argos-ci/cli
+
+      - name: Run tokenless upload e2e
+        run: pnpm --filter=@argos-ci/cli run e2e-tokenless
+        env:
+          NODE_VERSION: current
+          OS: ubuntu-latest
+
   e2e-cypress:
     timeout-minutes: 5
     strategy:

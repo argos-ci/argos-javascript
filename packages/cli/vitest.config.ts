@@ -7,6 +7,10 @@ export default {
         name: "oidc",
         description: "OIDC tests.",
       },
+      {
+        name: "tokenless",
+        description: "Tokenless exchange tests.",
+      },
     ],
   },
 };

@@ -4,7 +4,9 @@ import { resolveArgosToken } from "./auth";
 import type { Config } from "./config";
 import {
   MOCK_ARGOS_TOKEN,
+  MOCK_EXPIRES_AT,
   MOCK_OIDC_URL,
+  MOCK_TOKENLESS_ARGOS_TOKEN,
   setupOidcServer,
   stubOidcEnv,
 } from "../mocks/oidc";
@@ -30,7 +32,7 @@ const baseConfig: Config = {
   runId: "run-42",
   runAttempt: null,
   prNumber: null,
-  prHeadCommit: null,
+  prHeadCommit: "abc123def456abc123def456abc123def456abc1",
   prBaseBranch: null,
   mode: null,
   ciProvider: null,
@@ -101,61 +103,70 @@ describe("resolveArgosToken", () => {
       await expect(resolveArgosToken(baseConfig)).rejects.toThrow();
     });
 
-    it("is preferred over the tokenless fallback", async () => {
+    it("is preferred over the tokenless exchange fallback", async () => {
       const token = await resolveArgosToken({
         ...baseConfig,
         ciProvider: "github-actions",
       });
-      // The OIDC path returns the mocked Argos token, not a tokenless- prefix.
+      // The OIDC path returns the OIDC mock token, not the tokenless one.
       expect(token).toBe(MOCK_ARGOS_TOKEN);
     });
   });
 
-  describe("tokenless fallback (GitHub Actions, no OIDC)", () => {
-    it("returns a tokenless token with the expected prefix", async () => {
+  describe("GitHub Actions tokenless exchange (no OIDC)", () => {
+    it("exchanges the tokenless bearer token for a short-lived Argos token", async () => {
       const token = await resolveArgosToken({
         ...baseConfig,
         ciProvider: "github-actions",
       });
-      expect(token).toMatch(/^tokenless-github-/);
+      expect(token).toBe(MOCK_TOKENLESS_ARGOS_TOKEN);
     });
 
-    it("encodes owner, repository, jobId, and runId in the token", async () => {
-      const token = await resolveArgosToken({
+    it("sends the expected payload (commit, branch, tokenless bearer)", async () => {
+      let capturedBody: Record<string, unknown> = {};
+      server.use(
+        http.post(
+          "https://api.argos-ci.com/v2/auth/github-actions/tokenless/exchange",
+          async ({ request }) => {
+            capturedBody = (await request.json()) as Record<string, unknown>;
+            return HttpResponse.json({
+              token: MOCK_TOKENLESS_ARGOS_TOKEN,
+              expiresAt: MOCK_EXPIRES_AT,
+            });
+          },
+        ),
+      );
+
+      await resolveArgosToken({
         ...baseConfig,
         ciProvider: "github-actions",
+        prNumber: 99,
       });
-      const payload = base64Decode(token.replace("tokenless-github-", ""));
+
+      expect(capturedBody.commit).toBe(baseConfig.commit);
+      expect(capturedBody.branch).toBe(baseConfig.branch);
+      const bearer = capturedBody.tokenlessToken as string;
+      expect(bearer.startsWith("tokenless-github-")).toBe(true);
+      const payload = base64Decode(bearer.replace("tokenless-github-", ""));
       expect(payload).toEqual({
         owner: "acme",
         repository: "web",
         jobId: "job-1",
         runId: "run-42",
-      });
-    });
-
-    it("includes prNumber when set", async () => {
-      const token = await resolveArgosToken({
-        ...baseConfig,
-        ciProvider: "github-actions",
         prNumber: 99,
       });
-      const payload = base64Decode(token.replace("tokenless-github-", "")) as {
-        prNumber?: number;
-      };
-      expect(payload.prNumber).toBe(99);
     });
 
-    it("omits prNumber when null", async () => {
-      const token = await resolveArgosToken({
-        ...baseConfig,
-        ciProvider: "github-actions",
-        prNumber: null,
-      });
-      const payload = base64Decode(token.replace("tokenless-github-", "")) as {
-        prNumber?: number;
-      };
-      expect(payload.prNumber).toBeUndefined();
+    it("throws when the Argos tokenless exchange endpoint rejects the request", async () => {
+      server.use(
+        http.post(
+          "https://api.argos-ci.com/v2/auth/github-actions/tokenless/exchange",
+          () => HttpResponse.json({ error: "Forbidden" }, { status: 403 }),
+        ),
+      );
+      await expect(
+        resolveArgosToken({ ...baseConfig, ciProvider: "github-actions" }),
+      ).rejects.toThrow();
     });
 
     it("throws when originalRepository is missing", async () => {

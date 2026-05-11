@@ -6,6 +6,7 @@ export const MOCK_OIDC_URL = "https://oidc.test.local";
 export const MOCK_OIDC_TOKEN = "mock.oidc.jwt";
 export const MOCK_ARGOS_TOKEN = "mock-argos-token-returned";
 export const MOCK_EXPIRES_AT = "2099-01-01T00:00:00.000Z";
+export const MOCK_TOKENLESS_ARGOS_TOKEN = "mock-tokenless-argos-token-returned";
 
 export const oidcHandlers = [
   http.get(MOCK_OIDC_URL, ({ request }) => {
@@ -22,6 +23,28 @@ export const oidcHandlers = [
       if (body.oidcToken === MOCK_OIDC_TOKEN) {
         return HttpResponse.json({
           token: MOCK_ARGOS_TOKEN,
+          expiresAt: MOCK_EXPIRES_AT,
+        });
+      }
+      return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
+    },
+  ),
+  http.post(
+    "https://api.argos-ci.com/v2/auth/github-actions/tokenless/exchange",
+    async ({ request }) => {
+      const body = (await request.json()) as {
+        tokenlessToken?: string;
+        commit?: string;
+        branch?: string;
+      };
+      if (
+        typeof body.tokenlessToken === "string" &&
+        body.tokenlessToken.startsWith("tokenless-github-") &&
+        body.commit &&
+        body.branch
+      ) {
+        return HttpResponse.json({
+          token: MOCK_TOKENLESS_ARGOS_TOKEN,
           expiresAt: MOCK_EXPIRES_AT,
         });
       }
