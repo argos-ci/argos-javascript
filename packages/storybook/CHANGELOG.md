@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.0.0...@argos-ci/storybook@6.0.1) (2026-05-19)
+
+
+### Bug Fixes
+
+* **storybook:** fix missing dependency ([#304](https://github.com/argos-ci/argos-javascript/issues/304)) ([a78556e](https://github.com/argos-ci/argos-javascript/commit/a78556e213f23112fe2a085d893e8f31282a0952)), closes [#303](https://github.com/argos-ci/argos-javascript/issues/303)
+
+
+
+
+
 # [6.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@5.3.4...@argos-ci/storybook@6.0.0) (2026-05-11)
 
 
