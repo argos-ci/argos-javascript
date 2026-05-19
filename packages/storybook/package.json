@@ -49,12 +49,12 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
+    "@argos-ci/core": "workspace:*",
     "@argos-ci/playwright": "workspace:*",
     "@argos-ci/util": "workspace:*"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
-    "@argos-ci/core": "workspace:*",
     "@argos-ci/util": "workspace:*",
     "@storybook/addon-docs": "^10.3.6",
     "@storybook/addon-links": "^10.3.6",
