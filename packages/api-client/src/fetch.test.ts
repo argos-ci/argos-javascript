@@ -77,6 +77,10 @@ describe("apiFetch", () => {
       async (input: RequestInfo | URL) =>
         new Promise<Response>((_resolve, reject) => {
           const request = input instanceof Request ? input : new Request(input);
+          if (request.signal.aborted) {
+            reject(request.signal.reason);
+            return;
+          }
           request.signal.addEventListener(
             "abort",
             () => reject(request.signal.reason),
@@ -96,5 +100,61 @@ describe("apiFetch", () => {
       name: "TimeoutError",
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves caller cancellation signal", async () => {
+    const controller = new AbortController();
+    const reason = new Error("cancelled by caller");
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL) =>
+        new Promise<Response>((_resolve, reject) => {
+          const request = input instanceof Request ? input : new Request(input);
+          if (request.signal.aborted) {
+            reject(request.signal.reason);
+            return;
+          }
+          request.signal.addEventListener(
+            "abort",
+            () => reject(request.signal.reason),
+            { once: true },
+          );
+        }),
+    );
+
+    const promise = apiFetch(
+      new Request("https://api.argos-ci.test/builds", {
+        signal: controller.signal,
+      }),
+      {
+        fetch: fetchMock as unknown as typeof fetch,
+        minTimeout: 0,
+      },
+    );
+    const rejection = promise.catch((error: unknown) => error);
+
+    controller.abort(reason);
+
+    await expect(rejection).resolves.toBe(reason);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call fetch when the caller signal is already aborted", async () => {
+    const controller = new AbortController();
+    const reason = new Error("already cancelled");
+    const fetchMock = vi.fn(async () => new Response("{}"));
+
+    controller.abort(reason);
+
+    await expect(
+      apiFetch(
+        new Request("https://api.argos-ci.test/builds", {
+          signal: controller.signal,
+        }),
+        {
+          fetch: fetchMock as unknown as typeof fetch,
+        },
+      ),
+    ).rejects.toBe(reason);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
