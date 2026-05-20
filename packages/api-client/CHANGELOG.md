@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.20.0...@argos-ci/api-client@0.20.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* **api-client:** fix p-retry missing from deps ([bd741f5](https://github.com/argos-ci/argos-javascript/commit/bd741f5b6715eb6570d6f84a85a6d0abddb2d422))
+* **api-client:** fix retry failing and add a timeout of 30s ([787f97c](https://github.com/argos-ci/argos-javascript/commit/787f97c07e5dc346c7e664445ffcd4b29cf55286))
+
+
+
+
+
 # [0.20.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.19.0...@argos-ci/api-client@0.20.0) (2026-05-11)
 
 
