@@ -89,6 +89,9 @@ importers:
       p-retry:
         specifier: ^8.0.0
         version: 8.0.0
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.5(@types/node@20.19.40)(@vitest/browser-playwright@4.1.5)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(msw@2.14.5(@types/node@20.19.40)(typescript@6.0.3))(vite@7.3.3(@types/node@20.19.40)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.4))
 
   packages/browser:
     devDependencies:
