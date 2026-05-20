@@ -4,7 +4,9 @@ import { run } from "./utils.js";
 
 // No ARGOS_TOKEN — authentication is handled via the GitHub Actions
 // tokenless exchange flow.
-test(
+// It is skipped because it only works on PR, enable it if you have to test tokenless.
+// eslint-disable-next-line vitest/no-disabled-tests
+test.skip(
   "upload returns a full build URL using tokenless authentication",
   { tags: ["tokenless"], timeout: 20_000 },
   () => {
