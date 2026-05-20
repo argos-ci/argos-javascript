@@ -34,11 +34,13 @@ async function createRequestFactory(request: Request, timeout: number) {
       redirect: request.redirect,
       referrer: request.referrer,
       referrerPolicy: request.referrerPolicy,
-      signal: AbortSignal.timeout(timeout),
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(timeout)]),
     });
 }
 
 export async function apiFetch(input: Request, options: APIFetchOptions = {}) {
+  input.signal.throwIfAborted();
+
   const fetchImpl = options.fetch ?? fetch;
   const createRequest = await createRequestFactory(
     input,
@@ -56,6 +58,7 @@ export async function apiFetch(input: Request, options: APIFetchOptions = {}) {
     {
       minTimeout: options.minTimeout,
       retries: options.retries ?? 3,
+      shouldRetry: () => !input.signal.aborted,
       onFailedAttempt: (context) => {
         debug("API request failed", context.error.message);
         if (context.retriesLeft > 0) {
