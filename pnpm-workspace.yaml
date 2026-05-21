@@ -2,7 +2,7 @@ packages:
   - packages/*
 
 catalog:
-  '@types/node': ^20.19.41
+  '@types/node': ^22
   vitest: ^4.1.7
 
 allowBuilds:
