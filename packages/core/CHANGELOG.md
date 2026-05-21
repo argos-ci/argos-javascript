@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.0.1...@argos-ci/core@6.0.2) (2026-05-21)
+
+
+### Bug Fixes
+
+* **tokenless:** fix tokenless with push event ([60b3cd7](https://github.com/argos-ci/argos-javascript/commit/60b3cd76c823497489dfc2432d4ca4a05fc552d2))
+
+
+
+
+
 ## [6.0.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.0.0...@argos-ci/core@6.0.1) (2026-05-20)
 
 **Note:** Version bump only for package @argos-ci/core
