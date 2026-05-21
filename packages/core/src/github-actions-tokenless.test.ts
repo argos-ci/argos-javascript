@@ -58,17 +58,6 @@ describe("exchangeGitHubActionsTokenlessToken", () => {
     ).rejects.toThrow("Automatic GitHub Actions variables detection failed");
   });
 
-  it("throws when prHeadCommit is missing", async () => {
-    await expect(
-      exchangeGitHubActionsTokenlessToken({
-        apiBaseUrl: "https://api.argos-ci.com/v2/",
-        config: { ...baseConfig, prHeadCommit: null },
-      }),
-    ).rejects.toThrow(
-      "GitHub PR head commit is required for tokenless authentication",
-    );
-  });
-
   it("throws when the Argos API exchange returns an error", async () => {
     server.use(
       http.post(
@@ -104,7 +93,7 @@ describe("exchangeGitHubActionsTokenlessToken", () => {
       config: { ...baseConfig, prNumber: 99 },
     });
 
-    expect(capturedBody.commit).toBe(baseConfig.prHeadCommit);
+    expect(capturedBody.commit).toBe(baseConfig.commit);
     expect(capturedBody.branch).toBe(baseConfig.branch);
     expect(typeof capturedBody.tokenlessToken).toBe("string");
     const bearer = capturedBody.tokenlessToken as string;
