@@ -7,7 +7,7 @@ import {
   MOCK_EXPIRES_AT,
   MOCK_OIDC_URL,
   MOCK_TOKENLESS_ARGOS_TOKEN,
-  setupOidcServer,
+  setupTokenExchangeServer,
   stubOidcEnv,
 } from "../mocks/oidc";
 
@@ -43,7 +43,7 @@ const baseConfig: Config = {
   subset: false,
 };
 
-const server = setupOidcServer();
+const server = setupTokenExchangeServer();
 
 describe("resolveArgosToken", () => {
   beforeEach(() => {

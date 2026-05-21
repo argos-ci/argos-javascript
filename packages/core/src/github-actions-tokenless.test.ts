@@ -1,70 +1,16 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
-import {
-  isGitHubActionsTokenlessAvailable,
-  exchangeGitHubActionsTokenlessToken,
-} from "./github-actions-tokenless";
+import { exchangeGitHubActionsTokenlessToken } from "./github-actions-tokenless";
 import {
   MOCK_TOKENLESS_ARGOS_TOKEN,
   MOCK_EXPIRES_AT,
-  setupOidcServer,
+  setupTokenExchangeServer,
 } from "../mocks/oidc";
 
 const base64Decode = (str: string): unknown =>
   JSON.parse(Buffer.from(str, "base64").toString("utf8"));
 
-const server = setupOidcServer();
-
-describe("isGitHubActionsTokenlessAvailable", () => {
-  const prHeadCommit = "abc123def456abc123def456abc123def456abc1";
-
-  it("returns true when ciProvider is github-actions, prHeadCommit is set and ARGOS_TOKEN is absent", () => {
-    vi.stubEnv("ARGOS_TOKEN", "");
-    expect(
-      isGitHubActionsTokenlessAvailable({
-        ciProvider: "github-actions",
-        prHeadCommit,
-      }),
-    ).toBe(true);
-  });
-
-  it("returns false when ARGOS_TOKEN is set", () => {
-    vi.stubEnv("ARGOS_TOKEN", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    expect(
-      isGitHubActionsTokenlessAvailable({
-        ciProvider: "github-actions",
-        prHeadCommit,
-      }),
-    ).toBe(false);
-  });
-
-  it("returns false when ciProvider is not github-actions", () => {
-    vi.stubEnv("ARGOS_TOKEN", "");
-    expect(
-      isGitHubActionsTokenlessAvailable({
-        ciProvider: "gitlab-ci",
-        prHeadCommit,
-      }),
-    ).toBe(false);
-  });
-
-  it("returns false when ciProvider is null", () => {
-    vi.stubEnv("ARGOS_TOKEN", "");
-    expect(
-      isGitHubActionsTokenlessAvailable({ ciProvider: null, prHeadCommit }),
-    ).toBe(false);
-  });
-
-  it("returns false when prHeadCommit is missing", () => {
-    vi.stubEnv("ARGOS_TOKEN", "");
-    expect(
-      isGitHubActionsTokenlessAvailable({
-        ciProvider: "github-actions",
-        prHeadCommit: null,
-      }),
-    ).toBe(false);
-  });
-});
+const server = setupTokenExchangeServer();
 
 describe("exchangeGitHubActionsTokenlessToken", () => {
   const baseConfig = {
@@ -72,7 +18,8 @@ describe("exchangeGitHubActionsTokenlessToken", () => {
     jobId: "job-1",
     runId: "run-42",
     prNumber: null,
-    prHeadCommit: "abc123def456abc123def456abc123def456abc1",
+    prHeadCommit: null,
+    commit: "abc123def456abc123def456abc123def456abc1",
     branch: "main",
   };
 

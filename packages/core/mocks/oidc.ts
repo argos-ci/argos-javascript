@@ -8,7 +8,7 @@ export const MOCK_ARGOS_TOKEN = "mock-argos-token-returned";
 export const MOCK_EXPIRES_AT = "2099-01-01T00:00:00.000Z";
 export const MOCK_TOKENLESS_ARGOS_TOKEN = "mock-tokenless-argos-token-returned";
 
-export const oidcHandlers = [
+export const tokenExchangeHandlers = [
   http.get(MOCK_OIDC_URL, ({ request }) => {
     const url = new URL(request.url);
     if (url.searchParams.get("audience") !== "https://api.argos-ci.com") {
@@ -53,21 +53,21 @@ export const oidcHandlers = [
   ),
 ];
 
-export const oidcServer = setupServer(...oidcHandlers);
+export const tokenExchangeServer = setupServer(...tokenExchangeHandlers);
 
 /**
- * Registers vitest lifecycle hooks to start/stop the OIDC mock server and
+ * Registers vitest lifecycle hooks to start/stop the token mock server and
  * reset handlers + env stubs between tests. Returns the server so individual
  * tests can override handlers via `server.use(...)`.
  */
-export function setupOidcServer() {
-  beforeAll(() => oidcServer.listen());
+export function setupTokenExchangeServer() {
+  beforeAll(() => tokenExchangeServer.listen());
   afterEach(() => {
-    oidcServer.resetHandlers();
+    tokenExchangeServer.resetHandlers();
     vi.unstubAllEnvs();
   });
-  afterAll(() => oidcServer.close());
-  return oidcServer;
+  afterAll(() => tokenExchangeServer.close());
+  return tokenExchangeServer;
 }
 
 /** Stubs the env vars required for `isGitHubActionsOidcAvailable()` to return true. */

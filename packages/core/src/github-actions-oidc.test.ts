@@ -9,11 +9,11 @@ import {
   MOCK_OIDC_TOKEN,
   MOCK_ARGOS_TOKEN,
   MOCK_EXPIRES_AT,
-  setupOidcServer,
+  setupTokenExchangeServer,
   stubOidcEnv,
 } from "../mocks/oidc";
 
-const server = setupOidcServer();
+const server = setupTokenExchangeServer();
 
 describe("isGitHubActionsOidcAvailable", () => {
   it("returns true when all OIDC env vars are present and ARGOS_TOKEN is absent", () => {
