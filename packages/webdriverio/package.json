@@ -53,7 +53,7 @@
     "@wdio/mocha-framework": "^9.27.1",
     "@wdio/spec-reporter": "^9.27.1",
     "@wdio/types": "^9.27.1",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.3",
     "webdriverio": "^9.27.1"
   },
   "scripts": {
