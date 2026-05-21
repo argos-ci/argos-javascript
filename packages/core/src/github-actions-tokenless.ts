@@ -8,13 +8,9 @@ const base64Encode = (obj: any) =>
  * Check if GitHub Actions tokenless authentication is available for auto-detection.
  */
 export function isGitHubActionsTokenlessAvailable(
-  config: Pick<Config, "ciProvider" | "prHeadCommit">,
+  config: Pick<Config, "ciProvider" | "prHeadCommit" | "commit">,
 ): boolean {
-  return Boolean(
-    config.ciProvider === "github-actions" &&
-    config.prHeadCommit &&
-    !process.env.ARGOS_TOKEN,
-  );
+  return config.ciProvider === "github-actions";
 }
 
 /**
@@ -55,15 +51,11 @@ export async function exchangeGitHubActionsTokenlessToken(args: {
     | "prNumber"
     | "branch"
     | "prHeadCommit"
+    | "commit"
   >;
 }): Promise<string> {
   const { apiBaseUrl, config } = args;
-
-  if (!config.prHeadCommit) {
-    throw new Error(
-      `GitHub PR head commit is required for tokenless authentication.`,
-    );
-  }
+  const commit = config.prHeadCommit ?? config.commit;
 
   const tokenlessToken = getTokenlessBearerToken(config);
 
@@ -74,7 +66,7 @@ export async function exchangeGitHubActionsTokenlessToken(args: {
     {
       body: {
         tokenlessToken,
-        commit: config.prHeadCommit,
+        commit,
         branch: config.branch,
       },
     },
