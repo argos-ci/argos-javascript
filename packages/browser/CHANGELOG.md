@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.0.0...@argos-ci/browser@6.1.0) (2026-05-23)
+
+
+### Features
+
+* **browser:** add missing devices in viewports ([73afaf4](https://github.com/argos-ci/argos-javascript/commit/73afaf461a7f9417e920e86d3ec6b2c377534ab4))
+
+
+
+
+
 # [6.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@5.1.3...@argos-ci/browser@6.0.0) (2026-05-11)
 
 
