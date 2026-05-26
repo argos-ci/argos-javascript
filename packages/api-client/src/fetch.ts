@@ -20,8 +20,8 @@ async function createRequestFactory(request: Request, timeout: number) {
   // Snapshot the body once so retries do not clone/tee the original Request.
   const body = request.body ? await request.arrayBuffer() : undefined;
   const headers = new Headers(request.headers);
-  const requestId =
-    headers.get("x-argos-request-id") ?? globalThis.crypto.randomUUID();
+  const existingRequestId = headers.get("x-argos-request-id")?.trim();
+  const requestId = existingRequestId || globalThis.crypto.randomUUID();
 
   return (retryAttempt: number) => {
     const requestHeaders = new Headers(headers);
