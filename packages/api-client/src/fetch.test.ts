@@ -72,6 +72,34 @@ describe("apiFetch", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("adds stable request id and increments retry attempt headers", async () => {
+    const requestIds: string[] = [];
+    const retryAttempts: string[] = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const request = input instanceof Request ? input : new Request(input);
+      requestIds.push(request.headers.get("x-argos-request-id") ?? "");
+      retryAttempts.push(request.headers.get("x-argos-retry-attempt") ?? "");
+
+      return new Response("{}", {
+        status: requestIds.length === 1 ? 500 : 200,
+      });
+    });
+
+    const response = await apiFetch(
+      new Request("https://api.argos-ci.test/builds"),
+      {
+        fetch: fetchMock as unknown as typeof fetch,
+        minTimeout: 0,
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(requestIds).toHaveLength(2);
+    expect(requestIds[0]).toBeTruthy();
+    expect(requestIds[0]).toBe(requestIds[1]);
+    expect(retryAttempts).toEqual(["0", "1"]);
+  });
+
   it("aborts the request after the configured timeout", async () => {
     const fetchMock = vi.fn(
       async (input: RequestInfo | URL) =>
