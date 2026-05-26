@@ -20,13 +20,19 @@ async function createRequestFactory(request: Request, timeout: number) {
   // Snapshot the body once so retries do not clone/tee the original Request.
   const body = request.body ? await request.arrayBuffer() : undefined;
   const headers = new Headers(request.headers);
+  const existingRequestId = headers.get("x-argos-request-id")?.trim();
+  const requestId = existingRequestId || globalThis.crypto.randomUUID();
 
-  return () =>
-    new Request(request.url, {
+  return (retryAttempt: number) => {
+    const requestHeaders = new Headers(headers);
+    requestHeaders.set("x-argos-request-id", requestId);
+    requestHeaders.set("x-argos-retry-attempt", String(retryAttempt));
+
+    return new Request(request.url, {
       body,
       cache: request.cache,
       credentials: request.credentials,
-      headers,
+      headers: requestHeaders,
       integrity: request.integrity,
       keepalive: request.keepalive,
       method: request.method,
@@ -36,6 +42,7 @@ async function createRequestFactory(request: Request, timeout: number) {
       referrerPolicy: request.referrerPolicy,
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(timeout)]),
     });
+  };
 }
 
 export async function apiFetch(input: Request, options: APIFetchOptions = {}) {
@@ -48,8 +55,8 @@ export async function apiFetch(input: Request, options: APIFetchOptions = {}) {
   );
 
   return pRetry(
-    async () => {
-      const response = await fetchImpl(createRequest());
+    async (attemptNumber) => {
+      const response = await fetchImpl(createRequest(attemptNumber - 1));
       if (response.status >= 500) {
         throw new APIError(`Internal Server Error (${response.status})`);
       }
