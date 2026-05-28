@@ -5,7 +5,7 @@ import { discoverSnapshots } from "./discovery";
 import { optimizeScreenshot } from "./optimize";
 import { hashFile } from "./hashing";
 import { resolveArgosToken } from "./auth";
-import { uploadFile } from "./s3";
+import { uploadFileWithPresignedPost } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
 import { chunk } from "./util/chunk";
 import {
@@ -23,7 +23,13 @@ import { skip } from "./skip";
  */
 const CHUNK_SIZE = 10;
 
+const PLAYWRIGHT_TRACE_CONTENT_TYPE = "application/zip";
+
 type BuildMetadata = ArgosAPISchema.components["schemas"]["BuildMetadata"];
+type CreateBuildResponse =
+  ArgosAPISchema.operations["createBuild"]["responses"][201]["content"]["application/json"];
+type CreateBuildUpload = CreateBuildResponse["screenshots"][number];
+type SecureUploadFileInput = Parameters<typeof uploadFileWithPresignedPost>[0];
 
 export interface UploadParameters {
   /**
@@ -307,18 +313,19 @@ export async function upload(params: UploadParameters): Promise<{
 
   // Create build
   debug("Creating build");
-  const [pwTraceKeys, snapshotKeys] = snapshots.reduce(
-    ([pwTraceKeys, snapshotKeys], snapshot) => {
-      if (snapshot.pwTrace && !pwTraceKeys.includes(snapshot.pwTrace.hash)) {
-        pwTraceKeys.push(snapshot.pwTrace.hash);
-      }
-      if (!snapshotKeys.includes(snapshot.hash)) {
-        snapshotKeys.push(snapshot.hash);
-      }
-      return [pwTraceKeys, snapshotKeys];
-    },
-    [[], []] as [string[], string[]],
-  );
+  const pwTraceKeys: string[] = [];
+  const screenshots: { key: string; contentType: string }[] = [];
+  for (const snapshot of snapshots) {
+    if (snapshot.pwTrace && !pwTraceKeys.includes(snapshot.pwTrace.hash)) {
+      pwTraceKeys.push(snapshot.pwTrace.hash);
+    }
+    if (!screenshots.some((item) => item.key === snapshot.hash)) {
+      screenshots.push({
+        key: snapshot.hash,
+        contentType: snapshot.contentType,
+      });
+    }
+  }
 
   const createBuildResponse = await apiClient.POST("/builds", {
     body: {
@@ -328,7 +335,7 @@ export async function upload(params: UploadParameters): Promise<{
       mode: config.mode,
       parallel: config.parallel,
       parallelNonce: config.parallelNonce,
-      screenshotKeys: snapshotKeys,
+      screenshots,
       pwTraceKeys,
       prNumber: config.prNumber,
       prHeadCommit: config.prHeadCommit,
@@ -354,29 +361,29 @@ export async function upload(params: UploadParameters): Promise<{
   debug("Got uploads url", result);
 
   const uploadFiles = [
-    ...result.screenshots.map(({ key, putUrl }) => {
-      const snapshot = snapshots.find((s) => s.hash === key);
+    ...result.screenshots.map((upload) => {
+      const snapshot = snapshots.find((s) => s.hash === upload.key);
       if (!snapshot) {
-        throw new Error(`Invariant: snapshot with hash ${key} not found`);
+        throw new Error(
+          `Invariant: snapshot with hash ${upload.key} not found`,
+        );
       }
-      return {
-        url: putUrl,
+      return createSecureUploadFileInput(upload, {
         path: snapshot.optimizedPath,
         contentType: snapshot.contentType,
-      };
+      });
     }),
-    ...(result.pwTraces?.map(({ key, putUrl }) => {
+    ...(result.pwTraces?.map((upload) => {
       const snapshot = snapshots.find(
-        (s) => s.pwTrace && s.pwTrace.hash === key,
+        (s) => s.pwTrace && s.pwTrace.hash === upload.key,
       );
       if (!snapshot || !snapshot.pwTrace) {
-        throw new Error(`Invariant: trace with ${key} not found`);
+        throw new Error(`Invariant: trace with ${upload.key} not found`);
       }
-      return {
-        url: putUrl,
+      return createSecureUploadFileInput(upload, {
         path: snapshot.pwTrace.path,
-        contentType: "application/json",
-      };
+        contentType: PLAYWRIGHT_TRACE_CONTENT_TYPE,
+      });
     }) ?? []),
   ];
 
@@ -416,9 +423,7 @@ export async function upload(params: UploadParameters): Promise<{
   return { build: uploadBuildResponse.data.build, screenshots: snapshots };
 }
 
-async function uploadFilesToS3(
-  files: { url: string; path: string; contentType: string }[],
-) {
+async function uploadFilesToS3(files: SecureUploadFileInput[]) {
   debug(`Split files in chunks of ${CHUNK_SIZE}`);
   const chunks = chunk(files, CHUNK_SIZE);
 
@@ -433,17 +438,24 @@ async function uploadFilesToS3(
     if (!chunk) {
       throw new Error(`Invariant: chunk ${i} is empty`);
     }
-    await Promise.all(
-      chunk.map(async ({ url, path, contentType }) => {
-        await uploadFile({
-          url,
-          path,
-          contentType,
-        });
-      }),
-    );
+    await Promise.all(chunk.map((file) => uploadFileWithPresignedPost(file)));
     debugTimeEnd(timeLabel);
   }
+}
+
+function createSecureUploadFileInput(
+  upload: CreateBuildUpload,
+  file: { path: string; contentType: string },
+): SecureUploadFileInput {
+  if (!("postUrl" in upload)) {
+    throw new Error(`Invariant: expected secure upload for ${upload.key}`);
+  }
+
+  return {
+    url: upload.postUrl,
+    fields: upload.fields,
+    ...file,
+  };
 }
 
 /**

@@ -3,7 +3,8 @@ import { http, HttpResponse } from "msw";
 type CreateBuildParams = never;
 type CreateBuildRequestBody = {
   commit: string;
-  screenshotKeys: string[];
+  screenshots: { key: string; contentType: string }[];
+  pwTraceKeys?: string[];
   branch?: string | null;
   name?: string | null;
   parallel?: boolean | null;
@@ -18,7 +19,13 @@ type CreateBuildResponseBody = {
   };
   screenshots: {
     key: string;
-    putUrl: string;
+    postUrl: string;
+    fields: Record<string, string>;
+  }[];
+  pwTraces: {
+    key: string;
+    postUrl: string;
+    fields: Record<string, string>;
   }[];
 };
 
@@ -27,15 +34,27 @@ export const createBuild = http.post<
   CreateBuildRequestBody,
   CreateBuildResponseBody
 >("https://api.argos-ci.dev/builds", async ({ request }) => {
-  const { screenshotKeys } = await request.json();
+  const body = await request.json();
   return HttpResponse.json({
     build: {
       id: "123",
       url: "https://app.argos-ci.dev/builds/123",
     },
-    screenshots: screenshotKeys.map((key) => ({
+    screenshots: body.screenshots.map((screenshot) => ({
+      key: screenshot.key,
+      postUrl: `https://api.s3.dev/upload/${screenshot.key}`,
+      fields: {
+        key: screenshot.key,
+        "Content-Type": screenshot.contentType,
+      },
+    })),
+    pwTraces: (body.pwTraceKeys ?? []).map((key) => ({
       key,
-      putUrl: `https://api.s3.dev/upload/${key}`,
+      postUrl: `https://api.s3.dev/upload/${key}`,
+      fields: {
+        key,
+        "Content-Type": "application/zip",
+      },
     })),
   });
 });

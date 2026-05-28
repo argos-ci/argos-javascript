@@ -85,6 +85,82 @@ describe("#upload", () => {
     });
   });
 
+  it("uses secure uploads", () => {
+    return server.boundary(async () => {
+      const received: {
+        createBuildBody?: {
+          screenshots?: { key: string; contentType: string }[];
+          screenshotKeys?: string[];
+        };
+        upload?: {
+          keys: string[];
+          contentType: FormDataEntryValue | null;
+          policy: FormDataEntryValue | null;
+          file: FormDataEntryValue | null;
+        };
+      } = {};
+
+      server.use(
+        http.post("https://api.argos-ci.dev/builds", async ({ request }) => {
+          received.createBuildBody = (await request.json()) as {
+            screenshots?: { key: string; contentType: string }[];
+            screenshotKeys?: string[];
+          };
+          const screenshot = received.createBuildBody.screenshots?.[0];
+          if (!screenshot) {
+            return HttpResponse.json({ error: "Bad Request" }, { status: 400 });
+          }
+          return HttpResponse.json({
+            build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
+            screenshots: [
+              {
+                key: screenshot.key,
+                postUrl: `https://api.s3.dev/upload/${screenshot.key}`,
+                fields: {
+                  key: screenshot.key,
+                  "Content-Type": screenshot.contentType,
+                  policy: "test-policy",
+                },
+              },
+            ],
+            pwTraces: [],
+          });
+        }),
+        http.post("https://api.s3.dev/upload/*", async ({ request }) => {
+          const formData = await request.formData();
+          received.upload = {
+            keys: Array.from(formData.keys()),
+            contentType: formData.get("Content-Type"),
+            policy: formData.get("policy"),
+            file: formData.get("file"),
+          };
+          return new Response(null, { status: 204 });
+        }),
+      );
+
+      await upload({
+        branch: "main",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        files: ["penelope.png"],
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+      });
+
+      expect(received.createBuildBody?.screenshotKeys).toBeUndefined();
+      expect(received.createBuildBody?.screenshots).toEqual([
+        {
+          key: expect.stringMatching(/^[A-Fa-f0-9]{64}$/),
+          contentType: "image/png",
+        },
+      ]);
+      expect(received.upload?.contentType).toBe("image/png");
+      expect(received.upload?.policy).toBe("test-policy");
+      expect(received.upload?.keys.at(-1)).toBe("file");
+      expect(received.upload?.file).toBeInstanceOf(Blob);
+    })();
+  });
+
   it("retries", () => {
     return server.boundary(async () => {
       let reqCount = 0;
