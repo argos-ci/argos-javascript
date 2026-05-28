@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.0.3...@argos-ci/core@6.1.0) (2026-05-28)
+
+
+### Features
+
+* **core:** allow to upload text to be compared by Argos ([#313](https://github.com/argos-ci/argos-javascript/issues/313)) ([5bb0f3c](https://github.com/argos-ci/argos-javascript/commit/5bb0f3c17a228eef2a9fe5db616eb76e4e05daaf))
+
+
+
+
+
 ## [6.0.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.0.2...@argos-ci/core@6.0.3) (2026-05-26)
 
 **Note:** Version bump only for package @argos-ci/core

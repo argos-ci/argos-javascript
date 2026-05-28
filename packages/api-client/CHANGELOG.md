@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.22.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.21.0...@argos-ci/api-client@0.22.0) (2026-05-28)
+
+
+### Features
+
+* **core:** allow to upload text to be compared by Argos ([#313](https://github.com/argos-ci/argos-javascript/issues/313)) ([5bb0f3c](https://github.com/argos-ci/argos-javascript/commit/5bb0f3c17a228eef2a9fe5db616eb76e4e05daaf))
+
+
+
+
+
 # [0.21.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.20.1...@argos-ci/api-client@0.21.0) (2026-05-26)
 
 
