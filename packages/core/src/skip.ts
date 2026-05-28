@@ -49,7 +49,7 @@ export async function skip(
       runId: config.runId,
       runAttempt: config.runAttempt,
       skipped: true,
-      screenshotKeys: [],
+      screenshots: [],
       pwTraceKeys: [],
       parentCommits: [],
     },

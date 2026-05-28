@@ -282,6 +282,12 @@ export interface components {
         GitBranch: string;
         /** @description SHA256 hash */
         Sha256Hash: string;
+        /** @description Screenshot file to upload */
+        ScreenshotUploadRequest: {
+            key: components["schemas"]["Sha256Hash"];
+            /** @description Content type of the snapshot file */
+            contentType: string;
+        };
         /**
          * @description A unique identifier for the build
          * @example 12345
@@ -390,8 +396,8 @@ export interface components {
             } | null;
             pwTraceKey?: string | null;
             threshold?: number | null;
-            /** @default image/png */
-            contentType: string;
+            /** @description Content type of the snapshot file */
+            contentType?: string;
         };
         /** @description Build metadata */
         BuildMetadata: {
@@ -479,6 +485,8 @@ export interface components {
                     /** @enum {string} */
                     state: "pending" | "running" | "success" | "failed" | "canceled";
                 };
+                /** Format: uri */
+                url: string;
             } | null;
         };
         /** @description Git reference */
@@ -789,8 +797,6 @@ export interface operations {
                     commit: components["schemas"]["Sha1Hash"];
                     /** @description The branch the build is running on */
                     branch: components["schemas"]["GitBranch"];
-                    /** @description Keys of screenshot files */
-                    screenshotKeys: components["schemas"]["Sha256Hash"][];
                     /** @description Keys of Playwright trace files */
                     pwTraceKeys?: components["schemas"]["Sha256Hash"][];
                     /** @description The name of the build (for multi-build setups) */
@@ -830,7 +836,18 @@ export interface operations {
                      *     This is useful when a build is created from an incomplete test suite where some tests are skipped.
                      */
                     subset?: boolean | null;
-                };
+                } & ({
+                    /**
+                     * @deprecated
+                     * @description Keys of screenshot files
+                     */
+                    screenshotKeys: components["schemas"]["Sha256Hash"][];
+                    screenshots?: unknown;
+                } | {
+                    /** @description Screenshot files to upload */
+                    screenshots: components["schemas"]["ScreenshotUploadRequest"][];
+                    screenshotKeys?: unknown;
+                });
             };
         };
         responses: {
@@ -842,16 +859,38 @@ export interface operations {
                 content: {
                     "application/json": {
                         build: components["schemas"]["Build"];
-                        screenshots: {
+                        screenshots: ({
+                            key: string;
+                            /**
+                             * Format: uri
+                             * @deprecated
+                             * @description Deprecated. Use postUrl and fields instead.
+                             */
+                            putUrl: string;
+                        } | {
                             key: string;
                             /** Format: uri */
+                            postUrl: string;
+                            fields: {
+                                [key: string]: string;
+                            };
+                        })[];
+                        pwTraces: ({
+                            key: string;
+                            /**
+                             * Format: uri
+                             * @deprecated
+                             * @description Deprecated. Use postUrl and fields instead.
+                             */
                             putUrl: string;
-                        }[];
-                        pwTraces: {
+                        } | {
                             key: string;
                             /** Format: uri */
-                            putUrl: string;
-                        }[];
+                            postUrl: string;
+                            fields: {
+                                [key: string]: string;
+                            };
+                        })[];
                     };
                 };
             };
@@ -1446,8 +1485,26 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Server error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1880,10 +1937,18 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Overall review conclusion for the build: "APPROVE" or "REQUEST_CHANGES"
+                     * @description Review event to apply to the build: "APPROVE", "REJECT" or "COMMENT". Required when `conclusion` is not provided.
                      * @enum {string}
                      */
-                    conclusion: "APPROVE" | "REQUEST_CHANGES";
+                    event?: "APPROVE" | "REJECT" | "COMMENT";
+                    /**
+                     * @deprecated
+                     * @description Deprecated: use `event` instead. Overall review conclusion for the build: "APPROVE" or "REQUEST_CHANGES".
+                     * @enum {string}
+                     */
+                    conclusion?: "APPROVE" | "REQUEST_CHANGES";
+                    /** @description Optional comment to attach to the review. Expected as the JSON representation of a rich-text document. */
+                    body?: unknown;
                     /**
                      * @description Optional per-snapshot review decisions. When omitted, only the build-level review is recorded.
                      * @default []
@@ -1910,8 +1975,17 @@ export interface operations {
                     "application/json": {
                         id: string;
                         /** @enum {string} */
-                        state: "approved" | "rejected";
+                        state: "approved" | "rejected" | "commented" | "pending";
                     };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description Unauthorized */
