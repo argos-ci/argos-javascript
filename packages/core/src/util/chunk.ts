@@ -14,3 +14,21 @@ export const chunk = <T>(collection: T[], size: number) => {
 
   return result;
 };
+
+/**
+ * Map over a collection asynchronously, processing at most `size` items
+ * concurrently to limit memory pressure.
+ */
+export async function mapInChunks<T, R>(
+  collection: T[],
+  size: number,
+  mapper: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = [];
+
+  for (const items of chunk(collection, size)) {
+    results.push(...(await Promise.all(items.map(mapper))));
+  }
+
+  return results;
+}

@@ -7,7 +7,7 @@ import { hashFile } from "./hashing";
 import { resolveArgosToken } from "./auth";
 import { uploadFileWithPresignedPost } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
-import { chunk } from "./util/chunk";
+import { chunk, mapInChunks } from "./util/chunk";
 import {
   getPlaywrightTracePath,
   readMetadata,
@@ -19,7 +19,8 @@ import { getSnapshotMimeType } from "./mime-type";
 import { skip } from "./skip";
 
 /**
- * Size of the chunks used to upload screenshots to Argos.
+ * Size of the chunks used to process and upload screenshots.
+ * Limits concurrency to avoid memory pressure when handling many screenshots.
  */
 const CHUNK_SIZE = 10;
 
@@ -208,53 +209,53 @@ export async function upload(params: UploadParameters): Promise<{
   debug("Found snapshots", files);
 
   // Optimize & compute hashes
-  const snapshots = await Promise.all(
-    files.map(async (snapshot) => {
-      const contentType = getSnapshotMimeType(snapshot.path);
-      const [metadata, pwTracePath, optimizedPath] = await Promise.all([
-        readMetadata(snapshot.path),
-        getPlaywrightTracePath(snapshot.path),
-        contentType.startsWith("image/")
-          ? optimizeScreenshot(snapshot.path)
-          : snapshot.path,
-      ]);
+  // Process files in chunks to limit the number of images decoded in memory
+  // at the same time.
+  const snapshots = await mapInChunks(files, CHUNK_SIZE, async (snapshot) => {
+    const contentType = getSnapshotMimeType(snapshot.path);
+    const [metadata, pwTracePath, optimizedPath] = await Promise.all([
+      readMetadata(snapshot.path),
+      getPlaywrightTracePath(snapshot.path),
+      contentType.startsWith("image/")
+        ? optimizeScreenshot(snapshot.path)
+        : snapshot.path,
+    ]);
 
-      const [hash, pwTraceHash] = await Promise.all([
-        hashFile(optimizedPath),
-        pwTracePath ? hashFile(pwTracePath) : null,
-      ]);
+    const [hash, pwTraceHash] = await Promise.all([
+      hashFile(optimizedPath),
+      pwTracePath ? hashFile(pwTracePath) : null,
+    ]);
 
-      const threshold = metadata?.transient?.threshold ?? null;
-      const baseName = metadata?.transient?.baseName ?? null;
-      const parentName = metadata?.transient?.parentName ?? null;
+    const threshold = metadata?.transient?.threshold ?? null;
+    const baseName = metadata?.transient?.baseName ?? null;
+    const parentName = metadata?.transient?.parentName ?? null;
 
-      if (metadata) {
-        delete metadata.transient;
+    if (metadata) {
+      delete metadata.transient;
 
-        if (metadata.url && previewUrlFormatter) {
-          metadata.previewUrl = formatPreviewUrl(
-            metadata.url,
-            previewUrlFormatter,
-          );
-        }
+      if (metadata.url && previewUrlFormatter) {
+        metadata.previewUrl = formatPreviewUrl(
+          metadata.url,
+          previewUrlFormatter,
+        );
       }
+    }
 
-      return {
-        ...snapshot,
-        hash,
-        optimizedPath,
-        metadata,
-        threshold,
-        baseName,
-        parentName,
-        pwTrace:
-          pwTracePath && pwTraceHash
-            ? { path: pwTracePath, hash: pwTraceHash }
-            : null,
-        contentType,
-      };
-    }),
-  );
+    return {
+      ...snapshot,
+      hash,
+      optimizedPath,
+      metadata,
+      threshold,
+      baseName,
+      parentName,
+      pwTrace:
+        pwTracePath && pwTraceHash
+          ? { path: pwTracePath, hash: pwTraceHash }
+          : null,
+      contentType,
+    };
+  });
 
   debug("Fetch project");
   const projectResponse = await apiClient.GET("/project");
