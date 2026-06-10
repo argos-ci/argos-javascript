@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.1.0...@argos-ci/core@6.1.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **core:** chunk image processing to reduce memory pressure ([#315](https://github.com/argos-ci/argos-javascript/issues/315)) ([6e0f17c](https://github.com/argos-ci/argos-javascript/commit/6e0f17c4d80725717ff09d233241acb73fc90028))
+
+
+
+
+
 # [6.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.0.3...@argos-ci/core@6.1.0) (2026-05-28)
 
 
