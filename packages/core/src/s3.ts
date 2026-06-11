@@ -28,12 +28,14 @@ interface PresignedPostUploadInput extends UploadInput {
 async function readS3ErrorMessage(response: Response): Promise<string | null> {
   try {
     const body = await response.text();
-    const code = body.match(/<Code>(.*?)<\/Code>/)?.[1];
-    const message = body.match(/<Message>(.*?)<\/Message>/)?.[1];
+    // Trim captures: pretty-printed XML can leave whitespace/newlines around
+    // the inner text. `[\s\S]` matches across lines in case the value wraps.
+    const code = body.match(/<Code>([\s\S]*?)<\/Code>/)?.[1]?.trim();
+    const message = body.match(/<Message>([\s\S]*?)<\/Message>/)?.[1]?.trim();
     if (code && message) {
       return `${code}: ${message}`;
     }
-    return message ?? code ?? null;
+    return message || code || null;
   } catch {
     return null;
   }
@@ -48,7 +50,11 @@ async function createUploadError(
   response: Response,
 ): Promise<Error> {
   const detail = await readS3ErrorMessage(response);
-  const status = `${response.status} ${response.statusText}`;
+  // `statusText` is often empty in Node (e.g. HTTP/2), so only append it when
+  // present to avoid a trailing space like "403 ".
+  const status = response.statusText
+    ? `${response.status} ${response.statusText}`
+    : `${response.status}`;
   return new Error(
     `Failed to upload file to ${url}: ${status}${detail ? ` — ${detail}` : ""}`,
   );
