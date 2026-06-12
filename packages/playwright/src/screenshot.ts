@@ -276,6 +276,36 @@ export async function argosScreenshot(
           animations: "disabled" as const,
           ...playwrightOptions,
         };
+        // The story iframe is sized from the body height when the
+        // viewport is applied, but stories that render a short loading
+        // state first grow afterwards — the screenshot then shows a tall
+        // body inside a short iframe, blank below the iframe's height.
+        // Re-sync the iframe height to the body before every capture so
+        // the drawn area always matches what is screenshotted.
+        const syncFrameHeight = async (): Promise<boolean> => {
+          if (!fullPage || !checkIsFrame(handler)) {
+            return false;
+          }
+          const iframeElement = await handler.frameElement();
+          const resized = await iframeElement.evaluate(async (iframe) => {
+            if (!(iframe instanceof HTMLIFrameElement)) {
+              return false;
+            }
+            const body = iframe.contentDocument?.body;
+            if (!body || body.offsetHeight <= iframe.clientHeight) {
+              return false;
+            }
+            iframe.style.height = `${body.offsetHeight}px`;
+            iframe.getBoundingClientRect();
+            await new Promise<void>((resolve) =>
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve()),
+              ),
+            );
+            return true;
+          });
+          return resized;
+        };
         // Capture repeatedly until two consecutive screenshots are
         // identical, then keep that one. A single capture can read pixels
         // the browser has not finished drawing yet on loaded machines —
@@ -284,14 +314,16 @@ export async function argosScreenshot(
         // Mirrors the stabilization Playwright's toHaveScreenshot performs,
         // including its escalating waits between retakes.
         const pollIntervals = [0, 100, 250, 500];
+        await syncFrameHeight();
         let buffer = await screenshotTarget.screenshot(screenshotOptions);
         for (let attempt = 0; attempt < 4; attempt++) {
           const delay = pollIntervals.shift() ?? 1000;
           if (delay) {
             await new Promise((resolve) => setTimeout(resolve, delay));
           }
+          const resized = await syncFrameHeight();
           const next = await screenshotTarget.screenshot(screenshotOptions);
-          const stable = next.equals(buffer);
+          const stable = !resized && next.equals(buffer);
           buffer = next;
           if (stable) {
             break;
