@@ -292,9 +292,22 @@ export async function argosScreenshot(
               return false;
             }
             const body = iframe.contentDocument?.body;
-            if (!body || body.offsetHeight <= iframe.clientHeight) {
+            if (!body) {
               return false;
             }
+            const gap = body.offsetHeight - iframe.clientHeight;
+            if (gap <= 0) {
+              return false;
+            }
+            // A body whose height tracks the iframe (e.g. a 100%-height
+            // layout plus padding) is always taller than the iframe by the
+            // same gap — growing the iframe can never catch up and only
+            // inflates the snapshot. Skip stories already identified as
+            // viewport-tracking.
+            if (Number(iframe.dataset.argosTrackedGap) === gap) {
+              return false;
+            }
+            const previousHeight = iframe.style.height;
             iframe.style.height = `${body.offsetHeight}px`;
             iframe.getBoundingClientRect();
             await new Promise<void>((resolve) =>
@@ -302,6 +315,18 @@ export async function argosScreenshot(
                 requestAnimationFrame(() => resolve()),
               ),
             );
+            const newGap = body.offsetHeight - iframe.clientHeight;
+            if (newGap > 0 && Math.abs(newGap - gap) <= 1) {
+              iframe.style.height = previousHeight;
+              iframe.dataset.argosTrackedGap = String(gap);
+              iframe.getBoundingClientRect();
+              await new Promise<void>((resolve) =>
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => resolve()),
+                ),
+              );
+              return false;
+            }
             return true;
           });
           return resized;
