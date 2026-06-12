@@ -51,7 +51,7 @@ export const createArgosScreenshotCommand = (
         playwrightLibraries: ["@storybook/addon-vitest"],
         setViewportSize: async (size) => {
           await ctx.page.evaluate(
-            ({ size, fullPage }) => {
+            async ({ size, fullPage }) => {
               const iframe = document.querySelector(
                 'iframe[data-vitest="true"]',
               );
@@ -106,6 +106,18 @@ export const createArgosScreenshotCommand = (
                 iframe.style.height = "auto";
                 iframe.style.height = `${size.height}px`;
               }
+
+              // Force a layout and wait for two frames so the compositor
+              // rasterizes the area exposed by the resize before the
+              // screenshot is taken. Without this, the capture can read the
+              // pre-resize surface and the snapshot comes out blank below
+              // the iframe's previous height.
+              iframe.getBoundingClientRect();
+              await new Promise<void>((resolve) =>
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => resolve()),
+                ),
+              );
             },
             { size, fullPage: screenshotOptions.fullPage ?? !fitToContent },
           );
