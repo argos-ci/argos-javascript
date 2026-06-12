@@ -281,9 +281,15 @@ export async function argosScreenshot(
         // the browser has not finished drawing yet on loaded machines —
         // the snapshot comes out blank where content was just revealed
         // (e.g. below a story iframe that was resized for fullPage).
-        // Mirrors the stabilization Playwright's toHaveScreenshot performs.
+        // Mirrors the stabilization Playwright's toHaveScreenshot performs,
+        // including its escalating waits between retakes.
+        const pollIntervals = [0, 100, 250, 500];
         let buffer = await screenshotTarget.screenshot(screenshotOptions);
         for (let attempt = 0; attempt < 4; attempt++) {
+          const delay = pollIntervals.shift() ?? 1000;
+          if (delay) {
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          }
           const next = await screenshotTarget.screenshot(screenshotOptions);
           const stable = next.equals(buffer);
           buffer = next;
