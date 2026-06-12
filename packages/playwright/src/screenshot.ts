@@ -268,14 +268,94 @@ export async function argosScreenshot(
 
         return snapshotPath;
       })(),
-      screenshotTarget.screenshot({
-        path: screenshotPath,
-        type: "png",
-        fullPage,
-        mask: [handler.locator('[data-visual-test="blackout"]')],
-        animations: "disabled",
-        ...playwrightOptions,
-      }),
+      (async () => {
+        const screenshotOptions = {
+          type: "png" as const,
+          fullPage,
+          mask: [handler.locator('[data-visual-test="blackout"]')],
+          animations: "disabled" as const,
+          ...playwrightOptions,
+        };
+        // The story iframe is sized from the body height when the
+        // viewport is applied, but stories that render a short loading
+        // state first grow afterwards — the screenshot then shows a tall
+        // body inside a short iframe, blank below the iframe's height.
+        // Re-sync the iframe height to the body before every capture so
+        // the drawn area always matches what is screenshotted.
+        const syncFrameHeight = async (): Promise<boolean> => {
+          if (!fullPage || !checkIsFrame(handler)) {
+            return false;
+          }
+          const iframeElement = await handler.frameElement();
+          const resized = await iframeElement.evaluate(async (iframe) => {
+            if (!(iframe instanceof HTMLIFrameElement)) {
+              return false;
+            }
+            const body = iframe.contentDocument?.body;
+            if (!body) {
+              return false;
+            }
+            const gap = body.offsetHeight - iframe.clientHeight;
+            if (gap <= 0) {
+              return false;
+            }
+            // A body whose height tracks the iframe (e.g. a 100%-height
+            // layout plus padding) is always taller than the iframe by the
+            // same gap — growing the iframe can never catch up and only
+            // inflates the snapshot. Skip stories already identified as
+            // viewport-tracking.
+            if (Number(iframe.dataset.argosTrackedGap) === gap) {
+              return false;
+            }
+            const previousHeight = iframe.style.height;
+            iframe.style.height = `${body.offsetHeight}px`;
+            iframe.getBoundingClientRect();
+            await new Promise<void>((resolve) =>
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve()),
+              ),
+            );
+            const newGap = body.offsetHeight - iframe.clientHeight;
+            if (newGap > 0 && Math.abs(newGap - gap) <= 1) {
+              iframe.style.height = previousHeight;
+              iframe.dataset.argosTrackedGap = String(gap);
+              iframe.getBoundingClientRect();
+              await new Promise<void>((resolve) =>
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => resolve()),
+                ),
+              );
+              return false;
+            }
+            return true;
+          });
+          return resized;
+        };
+        // Capture repeatedly until two consecutive screenshots are
+        // identical, then keep that one. A single capture can read pixels
+        // the browser has not finished drawing yet on loaded machines —
+        // the snapshot comes out blank where content was just revealed
+        // (e.g. below a story iframe that was resized for fullPage).
+        // Mirrors the stabilization Playwright's toHaveScreenshot performs,
+        // including its escalating waits between retakes.
+        const pollIntervals = [0, 100, 250, 500];
+        await syncFrameHeight();
+        let buffer = await screenshotTarget.screenshot(screenshotOptions);
+        for (let attempt = 0; attempt < 4; attempt++) {
+          const delay = pollIntervals.shift() ?? 1000;
+          if (delay) {
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          }
+          const resized = await syncFrameHeight();
+          const next = await screenshotTarget.screenshot(screenshotOptions);
+          const stable = !resized && next.equals(buffer);
+          buffer = next;
+          if (stable) {
+            break;
+          }
+        }
+        await writeFile(screenshotPath, buffer);
+      })(),
       writeMetadata(screenshotPath, metadata),
     ]);
 

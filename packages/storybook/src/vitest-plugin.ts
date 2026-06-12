@@ -50,12 +50,14 @@ export const createArgosScreenshotCommand = (
         ...testContext,
         playwrightLibraries: ["@storybook/addon-vitest"],
         setViewportSize: async (size) => {
-          await ctx.page.evaluate(
-            ({ size, fullPage }) => {
-              const iframe = document.querySelector(
-                'iframe[data-vitest="true"]',
-              );
-
+          // Resolve the iframe element that contains the frame being
+          // screenshotted. Vitest keeps one iframe per test file, so
+          // querying the page for the first matching iframe can return
+          // another file's iframe — the story's own iframe then keeps its
+          // initial height and the screenshot comes out blank below it.
+          const sessionIframe = await frame.frameElement();
+          await sessionIframe.evaluate(
+            async (iframe, { size, fullPage }) => {
               if (!(iframe instanceof HTMLIFrameElement)) {
                 throw new Error("Vitest iframe not found");
               }
@@ -88,6 +90,20 @@ export const createArgosScreenshotCommand = (
                 iframe.style.width = `${size.width}px`;
               }
 
+              // Each story starts a fresh viewport-tracking check.
+              delete iframe.dataset.argosTrackedGap;
+
+              const settleFrames = async () => {
+                // Force a layout and wait for two frames so the browser
+                // draws the area exposed by a resize before the screenshot.
+                iframe.getBoundingClientRect();
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() =>
+                    requestAnimationFrame(() => resolve()),
+                  ),
+                );
+              };
+
               if (fullPage) {
                 if (!iframe.contentWindow) {
                   throw new Error(`Can't access iframe window`);
@@ -98,13 +114,29 @@ export const createArgosScreenshotCommand = (
                     : size.height;
 
                 iframe.style.height = "auto";
-                iframe.style.height =
-                  viewportHeight < iframe.contentDocument.body.offsetHeight
-                    ? `${iframe.contentDocument.body.offsetHeight}px`
-                    : "100%";
+                const measuredBody = iframe.contentDocument.body.offsetHeight;
+                const gap = measuredBody - viewportHeight;
+                iframe.style.height = gap > 0 ? `${measuredBody}px` : "100%";
+                await settleFrames();
+                if (gap > 0) {
+                  // A body whose height tracks the iframe (e.g. a
+                  // 100%-height layout plus padding) is always taller by the
+                  // same gap — stretching can never catch up and only
+                  // inflates the snapshot. If the gap survived the stretch,
+                  // revert it.
+                  const newGap =
+                    iframe.contentDocument.body.offsetHeight -
+                    iframe.clientHeight;
+                  if (newGap > 0 && Math.abs(newGap - gap) <= 1) {
+                    iframe.style.height = "100%";
+                    iframe.dataset.argosTrackedGap = String(gap);
+                    await settleFrames();
+                  }
+                }
               } else if (size !== "default") {
                 iframe.style.height = "auto";
                 iframe.style.height = `${size.height}px`;
+                await settleFrames();
               }
             },
             { size, fullPage: screenshotOptions.fullPage ?? !fitToContent },
