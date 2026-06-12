@@ -268,14 +268,31 @@ export async function argosScreenshot(
 
         return snapshotPath;
       })(),
-      screenshotTarget.screenshot({
-        path: screenshotPath,
-        type: "png",
-        fullPage,
-        mask: [handler.locator('[data-visual-test="blackout"]')],
-        animations: "disabled",
-        ...playwrightOptions,
-      }),
+      (async () => {
+        const screenshotOptions = {
+          type: "png" as const,
+          fullPage,
+          mask: [handler.locator('[data-visual-test="blackout"]')],
+          animations: "disabled" as const,
+          ...playwrightOptions,
+        };
+        // Capture repeatedly until two consecutive screenshots are
+        // identical, then keep that one. A single capture can read pixels
+        // the browser has not finished drawing yet on loaded machines —
+        // the snapshot comes out blank where content was just revealed
+        // (e.g. below a story iframe that was resized for fullPage).
+        // Mirrors the stabilization Playwright's toHaveScreenshot performs.
+        let buffer = await screenshotTarget.screenshot(screenshotOptions);
+        for (let attempt = 0; attempt < 4; attempt++) {
+          const next = await screenshotTarget.screenshot(screenshotOptions);
+          const stable = next.equals(buffer);
+          buffer = next;
+          if (stable) {
+            break;
+          }
+        }
+        await writeFile(screenshotPath, buffer);
+      })(),
       writeMetadata(screenshotPath, metadata),
     ]);
 
