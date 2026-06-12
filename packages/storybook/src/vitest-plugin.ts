@@ -50,12 +50,14 @@ export const createArgosScreenshotCommand = (
         ...testContext,
         playwrightLibraries: ["@storybook/addon-vitest"],
         setViewportSize: async (size) => {
-          await ctx.page.evaluate(
-            async ({ size, fullPage }) => {
-              const iframe = document.querySelector(
-                'iframe[data-vitest="true"]',
-              );
-
+          // Resolve the iframe element that contains the frame being
+          // screenshotted. Vitest keeps one iframe per test file, so
+          // querying the page for the first matching iframe can return
+          // another file's iframe — the story's own iframe then keeps its
+          // initial height and the screenshot comes out blank below it.
+          const sessionIframe = await frame.frameElement();
+          await sessionIframe.evaluate(
+            async (iframe, { size, fullPage }) => {
               if (!(iframe instanceof HTMLIFrameElement)) {
                 throw new Error("Vitest iframe not found");
               }
