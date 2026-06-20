@@ -5,14 +5,17 @@ import ora from "ora";
 import {
   buildNameOption,
   parallelNonceOption,
+  projectOption,
   tokenOption,
   type BuildNameOption,
   type ParallelNonceOption,
+  type ProjectOption,
   type TokenOption,
 } from "../options";
 
 type UploadOptions = BuildNameOption &
   ParallelNonceOption &
+  ProjectOption &
   TokenOption & {
     files?: string[] | undefined;
     ignore?: string[] | undefined;
@@ -41,6 +44,7 @@ export function uploadCommand(program: Command) {
       'One or more globs matching image file paths to ignore (ex: "**/*.png **/diff.jpg")',
     )
     .addOption(tokenOption)
+    .addOption(projectOption)
     .addOption(buildNameOption)
     .addOption(
       new Option(
@@ -117,6 +121,7 @@ export function uploadCommand(program: Command) {
         })();
         const result = await upload({
           token: options.token,
+          project: options.project,
           root: directory,
           buildName: options.buildName,
           files: options.files,

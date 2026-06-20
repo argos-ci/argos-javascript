@@ -17,6 +17,7 @@ const base64Decode = (str: string): unknown =>
 const baseConfig: Config = {
   apiBaseUrl: "https://api.argos-ci.com/v2/",
   token: null,
+  project: null,
   commit: "abc123def456abc123def456abc123def456abc1",
   branch: "main",
   buildName: null,
