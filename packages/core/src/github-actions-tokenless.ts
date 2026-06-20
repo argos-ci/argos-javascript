@@ -17,9 +17,18 @@ export function isGitHubActionsTokenlessAvailable(
  * Build a tokenless GitHub Actions bearer token from the CI environment.
  */
 function getTokenlessBearerToken(
-  config: Pick<Config, "originalRepository" | "jobId" | "runId" | "prNumber">,
+  config: Pick<
+    Config,
+    "originalRepository" | "jobId" | "runId" | "prNumber" | "project"
+  >,
 ): string {
-  const { originalRepository: repository, jobId, runId, prNumber } = config;
+  const {
+    originalRepository: repository,
+    jobId,
+    runId,
+    prNumber,
+    project,
+  } = config;
 
   if (!repository || !jobId || !runId) {
     throw new Error(
@@ -35,6 +44,7 @@ function getTokenlessBearerToken(
     jobId,
     runId,
     prNumber: prNumber ?? undefined,
+    project: project ?? undefined,
   })}`;
 }
 
@@ -52,6 +62,7 @@ export async function exchangeGitHubActionsTokenlessToken(args: {
     | "branch"
     | "prHeadCommit"
     | "commit"
+    | "project"
   >;
 }): Promise<string> {
   const { apiBaseUrl, config } = args;

@@ -72,6 +72,13 @@ export interface UploadParameters {
   token?: string;
 
   /**
+   * Argos project slug (`account/project`).
+   * Used to disambiguate tokenless authentication when multiple
+   * Argos projects are linked to the same repository.
+   */
+  project?: string;
+
+  /**
    * Pull request number associated with the build.
    */
   prNumber?: number;

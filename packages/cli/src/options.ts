@@ -12,6 +12,12 @@ export const tokenOption = new Option(
   "Repository token",
 ).env("ARGOS_TOKEN");
 
+export type ProjectOption = { project?: string | undefined };
+export const projectOption = new Option(
+  "--project <slug>",
+  "Argos project slug (account/project), used to disambiguate tokenless authentication when multiple projects are linked to the same repository",
+).env("ARGOS_PROJECT");
+
 export type BuildNameOption = { buildName?: string | undefined };
 export const buildNameOption = new Option(
   "--build-name <string>",

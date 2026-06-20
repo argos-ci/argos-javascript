@@ -126,6 +126,12 @@ const schema = {
     default: null,
     format: mustBeArgosToken,
   },
+  project: {
+    env: "ARGOS_PROJECT",
+    default: null,
+    format: String,
+    nullable: true,
+  },
   buildName: {
     env: "ARGOS_BUILD_NAME",
     default: null,
@@ -278,6 +284,14 @@ export interface Config {
    * Argos repository access token.
    */
   token: string | null;
+
+  /**
+   * Argos project slug used for tokenless authentication.
+   * Useful to disambiguate when multiple Argos projects are linked
+   * to the same repository.
+   * @example "my-org/my-project"
+   */
+  project: string | null;
 
   /**
    * Custom build name.
@@ -433,6 +447,7 @@ export async function readConfig(options: Partial<Config> = {}) {
     commit: options.commit || defaultConfig.commit || ciEnv?.commit || null,
     branch: options.branch || defaultConfig.branch || ciEnv?.branch || null,
     token: options.token || defaultConfig.token || null,
+    project: options.project || defaultConfig.project || null,
     buildName: options.buildName || defaultConfig.buildName || null,
     prNumber:
       options.prNumber || defaultConfig.prNumber || ciEnv?.prNumber || null,
