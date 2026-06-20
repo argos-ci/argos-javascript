@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.0.5...@argos-ci/cli@5.1.0) (2026-06-20)
+
+
+### Features
+
+* **core:** allow specifying a project for tokenless authentication ([#318](https://github.com/argos-ci/argos-javascript/issues/318)) ([2fd3b58](https://github.com/argos-ci/argos-javascript/commit/2fd3b585ce7356e1a43e480243c758a5de2b92f6))
+* **core:** surface S3 error details on upload failure ([#316](https://github.com/argos-ci/argos-javascript/issues/316)) ([d913ac8](https://github.com/argos-ci/argos-javascript/commit/d913ac8935d9e54993cef22368cc5f45d3e3204d))
+
+
+
+
+
 ## [5.0.5](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.0.4...@argos-ci/cli@5.0.5) (2026-06-10)
 
 **Note:** Version bump only for package @argos-ci/cli
