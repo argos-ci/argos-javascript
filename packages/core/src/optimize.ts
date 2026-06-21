@@ -1,10 +1,10 @@
 import { promisify } from "node:util";
 import { basename } from "node:path";
-import sharp from "sharp";
+import sharp, { type FormatEnum } from "sharp";
 import tmp from "tmp";
 import { checkIsValidImageFile } from "./discovery";
 
-export type ImageFormat = keyof sharp.FormatEnum;
+export type ImageFormat = keyof FormatEnum;
 
 const tmpFile = promisify<string>(tmp.file);
 
