@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "cypress": "^15.15.0",
+    "cypress": "^15.17.0",
     "eslint-plugin-cypress": "^6.4.1"
   },
   "scripts": {
