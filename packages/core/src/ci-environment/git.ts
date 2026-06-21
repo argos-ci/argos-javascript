@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { debug, isDebugEnabled } from "../debug";
 
 /**
@@ -64,7 +64,7 @@ export function getRepositoryURL() {
  */
 function gitMergeBase(input: { base: string; head: string }) {
   try {
-    return execSync(`git merge-base ${input.head} ${input.base}`)
+    return execFileSync("git", ["merge-base", input.head, input.base])
       .toString()
       .trim();
   } catch (error) {
@@ -85,9 +85,15 @@ function gitMergeBase(input: { base: string; head: string }) {
  * Run git fetch with a specific ref and depth.
  */
 function gitFetch(input: { ref: string; depth: number; target: string }) {
-  execSync(
-    `git fetch --force --update-head-ok --depth ${input.depth} origin ${input.ref}:${input.target}`,
-  );
+  execFileSync("git", [
+    "fetch",
+    "--force",
+    "--update-head-ok",
+    "--depth",
+    String(input.depth),
+    "origin",
+    `${input.ref}:${input.target}`,
+  ]);
 }
 
 /**
@@ -150,8 +156,12 @@ export function getMergeBaseCommitSha(input: {
 }
 
 function listShas(path: string, maxCount?: number): string[] {
-  const maxCountArg = maxCount ? `--max-count=${maxCount}` : "";
-  const raw = execSync(`git log --format="%H" ${maxCountArg} ${path}`.trim());
+  const args = ["log", "--format=%H"];
+  if (maxCount) {
+    args.push(`--max-count=${maxCount}`);
+  }
+  args.push(path);
+  const raw = execFileSync("git", args);
   const shas = raw.toString().trim().split("\n");
   return shas;
 }
@@ -159,7 +169,7 @@ function listShas(path: string, maxCount?: number): string[] {
 export function listParentCommits(input: { sha: string }): string[] | null {
   const limit = 200;
   try {
-    execSync(`git fetch --depth=${limit} origin ${input.sha}`);
+    execFileSync("git", ["fetch", `--depth=${limit}`, "origin", input.sha]);
   } catch (error) {
     if (error instanceof Error && error.message.includes("not our ref")) {
       return [];
