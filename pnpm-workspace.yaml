@@ -2,8 +2,8 @@ packages:
   - packages/*
 
 catalog:
-  '@types/node': ^22.19.19
-  vitest: ^4.1.7
+  '@types/node': ^22.19.21
+  vitest: ^4.1.9
 
 allowBuilds:
   '@swc/core': true

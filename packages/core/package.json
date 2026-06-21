@@ -45,8 +45,8 @@
     "debug": "^4.4.3",
     "fast-glob": "^3.3.3",
     "mime-types": "^3.0.2",
-    "sharp": "^0.34.5",
-    "tmp": "^0.2.5"
+    "sharp": "^0.35.2",
+    "tmp": "^0.2.7"
   },
   "devDependencies": {
     "@octokit/webhooks": "^14.2.0",
