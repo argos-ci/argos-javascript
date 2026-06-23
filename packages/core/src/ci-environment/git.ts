@@ -1,5 +1,9 @@
-import { execFileSync, execSync } from "node:child_process";
+import { execFile, execFileSync, execSync } from "node:child_process";
+import { promisify } from "node:util";
+import pRetry from "p-retry";
 import { debug, isDebugEnabled } from "../debug";
+
+const execFileAsync = promisify(execFile);
 
 /**
  * Check if the current directory is a git repository.
@@ -82,11 +86,57 @@ function gitMergeBase(input: { base: string; head: string }) {
 }
 
 /**
+ * Combine an error's message and stderr into a single searchable string.
+ */
+function getGitErrorOutput(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "";
+  }
+  const stderr = "stderr" in error ? String(error.stderr ?? "") : "";
+  return `${error.message}\n${stderr}`;
+}
+
+/**
+ * Check whether a git error is a `.git/*.lock` contention error.
+ * This happens when another git process is running concurrently (e.g. parallel
+ * CI shards fetching the same repository) or when a stale lock was left behind
+ * by a crashed git process.
+ */
+function checkIsGitLockError(error: unknown): boolean {
+  const output = getGitErrorOutput(error);
+  return (
+    output.includes(".lock': File exists") ||
+    output.includes("Another git process seems to be running")
+  );
+}
+
+/**
+ * Run `git fetch` with the given arguments.
+ *
+ * Retries on lock contention (`.git/shallow.lock` "File exists") with an
+ * exponential backoff, since this is usually a transient conflict with another
+ * git process and resolves once that process releases the lock.
+ */
+function runGitFetch(args: string[]) {
+  return pRetry(() => execFileAsync("git", ["fetch", ...args]), {
+    retries: 3,
+    minTimeout: 500,
+    shouldRetry: ({ error }) => checkIsGitLockError(error),
+    onFailedAttempt: ({ error, retriesLeft, retryDelay }) => {
+      if (checkIsGitLockError(error) && retriesLeft > 0) {
+        debug(
+          `git fetch failed on lock contention, retrying in ${retryDelay}ms (${retriesLeft} left)`,
+        );
+      }
+    },
+  });
+}
+
+/**
  * Run git fetch with a specific ref and depth.
  */
-function gitFetch(input: { ref: string; depth: number; target: string }) {
-  execFileSync("git", [
-    "fetch",
+async function gitFetch(input: { ref: string; depth: number; target: string }) {
+  await runGitFetch([
     "--force",
     "--update-head-ok",
     "--depth",
@@ -116,18 +166,18 @@ function checkIsExecError(
  * Fetch both base and head with depth and then run merge base.
  * Try to find a merge base with a depth of 1000 max.
  */
-export function getMergeBaseCommitSha(input: {
+export async function getMergeBaseCommitSha(input: {
   base: string;
   head: string;
-}): string | null {
+}): Promise<string | null> {
   let depth = 200;
 
   const argosBaseRef = `argos/${input.base}`;
   const argosHeadRef = `argos/${input.head}`;
 
   while (depth < 1000) {
-    gitFetch({ ref: input.head, depth, target: argosHeadRef });
-    gitFetch({ ref: input.base, depth, target: argosBaseRef });
+    await gitFetch({ ref: input.head, depth, target: argosHeadRef });
+    await gitFetch({ ref: input.base, depth, target: argosBaseRef });
     const mergeBase = gitMergeBase({
       base: argosBaseRef,
       head: argosHeadRef,
@@ -166,12 +216,14 @@ function listShas(path: string, maxCount?: number): string[] {
   return shas;
 }
 
-export function listParentCommits(input: { sha: string }): string[] | null {
+export async function listParentCommits(input: {
+  sha: string;
+}): Promise<string[] | null> {
   const limit = 200;
   try {
-    execFileSync("git", ["fetch", `--depth=${limit}`, "origin", input.sha]);
+    await runGitFetch([`--depth=${limit}`, "origin", input.sha]);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("not our ref")) {
+    if (getGitErrorOutput(error).includes("not our ref")) {
       return [];
     }
   }

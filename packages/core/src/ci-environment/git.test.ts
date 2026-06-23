@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -56,7 +56,7 @@ describe("#getMergeBaseCommitSha (command injection)", () => {
     rmSync(join(repoDir, ".."), { recursive: true, force: true });
   });
 
-  it("does not execute shell metacharacters in the branch name", () => {
+  it("does not execute shell metacharacters in the branch name", async () => {
     // Mirrors the GHSA-4x45-gxvp-6283 PoC: a ref containing $() command
     // substitution must be passed to git as a literal argument, never
     // evaluated by a shell.
@@ -65,11 +65,60 @@ describe("#getMergeBaseCommitSha (command injection)", () => {
     // git will fail because the ref does not exist; that's expected. What
     // matters is that the injected `touch` never runs.
     try {
-      getMergeBaseCommitSha({ base: malicious, head: malicious });
+      await getMergeBaseCommitSha({ base: malicious, head: malicious });
     } catch {
       // Ignore the git failure.
     }
 
     expect(existsSync(markerFile)).toBe(false);
+  });
+});
+
+describe("#getMergeBaseCommitSha (lock contention)", () => {
+  let cwd: string;
+  let root: string;
+  let repoDir: string;
+  let lockFile: string;
+
+  beforeEach(() => {
+    cwd = process.cwd();
+    root = mkdtempSync(join(tmpdir(), "argos-git-lock-test-"));
+    repoDir = join(root, "repo");
+    lockFile = join(repoDir, ".git", "shallow.lock");
+
+    const bareDir = join(root, "origin.git");
+    execFileSync("git", ["init", "--bare", bareDir]);
+    execFileSync("git", ["init", repoDir]);
+    const git = (...args: string[]) =>
+      execFileSync("git", ["-C", repoDir, ...args]);
+    git("remote", "add", "origin", bareDir);
+    git("config", "user.email", "test@argos-ci.com");
+    git("config", "user.name", "Argos Test");
+    git("commit", "--allow-empty", "-m", "initial");
+    git("branch", "-M", "main");
+    git("push", "origin", "main");
+
+    process.chdir(repoDir);
+  });
+
+  afterEach(() => {
+    process.chdir(cwd);
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("retries and recovers once the lock is released", async () => {
+    // Simulate a concurrent git process holding the shallow lock.
+    writeFileSync(lockFile, "");
+
+    // Release the lock shortly after, while gitFetch is retrying.
+    const timer = setTimeout(() => rmSync(lockFile, { force: true }), 700);
+
+    try {
+      const sha = await getMergeBaseCommitSha({ base: "main", head: "main" });
+      expect(sha).toMatch(/^[0-9a-f]{40}$/);
+      expect(existsSync(lockFile)).toBe(false);
+    } finally {
+      clearTimeout(timer);
+    }
   });
 });

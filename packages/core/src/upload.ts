@@ -273,7 +273,7 @@ export async function upload(params: UploadParameters): Promise<{
 
   const { defaultBaseBranch, hasRemoteContentAccess } = projectResponse.data;
 
-  const referenceCommit = (() => {
+  const referenceCommit = await (async () => {
     if (config.referenceCommit) {
       debug("Found reference commit in config", config.referenceCommit);
       return config.referenceCommit;
@@ -289,7 +289,7 @@ export async function upload(params: UploadParameters): Promise<{
     const base =
       config.referenceBranch || config.prBaseBranch || defaultBaseBranch;
 
-    const sha = getMergeBaseCommitSha({ base, head: config.branch });
+    const sha = await getMergeBaseCommitSha({ base, head: config.branch });
 
     if (sha) {
       debug("Found merge base", sha);
@@ -300,14 +300,14 @@ export async function upload(params: UploadParameters): Promise<{
     return sha;
   })();
 
-  const parentCommits = (() => {
+  const parentCommits = await (async () => {
     // If we have remote access, we will fetch them from the Git Provider.
     if (hasRemoteContentAccess) {
       return null;
     }
 
     if (referenceCommit) {
-      const commits = listParentCommits({ sha: referenceCommit });
+      const commits = await listParentCommits({ sha: referenceCommit });
       if (commits) {
         debug("Found parent commits", commits);
       } else {
