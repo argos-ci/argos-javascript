@@ -75,7 +75,7 @@ export async function exchangeGitHubActionsOidcToken(args: {
   });
 
   if (result.error) {
-    throwAPIError(result.error);
+    throwAPIError(result.error, result.response);
   }
 
   return result.data.token;
