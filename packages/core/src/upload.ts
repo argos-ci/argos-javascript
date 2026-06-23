@@ -267,7 +267,7 @@ export async function upload(params: UploadParameters): Promise<{
   debug("Fetch project");
   const projectResponse = await apiClient.GET("/project");
   if (projectResponse.error) {
-    throwAPIError(projectResponse.error);
+    throwAPIError(projectResponse.error, projectResponse.response);
   }
   debug("Project fetched", projectResponse.data);
 
@@ -361,7 +361,7 @@ export async function upload(params: UploadParameters): Promise<{
   });
 
   if (createBuildResponse.error) {
-    throwAPIError(createBuildResponse.error);
+    throwAPIError(createBuildResponse.error, createBuildResponse.response);
   }
 
   const result = createBuildResponse.data;
@@ -425,7 +425,7 @@ export async function upload(params: UploadParameters): Promise<{
   });
 
   if (uploadBuildResponse.error) {
-    throwAPIError(uploadBuildResponse.error);
+    throwAPIError(uploadBuildResponse.error, uploadBuildResponse.response);
   }
 
   return { build: uploadBuildResponse.data.build, screenshots: snapshots };

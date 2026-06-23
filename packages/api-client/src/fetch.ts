@@ -4,8 +4,25 @@ import { debug } from "./debug";
 const DEFAULT_TIMEOUT = 30_000;
 
 export class APIError extends Error {
-  constructor(message: string) {
-    super(message);
+  /**
+   * HTTP status code of the response that triggered the error, when available.
+   */
+  status?: number;
+
+  /**
+   * Raw error payload returned by the API (or the infrastructure in front of
+   * it). Useful when the body does not match the expected error shape.
+   */
+  data?: unknown;
+
+  constructor(
+    message: string,
+    options?: { status?: number; data?: unknown; cause?: unknown },
+  ) {
+    super(message, options?.cause != null ? { cause: options.cause } : undefined);
+    this.name = "APIError";
+    this.status = options?.status;
+    this.data = options?.data;
   }
 }
 

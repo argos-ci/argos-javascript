@@ -33,7 +33,7 @@ export async function finalize(params: FinalizeParameters) {
   });
 
   if (finalizeBuildsResult.error) {
-    throwAPIError(finalizeBuildsResult.error);
+    throwAPIError(finalizeBuildsResult.error, finalizeBuildsResult.response);
   }
 
   return finalizeBuildsResult.data;

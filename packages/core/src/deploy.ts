@@ -119,7 +119,7 @@ export async function deploy(params: DeployParameters) {
   });
 
   if (createResponse.error) {
-    throwAPIError(createResponse.error);
+    throwAPIError(createResponse.error, createResponse.response);
   }
 
   const { deploymentId, uploadFiles: filesToUpload } = createResponse.data;
@@ -162,7 +162,7 @@ export async function deploy(params: DeployParameters) {
   );
 
   if (finalizeResponse.error) {
-    throwAPIError(finalizeResponse.error);
+    throwAPIError(finalizeResponse.error, finalizeResponse.response);
   }
 
   return finalizeResponse.data;

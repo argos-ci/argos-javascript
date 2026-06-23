@@ -56,7 +56,7 @@ export async function skip(
   });
 
   if (createBuildResponse.error) {
-    throwAPIError(createBuildResponse.error);
+    throwAPIError(createBuildResponse.error, createBuildResponse.response);
   }
 
   return { build: createBuildResponse.data.build };

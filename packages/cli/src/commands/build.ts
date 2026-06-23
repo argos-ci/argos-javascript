@@ -209,7 +209,7 @@ async function fetchAllDiffs(
       perPage: String(perPage),
       ...(options?.needsReview ? ({ needsReview: true } as const) : {}),
     };
-    const { data, error } = await client.GET(
+    const { data, error, response } = await client.GET(
       "/projects/{owner}/{project}/builds/{buildNumber}/diffs",
       {
         params: {
@@ -225,7 +225,7 @@ async function fetchAllDiffs(
 
     if (error || !data) {
       if (error) {
-        throwAPIError(error);
+        throwAPIError(error, response);
       }
       throw new Error("Unexpected empty response from API.");
     }
@@ -244,10 +244,10 @@ async function fetchAllDiffs(
 async function fetchProject(
   client: ReturnType<typeof createClient>,
 ): Promise<Project> {
-  const { data, error } = await client.GET("/project");
+  const { data, error, response } = await client.GET("/project");
 
   if (error) {
-    throwAPIError(error);
+    throwAPIError(error, response);
   }
 
   if (!data) {
@@ -282,7 +282,7 @@ async function fetchBuildByNumber(
       console.error(`Error: Build number ${errorLabel} not found.`);
       process.exit(1);
     }
-    throwAPIError(error);
+    throwAPIError(error, response);
   }
 
   if (!data) {
@@ -432,7 +432,7 @@ export function buildCommand(program: Command) {
 
         const authToken = await getTokenOrExit(options);
         const client = createClient({ authToken, baseUrl: getAPIBaseURL() });
-        const { data, error } = await client.POST(
+        const { data, error, response } = await client.POST(
           "/projects/{owner}/{project}/builds/{buildNumber}/reviews",
           {
             params: {
@@ -447,7 +447,7 @@ export function buildCommand(program: Command) {
         );
 
         if (error) {
-          const message = formatAPIError(error);
+          const message = formatAPIError(error, response);
           throw new Error(
             [
               `Failed to create review for ${owner}/${project} build #${buildReferenceDetails.buildNumber}: ${message}`,
