@@ -62,15 +62,22 @@ describe("throwAPIError", () => {
       status: 413,
       statusText: "Payload Too Large",
     });
-    try {
-      throwAPIError({}, response);
-      expect.unreachable();
-    } catch (error) {
-      expect(error).toBeInstanceOf(APIError);
-      const apiError = error as APIError;
-      expect(apiError.message).toBe("HTTP 413 Payload Too Large");
-      expect(apiError.status).toBe(413);
-      expect(apiError.data).toEqual({});
-    }
+    const error = getThrownError(() => throwAPIError({}, response));
+    expect(error).toBeInstanceOf(APIError);
+    expect((error as APIError).message).toBe("HTTP 413 Payload Too Large");
+    expect((error as APIError).status).toBe(413);
+    expect((error as APIError).data).toEqual({});
   });
 });
+
+/**
+ * Run `fn` and return the error it throws (fails the test if it doesn't throw).
+ */
+function getThrownError(fn: () => unknown): unknown {
+  try {
+    fn();
+  } catch (error) {
+    return error;
+  }
+  throw new Error("Expected function to throw");
+}

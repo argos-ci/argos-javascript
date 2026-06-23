@@ -19,7 +19,10 @@ export class APIError extends Error {
     message: string,
     options?: { status?: number; data?: unknown; cause?: unknown },
   ) {
-    super(message, options?.cause != null ? { cause: options.cause } : undefined);
+    super(
+      message,
+      options?.cause != null ? { cause: options.cause } : undefined,
+    );
     this.name = "APIError";
     this.status = options?.status;
     this.data = options?.data;

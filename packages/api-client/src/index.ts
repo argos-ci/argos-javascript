@@ -96,10 +96,7 @@ function formatRawBody(error: unknown): string | null {
  * we fall back to the HTTP status and the raw body so the failure stays
  * debuggable instead of surfacing an empty message.
  */
-export function formatAPIError(
-  error: unknown,
-  response?: Response,
-): string {
+export function formatAPIError(error: unknown, response?: Response): string {
   debug("API error", { error, status: response?.status });
 
   if (isStructuredAPIError(error)) {
