@@ -44,11 +44,11 @@ function getCiService(context: Context) {
 export function getMergeBaseCommitSha(input: {
   base: string;
   head: string;
-}): string | null {
+}): Promise<string | null> {
   const context = createContext();
   const service = getCiService(context);
   if (!service) {
-    return null;
+    return Promise.resolve(null);
   }
   return service.getMergeBaseCommitSha(input, context);
 }
@@ -56,11 +56,13 @@ export function getMergeBaseCommitSha(input: {
 /**
  * Get the merge base commit.
  */
-export function listParentCommits(input: { sha: string }): string[] | null {
+export function listParentCommits(input: {
+  sha: string;
+}): Promise<string[] | null> {
   const context = createContext();
   const service = getCiService(context);
   if (!service) {
-    return null;
+    return Promise.resolve(null);
   }
   return service.listParentCommits(input, context);
 }
