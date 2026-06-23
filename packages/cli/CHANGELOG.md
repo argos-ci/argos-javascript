@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.1.1...@argos-ci/cli@5.1.2) (2026-06-23)
+
+
+### Bug Fixes
+
+* surface HTTP status and raw body in API errors ([6c465a3](https://github.com/argos-ci/argos-javascript/commit/6c465a345ae95a3e20240653a4749831f3b94d79))
+
+
+
+
+
 ## [5.1.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.1.0...@argos-ci/cli@5.1.1) (2026-06-21)
 
 **Note:** Version bump only for package @argos-ci/cli
