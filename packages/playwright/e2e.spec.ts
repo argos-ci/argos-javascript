@@ -166,6 +166,96 @@ test.describe("#argosScreenshot", () => {
     });
   });
 
+  test.describe("with `waitForBackgroundImages`", () => {
+    // A 1x1 transparent PNG, served by the route below.
+    const PNG = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "base64",
+    );
+
+    test("waits for background images to load before screenshotting", async ({
+      page,
+      context,
+    }) => {
+      // Gate the background image request so we control exactly when it loads.
+      let releaseImage = () => {};
+      const imageGate = new Promise<void>((resolve) => {
+        releaseImage = resolve;
+      });
+      let imageRequested = () => {};
+      const imageRequestedPromise = new Promise<void>((resolve) => {
+        imageRequested = resolve;
+      });
+
+      await context.route(/slow-background\.png/, async (route) => {
+        imageRequested();
+        await imageGate;
+        await route.fulfill({
+          status: 200,
+          contentType: "image/png",
+          body: PNG,
+        });
+      });
+
+      // `domcontentloaded` so navigation doesn't wait for the gated image.
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+
+      let resolved = false;
+      const screenshotPromise = argosScreenshot(page, "background-images", {
+        fullPage: false,
+        stabilize: { waitForBackgroundImages: true },
+      })
+        .then(() => {
+          resolved = true;
+        })
+        .catch(() => {
+          // Swallow so a failure surfaces through the assertions below.
+        });
+
+      // The plugin must have triggered the background image request…
+      await imageRequestedPromise;
+      // …and stabilization must still be blocked on it (well past the other
+      // stabilizers: the 1000ms loader and the 500ms delayed fonts).
+      await page.waitForTimeout(2000);
+      expect(resolved).toBe(false);
+
+      // Once the image loads, stabilization completes.
+      releaseImage();
+      await screenshotPromise;
+      expect(resolved).toBe(true);
+    });
+
+    test("does not wait for background images by default", async ({
+      page,
+      context,
+    }) => {
+      // Gate the image and never release it: default stabilization must still
+      // complete, proving it does not block on background images.
+      let releaseImage = () => {};
+      const imageGate = new Promise<void>((resolve) => {
+        releaseImage = resolve;
+      });
+      await context.route(/slow-background\.png/, async (route) => {
+        await imageGate;
+        await route.fulfill({
+          status: 200,
+          contentType: "image/png",
+          body: PNG,
+        });
+      });
+
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+
+      // The plugin is opt-in, so this resolves even though the image is stuck.
+      await argosScreenshot(page, "background-images-disabled", {
+        fullPage: false,
+      });
+
+      // Release the still-pending request to avoid leaking it.
+      releaseImage();
+    });
+  });
+
   test.describe("with argosCSS", () => {
     test("evaluate custom CSS", async ({ page }) => {
       await argosScreenshot(page, "custom-css", {
