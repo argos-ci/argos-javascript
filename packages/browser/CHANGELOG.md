@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.1.0...@argos-ci/browser@6.2.0) (2026-06-26)
+
+
+### Features
+
+* add waitForBackgroundImages stabilization plugin ([8d05229](https://github.com/argos-ci/argos-javascript/commit/8d0522959ec70eeffd0cc1ffe0f321cd5f1181eb)), closes [#1943](https://github.com/argos-ci/argos-javascript/issues/1943)
+
+
+
+
+
 # [6.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.0.0...@argos-ci/browser@6.1.0) (2026-05-23)
 
 

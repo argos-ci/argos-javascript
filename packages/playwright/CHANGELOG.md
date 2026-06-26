@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.0.9...@argos-ci/playwright@7.1.0) (2026-06-26)
+
+
+### Features
+
+* add waitForBackgroundImages stabilization plugin ([8d05229](https://github.com/argos-ci/argos-javascript/commit/8d0522959ec70eeffd0cc1ffe0f321cd5f1181eb)), closes [#1943](https://github.com/argos-ci/argos-javascript/issues/1943)
+
+
+
+
+
 ## [7.0.9](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.0.8...@argos-ci/playwright@7.0.9) (2026-06-23)
 
 **Note:** Version bump only for package @argos-ci/playwright
