@@ -3,4 +3,5 @@ export * from "./script";
 export type {
   PluginOptions as StabilizationPluginOptions,
   Context as StabilizationContext,
+  WaitForBackgroundImagesOptions,
 } from "./global/stabilization";

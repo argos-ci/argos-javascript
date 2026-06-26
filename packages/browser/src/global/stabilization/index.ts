@@ -9,13 +9,25 @@ export interface Plugin {
    */
   name: string;
   /**
+   * When `true`, the plugin is disabled unless explicitly enabled through the
+   * options (e.g. `{ [name]: true }`). Use it for plugins that are too
+   * expensive to run by default.
+   */
+  optIn?: boolean;
+  /**
    * Run before taking all screenshots.
    */
-  beforeAll?: (context: RuntimeContext) => Cleanup | undefined;
+  beforeAll?: (
+    context: RuntimeContext,
+    options?: unknown,
+  ) => Cleanup | undefined;
   /**
    * Run before taking each screenshot (between viewport changes).
    */
-  beforeEach?: (context: RuntimeContext) => Cleanup | undefined;
+  beforeEach?: (
+    context: RuntimeContext,
+    options?: unknown,
+  ) => Cleanup | undefined;
   /**
    * Wait for a condition to be met before taking a screenshot.
    */
@@ -23,7 +35,7 @@ export interface Plugin {
     /**
      * Function to check if the condition is met.
      */
-    for: (context: RuntimeContext) => boolean;
+    for: (context: RuntimeContext, options?: unknown) => boolean;
     /**
      * Error message to display if the condition is not met.
      */
@@ -48,8 +60,28 @@ export interface RuntimeContext {
   argosCSS?: string;
 }
 
+/**
+ * Options for the `waitForBackgroundImages` plugin.
+ */
+export interface WaitForBackgroundImagesOptions {
+  /**
+   * CSS selector scoping which elements are scanned for background images.
+   * Scoping avoids a full-document `getComputedStyle` sweep on large pages.
+   * @default "*"
+   */
+  selector?: string;
+}
+
 export type PluginOptions = {
-  [key in PluginName]?: boolean;
+  [key in Exclude<PluginName, "waitForBackgroundImages">]?: boolean;
+} & {
+  /**
+   * Wait for CSS background images to be loaded.
+   * Disabled by default. Enable with `true` to scan the whole document, or
+   * pass an object to scope it to a selector.
+   * @default false
+   */
+  waitForBackgroundImages?: boolean | WaitForBackgroundImagesOptions;
 };
 
 export interface Context extends RuntimeContext {
@@ -60,6 +92,16 @@ const beforeAllCleanups = new Set<Cleanup>();
 const beforeEachCleanups = new Set<Cleanup>();
 
 /**
+ * Get the option value passed for a specific plugin.
+ */
+function getPluginOptions(context: Context, name: string): unknown {
+  if (typeof context.options === "object" && context.options) {
+    return (context.options as Record<string, unknown>)[name];
+  }
+  return undefined;
+}
+
+/**
  * Get the list of plugins to run based on the options.
  */
 function getPlugins(context: Context): Plugin[] {
@@ -67,11 +109,13 @@ function getPlugins(context: Context): Plugin[] {
     if (context.options === false) {
       return false;
     }
-    if (typeof context.options === "object") {
-      const pluginEnabled = context.options[plugin.name];
-      if (pluginEnabled === false) {
-        return false;
-      }
+    const pluginOptions = getPluginOptions(context, plugin.name);
+    if ((plugin as Plugin).optIn) {
+      // Opt-in plugins stay disabled unless explicitly enabled.
+      return Boolean(pluginOptions);
+    }
+    if (pluginOptions === false) {
+      return false;
     }
     return true;
   });
@@ -93,7 +137,10 @@ function getPluginByName(name: string): Plugin {
 export function beforeAll(context: Context = {}) {
   getPlugins(context).forEach((plugin) => {
     if (plugin.beforeAll) {
-      const cleanup = plugin.beforeAll(context);
+      const cleanup = plugin.beforeAll(
+        context,
+        getPluginOptions(context, plugin.name),
+      );
       if (cleanup) {
         beforeAllCleanups.add(cleanup);
       }
@@ -117,7 +164,10 @@ export function afterAll() {
 export function beforeEach(context: Context = {}) {
   getPlugins(context).forEach((plugin) => {
     if (plugin.beforeEach) {
-      const cleanup = plugin.beforeEach(context);
+      const cleanup = plugin.beforeEach(
+        context,
+        getPluginOptions(context, plugin.name),
+      );
       if (cleanup) {
         beforeEachCleanups.add(cleanup);
       }
@@ -143,7 +193,10 @@ function getStabilityState(context: Context) {
 
   getPlugins(context).forEach((plugin) => {
     if (plugin.wait) {
-      stabilityState[plugin.name] = plugin.wait.for(context);
+      stabilityState[plugin.name] = plugin.wait.for(
+        context,
+        getPluginOptions(context, plugin.name),
+      );
     }
   });
 

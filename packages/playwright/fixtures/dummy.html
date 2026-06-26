@@ -67,6 +67,12 @@
           background-color: green;
         }
       }
+      #background-image {
+        width: 200px;
+        height: 100px;
+        background-image: url("slow-background.png");
+        background-size: cover;
+      }
     </style>
   </head>
   <body>
@@ -126,6 +132,10 @@
         sizes="(max-width: 1280px) 100vw, 1280px"
         style="width: 100%; height: auto"
       />
+
+      <h3>Background image</h3>
+      <div class="hint">Hint: the background image should be loaded.</div>
+      <div id="background-image"></div>
 
       <h3>Input</h3>
       <div class="hint">Hint: spellcheck should be disabled</div>

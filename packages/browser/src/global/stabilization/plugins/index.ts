@@ -10,6 +10,7 @@ import { plugin as loadImageSrcset } from "./loadImageSrcset";
 import { plugin as roundImageSize } from "./roundImageSize";
 import { plugin as stabilizeSticky } from "./stabilizeSticky";
 import { plugin as waitForAriaBusy } from "./waitForAriaBusy";
+import { plugin as waitForBackgroundImages } from "./waitForBackgroundImages";
 import { plugin as waitForFonts } from "./waitForFonts";
 import { plugin as waitForImages } from "./waitForImages";
 
@@ -24,6 +25,7 @@ export const plugins = [
   roundImageSize,
   stabilizeSticky,
   waitForAriaBusy,
+  waitForBackgroundImages,
   waitForFonts,
   waitForImages,
 ] satisfies Plugin[];
