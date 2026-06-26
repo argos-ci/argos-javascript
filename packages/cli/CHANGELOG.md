@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.1.2...@argos-ci/cli@5.1.3) (2026-06-26)
+
+
+### Bug Fixes
+
+* don't treat empty ARGOS_SUBSET/ARGOS_PARALLEL env as enabled ([8134950](https://github.com/argos-ci/argos-javascript/commit/8134950565288a3184adf4279d26674b5089b2d3))
+
+
+
+
+
 ## [5.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.1.1...@argos-ci/cli@5.1.2) (2026-06-23)
 
 
