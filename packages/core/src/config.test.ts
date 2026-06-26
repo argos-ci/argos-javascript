@@ -111,6 +111,24 @@ describe("#readConfig", () => {
     delete process.env.ARGOS_SUBSET;
   });
 
+  it("treats an empty ARGOS_SUBSET as false", async () => {
+    process.env.ARGOS_SUBSET = "";
+    expect((await readDummyConfig()).subset).toBe(false);
+    delete process.env.ARGOS_SUBSET;
+  });
+
+  it("reads parallel from env", async () => {
+    process.env.ARGOS_PARALLEL = "true";
+    expect((await readDummyConfig()).parallel).toBe(true);
+    delete process.env.ARGOS_PARALLEL;
+  });
+
+  it("treats an empty ARGOS_PARALLEL as false", async () => {
+    process.env.ARGOS_PARALLEL = "";
+    expect((await readDummyConfig()).parallel).toBe(false);
+    delete process.env.ARGOS_PARALLEL;
+  });
+
   it("reads merge queue pr numbers from env", async () => {
     process.env.ARGOS_MERGE_QUEUE_PRS = "101,102";
     const config = await readDummyConfig();

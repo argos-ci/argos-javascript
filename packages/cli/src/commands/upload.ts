@@ -58,8 +58,8 @@ export function uploadCommand(program: Command) {
     .addOption(
       new Option(
         "--parallel",
-        "Enable parallel mode. Run multiple Argos builds and combine them at the end",
-      ).env("ARGOS_PARALLEL"),
+        "Enable parallel mode. Run multiple Argos builds and combine them at the end.\nCan also be set via the ARGOS_PARALLEL environment variable.",
+      ),
     )
     .addOption(
       new Option(
@@ -95,8 +95,8 @@ export function uploadCommand(program: Command) {
     .addOption(
       new Option(
         "--subset",
-        "Whether this build contains only a subset of screenshots.\nThis is useful when a build is created from an incomplete test suite where some tests are skipped.",
-      ).env("ARGOS_SUBSET"),
+        "Whether this build contains only a subset of screenshots.\nThis is useful when a build is created from an incomplete test suite where some tests are skipped.\nCan also be set via the ARGOS_SUBSET environment variable.",
+      ),
     )
     .action(async (directory: string, options: UploadOptions) => {
       const spinner = ora("Uploading screenshots").start();
