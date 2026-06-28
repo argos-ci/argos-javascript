@@ -11,9 +11,10 @@ import { parseProjectPathOrFail, type ProjectPath } from "./project";
 /**
  * Authentication mode for a build-scoped command:
  *
- * - `project`: read-only build data. Accepts a project token (`--token` /
- *   `ARGOS_TOKEN`); the project path is resolved from the `/project` endpoint
- *   when not provided in the reference or via `--project`.
+ * - `project`: read-only build data. Accepts a project token or a personal
+ *   access token (`--token` / `ARGOS_TOKEN` / `argos login`); the project path
+ *   is resolved from the `/project` endpoint when not provided in the reference
+ *   or via `--project`.
  * - `user`: review and comment actions. Requires a personal access token
  *   (`--token` / `ARGOS_TOKEN` / `argos login`); the project path must come from
  *   the build URL or `--project`.
@@ -32,15 +33,11 @@ export type BuildTarget = ProjectPath & {
   buildNumber: string;
 };
 
-function resolveProjectToken(options: TargetOptions): string {
-  const token = options.token || process.env["ARGOS_TOKEN"];
-  if (!token) {
-    fail("No Argos project token found. Use --token or set ARGOS_TOKEN.");
-  }
-  return token;
-}
-
-async function resolveUserToken(options: TargetOptions): Promise<string> {
+/**
+ * Resolve the API token, preferring an explicit token (`--token` /
+ * `ARGOS_TOKEN`) over the one stored by `argos login`.
+ */
+async function resolveToken(options: TargetOptions): Promise<string> {
   const token =
     options.token || process.env["ARGOS_TOKEN"] || (await getStoredToken());
   if (!token) {
@@ -76,9 +73,9 @@ export async function resolveBuildTarget(
 ): Promise<BuildTarget> {
   const parsed = parseBuildReferenceOrFail(reference);
   const buildNumber = String(parsed.buildNumber);
+  const client = createApiClient(await resolveToken(options));
 
   if (auth === "user") {
-    const client = createApiClient(await resolveUserToken(options));
     const projectPath = explicitProjectPath(parsed, options);
     if (!projectPath) {
       fail(
@@ -88,7 +85,6 @@ export async function resolveBuildTarget(
     return { client, ...projectPath, buildNumber };
   }
 
-  const client = createApiClient(resolveProjectToken(options));
   const projectPath = explicitProjectPath(parsed, options);
   if (projectPath) {
     return { client, ...projectPath, buildNumber };
