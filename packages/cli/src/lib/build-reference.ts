@@ -10,8 +10,11 @@ export type BuildReference = {
   project?: string;
 };
 
+// Anything after the build number — extra path segments (e.g. a diff id), a
+// query string, or a hash — is ignored, so deep links like
+// `.../builds/5014/347549006` resolve to build 5014.
 const BUILD_URL_REGEXP =
-  /^https:\/\/app\.argos-ci\.(?:com|dev(?::\d+)?)\/(?<owner>[^/?#]+)\/(?<project>[^/?#]+)\/builds\/(?<buildNumber>\d+)(?:\/?$|[?#])/;
+  /^https:\/\/app\.argos-ci\.(?:com|dev(?::\d+)?)\/(?<owner>[^/?#]+)\/(?<project>[^/?#]+)\/builds\/(?<buildNumber>\d+)(?:[/?#]|$)/;
 
 /**
  * Parse a build reference, accepting either a bare build number (`"1234"`) or a

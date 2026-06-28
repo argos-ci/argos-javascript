@@ -44,6 +44,14 @@ describe("parseBuildReference", () => {
     ).toEqual({ owner: "team", project: "project", buildNumber: 42 });
   });
 
+  it("parses a build URL with extra path segments (e.g. a diff id)", () => {
+    expect(
+      parseBuildReference(
+        "https://app.argos-ci.com/argos-ci/argos/builds/5014/347549006",
+      ),
+    ).toEqual({ owner: "argos-ci", project: "argos", buildNumber: 5014 });
+  });
+
   it("parses a local dev build URL with a port", () => {
     expect(
       parseBuildReference(
