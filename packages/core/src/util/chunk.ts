@@ -16,6 +16,30 @@ export const chunk = <T>(collection: T[], size: number) => {
 };
 
 /**
+ * Split items into chunks whose serialized JSON size stays under `maxBytes`.
+ * An item larger than `maxBytes` on its own gets its own chunk.
+ */
+export const chunkBySize = <T>(items: T[], maxBytes: number): T[][] => {
+  const chunks: T[][] = [];
+  let current: T[] = [];
+  let currentBytes = 0;
+  for (const item of items) {
+    const size = Buffer.byteLength(JSON.stringify(item));
+    if (current.length > 0 && currentBytes + size > maxBytes) {
+      chunks.push(current);
+      current = [];
+      currentBytes = 0;
+    }
+    current.push(item);
+    currentBytes += size;
+  }
+  if (current.length > 0) {
+    chunks.push(current);
+  }
+  return chunks;
+};
+
+/**
  * Map over a collection asynchronously, processing at most `size` items
  * concurrently to limit memory pressure.
  */

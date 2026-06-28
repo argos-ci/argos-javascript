@@ -161,6 +161,51 @@ describe("#upload", () => {
     })();
   });
 
+  it("marks the update build request as final and carries the metadata", () => {
+    return server.boundary(async () => {
+      const updateBuildBodies: {
+        final?: boolean | null;
+        metadata?: unknown;
+        screenshots: unknown[];
+      }[] = [];
+
+      server.use(
+        http.put(
+          "https://api.argos-ci.dev/builds/:buildId",
+          async ({ request }) => {
+            updateBuildBodies.push(
+              (await request.json()) as {
+                final?: boolean | null;
+                metadata?: unknown;
+                screenshots: unknown[];
+              },
+            );
+            return HttpResponse.json({
+              build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
+            });
+          },
+        ),
+      );
+
+      await upload({
+        branch: "main",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        metadata: {
+          testReport: { status: "passed" },
+        },
+      });
+
+      // The fixtures are small, so everything fits in a single request.
+      expect(updateBuildBodies).toHaveLength(1);
+      const last = updateBuildBodies.at(-1);
+      expect(last?.final).toBe(true);
+      expect(last?.metadata).toEqual({ testReport: { status: "passed" } });
+    })();
+  });
+
   it("retries", () => {
     return server.boundary(async () => {
       let reqCount = 0;
