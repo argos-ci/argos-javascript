@@ -5,9 +5,9 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { getStoredToken, removeToken, saveToken } from "../src/auth";
 
-let homeDir;
-let originalHome;
-let originalUserProfile;
+let homeDir: string;
+let originalHome: string | undefined;
+let originalUserProfile: string | undefined;
 
 function getConfigPath() {
   return resolve(homeDir, ".config", "argos-ci", "config.json");

@@ -3,12 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, test } from "vitest";
 
-import { getRequiredEnv, run } from "./utils.js";
+import { getRequiredEnv, run, type CommandError } from "./utils";
 
 const userAccessToken = getRequiredEnv("USER_ACCESS_TOKEN");
 const buildNumber = process.env.ARGOS_BUILD_NUMBER || "27748";
 
-const baseEnv = {
+const baseEnv: NodeJS.ProcessEnv = {
   ...process.env,
   HOME: mkdtempSync(join(tmpdir(), "argos-cli-e2e-")),
   ARGOS_API_BASE_URL: process.env.ARGOS_API_BASE_URL,
@@ -16,11 +16,11 @@ const baseEnv = {
 };
 
 /** Run a comment command authenticated with the user access token. */
-function runAs(args) {
+function runAs(args: string[]) {
   return run([...args, "--token", userAccessToken, "--json"], baseEnv);
 }
 
-let buildUrl;
+let buildUrl: string;
 
 beforeAll(() => {
   const build = JSON.parse(
@@ -31,14 +31,14 @@ beforeAll(() => {
 
 describe("argos comment", () => {
   test("requires a body to create a comment", () => {
-    let error;
+    // Use the build URL (which carries the project) so resolution succeeds and
+    // the command reaches the body validation rather than failing earlier on a
+    // missing --project.
+    let error: CommandError | undefined;
     try {
-      run(
-        ["comment", "create", buildNumber, "--token", userAccessToken],
-        baseEnv,
-      );
+      run(["comment", "create", buildUrl, "--token", userAccessToken], baseEnv);
     } catch (err) {
-      error = err;
+      error = err as CommandError;
     }
     expect(error?.status).not.toBe(0);
     expect(error?.stderr).toContain("A comment body is required");
@@ -75,11 +75,15 @@ describe("argos comment", () => {
     const reacted = JSON.parse(
       runAs(["comment", "react", buildUrl, id, "👍"]).stdout,
     );
-    expect(reacted.reactions.some((r) => r.emoji === "👍")).toBe(true);
+    expect(
+      reacted.reactions.some((r: { emoji: string }) => r.emoji === "👍"),
+    ).toBe(true);
     const unreacted = JSON.parse(
       runAs(["comment", "unreact", buildUrl, id, "👍"]).stdout,
     );
-    expect(unreacted.reactions.some((r) => r.emoji === "👍")).toBe(false);
+    expect(
+      unreacted.reactions.some((r: { emoji: string }) => r.emoji === "👍"),
+    ).toBe(false);
 
     // Resolve / unresolve (acts on the thread root)
     const resolved = JSON.parse(

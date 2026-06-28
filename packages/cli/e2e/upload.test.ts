@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { getRequiredEnv, run } from "./utils.js";
+import { getRequiredEnv, run } from "./utils";
 
 getRequiredEnv("ARGOS_TOKEN");
 

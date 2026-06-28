@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { run } from "./utils.js";
+import { run } from "./utils";
 
 // No ARGOS_TOKEN — authentication is handled via GitHub Actions OIDC.
 test(

@@ -3,41 +3,47 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, test } from "vitest";
 
-import { getRequiredEnv, run } from "./utils.js";
+import { getRequiredEnv, run, type CommandError } from "./utils";
 
 const userAccessToken = getRequiredEnv("USER_ACCESS_TOKEN");
 const buildNumber = process.env.ARGOS_BUILD_NUMBER || "27748";
 
-const baseEnv = {
+const baseEnv: NodeJS.ProcessEnv = {
   ...process.env,
   HOME: mkdtempSync(join(tmpdir(), "argos-cli-e2e-")),
   ARGOS_API_BASE_URL: process.env.ARGOS_API_BASE_URL,
   ARGOS_TOKEN: getRequiredEnv("ARGOS_TOKEN"),
 };
 
-function expectRunToFail(args, overrideEnv) {
+function expectRunToFail(
+  args: string[],
+  overrideEnv?: NodeJS.ProcessEnv,
+): CommandError {
   try {
     run(args, { ...baseEnv, ...overrideEnv });
   } catch (error) {
-    return error;
+    return error as CommandError;
   }
   throw new Error(
     `Expected command to fail: node bin/argos-cli.js ${args.join(" ")}`,
   );
 }
 
-let buildUrl;
-let projectPath;
+let buildUrl: string;
+let projectPath: string;
 
 beforeAll(() => {
   const build = JSON.parse(
     run(["build", "get", buildNumber, "--json"], baseEnv).stdout,
   );
   buildUrl = build.url;
-  const urlMatch = buildUrl.match(
+  const match = buildUrl.match(
     /app\.argos-ci\.(?:com|dev(?::\d+)?)\/([^/?#]+)\/([^/?#]+)\/builds\//,
   );
-  projectPath = urlMatch ? `${urlMatch[1]}/${urlMatch[2]}` : null;
+  if (!match) {
+    throw new Error(`Could not parse project from build URL: ${buildUrl}`);
+  }
+  projectPath = `${match[1]}/${match[2]}`;
 });
 
 describe("argos review create", () => {

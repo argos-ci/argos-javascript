@@ -3,22 +3,25 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, test } from "vitest";
 
-import { getRequiredEnv, run } from "./utils.js";
+import { getRequiredEnv, run, type CommandError } from "./utils";
 
 const buildNumber = process.env.ARGOS_BUILD_NUMBER || "27748";
 
-const baseEnv = {
+const baseEnv: NodeJS.ProcessEnv = {
   ...process.env,
   HOME: mkdtempSync(join(tmpdir(), "argos-cli-e2e-")),
   ARGOS_API_BASE_URL: process.env.ARGOS_API_BASE_URL,
   ARGOS_TOKEN: getRequiredEnv("ARGOS_TOKEN"),
 };
 
-function expectRunToFail(args, overrideEnv) {
+function expectRunToFail(
+  args: string[],
+  overrideEnv?: NodeJS.ProcessEnv,
+): CommandError {
   try {
     run(args, { ...baseEnv, ...overrideEnv });
   } catch (error) {
-    return error;
+    return error as CommandError;
   }
 
   throw new Error(
@@ -26,8 +29,8 @@ function expectRunToFail(args, overrideEnv) {
   );
 }
 
-let build;
-let buildUrl;
+let build: any;
+let buildUrl: string;
 
 beforeAll(() => {
   build = JSON.parse(
