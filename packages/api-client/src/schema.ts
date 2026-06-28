@@ -13,6 +13,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Create a build
+         * @description Create a build and receive signed upload targets for its screenshots and Playwright traces. The response lists, for every file Argos doesn't already have, a secure `postUrl` with `fields` (or a legacy `putUrl`) to upload it to. Supports single and parallel builds.
+         */
         post: operations["createBuild"];
         delete?: never;
         options?: never;
@@ -29,6 +33,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Create a deployment
+         * @description Create a deployment and receive signed upload URLs for the files Argos doesn't already store. Files already present (matched by content hash) are reused and omitted from `uploadFiles`. The environment is inferred from the branch when omitted.
+         */
         post: operations["createDeployment"];
         delete?: never;
         options?: never;
@@ -43,6 +51,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Get a deployment
+         * @description Retrieve a single deployment by its ID.
+         */
         get: operations["getDeployment"];
         put?: never;
         post?: never;
@@ -61,6 +73,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Finalize a deployment
+         * @description Mark a deployment as ready once all of its files have been uploaded. Argos assigns the deployment's aliases and starts serving it.
+         */
         post: operations["finalizeDeployment"];
         delete?: never;
         options?: never;
@@ -75,6 +91,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Resolve a deployment domain
+         * @description Resolve a deployment domain or URL to the deployment it currently serves. This endpoint is public and does not require authentication.
+         */
         get: operations["resolveDeploymentDomain"];
         put?: never;
         post?: never;
@@ -93,6 +113,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Finalize parallel builds
+         * @description Mark every parallel shard sharing the given `parallelNonce` as complete. Once finalized, Argos compares the aggregated screenshots and starts processing the build.
+         */
         post: operations["finalizeBuilds"];
         delete?: never;
         options?: never;
@@ -110,7 +134,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Exchange CLI authorization code for a token
+         * Exchange a CLI authorization code for a token
          * @description Called by the CLI to exchange a PKCE authorization code for an API token.
          */
         post: operations["exchangeCliToken"];
@@ -167,6 +191,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Get the current project
+         * @description Retrieve the project associated with the project token used to authenticate the request.
+         */
         get: operations["getAuthProject"];
         put?: never;
         post?: never;
@@ -184,6 +212,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        /**
+         * Update a build
+         * @description Add screenshots to an existing build and update its metadata. Used to push the screenshots of a parallel shard, identified by `parallelIndex` and `parallelTotal`.
+         */
         put: operations["updateBuild"];
         post?: never;
         delete?: never;
@@ -199,6 +231,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Get a project
+         * @description Retrieve a project by its owner (account slug) and project name.
+         */
         get: operations["getProject"];
         put?: never;
         post?: never;
@@ -215,6 +251,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * List a project's builds
+         * @description List the builds of a project, most recent first. Results are paginated. Use `distinctName` to return only the latest build per name and commit.
+         */
         get: operations["getProjectBuilds"];
         put?: never;
         post?: never;
@@ -231,6 +271,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Get a build
+         * @description Retrieve a single build by its number within a project, including its status and metadata.
+         */
         get: operations["getBuild"];
         put?: never;
         post?: never;
@@ -247,6 +291,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * List a build's screenshot diffs
+         * @description List the screenshot diffs of a build, with pagination. Each diff compares a baseline screenshot to the one captured by the build. Use `onlyChanged` to return only the diffs that require review.
+         */
         get: operations["getBuildDiffs"];
         put?: never;
         post?: never;
@@ -263,11 +311,178 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List the reviews submitted on a build
+         * @description List the reviews submitted on a build, with pagination.
+         */
+        get: operations["listReviews"];
         put?: never;
-        /** Create a review on a specified build */
+        /**
+         * Create a review on a build
+         * @description Submit a review on a build to approve or reject the changes it captured.
+         */
         post: operations["createReview"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/reviews/{reviewId}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dismiss a submitted review on a build
+         * @description Dismiss a previously submitted review on a build, clearing its effect on the build's review status.
+         */
+        post: operations["dismissReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the comments on a build
+         * @description List the comments on a build, with pagination.
+         */
+        get: operations["listComments"];
+        put?: never;
+        /**
+         * Post a comment (or reply) on a build
+         * @description Post a comment on a build. Start a new thread, reply to an existing one with `threadId`, optionally anchor the comment to a screenshot diff, or attach it to your pending review with `addToReview`.
+         */
+        post: operations["createComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single comment on a build
+         * @description Retrieve a single comment on a build by its ID.
+         */
+        get: operations["getComment"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a comment on a build
+         * @description Delete a comment on a build. Only the comment's author can delete it.
+         */
+        delete: operations["deleteComment"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a comment on a build
+         * @description Update the body of a comment on a build. Only the comment's author can edit it.
+         */
+        patch: operations["updateComment"];
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/comments/{commentId}/reactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add an emoji reaction to a comment
+         * @description Add an emoji reaction to a comment on behalf of the authenticated user.
+         */
+        post: operations["addCommentReaction"];
+        /**
+         * Remove an emoji reaction from a comment
+         * @description Remove an emoji reaction previously added by the authenticated user from a comment.
+         */
+        delete: operations["removeCommentReaction"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/comments/{commentId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a comment thread as resolved
+         * @description Mark a comment thread as resolved.
+         */
+        post: operations["resolveCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/comments/{commentId}/unresolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopen a resolved comment thread
+         * @description Reopen a previously resolved comment thread.
+         */
+        post: operations["unresolveCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/comments/{commentId}/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subscribe to a comment thread's notifications
+         * @description Subscribe the authenticated user to a comment thread to receive notifications about new replies.
+         */
+        post: operations["subscribeCommentThread"];
+        /**
+         * Unsubscribe from a comment thread's notifications
+         * @description Unsubscribe the authenticated user from a comment thread's notifications.
+         */
+        delete: operations["unsubscribeCommentThread"];
         options?: never;
         head?: never;
         patch?: never;
@@ -768,6 +983,72 @@ export interface components {
                 /** @description Content type of the snapshot file */
                 contentType: string;
             } | null;
+        };
+        /** @description Build review */
+        BuildReview: {
+            id: string;
+            buildId: string;
+            /**
+             * @description State of a build review: approved, rejected, commented (neutral) or pending (an unsubmitted draft).
+             * @enum {string}
+             */
+            state: "approved" | "rejected" | "commented" | "pending";
+            /** @description The user who submitted the review. */
+            user: components["schemas"]["User"] | null;
+            /** @description Date the review was dismissed, null if not dismissed. */
+            dismissedAt: string | null;
+            /** @description The user who dismissed the review, if any. */
+            dismissedBy: components["schemas"]["User"] | null;
+            /** @description Date the review was created. */
+            date: string;
+        };
+        /** @description A user. */
+        User: {
+            id: string;
+            slug: string;
+            name: string | null;
+        };
+        /** @description A comment posted on a build. */
+        Comment: {
+            id: string;
+            buildId: string;
+            /** @description Root comment ID when this comment is a reply. */
+            threadId: string | null;
+            /** @description Rich-text JSON content of the comment. */
+            body: unknown;
+            /** @description Plain-text rendering of the comment content. */
+            text: string;
+            author: components["schemas"]["User"] | null;
+            /** @description Screenshot diff this comment is anchored to, if any. */
+            screenshotDiffId: string | null;
+            /** @description Where the comment points on its screenshot diff. Null means the whole diff. */
+            anchor: ({
+                /** @constant */
+                type: "point";
+                x: number;
+                y: number;
+            } | {
+                /** @constant */
+                type: "lines";
+                from: number;
+                to: number;
+            }) | null;
+            /** @description Whether the comment belongs to a pending (unsubmitted) review and is only visible to its author. */
+            pending: boolean;
+            /** @description Date the thread was resolved, null if not resolved. Only set on a root comment. */
+            resolvedAt: string | null;
+            /** @description Date the comment was last edited, null if never edited. */
+            editedAt: string | null;
+            /** @description Date the comment was posted. */
+            createdAt: string;
+            reactions: {
+                /** @description The emoji used for the reaction. */
+                emoji: string;
+                /** @description Number of users who reacted with this emoji. */
+                count: number;
+                /** @description The users who reacted with this emoji. */
+                users: components["schemas"]["User"][];
+            }[];
         };
         /**
          * @description The build number
@@ -1364,10 +1645,6 @@ export interface operations {
                     repository?: string;
                     /** @description Expected commit SHA */
                     commit?: components["schemas"]["Sha1Hash"];
-                    /** @description Expected branch name */
-                    branch?: string;
-                    /** @description Expected pull request number */
-                    pullRequestNumber?: number;
                 };
             };
         };
@@ -1921,6 +2198,76 @@ export interface operations {
             };
         };
     };
+    listReviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Build reviews */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuildReview"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     createReview: {
         parameters: {
             query?: never;
@@ -1947,7 +2294,7 @@ export interface operations {
                      * @enum {string}
                      */
                     conclusion?: "APPROVE" | "REQUEST_CHANGES";
-                    /** @description Optional comment to attach to the review. Expected as the JSON representation of a rich-text document. */
+                    /** @description Optional comment to attach to the review. Either Markdown text or the JSON representation of a rich-text document. */
                     body?: unknown;
                     /**
                      * @description Optional per-snapshot review decisions. When omitted, only the build-level review is recorded.
@@ -1972,11 +2319,913 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        id: string;
-                        /** @enum {string} */
-                        state: "approved" | "rejected" | "commented" | "pending";
+                    "application/json": components["schemas"]["BuildReview"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    dismissReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description The ID of the review */
+                reviewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Review dismissed successfully — returns the review */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuildReview"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Build comments, oldest first. Replies carry a threadId pointing at their root comment. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
                     };
+                    /** @description Root comment ID to reply to. */
+                    threadId?: string;
+                    /** @description Screenshot diff to anchor the comment to. Required when anchor is set. */
+                    screenshotDiffId?: string;
+                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0–1) coordinates; lines is a 1-based inclusive range. */
+                    anchor?: {
+                        /** @constant */
+                        type: "point";
+                        x: number;
+                        y: number;
+                    } | {
+                        /** @constant */
+                        type: "lines";
+                        from: number;
+                        to: number;
+                    };
+                    /** @description Attach the comment to your pending review (created if needed) instead of posting it immediately. Ignored for replies, which inherit their thread's review. */
+                    addToReview?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Comment created successfully — returns the comment */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description The ID of the comment */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description The ID of the comment */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment deleted successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description The ID of the comment */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Comment updated successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    addCommentReaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description The ID of the comment */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The emoji to react with. */
+                    emoji: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Reaction added — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeCommentReaction: {
+        parameters: {
+            query: {
+                /** @description The emoji reaction to remove. */
+                emoji: string;
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description The ID of the comment */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reaction removed — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resolveCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description ID of any comment in the thread */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread resolved — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unresolveCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description ID of any comment in the thread */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread reopened — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    subscribeCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description ID of any comment in the thread */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unsubscribeCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+                /** @description ID of any comment in the thread */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unsubscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
                 };
             };
             /** @description Invalid parameters */

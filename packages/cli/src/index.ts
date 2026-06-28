@@ -6,7 +6,10 @@ import { uploadCommand } from "./commands/upload";
 import { finalizeCommand } from "./commands/finalize";
 import { skipCommand } from "./commands/skip";
 import { buildCommand } from "./commands/build";
+import { reviewCommand } from "./commands/review";
+import { commentCommand } from "./commands/comment";
 import { loginCommand } from "./commands/login";
+import { logoutCommand } from "./commands/logout";
 import { deployCommand } from "./commands/deploy";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -25,7 +28,10 @@ uploadCommand(program);
 skipCommand(program);
 finalizeCommand(program);
 buildCommand(program);
+reviewCommand(program);
+commentCommand(program);
 loginCommand(program);
+logoutCommand(program);
 deployCommand(program);
 
 if (!process.argv.slice(2).length) {

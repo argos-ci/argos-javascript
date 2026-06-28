@@ -46,9 +46,10 @@
   },
   "scripts": {
     "build": "tsdown",
-    "e2e": "vitest --tags-filter=\"not oidc and not tokenless\"",
-    "e2e-oidc": "vitest e2e/upload-oidc.test.js",
-    "e2e-tokenless": "vitest e2e/upload-tokenless.test.js",
+    "test": "vitest run src",
+    "e2e": "vitest e2e --tags-filter=\"not oidc and not tokenless\"",
+    "e2e-oidc": "vitest e2e/upload-oidc.test.ts",
+    "e2e-tokenless": "vitest e2e/upload-tokenless.test.ts",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."

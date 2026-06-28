@@ -1,7 +1,7 @@
 export default {
   test: {
     environment: "node",
-    include: ["e2e/**/*.test.{js,ts}"],
+    include: ["src/**/*.test.ts", "e2e/**/*.test.ts"],
     tags: [
       {
         name: "oidc",
