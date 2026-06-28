@@ -35,11 +35,11 @@ number, add `--project owner/project`; a URL already contains it.
 
 Two token types — pick by command:
 
-| Commands                              | Token                            | Resolution order                       |
-| ------------------------------------- | -------------------------------- | -------------------------------------- |
-| `build get`, `build snapshots`        | Project token                    | `--token` › `ARGOS_TOKEN`              |
-| `review *`, `comment *`               | Personal access token (PAT)      | `--token` › `ARGOS_TOKEN` › `argos login` |
-| `upload`, `finalize`, `skip`, `deploy`| CI / project token               | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
+| Commands                               | Token                       | Resolution order                            |
+| -------------------------------------- | --------------------------- | ------------------------------------------- |
+| `build get`, `build snapshots`         | Project token               | `--token` › `ARGOS_TOKEN`                   |
+| `review *`, `comment *`                | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
+| `upload`, `finalize`, `skip`, `deploy` | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
 
 Project tokens read build data but **cannot** review or comment — those need a
 PAT. If no suitable token is available, ask the user. For review/comment, if no

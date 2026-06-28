@@ -16,7 +16,7 @@ is intentional, a regression, or a flaky capture.
 
 Treat the Argos build as **one input** to the PR review, never the sole source of
 truth. Infer the intended UI change from the PR title, description, linked issue,
-and code diff *first*, then use Argos to confirm the rendered result matches.
+and code diff _first_, then use Argos to confirm the rendered result matches.
 
 ## Tooling & auth
 
@@ -31,12 +31,12 @@ and evidence instead of posting — the CLI can't submit the review.
 
 1. **Inspect the build** — `argos build get <ref> --json`. Decide from status:
 
-   | Status                          | Meaning / next step                                  |
-   | ------------------------------- | ---------------------------------------------------- |
-   | `accepted` / `no-changes`       | Already approved / no visual diff — no review needed  |
-   | `pending` / `progress`          | Not ready — stop and report it can't be reviewed yet |
-   | `changes-detected`              | Needs a decision — fetch snapshots                   |
-   | `rejected` / `error` / `aborted`/ `expired` | Don't approve until the cause is understood |
+   | Status                                      | Meaning / next step                                  |
+   | ------------------------------------------- | ---------------------------------------------------- |
+   | `accepted` / `no-changes`                   | Already approved / no visual diff — no review needed |
+   | `pending` / `progress`                      | Not ready — stop and report it can't be reviewed yet |
+   | `changes-detected`                          | Needs a decision — fetch snapshots                   |
+   | `rejected` / `error` / `aborted`/ `expired` | Don't approve until the cause is understood          |
 
 2. **Fetch what changed** — `argos build snapshots <ref> --needs-review --json`.
    For each diff inspect `url` (diff mask), `base.url` (before), `head.url`
