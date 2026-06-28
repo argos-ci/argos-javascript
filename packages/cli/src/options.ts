@@ -23,3 +23,15 @@ export const buildNameOption = new Option(
   "--build-name <string>",
   "Name of the build, in case you want to run multiple Argos builds in a single CI job",
 ).env("ARGOS_BUILD_NAME");
+
+export type JsonOption = { json?: boolean | undefined };
+export const jsonOption = new Option(
+  "--json",
+  "Output machine-readable JSON instead of human-readable text",
+);
+
+export type ProjectPathOption = { project?: string | undefined };
+export const projectPathOption = new Option(
+  "--project <owner/project>",
+  "Project path in owner/project format. Required for build-number references on review and comment commands",
+).env("ARGOS_PROJECT");

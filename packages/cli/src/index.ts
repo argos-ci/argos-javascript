@@ -6,6 +6,8 @@ import { uploadCommand } from "./commands/upload";
 import { finalizeCommand } from "./commands/finalize";
 import { skipCommand } from "./commands/skip";
 import { buildCommand } from "./commands/build";
+import { reviewCommand } from "./commands/review";
+import { commentCommand } from "./commands/comment";
 import { loginCommand } from "./commands/login";
 import { deployCommand } from "./commands/deploy";
 
@@ -25,6 +27,8 @@ uploadCommand(program);
 skipCommand(program);
 finalizeCommand(program);
 buildCommand(program);
+reviewCommand(program);
+commentCommand(program);
 loginCommand(program);
 deployCommand(program);
 
