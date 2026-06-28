@@ -44,7 +44,7 @@ describe("argos build get", () => {
     const error = expectRunToFail(["build", "get", "1"], { ARGOS_TOKEN: "" });
 
     expect(error.status).not.toBe(0);
-    expect(error.stderr).toContain("No Argos project token found");
+    expect(error.stderr).toContain("No Argos token found");
   });
 
   test("fails when token is missing for a build URL", () => {
@@ -58,7 +58,7 @@ describe("argos build get", () => {
     );
 
     expect(error.status).not.toBe(0);
-    expect(error.stderr).toContain("No Argos project token found");
+    expect(error.stderr).toContain("No Argos token found");
   });
 
   test("fails for an unknown build number", () => {
@@ -113,7 +113,7 @@ describe("argos build snapshots", () => {
     });
 
     expect(error.status).not.toBe(0);
-    expect(error.stderr).toContain("No Argos project token found");
+    expect(error.stderr).toContain("No Argos token found");
   });
 
   test("prints human-readable snapshot data", () => {
