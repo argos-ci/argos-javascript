@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import { createHash, randomBytes } from "node:crypto";
 import open from "open";
 import { createClient } from "@argos-ci/api-client";
-import { saveToken, removeToken, getStoredToken } from "../auth";
+import { saveToken } from "../auth";
 
 const APP_BASE_URL =
   process.env["ARGOS_APP_BASE_URL"] ?? "https://app.argos-ci.com/";
@@ -210,18 +210,5 @@ export function loginCommand(program: Command) {
 
       await saveToken(data.token);
       console.log(successColor("Logged in to Argos successfully."));
-    });
-
-  program
-    .command("logout")
-    .description("Log out from Argos")
-    .action(async () => {
-      const existing = await getStoredToken();
-      if (!existing) {
-        console.log("No token found. You are already logged out.");
-        return;
-      }
-      await removeToken();
-      console.log("Logged out from Argos.");
     });
 }

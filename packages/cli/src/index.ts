@@ -9,6 +9,7 @@ import { buildCommand } from "./commands/build";
 import { reviewCommand } from "./commands/review";
 import { commentCommand } from "./commands/comment";
 import { loginCommand } from "./commands/login";
+import { logoutCommand } from "./commands/logout";
 import { deployCommand } from "./commands/deploy";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -30,6 +31,7 @@ buildCommand(program);
 reviewCommand(program);
 commentCommand(program);
 loginCommand(program);
+logoutCommand(program);
 deployCommand(program);
 
 if (!process.argv.slice(2).length) {
