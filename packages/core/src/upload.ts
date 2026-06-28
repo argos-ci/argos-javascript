@@ -418,18 +418,23 @@ export async function upload(params: UploadParameters): Promise<{
     contentType: snapshot.contentType,
   }));
 
-  // Parallel shards must be sent in a single request (each request counts as one
-  // batch). Non-parallel builds split their screenshots across several requests
-  // to stay under the API request body size limit, since the metadata of a
-  // single screenshot can be large.
-  const screenshotChunks = config.parallel
-    ? [screenshotInputs]
-    : chunkBySize(screenshotInputs, MAX_UPDATE_BUILD_SCREENSHOTS_BYTES);
+  // Split the screenshots across several requests to stay under the API request
+  // body size limit, since the metadata of a single screenshot can be large.
+  const screenshotChunks = chunkBySize(
+    screenshotInputs,
+    MAX_UPDATE_BUILD_SCREENSHOTS_BYTES,
+  );
   // Always send at least one request so a build with no screenshots is
   // finalized.
   if (screenshotChunks.length === 0) {
     screenshotChunks.push([]);
   }
+
+  // A parallel shard with an index groups its requests into a single shard, so
+  // only its last request is `final`. Without an index (manual finalization),
+  // requests can't be grouped, so each is its own complete shard — that's fine
+  // since the build is finalized manually.
+  const groupsRequests = !config.parallel || config.parallelIndex != null;
 
   let build: ArgosAPISchema.components["schemas"]["Build"] | null = null;
   for (let index = 0; index < screenshotChunks.length; index++) {
@@ -446,9 +451,9 @@ export async function upload(params: UploadParameters): Promise<{
         parallel: config.parallel,
         parallelTotal: config.parallelTotal,
         parallelIndex: config.parallelIndex,
-        // The build is finalized by the last request, which also carries the
-        // build metadata.
-        final: isLast,
+        // The build/shard is finalized by its last request, which also carries
+        // the build metadata. Ungrouped requests are each final on their own.
+        final: groupsRequests ? isLast : true,
         metadata: isLast ? params.metadata : undefined,
       },
     });
