@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.2.3...@argos-ci/core@6.3.0) (2026-06-29)
+
+
+### Features
+
+* **core:** split parallel shard uploads too ([4a71d67](https://github.com/argos-ci/argos-javascript/commit/4a71d6798431ff4f111893d391e4d368469c3a1e))
+* **core:** split the updateBuild request to avoid PayloadTooLargeError ([b2babd5](https://github.com/argos-ci/argos-javascript/commit/b2babd5da22a8526914068ab6639d94f0facb04e))
+
+
+
+
+
 ## [6.2.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.2.2...@argos-ci/core@6.2.3) (2026-06-26)
 
 

@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.0.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.1.3...@argos-ci/cli@6.0.0) (2026-06-29)
+
+
+### Bug Fixes
+
+* **cli:** accept build URLs with trailing path segments ([3a7f711](https://github.com/argos-ci/argos-javascript/commit/3a7f711dcf46ce69ae8eca08e5c254b3734d6a6c))
+* **cli:** use the stored login token for project-auth commands ([4328659](https://github.com/argos-ci/argos-javascript/commit/43286592393a16508179ca8fff6f5662d0cb2922))
+
+
+### Features
+
+* **cli:** expose review and comment commands ([dd4df47](https://github.com/argos-ci/argos-javascript/commit/dd4df47991736be42f2000a8674bf1de5b8f4bf1)), closes [argos-ci/argos#2287](https://github.com/argos-ci/argos/issues/2287)
+
+
+### BREAKING CHANGES
+
+* **cli:** argos build review --conclusion <approve|request-changes>
+is replaced by argos review create --event <approve|reject|comment> [--body].
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+
+
+
+
 ## [5.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@5.1.2...@argos-ci/cli@5.1.3) (2026-06-26)
 
 

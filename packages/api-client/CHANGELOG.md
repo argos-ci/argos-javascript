@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.23.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.22.1...@argos-ci/api-client@0.23.0) (2026-06-29)
+
+
+### Features
+
+* **core:** split the updateBuild request to avoid PayloadTooLargeError ([b2babd5](https://github.com/argos-ci/argos-javascript/commit/b2babd5da22a8526914068ab6639d94f0facb04e))
+
+
+
+
+
 ## [0.22.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.22.0...@argos-ci/api-client@0.22.1) (2026-06-23)
 
 
