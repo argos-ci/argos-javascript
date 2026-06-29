@@ -7,7 +7,7 @@ import { hashFile } from "./hashing";
 import { resolveArgosToken } from "./auth";
 import { uploadFileWithPresignedPost } from "./s3";
 import { debug, debugTime, debugTimeEnd } from "./debug";
-import { chunk, mapInChunks } from "./util/chunk";
+import { chunk, chunkBySize, mapInChunks } from "./util/chunk";
 import {
   getPlaywrightTracePath,
   readMetadata,
@@ -23,6 +23,13 @@ import { skip } from "./skip";
  * Limits concurrency to avoid memory pressure when handling many screenshots.
  */
 const CHUNK_SIZE = 10;
+
+/**
+ * Maximum serialized size (in bytes) of the screenshots sent in a single
+ * `updateBuild` request. Kept below the API request body size limit (3MB) to
+ * leave room for the rest of the body (build metadata, etc.).
+ */
+const MAX_UPDATE_BUILD_SCREENSHOTS_BYTES = 2 * 1024 * 1024;
 
 const PLAYWRIGHT_TRACE_CONTENT_TYPE = "application/zip";
 
@@ -400,35 +407,71 @@ export async function upload(params: UploadParameters): Promise<{
   // Update build
   debug("Updating build");
 
-  const uploadBuildResponse = await apiClient.PUT("/builds/{buildId}", {
-    params: {
-      path: {
-        buildId: result.build.id,
-      },
-    },
-    body: {
-      screenshots: snapshots.map((snapshot) => ({
-        key: snapshot.hash,
-        name: snapshot.name,
-        metadata: snapshot.metadata,
-        pwTraceKey: snapshot.pwTrace?.hash ?? null,
-        threshold: snapshot.threshold ?? config?.threshold ?? null,
-        baseName: snapshot.baseName,
-        parentName: snapshot.parentName,
-        contentType: snapshot.contentType,
-      })),
-      parallel: config.parallel,
-      parallelTotal: config.parallelTotal,
-      parallelIndex: config.parallelIndex,
-      metadata: params.metadata,
-    },
-  });
+  const screenshotInputs = snapshots.map((snapshot) => ({
+    key: snapshot.hash,
+    name: snapshot.name,
+    metadata: snapshot.metadata,
+    pwTraceKey: snapshot.pwTrace?.hash ?? null,
+    threshold: snapshot.threshold ?? config?.threshold ?? null,
+    baseName: snapshot.baseName,
+    parentName: snapshot.parentName,
+    contentType: snapshot.contentType,
+  }));
 
-  if (uploadBuildResponse.error) {
-    throwAPIError(uploadBuildResponse.error, uploadBuildResponse.response);
+  // Split the screenshots across several requests to stay under the API request
+  // body size limit, since the metadata of a single screenshot can be large.
+  const screenshotChunks = chunkBySize(
+    screenshotInputs,
+    MAX_UPDATE_BUILD_SCREENSHOTS_BYTES,
+  );
+  // Always send at least one request so a build with no screenshots is
+  // finalized.
+  if (screenshotChunks.length === 0) {
+    screenshotChunks.push([]);
   }
 
-  return { build: uploadBuildResponse.data.build, screenshots: snapshots };
+  // A parallel shard with an index groups its requests into a single shard, so
+  // only its last request is `final`. Without an index (manual finalization),
+  // requests can't be grouped, so each is its own complete shard — that's fine
+  // since the build is finalized manually.
+  const groupsRequests = !config.parallel || config.parallelIndex != null;
+
+  let build: ArgosAPISchema.components["schemas"]["Build"] | null = null;
+  for (let index = 0; index < screenshotChunks.length; index++) {
+    const isLast = index === screenshotChunks.length - 1;
+    debug(`Updating build (request ${index + 1}/${screenshotChunks.length})`);
+    const uploadBuildResponse = await apiClient.PUT("/builds/{buildId}", {
+      params: {
+        path: {
+          buildId: result.build.id,
+        },
+      },
+      body: {
+        screenshots: screenshotChunks[index] ?? [],
+        parallel: config.parallel,
+        parallelTotal: config.parallelTotal,
+        parallelIndex: config.parallelIndex,
+        // The build/shard is finalized by its last request, which also carries
+        // the build metadata. Ungrouped requests are each final on their own.
+        final: groupsRequests ? isLast : true,
+        metadata: isLast ? params.metadata : undefined,
+      },
+    });
+
+    if (uploadBuildResponse.error) {
+      throwAPIError(uploadBuildResponse.error, uploadBuildResponse.response);
+    }
+
+    if (isLast) {
+      build = uploadBuildResponse.data.build;
+    }
+  }
+
+  if (!build) {
+    throw new Error("Invariant: the build was not updated");
+  }
+
+  return { build, screenshots: snapshots };
 }
 
 async function uploadFilesToS3(files: SecureUploadFileInput[]) {

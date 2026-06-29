@@ -1846,6 +1846,8 @@ export interface operations {
                     parallel?: boolean | null;
                     parallelTotal?: number | null;
                     parallelIndex?: number | null;
+                    /** @description Only used for non-parallel builds. Indicates that this is the last request of the build, so Argos can finalize it. A build whose screenshots are too large to fit in a single request can split them across several sequential requests, leaving `final` falsy on every request but the last. Defaults to `true`. */
+                    final?: boolean | null;
                     metadata?: components["schemas"]["BuildMetadata"];
                 };
             };
