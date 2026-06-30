@@ -184,9 +184,8 @@ describe("getSnapshotNames", () => {
 });
 
 describe("checkIsUsingArgosReporter", () => {
-  const createMockTestInfo = (
-    reporter: [string, unknown?][],
-  ): TestInfo => ({ config: { reporter } }) as unknown as TestInfo;
+  const createMockTestInfo = (reporter: [string, unknown?][]): TestInfo =>
+    ({ config: { reporter } }) as unknown as TestInfo;
 
   it("returns false without test info", () => {
     expect(checkIsUsingArgosReporter(null)).toBe(false);
@@ -205,10 +204,7 @@ describe("checkIsUsingArgosReporter", () => {
     // package's dist file, which no longer contains `/reporter`.
     const testInfo = createMockTestInfo([
       ["list"],
-      [
-        "/repo/node_modules/@argos-ci/playwright/dist/reporter.mjs",
-        {},
-      ],
+      ["/repo/node_modules/@argos-ci/playwright/dist/reporter.mjs", {}],
     ]);
     expect(checkIsUsingArgosReporter(testInfo)).toBe(true);
   });
