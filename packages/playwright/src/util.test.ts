@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { getAutomaticScreenshotName } from "./util";
+import { getAutomaticScreenshotName, getSnapshotNames } from "./util";
 import type { TestCase, TestResult } from "@playwright/test/reporter";
+import type { TestInfo } from "@playwright/test";
 
 describe("getAutomaticScreenshotName", () => {
   const createMockTest = (
@@ -142,5 +143,38 @@ describe("getAutomaticScreenshotName", () => {
     const name = getAutomaticScreenshotName(test, result);
 
     expect(name.length).toBeLessThanOrEqual(240);
+  });
+});
+
+describe("getSnapshotNames", () => {
+  const createMockTestInfo = (
+    projectName: string,
+    repeatEachIndex = 0,
+  ): TestInfo =>
+    ({
+      project: { name: projectName },
+      repeatEachIndex,
+    }) as TestInfo;
+
+  it("prefixes the name with the project name", () => {
+    const names = getSnapshotNames("hero", createMockTestInfo("chromium"));
+    expect(names).toEqual({ name: "chromium/hero", baseName: null });
+  });
+
+  it("does not prefix the name when the project name is empty", () => {
+    // No `projects` configured in the Playwright config: the project name is
+    // empty. Prefixing would produce an absolute path (`/hero`).
+    const names = getSnapshotNames("hero", createMockTestInfo(""));
+    expect(names).toEqual({ name: "hero", baseName: null });
+  });
+
+  it("returns the bare name when there is no test info", () => {
+    const names = getSnapshotNames("hero", null);
+    expect(names).toEqual({ name: "hero", baseName: null });
+  });
+
+  it("handles repeated tests with an empty project name", () => {
+    const names = getSnapshotNames("hero", createMockTestInfo("", 2));
+    expect(names).toEqual({ name: "hero repeat-2", baseName: "hero" });
   });
 });

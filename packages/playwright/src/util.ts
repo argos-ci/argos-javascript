@@ -167,7 +167,13 @@ export function getSnapshotNames(
   testInfo: TestInfo | null,
 ): SnapshotNames {
   if (testInfo) {
-    const projectName = `${testInfo.project.name}/${name}`;
+    // The project name is empty when no `projects` are configured in the
+    // Playwright config. In that case we must not prefix the name, otherwise it
+    // becomes an absolute path (e.g. `/my-screenshot`) and `path.resolve(root,
+    // name)` resolves it to the filesystem root.
+    const projectName = testInfo.project.name
+      ? `${testInfo.project.name}/${name}`
+      : name;
 
     if (testInfo.repeatEachIndex > 0) {
       return {
