@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { getAutomaticScreenshotName, getSnapshotNames } from "./util";
+import {
+  checkIsUsingArgosReporter,
+  getAutomaticScreenshotName,
+  getSnapshotNames,
+} from "./util";
 import type { TestCase, TestResult } from "@playwright/test/reporter";
 import type { TestInfo } from "@playwright/test";
 
@@ -176,5 +180,51 @@ describe("getSnapshotNames", () => {
   it("handles repeated tests with an empty project name", () => {
     const names = getSnapshotNames("hero", createMockTestInfo("", 2));
     expect(names).toEqual({ name: "hero repeat-2", baseName: "hero" });
+  });
+});
+
+describe("checkIsUsingArgosReporter", () => {
+  const createMockTestInfo = (
+    reporter: [string, unknown?][],
+  ): TestInfo => ({ config: { reporter } }) as unknown as TestInfo;
+
+  it("returns false without test info", () => {
+    expect(checkIsUsingArgosReporter(null)).toBe(false);
+  });
+
+  it("detects the reporter from the import specifier", () => {
+    const testInfo = createMockTestInfo([
+      ["dot"],
+      ["@argos-ci/playwright/reporter", {}],
+    ]);
+    expect(checkIsUsingArgosReporter(testInfo)).toBe(true);
+  });
+
+  it("detects the reporter from a Playwright-resolved absolute path", () => {
+    // Playwright resolves reporter ids to absolute paths pointing at the
+    // package's dist file, which no longer contains `/reporter`.
+    const testInfo = createMockTestInfo([
+      ["list"],
+      [
+        "/repo/node_modules/@argos-ci/playwright/dist/reporter.mjs",
+        {},
+      ],
+    ]);
+    expect(checkIsUsingArgosReporter(testInfo)).toBe(true);
+  });
+
+  it("detects the reporter from a pnpm-resolved absolute path", () => {
+    const testInfo = createMockTestInfo([
+      [
+        "/repo/node_modules/.pnpm/@argos-ci+playwright@7.1.2/node_modules/@argos-ci/playwright/dist/reporter.mjs",
+        {},
+      ],
+    ]);
+    expect(checkIsUsingArgosReporter(testInfo)).toBe(true);
+  });
+
+  it("returns false when the reporter is not configured", () => {
+    const testInfo = createMockTestInfo([["dot"], ["list"]]);
+    expect(checkIsUsingArgosReporter(testInfo)).toBe(false);
   });
 });
