@@ -1,5 +1,10 @@
 import type { Context, Service } from "../types";
-import { head, branch, getMergeBaseCommitSha, listParentCommits } from "../git";
+import {
+  head,
+  branch,
+  getMergeBaseCommitSha,
+  listAncestorCommits,
+} from "../git";
 import { getRepositoryNameFromURL } from "../../util/url";
 
 function getRepository(context: Context): string | null {
@@ -35,7 +40,7 @@ const service: Service = {
     };
   },
   getMergeBaseCommitSha,
-  listParentCommits,
+  listAncestorCommits,
 };
 
 export default service;

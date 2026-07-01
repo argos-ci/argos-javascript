@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import type { Service, Context } from "../types";
-import { getMergeBaseCommitSha, listParentCommits } from "../git";
+import { getMergeBaseCommitSha, listAncestorCommits } from "../git";
 import type * as webhooks from "@octokit/webhooks";
 import type { RepositoryDispatchContext } from "@vercel/repository-dispatch/context";
 import {
@@ -338,7 +338,7 @@ const service: Service = {
     };
   },
   getMergeBaseCommitSha,
-  listParentCommits,
+  listAncestorCommits,
 };
 
 export default service;

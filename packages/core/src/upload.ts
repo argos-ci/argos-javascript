@@ -14,7 +14,8 @@ import {
   type ScreenshotMetadata,
 } from "@argos-ci/util";
 import { getArgosCoreSDKIdentifier } from "./version";
-import { getMergeBaseCommitSha, listParentCommits } from "./ci-environment";
+import { getMergeBaseCommitSha, listAncestorCommits } from "./ci-environment";
+import { resolveBaseline, PARENT_COMMITS_LIMIT } from "./find-reference-commit";
 import { getSnapshotMimeType } from "./mime-type";
 import { skip } from "./skip";
 
@@ -280,50 +281,58 @@ export async function upload(params: UploadParameters): Promise<{
 
   const { defaultBaseBranch, hasRemoteContentAccess } = projectResponse.data;
 
-  const referenceCommit = await (async () => {
+  // List a commit followed by its ancestors, closest first, up to `limit`
+  // commits. This matches the `parentCommits` API contract (the server drops the
+  // first entry and searches the rest) and the candidate list for the baseline
+  // API (where the commit itself can also be the baseline).
+  const listCommits = async (sha: string, limit: number) => {
+    const ancestors = await listAncestorCommits({ sha, limit: limit - 1 });
+    return [sha, ...ancestors];
+  };
+
+  const { referenceCommit, parentCommits } = await (async (): Promise<{
+    referenceCommit: string | null;
+    parentCommits: string[] | null;
+  }> => {
+    // An explicitly configured reference commit wins. Its exact commit may not
+    // have a baseline build, so we also send its parent commits as a fallback.
     if (config.referenceCommit) {
       debug("Found reference commit in config", config.referenceCommit);
-      return config.referenceCommit;
+      return {
+        referenceCommit: config.referenceCommit,
+        parentCommits: await listCommits(
+          config.referenceCommit,
+          PARENT_COMMITS_LIMIT,
+        ),
+      };
     }
 
-    // If we have remote access, we will fetch it from the Git Provider.
+    // With remote content access, the reference commit and parent commits are
+    // resolved server-side from the Git Provider.
     if (hasRemoteContentAccess) {
-      return null;
+      return { referenceCommit: null, parentCommits: null };
     }
 
-    // We use the pull request as base branch if possible
-    // else branch specified by the user or the default branch.
+    // Without remote content access, resolve the baseline from the merge base.
     const base =
       config.referenceBranch || config.prBaseBranch || defaultBaseBranch;
-
-    const sha = await getMergeBaseCommitSha({ base, head: config.branch });
-
-    if (sha) {
-      debug("Found merge base", sha);
-    } else {
-      debug("No merge base found");
-    }
-
-    return sha;
-  })();
-
-  const parentCommits = await (async () => {
-    // If we have remote access, we will fetch them from the Git Provider.
-    if (hasRemoteContentAccess) {
-      return null;
-    }
-
-    if (referenceCommit) {
-      const commits = await listParentCommits({ sha: referenceCommit });
-      if (commits) {
-        debug("Found parent commits", commits);
-      } else {
-        debug("No parent commits found");
-      }
-      return commits;
-    }
-
-    return null;
+    return resolveBaseline({
+      getMergeBase: () => getMergeBaseCommitSha({ base, head: config.branch }),
+      listCommits,
+      findBaseline: async (commits) => {
+        const response = await apiClient.POST("/baseline", {
+          body: {
+            commits,
+            name: config.buildName ?? undefined,
+            mode: config.mode ?? undefined,
+          },
+        });
+        if (response.error) {
+          throwAPIError(response.error, response.response);
+        }
+        return response.data.baseline;
+      },
+    });
   })();
 
   // Create build

@@ -4,7 +4,7 @@ import {
   branch,
   checkIsGitRepository,
   getMergeBaseCommitSha,
-  listParentCommits,
+  listAncestorCommits,
   getRepositoryURL,
 } from "../git";
 import { getRepositoryNameFromURL } from "../../util/url";
@@ -38,7 +38,7 @@ const service: Service = {
     };
   },
   getMergeBaseCommitSha,
-  listParentCommits,
+  listAncestorCommits,
 };
 
 export default service;
