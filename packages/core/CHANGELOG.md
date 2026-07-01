@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.3.0...@argos-ci/core@6.4.0) (2026-07-01)
+
+
+### Features
+
+* **core:** resolve baseline from commits when no Git provider ([92a6889](https://github.com/argos-ci/argos-javascript/commit/92a68894aa205369806789d57429d550917c1664))
+
+
+
+
+
 # [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.2.3...@argos-ci/core@6.3.0) (2026-06-29)
 
 

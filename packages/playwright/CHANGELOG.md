@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.1.2...@argos-ci/playwright@7.1.3) (2026-07-01)
+
+
+### Bug Fixes
+
+* **playwright:** avoid absolute screenshot path when project name is empty ([7fd6d54](https://github.com/argos-ci/argos-javascript/commit/7fd6d54054f5634dd52d3d8739a0e10089dd0f5a))
+* **playwright:** detect the Argos reporter from its resolved path ([7f8fce0](https://github.com/argos-ci/argos-javascript/commit/7f8fce00ff7c23118acc2269339baca0b5d72c1b))
+
+
+
+
+
 ## [7.1.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.1.1...@argos-ci/playwright@7.1.2) (2026-06-29)
 
 **Note:** Version bump only for package @argos-ci/playwright

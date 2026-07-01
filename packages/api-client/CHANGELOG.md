@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.24.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.23.0...@argos-ci/api-client@0.24.0) (2026-07-01)
+
+
+### Features
+
+* **cli:** add whoami command ([d864363](https://github.com/argos-ci/argos-javascript/commit/d8643634645360b2350b22e55e7d95e982792462))
+
+
+
+
+
 # [0.23.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.22.1...@argos-ci/api-client@0.23.0) (2026-06-29)
 
 
