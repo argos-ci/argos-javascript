@@ -7,7 +7,8 @@ CHANGELOG.md
 dist
 /docs
 __fixtures__/screenshots/invalid.argos.json
-packages/api-client/src/schema.ts
+/packages/api-client/src/schema.ts
 /examples
 /.nx/workspace-data
 /.agents/skills
+/packages/storybook/storybook-static

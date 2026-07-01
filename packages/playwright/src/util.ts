@@ -26,11 +26,21 @@ export function checkIsUsingArgosReporter(testInfo: TestInfo | null): boolean {
   if (!testInfo) {
     return false;
   }
-  const reporterPath = require.resolve("@argos-ci/playwright/reporter");
+  // Playwright rewrites every non-builtin reporter id to an absolute resolved
+  // path (e.g. `…/node_modules/@argos-ci/playwright/dist/reporter.mjs`), so we
+  // can't match against the `@argos-ci/playwright/reporter` import specifier.
+  // Match the package directory instead, which is present in both the raw
+  // specifier and the resolved path.
+  let reporterPath: string | null = null;
+  try {
+    reporterPath = require.resolve("@argos-ci/playwright/reporter");
+  } catch {
+    // Ignore: the reporter entry point might not be resolvable in every setup.
+  }
   return testInfo.config.reporter.some(
     (reporter) =>
-      reporter[0].includes("@argos-ci/playwright/reporter") ||
-      reporter[0] === reporterPath,
+      reporter[0].includes("@argos-ci/playwright") ||
+      (reporterPath !== null && reporter[0] === reporterPath),
   );
 }
 
@@ -167,7 +177,13 @@ export function getSnapshotNames(
   testInfo: TestInfo | null,
 ): SnapshotNames {
   if (testInfo) {
-    const projectName = `${testInfo.project.name}/${name}`;
+    // The project name is empty when no `projects` are configured in the
+    // Playwright config. In that case we must not prefix the name, otherwise it
+    // becomes an absolute path (e.g. `/my-screenshot`) and `path.resolve(root,
+    // name)` resolves it to the filesystem root.
+    const projectName = testInfo.project.name
+      ? `${testInfo.project.name}/${name}`
+      : name;
 
     if (testInfo.repeatEachIndex > 0) {
       return {
