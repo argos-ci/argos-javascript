@@ -124,6 +124,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/baseline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Find an eligible baseline from a list of commits
+         * @description Find the build eligible to be used as a baseline among a list of commits. Useful when no Git provider is connected: the CLI can send the candidate ancestor commits and let Argos pick the closest one that has an eligible (complete, valid, approved and not rejected) baseline build.
+         */
+        post: operations["findBaseline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/cli/token": {
         parameters: {
             query?: never;
@@ -1552,6 +1572,74 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    findBaseline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description The commits to look for an eligible baseline, ordered from the closest to the furthest ancestor. The first commit with an eligible baseline wins. */
+                    commits: components["schemas"]["Sha1Hash"][];
+                    /**
+                     * @description The name of the build to find a baseline for.
+                     * @default default
+                     */
+                    name?: string;
+                    /**
+                     * @description The mode of the build to find a baseline for.
+                     * @default ci
+                     * @enum {string}
+                     */
+                    mode?: "ci" | "monitoring";
+                };
+            };
+        };
+        responses: {
+            /** @description The eligible baseline build, or null when none is found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description The eligible baseline build found among the commits, or null when none is found. */
+                        baseline: components["schemas"]["Build"] | null;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
