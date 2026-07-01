@@ -37,7 +37,7 @@ export type BuildTarget = ProjectPath & {
  * Resolve the API token, preferring an explicit token (`--token` /
  * `ARGOS_TOKEN`) over the one stored by `argos login`.
  */
-async function resolveToken(options: TargetOptions): Promise<string> {
+export async function resolveToken(options: TargetOptions): Promise<string> {
   const token =
     options.token || process.env["ARGOS_TOKEN"] || (await getStoredToken());
   if (!token) {

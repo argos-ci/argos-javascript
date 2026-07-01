@@ -124,6 +124,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/baseline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Find an eligible baseline from a list of commits
+         * @description Find the build eligible to be used as a baseline among a list of commits. Useful when no Git provider is connected: the CLI can send the candidate ancestor commits and let Argos pick the closest one that has an eligible (complete, valid, approved and not rejected) baseline build.
+         */
+        post: operations["findBaseline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/cli/token": {
         parameters: {
             query?: never;
@@ -178,6 +198,26 @@ export interface paths {
          * @description Called by GitHub Actions to exchange a tokenless bearer token for a short-lived Argos project token. The provided commit and branch must match the GitHub workflow run.
          */
         post: operations["exchangeGitHubActionsTokenlessToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the current user
+         * @description Retrieve the user associated with the personal access token used to authenticate the request.
+         */
+        get: operations["getMe"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -718,6 +758,12 @@ export interface components {
                 message: string;
             }[];
         };
+        /** @description A user. */
+        User: {
+            id: string;
+            slug: string;
+            name: string | null;
+        };
         /** @description Project */
         Project: {
             id: string;
@@ -1001,12 +1047,6 @@ export interface components {
             dismissedBy: components["schemas"]["User"] | null;
             /** @description Date the review was created. */
             date: string;
-        };
-        /** @description A user. */
-        User: {
-            id: string;
-            slug: string;
-            name: string | null;
         };
         /** @description A comment posted on a build. */
         Comment: {
@@ -1570,6 +1610,74 @@ export interface operations {
             };
         };
     };
+    findBaseline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description The commits to look for an eligible baseline, ordered from the closest to the furthest ancestor. The first commit with an eligible baseline wins. */
+                    commits: components["schemas"]["Sha1Hash"][];
+                    /**
+                     * @description The name of the build to find a baseline for.
+                     * @default default
+                     */
+                    name?: string;
+                    /**
+                     * @description The mode of the build to find a baseline for.
+                     * @default ci
+                     * @enum {string}
+                     */
+                    mode?: "ci" | "monitoring";
+                };
+            };
+        };
+        responses: {
+            /** @description The eligible baseline build, or null when none is found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description The eligible baseline build found among the commits, or null when none is found. */
+                        baseline: components["schemas"]["Build"] | null;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     exchangeCliToken: {
         parameters: {
             query?: never;
@@ -1782,6 +1890,44 @@ export interface operations {
             };
             /** @description Service unavailable */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The authenticated user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

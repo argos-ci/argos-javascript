@@ -22,6 +22,14 @@ function formatUser(user: User | null | undefined): string {
   return user.name ? `${user.name} (@${user.slug})` : `@${user.slug}`;
 }
 
+export function formatMe(user: User): string {
+  return [
+    `Logged in to Argos as ${formatUser(user)}.`,
+    `Slug: ${user.slug}`,
+    `Name: ${formatValue(user.name)}`,
+  ].join("\n");
+}
+
 export function formatStats(stats: Build["stats"]): string {
   if (!stats) {
     return "-";
