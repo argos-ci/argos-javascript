@@ -3,7 +3,13 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { branch, getMergeBaseCommitSha, getRepositoryURL, head } from "./git";
+import {
+  branch,
+  getMergeBaseCommitSha,
+  getRepositoryURL,
+  head,
+  listAncestorCommits,
+} from "./git";
 
 describe("#head", () => {
   it("returns the current commit", () => {
@@ -71,6 +77,65 @@ describe("#getMergeBaseCommitSha (command injection)", () => {
     }
 
     expect(existsSync(markerFile)).toBe(false);
+  });
+});
+
+describe("#listAncestorCommits", () => {
+  let cwd: string;
+  let root: string;
+  let repoDir: string;
+  // Commit SHAs ordered from the oldest (first) to the newest (head).
+  let shas: string[];
+  let firstSha: string;
+  let headSha: string;
+
+  beforeEach(() => {
+    cwd = process.cwd();
+    root = mkdtempSync(join(tmpdir(), "argos-git-ancestors-test-"));
+    repoDir = join(root, "repo");
+
+    const bareDir = join(root, "origin.git");
+    execFileSync("git", ["init", "--bare", bareDir]);
+    execFileSync("git", ["init", repoDir]);
+    const git = (...args: string[]) =>
+      execFileSync("git", ["-C", repoDir, ...args]);
+    git("remote", "add", "origin", bareDir);
+    git("config", "user.email", "test@argos-ci.com");
+    git("config", "user.name", "Argos Test");
+
+    // Create a linear history of 5 commits.
+    shas = [];
+    for (let i = 0; i < 5; i++) {
+      git("commit", "--allow-empty", "-m", `commit ${i}`);
+      shas.push(git("rev-parse", "HEAD").toString().trim());
+    }
+    firstSha = shas[0] as string;
+    headSha = shas[shas.length - 1] as string;
+    git("branch", "-M", "main");
+    git("push", "origin", "main");
+
+    process.chdir(repoDir);
+  });
+
+  afterEach(() => {
+    process.chdir(cwd);
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("lists ancestors closest first, excluding the commit itself", async () => {
+    const ancestors = await listAncestorCommits({ sha: headSha, limit: 10 });
+    // All commits but the head, ordered from the closest to the furthest.
+    expect(ancestors).toEqual([...shas].reverse().slice(1));
+  });
+
+  it("limits the number of ancestors returned", async () => {
+    const ancestors = await listAncestorCommits({ sha: headSha, limit: 2 });
+    expect(ancestors).toEqual([...shas].reverse().slice(1, 3));
+  });
+
+  it("returns an empty array when the commit has no ancestor", async () => {
+    const ancestors = await listAncestorCommits({ sha: firstSha, limit: 10 });
+    expect(ancestors).toEqual([]);
   });
 });
 

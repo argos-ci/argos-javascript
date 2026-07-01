@@ -1,4 +1,4 @@
-import { getMergeBaseCommitSha, listParentCommits } from "../git";
+import { getMergeBaseCommitSha, listAncestorCommits } from "../git";
 import type { Context, Service } from "../types";
 
 function getRepository(context: Context): string | null {
@@ -38,7 +38,7 @@ const service: Service = {
     };
   },
   getMergeBaseCommitSha,
-  listParentCommits,
+  listAncestorCommits,
 };
 
 export default service;

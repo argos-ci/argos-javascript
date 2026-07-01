@@ -94,10 +94,11 @@ export interface Service {
     },
     ctx: Context,
   ): Promise<string | null>;
-  listParentCommits(
+  listAncestorCommits(
     input: {
       sha: string;
+      limit: number;
     },
     ctx: Context,
-  ): Promise<string[] | null>;
+  ): Promise<string[]>;
 }

@@ -54,17 +54,18 @@ export function getMergeBaseCommitSha(input: {
 }
 
 /**
- * Get the merge base commit.
+ * List the ancestor commits of a commit, closest first, up to `limit` commits.
  */
-export function listParentCommits(input: {
+export function listAncestorCommits(input: {
   sha: string;
-}): Promise<string[] | null> {
+  limit: number;
+}): Promise<string[]> {
   const context = createContext();
   const service = getCiService(context);
   if (!service) {
-    return Promise.resolve(null);
+    return Promise.resolve([]);
   }
-  return service.listParentCommits(input, context);
+  return service.listAncestorCommits(input, context);
 }
 /**
  * Get the CI environment.

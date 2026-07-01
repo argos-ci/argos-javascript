@@ -216,16 +216,33 @@ function listShas(path: string, maxCount?: number): string[] {
   return shas;
 }
 
-export async function listParentCommits(input: {
+/**
+ * List the ancestor commits of a commit, ordered from the closest to the
+ * furthest ancestor, up to `limit` commits. The commit itself is excluded.
+ *
+ * The history is deepened with a shallow fetch so this works on the shallow
+ * clones typically used in CI. When the commit is not on the remote (e.g. not
+ * pushed yet) or the fetch fails, we fall back to whatever local history is
+ * available; when the commit is unknown locally too, we return an empty list.
+ */
+export async function listAncestorCommits(input: {
   sha: string;
-}): Promise<string[] | null> {
-  const limit = 200;
+  limit: number;
+}): Promise<string[]> {
+  // Fetch one extra commit since the commit itself is excluded from the result.
+  const depth = input.limit + 1;
   try {
-    await runGitFetch([`--depth=${limit}`, "origin", input.sha]);
+    await runGitFetch([`--depth=${depth}`, "origin", input.sha]);
   } catch (error) {
-    if (getGitErrorOutput(error).includes("not our ref")) {
-      return [];
-    }
+    debug(
+      `Failed to deepen history for ${input.sha}, using local history`,
+      getGitErrorOutput(error),
+    );
   }
-  return listShas(input.sha, limit);
+  try {
+    return listShas(input.sha, depth).slice(1);
+  } catch (error) {
+    debug(`Failed to list ancestors of ${input.sha}`, getGitErrorOutput(error));
+    return [];
+  }
 }
