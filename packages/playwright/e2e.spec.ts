@@ -256,6 +256,78 @@ test.describe("#argosScreenshot", () => {
     });
   });
 
+  test.describe("with `pauseGifs`", () => {
+    test("pauses animated GIFs on their first frame", async ({ page }) => {
+      const gif = page.locator("#gif");
+
+      // The fixture ships a 2-frame animated GIF (frame 0 red, frame 1 lime).
+      const originalSrc = await gif.getAttribute("src");
+      expect(originalSrc).toMatch(/^data:image\/gif/);
+
+      // Inject the Argos global (as `argosScreenshot` does) so we can drive the
+      // stabilization phases directly and observe the paused state — the normal
+      // screenshot flow restores it immediately after capturing.
+      await argosScreenshot(page, "with-gif", { fullPage: false });
+
+      // Run the stabilization `beforeEach` phase, which pauses the GIF, then
+      // wait until every GIF has finished being frozen.
+      await page.evaluate(() => (window as any).__ARGOS__.beforeEach({}));
+      await page.waitForFunction(() => (window as any).__ARGOS__.waitFor({}));
+      await page.waitForFunction(() => {
+        const img = document.getElementById("gif") as HTMLImageElement;
+        return (
+          img.src.startsWith("data:image/png") &&
+          img.complete &&
+          img.naturalWidth > 0
+        );
+      });
+
+      // The animated GIF is now a static PNG snapshot.
+      const frozenSrc = await gif.getAttribute("src");
+      expect(frozenSrc).toMatch(/^data:image\/png/);
+
+      // …and it is frozen on the first frame, which is red.
+      const pixel = await gif.evaluate((img: HTMLImageElement) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        const {
+          data: [r, g, b],
+        } = ctx.getImageData(
+          Math.floor(canvas.width / 2),
+          Math.floor(canvas.height / 2),
+          1,
+          1,
+        );
+        return { r, g, b };
+      });
+      expect(pixel).toEqual({ r: 255, g: 0, b: 0 });
+
+      // Cleanup restores the original animated GIF.
+      await page.evaluate(() => (window as any).__ARGOS__.afterEach());
+      expect(await gif.getAttribute("src")).toBe(originalSrc);
+    });
+
+    test("does not pause GIFs when disabled", async ({ page }) => {
+      await argosScreenshot(page, "with-gif-disabled", { fullPage: false });
+
+      await page.evaluate(() =>
+        (window as any).__ARGOS__.beforeEach({ options: { pauseGifs: false } }),
+      );
+      await page.waitForFunction(() =>
+        (window as any).__ARGOS__.waitFor({ options: { pauseGifs: false } }),
+      );
+
+      // The GIF is left untouched (still an animated GIF).
+      const src = await page.locator("#gif").getAttribute("src");
+      expect(src).toMatch(/^data:image\/gif/);
+
+      await page.evaluate(() => (window as any).__ARGOS__.afterEach());
+    });
+  });
+
   test.describe("with argosCSS", () => {
     test("evaluate custom CSS", async ({ page }) => {
       await argosScreenshot(page, "custom-css", {
