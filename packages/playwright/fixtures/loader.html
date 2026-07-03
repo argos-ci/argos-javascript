@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Loader page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cantarell&display=swap"
+    />
+    <style>
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .hoverable {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+
+        &:hover {
+          background-color: green;
+        }
+      }
+      #loader {
+        border: 6px solid #cccccc;
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+      }
+      .paragraph {
+        font-family: cantarell;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Loader page</h1>
+
+      <div class="hoverable" data-testid="hoverable"></div>
+
+      <h3>aria-busy (HTMLElement) (1000ms)</h3>
+      <div id="loader-container">
+        <div id="loader" aria-busy="true"></div>
+      </div>
+
+      <h3>aria-busy (SVGElement) (500ms)</h3>
+      <svg id="svg-loader" height="10" width="10" aria-busy="true">
+        <circle cx="5" cy="5" r="4" fill="red" />
+      </svg>
+
+      <p class="paragraph">
+        The font should be loaded before the screenshot is taken.
+      </p>
+    </main>
+
+    <script>
+      // Loaders disappear after a delay: `argosScreenshot` must wait for
+      // `aria-busy` to clear before capturing.
+      setTimeout(() => {
+        document.querySelector("#loader").remove();
+      }, 1000);
+      setTimeout(() => {
+        document.querySelector("#svg-loader").removeAttribute("aria-busy");
+      }, 500);
+    </script>
+  </body>
+</html>

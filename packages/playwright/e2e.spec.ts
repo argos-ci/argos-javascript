@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type BrowserContext } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
 import { argosScreenshot } from "./dist/index.mjs";
@@ -40,20 +40,25 @@ async function expectSnapshotToExists(
   expect(exists).toBe(true);
 }
 
-const url = new URL("fixtures/dummy.html", import.meta.url).href;
+/**
+ * Resolve the URL of a fixture. Each test uses a focused fixture that contains
+ * only the markup it needs, so tests stay isolated from one another.
+ */
+function fixture(name: string) {
+  return new URL(`fixtures/${name}`, import.meta.url).href;
+}
+
+/**
+ * Delay Google Font loading so the `waitForFonts` stabilizer is exercised.
+ */
+async function delayFonts(context: BrowserContext) {
+  await context.route(/fonts\.gstatic\.com/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await route.continue();
+  });
+}
 
 test.describe("#argosScreenshot", () => {
-  test.beforeEach(async ({ page, context }) => {
-    // Delay the font loading to test the stabilization plugin.
-    context.route(/fonts\.gstatic\.com/, async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await route.continue();
-    });
-
-    // Visit the page
-    await page.goto(url);
-  });
-
   test.describe("API", () => {
     test("throws without page", async () => {
       let error: any;
@@ -79,6 +84,11 @@ test.describe("#argosScreenshot", () => {
   });
 
   test.describe("without any option", () => {
+    test.beforeEach(async ({ page, context }) => {
+      await delayFonts(context);
+      await page.goto(fixture("loader.html"));
+    });
+
     test("takes a screenshot", async ({ page }) => {
       // Test hovering stabilization
       await page.getByTestId("hoverable").hover();
@@ -106,6 +116,7 @@ test.describe("#argosScreenshot", () => {
     },
     () => {
       test("takes a screenshot", async ({ page }) => {
+        await page.goto(fixture("basic.html"));
         await argosScreenshot(page, "with-annotation");
       });
     },
@@ -113,6 +124,7 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with cjs version", () => {
     test("takes a screenshot", async ({ page }) => {
+      await page.goto(fixture("basic.html"));
       await argosScreenshotCjs(page, "basic-cjs");
       await expectSnapshotToExists("basic-cjs");
     });
@@ -120,6 +132,7 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with `fullPage` set to false", () => {
     test("does not take a screenshot of full page", async ({ page }) => {
+      await page.goto(fixture("basic.html"));
       await page.evaluate(() => window.scrollTo(0, 0));
       await argosScreenshot(page, "partial-page", { fullPage: false });
       await expectSnapshotToExists("partial-page");
@@ -128,6 +141,7 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with `disabledHover` set to false", () => {
     test("it does not disable hover", async ({ page }) => {
+      await page.goto(fixture("hover.html"));
       // Test hovering stabilization
       await page.getByTestId("hoverable").hover();
       await argosScreenshot(page, "with-hover", {
@@ -139,12 +153,14 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("screenshot element", () => {
     test("takes a screenshot of an element", async ({ page }) => {
+      await page.goto(fixture("element.html"));
       await argosScreenshot(page, "red-square", { element: ".red-square" });
     });
   });
 
   test.describe("viewports", () => {
     test("takes screenshots on different viewports", async ({ page }) => {
+      await page.goto(fixture("basic.html"));
       await argosScreenshot(page, "viewport", {
         viewports: [
           "iphone-4",
@@ -177,6 +193,8 @@ test.describe("#argosScreenshot", () => {
       page,
       context,
     }) => {
+      await delayFonts(context);
+
       // Gate the background image request so we control exactly when it loads.
       let releaseImage = () => {};
       const imageGate = new Promise<void>((resolve) => {
@@ -198,7 +216,9 @@ test.describe("#argosScreenshot", () => {
       });
 
       // `domcontentloaded` so navigation doesn't wait for the gated image.
-      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.goto(fixture("background-image.html"), {
+        waitUntil: "domcontentloaded",
+      });
 
       let resolved = false;
       const screenshotPromise = argosScreenshot(page, "background-images", {
@@ -229,6 +249,8 @@ test.describe("#argosScreenshot", () => {
       page,
       context,
     }) => {
+      await delayFonts(context);
+
       // Gate the image and never release it: default stabilization must still
       // complete, proving it does not block on background images.
       let releaseImage = () => {};
@@ -244,7 +266,9 @@ test.describe("#argosScreenshot", () => {
         });
       });
 
-      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.goto(fixture("background-image.html"), {
+        waitUntil: "domcontentloaded",
+      });
 
       // The plugin is opt-in, so this resolves even though the image is stuck.
       await argosScreenshot(page, "background-images-disabled", {
@@ -257,6 +281,10 @@ test.describe("#argosScreenshot", () => {
   });
 
   test.describe("with `pauseGifs`", () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(fixture("gif.html"));
+    });
+
     test("pauses animated GIFs on their first frame", async ({ page }) => {
       const gif = page.locator("#gif");
 
@@ -330,6 +358,7 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with argosCSS", () => {
     test("evaluate custom CSS", async ({ page }) => {
+      await page.goto(fixture("basic.html"));
       await argosScreenshot(page, "custom-css", {
         argosCSS: "body { background: blue; }",
       });
@@ -338,6 +367,7 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with custom threshold", () => {
     test("takes a screenshot with the threshold option", async ({ page }) => {
+      await page.goto(fixture("basic.html"));
       await argosScreenshot(page, "threshold-option", {
         threshold: 0.2,
       });
@@ -346,6 +376,7 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with tags", () => {
     test("works", async ({ page }) => {
+      await page.goto(fixture("basic.html"));
       await argosScreenshot(page, "tags-option", {
         tag: ["snapshot-tag"],
       });
@@ -354,14 +385,18 @@ test.describe("#argosScreenshot", () => {
 
   test.describe("with Playwright test tags", { tag: ["@on-describe"] }, () => {
     test("captures test tags", { tag: "@on-test" }, async ({ page }) => {
+      await page.goto(fixture("basic.html"));
       await argosScreenshot(page, "playwright-test-tags");
     });
   });
 });
 
 test.describe("#argosAriaSnapshot", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(fixture("aria.html"));
+  });
+
   test("takes a an aria snapshot with the screenshot", async ({ page }) => {
-    await page.goto(url);
     await argosScreenshot(page, "with-aria-snapshot", {
       ariaSnapshot: true,
     });
@@ -372,7 +407,6 @@ test.describe("#argosAriaSnapshot", () => {
   test("takes a an aria snapshot with the screenshot by viewport", async ({
     page,
   }) => {
-    await page.goto(url);
     await argosScreenshot(page, "with-aria-snapshot-viewport", {
       ariaSnapshot: true,
       viewports: ["iphone-4", "macbook-16"],
@@ -380,7 +414,6 @@ test.describe("#argosAriaSnapshot", () => {
   });
 
   test("takes a an aria snapshot of the page", async ({ page }) => {
-    await page.goto(url);
     await argosAriaSnapshot(page, "body-aria-snapshot");
     await expectSnapshotToExists("body-aria-snapshot", "aria");
   });
@@ -388,7 +421,6 @@ test.describe("#argosAriaSnapshot", () => {
   test("takes a an aria snapshot of the transparent section", async ({
     page,
   }) => {
-    await page.goto(url);
     await argosAriaSnapshot(page, "section-aria-snapshot", {
       element: "#transparent-section",
     });
