@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Background image page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cantarell&display=swap"
+    />
+    <style>
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      #loader {
+        border: 6px solid #cccccc;
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+      }
+      .paragraph {
+        font-family: cantarell;
+      }
+      #background-image {
+        width: 200px;
+        height: 100px;
+        background-image: url("slow-background.png");
+        background-size: cover;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Background image page</h1>
+
+      <!-- Other stabilizers the background image must outlast: a 1000ms loader
+           and fonts that the test delays by 500ms. -->
+      <div id="loader-container">
+        <div id="loader" aria-busy="true"></div>
+      </div>
+      <p class="paragraph">The font is loaded before the screenshot.</p>
+
+      <div id="background-image"></div>
+    </main>
+
+    <script>
+      setTimeout(() => {
+        document.querySelector("#loader").remove();
+      }, 1000);
+    </script>
+  </body>
+</html>

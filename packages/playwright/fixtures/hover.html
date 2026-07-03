@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hover page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      .hoverable {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+
+        &:hover {
+          background-color: green;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Hover page</h1>
+      <div class="hoverable" data-testid="hoverable"></div>
+    </main>
+  </body>
+</html>

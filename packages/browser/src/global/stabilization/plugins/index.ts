@@ -7,6 +7,7 @@ import { plugin as fontAntialiasing } from "./fontAntialiasing";
 import { plugin as hideCarets } from "./hideCarets";
 import { plugin as hideScrollbars } from "./hideScrollbars";
 import { plugin as loadImageSrcset } from "./loadImageSrcset";
+import { plugin as pauseGifs } from "./pauseGifs";
 import { plugin as roundImageSize } from "./roundImageSize";
 import { plugin as stabilizeSticky } from "./stabilizeSticky";
 import { plugin as waitForAriaBusy } from "./waitForAriaBusy";
@@ -22,6 +23,7 @@ export const plugins = [
   hideCarets,
   hideScrollbars,
   loadImageSrcset,
+  pauseGifs,
   roundImageSize,
   stabilizeSticky,
   waitForAriaBusy,
