@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.1.3...@argos-ci/playwright@7.2.0) (2026-07-03)
+
+
+### Features
+
+* **browser:** add pauseGifs stabilization plugin ([2a4b8aa](https://github.com/argos-ci/argos-javascript/commit/2a4b8aa560b1ca5e5e6653f48b5db0b6746e24ab))
+
+
+
+
+
 ## [7.1.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.1.2...@argos-ci/playwright@7.1.3) (2026-07-01)
 
 

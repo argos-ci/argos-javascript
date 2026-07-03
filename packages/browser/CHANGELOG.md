@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.2.0...@argos-ci/browser@6.3.0) (2026-07-03)
+
+
+### Features
+
+* **browser:** add pauseGifs stabilization plugin ([2a4b8aa](https://github.com/argos-ci/argos-javascript/commit/2a4b8aa560b1ca5e5e6653f48b5db0b6746e24ab))
+
+
+
+
+
 # [6.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.1.0...@argos-ci/browser@6.2.0) (2026-06-26)
 
 
