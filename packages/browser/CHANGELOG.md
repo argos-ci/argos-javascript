@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.3.0...@argos-ci/browser@6.4.0) (2026-07-04)
+
+
+### Features
+
+* **browser:** detect GIFs flagged with data-image-type="gif" ([6bfd0f7](https://github.com/argos-ci/argos-javascript/commit/6bfd0f731a561b512484b5247d49ade9739c0aaf))
+* **browser:** enable waitForBackgroundImages by default via opt-in attribute ([997348e](https://github.com/argos-ci/argos-javascript/commit/997348e60bf007596c1199be45e7d5a1569b03f4))
+
+
+
+
+
 # [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.2.0...@argos-ci/browser@6.3.0) (2026-07-03)
 
 
