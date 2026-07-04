@@ -34,6 +34,12 @@
         background-image: url("slow-background.png");
         background-size: cover;
       }
+      #flagged-background-image {
+        width: 200px;
+        height: 100px;
+        background-image: url("flagged-background.png");
+        background-size: cover;
+      }
     </style>
   </head>
   <body>
@@ -48,6 +54,9 @@
       <p class="paragraph">The font is loaded before the screenshot.</p>
 
       <div id="background-image"></div>
+
+      <!-- Opted into background-image waiting by default via the attribute. -->
+      <div id="flagged-background-image" data-visual-test-wait-bg-img></div>
     </main>
 
     <script>

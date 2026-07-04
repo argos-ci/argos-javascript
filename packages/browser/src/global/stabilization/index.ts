@@ -9,12 +9,6 @@ export interface Plugin {
    */
   name: string;
   /**
-   * When `true`, the plugin is disabled unless explicitly enabled through the
-   * options (e.g. `{ [name]: true }`). Use it for plugins that are too
-   * expensive to run by default.
-   */
-  optIn?: boolean;
-  /**
    * Run before taking all screenshots.
    */
   beforeAll?: (
@@ -67,7 +61,7 @@ export interface WaitForBackgroundImagesOptions {
   /**
    * CSS selector scoping which elements are scanned for background images.
    * Scoping avoids a full-document `getComputedStyle` sweep on large pages.
-   * @default "*"
+   * @default "[data-visual-test-wait-bg-img], [data-visual-test-wait-bg-img] *"
    */
   selector?: string;
 }
@@ -77,9 +71,11 @@ export type PluginOptions = {
 } & {
   /**
    * Wait for CSS background images to be loaded.
-   * Disabled by default. Enable with `true` to scan the whole document, or
-   * pass an object to scope it to a selector.
-   * @default false
+   * Enabled by default, scoped to elements flagged with the
+   * `data-visual-test-wait-bg-img` attribute (and their descendants). Pass
+   * `true` to scan the whole document, an object to target a custom selector,
+   * or `false` to disable it entirely.
+   * @default true
    */
   waitForBackgroundImages?: boolean | WaitForBackgroundImagesOptions;
 };
@@ -110,10 +106,6 @@ function getPlugins(context: Context): Plugin[] {
       return false;
     }
     const pluginOptions = getPluginOptions(context, plugin.name);
-    if ((plugin as Plugin).optIn) {
-      // Opt-in plugins stay disabled unless explicitly enabled.
-      return Boolean(pluginOptions);
-    }
     if (pluginOptions === false) {
       return false;
     }

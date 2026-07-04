@@ -10,6 +10,15 @@ const preloadedImages = new Set<HTMLImageElement>();
 const URL_REGEX = /url\((['"]?)([^'")]+)\1\)/g;
 
 /**
+ * By default, only elements opted in with the `data-visual-test-wait-bg-img`
+ * attribute (and their descendants) are scanned. This keeps the otherwise
+ * expensive `getComputedStyle` sweep cheap while still letting authors flag the
+ * regions whose background images must be loaded before the screenshot.
+ */
+const DEFAULT_SELECTOR =
+  "[data-visual-test-wait-bg-img], [data-visual-test-wait-bg-img] *";
+
+/**
  * Extract non-data background-image URLs from a computed `background-image`
  * value (which may contain several layered backgrounds and gradients).
  */
@@ -33,16 +42,22 @@ function collectUrls(
 }
 
 /**
- * Resolve the selector scoping the scan, defaulting to the whole document.
+ * Resolve the selector scoping the scan. Defaults to the opt-in attribute
+ * selector; `true` widens the scan to the whole document, and an explicit
+ * `selector` overrides both.
  */
 function resolveSelector(options: unknown): string {
+  // `true` opts every element into the scan (whole-document sweep).
+  if (options === true) {
+    return "*";
+  }
   if (options && typeof options === "object") {
     const { selector } = options as WaitForBackgroundImagesOptions;
     if (typeof selector === "string" && selector.trim() !== "") {
       return selector;
     }
   }
-  return "*";
+  return DEFAULT_SELECTOR;
 }
 
 /**
@@ -51,17 +66,17 @@ function resolveSelector(options: unknown): string {
  * There is no native load event for CSS background images, so URLs are
  * discovered with `getComputedStyle` and preloaded through `Image` objects.
  *
- * This plugin is opt-in because the scan is resource-intensive. Enable it with
- * `stabilize: { waitForBackgroundImages: true }` to scan the whole document, or
- * scope it on large pages with
- * `stabilize: { waitForBackgroundImages: { selector: ".hero, [data-bg]" } }`.
+ * A full-document `getComputedStyle` sweep is expensive, so by default the scan
+ * is limited to elements opted in with the `data-visual-test-wait-bg-img`
+ * attribute (and their descendants). Widen it to the whole document with
+ * `stabilize: { waitForBackgroundImages: true }`, or target a custom selector
+ * with `stabilize: { waitForBackgroundImages: { selector: ".hero, [data-bg]" } }`.
  *
- * The expensive scan runs only once per viewport in `beforeEach`; `wait.for`
- * just polls the preloaded images.
+ * The scan runs only once per viewport in `beforeEach`; `wait.for` just polls
+ * the preloaded images.
  */
 export const plugin = {
   name: "waitForBackgroundImages" as const,
-  optIn: true,
   beforeEach(_context, options) {
     const selector = resolveSelector(options);
     const urls = new Set<string>();

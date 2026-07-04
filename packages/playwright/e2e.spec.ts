@@ -270,13 +270,75 @@ test.describe("#argosScreenshot", () => {
         waitUntil: "domcontentloaded",
       });
 
-      // The plugin is opt-in, so this resolves even though the image is stuck.
+      // `#background-image` is not flagged with `data-visual-test-wait-bg-img`,
+      // so the default scan ignores it and stabilization resolves even though
+      // the image is stuck.
       await argosScreenshot(page, "background-images-disabled", {
         fullPage: false,
       });
 
       // Release the still-pending request to avoid leaking it.
       releaseImage();
+    });
+
+    test("waits for flagged background images by default", async ({
+      page,
+      context,
+    }) => {
+      await delayFonts(context);
+
+      // Gate the flagged element's background image so we control when it loads.
+      let releaseImage = () => {};
+      const imageGate = new Promise<void>((resolve) => {
+        releaseImage = resolve;
+      });
+      let imageRequested = () => {};
+      const imageRequestedPromise = new Promise<void>((resolve) => {
+        imageRequested = resolve;
+      });
+
+      await context.route(/flagged-background\.png/, async (route) => {
+        imageRequested();
+        await imageGate;
+        await route.fulfill({
+          status: 200,
+          contentType: "image/png",
+          body: PNG,
+        });
+      });
+
+      await page.goto(fixture("background-image.html"), {
+        waitUntil: "domcontentloaded",
+      });
+
+      let resolved = false;
+      // No `waitForBackgroundImages` option: the attribute alone opts the
+      // element in.
+      const screenshotPromise = argosScreenshot(
+        page,
+        "background-images-flagged",
+        {
+          fullPage: false,
+        },
+      )
+        .then(() => {
+          resolved = true;
+        })
+        .catch(() => {
+          // Swallow so a failure surfaces through the assertions below.
+        });
+
+      // The plugin must have triggered the flagged image request…
+      await imageRequestedPromise;
+      // …and stabilization must still be blocked on it (well past the other
+      // stabilizers: the 1000ms loader and the 500ms delayed fonts).
+      await page.waitForTimeout(2000);
+      expect(resolved).toBe(false);
+
+      // Once the image loads, stabilization completes.
+      releaseImage();
+      await screenshotPromise;
+      expect(resolved).toBe(true);
     });
   });
 
