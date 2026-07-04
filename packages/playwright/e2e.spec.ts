@@ -281,7 +281,18 @@ test.describe("#argosScreenshot", () => {
   });
 
   test.describe("with `pauseGifs`", () => {
-    test.beforeEach(async ({ page }) => {
+    // The 2-frame animated GIF (frame 0 red, frame 1 lime) from the fixture,
+    // served from an extension-less URL so only `data-image-type="gif"` can
+    // flag it.
+    const GIF = Buffer.from(
+      "R0lGODlhZABkAPAAAP8AAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQAFAAAACwAAAAAZABkAAACc4SPqcvtD6OctNqLs968+w+G4kiW5omm6sq27gvH8kzX9o3n+s73/g8MCofEovGITCqXzKbzCY1Kp9Sq9YrNarfcrvcLDovH5LL5jE6r1+y2+w2Py+f0uv2Oz+v3/L7/DxgoOEhYaHiImKi4yNjo+AhpWAAAIfkEABQAAAAsAAAAAGQAZACAAP8AAAAAAnOEj6nL7Q+jnLTai7PevPsPhuJIluaJpurKtu4Lx/JM1/aN5/rO9/4PDAqHxKLxiEwql8ym8wmNSqfUqvWKzWq33K73Cw6Lx+Sy+YxOq9fstvsNj8vn9Lr9js/r9/y+/w8YKDhIWGh4iJiouMjY6PgIaVgAADs=",
+      "base64",
+    );
+
+    test.beforeEach(async ({ page, context }) => {
+      await context.route(/masked-gif-endpoint/, (route) =>
+        route.fulfill({ status: 200, contentType: "image/gif", body: GIF }),
+      );
       await page.goto(fixture("gif.html"));
     });
 
@@ -336,6 +347,30 @@ test.describe("#argosScreenshot", () => {
       // Cleanup restores the original animated GIF.
       await page.evaluate(() => (window as any).__ARGOS__.afterEach());
       expect(await gif.getAttribute("src")).toBe(originalSrc);
+    });
+
+    test('pauses GIFs flagged with `data-image-type="gif"`', async ({
+      page,
+    }) => {
+      const gif = page.locator("#masked-gif");
+
+      // The URL has no `.gif` extension, so only the attribute can flag it.
+      expect(await gif.getAttribute("src")).toBe("masked-gif-endpoint");
+
+      await argosScreenshot(page, "with-masked-gif", { fullPage: false });
+
+      await page.evaluate(() => (window as any).__ARGOS__.beforeEach({}));
+      await page.waitForFunction(() => (window as any).__ARGOS__.waitFor({}));
+      await page.waitForFunction(() => {
+        const img = document.getElementById("masked-gif") as HTMLImageElement;
+        return img.src.startsWith("data:image/png") && img.complete;
+      });
+
+      // The animated GIF is now a static PNG snapshot, frozen on the red frame.
+      expect(await gif.getAttribute("src")).toMatch(/^data:image\/png/);
+
+      await page.evaluate(() => (window as any).__ARGOS__.afterEach());
+      expect(await gif.getAttribute("src")).toBe("masked-gif-endpoint");
     });
 
     test("does not pause GIFs when disabled", async ({ page }) => {
