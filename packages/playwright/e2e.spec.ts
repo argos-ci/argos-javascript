@@ -270,7 +270,9 @@ test.describe("#argosScreenshot", () => {
         waitUntil: "domcontentloaded",
       });
 
-      // The plugin is opt-in, so this resolves even though the image is stuck.
+      // `#background-image` is not flagged with `data-visual-test-wait-bg-img`,
+      // so the default scan ignores it and stabilization resolves even though
+      // the image is stuck.
       await argosScreenshot(page, "background-images-disabled", {
         fullPage: false,
       });
@@ -278,10 +280,81 @@ test.describe("#argosScreenshot", () => {
       // Release the still-pending request to avoid leaking it.
       releaseImage();
     });
+
+    test("waits for flagged background images by default", async ({
+      page,
+      context,
+    }) => {
+      await delayFonts(context);
+
+      // Gate the flagged element's background image so we control when it loads.
+      let releaseImage = () => {};
+      const imageGate = new Promise<void>((resolve) => {
+        releaseImage = resolve;
+      });
+      let imageRequested = () => {};
+      const imageRequestedPromise = new Promise<void>((resolve) => {
+        imageRequested = resolve;
+      });
+
+      await context.route(/flagged-background\.png/, async (route) => {
+        imageRequested();
+        await imageGate;
+        await route.fulfill({
+          status: 200,
+          contentType: "image/png",
+          body: PNG,
+        });
+      });
+
+      await page.goto(fixture("background-image.html"), {
+        waitUntil: "domcontentloaded",
+      });
+
+      let resolved = false;
+      // No `waitForBackgroundImages` option: the attribute alone opts the
+      // element in.
+      const screenshotPromise = argosScreenshot(
+        page,
+        "background-images-flagged",
+        {
+          fullPage: false,
+        },
+      )
+        .then(() => {
+          resolved = true;
+        })
+        .catch(() => {
+          // Swallow so a failure surfaces through the assertions below.
+        });
+
+      // The plugin must have triggered the flagged image request…
+      await imageRequestedPromise;
+      // …and stabilization must still be blocked on it (well past the other
+      // stabilizers: the 1000ms loader and the 500ms delayed fonts).
+      await page.waitForTimeout(2000);
+      expect(resolved).toBe(false);
+
+      // Once the image loads, stabilization completes.
+      releaseImage();
+      await screenshotPromise;
+      expect(resolved).toBe(true);
+    });
   });
 
   test.describe("with `pauseGifs`", () => {
-    test.beforeEach(async ({ page }) => {
+    // The 2-frame animated GIF (frame 0 red, frame 1 lime) from the fixture,
+    // served from an extension-less URL so only `data-image-type="gif"` can
+    // flag it.
+    const GIF = Buffer.from(
+      "R0lGODlhZABkAPAAAP8AAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQAFAAAACwAAAAAZABkAAACc4SPqcvtD6OctNqLs968+w+G4kiW5omm6sq27gvH8kzX9o3n+s73/g8MCofEovGITCqXzKbzCY1Kp9Sq9YrNarfcrvcLDovH5LL5jE6r1+y2+w2Py+f0uv2Oz+v3/L7/DxgoOEhYaHiImKi4yNjo+AhpWAAAIfkEABQAAAAsAAAAAGQAZACAAP8AAAAAAnOEj6nL7Q+jnLTai7PevPsPhuJIluaJpurKtu4Lx/JM1/aN5/rO9/4PDAqHxKLxiEwql8ym8wmNSqfUqvWKzWq33K73Cw6Lx+Sy+YxOq9fstvsNj8vn9Lr9js/r9/y+/w8YKDhIWGh4iJiouMjY6PgIaVgAADs=",
+      "base64",
+    );
+
+    test.beforeEach(async ({ page, context }) => {
+      await context.route(/masked-gif-endpoint/, (route) =>
+        route.fulfill({ status: 200, contentType: "image/gif", body: GIF }),
+      );
       await page.goto(fixture("gif.html"));
     });
 
@@ -336,6 +409,31 @@ test.describe("#argosScreenshot", () => {
       // Cleanup restores the original animated GIF.
       await page.evaluate(() => (window as any).__ARGOS__.afterEach());
       expect(await gif.getAttribute("src")).toBe(originalSrc);
+    });
+
+    test('pauses GIFs flagged with `data-image-type="gif"`', async ({
+      page,
+    }) => {
+      const gif = page.locator("#masked-gif");
+
+      // The URL has no `.gif` extension, so only the attribute can flag it.
+      expect(await gif.getAttribute("src")).toBe("masked-gif-endpoint");
+
+      await argosScreenshot(page, "with-masked-gif", { fullPage: false });
+
+      await page.evaluate(() => (window as any).__ARGOS__.beforeEach({}));
+      await page.waitForFunction(() => (window as any).__ARGOS__.waitFor({}));
+      await page.waitForFunction(() => {
+        const img = document.getElementById("masked-gif") as HTMLImageElement;
+        return img.src.startsWith("data:image/png") && img.complete;
+      });
+
+      // The animated GIF is now a static PNG snapshot, frozen on the red frame.
+      expect(await gif.getAttribute("src")).toMatch(/^data:image\/png/);
+
+      // Cleanup restores the original GIF (as a resolved absolute URL).
+      await page.evaluate(() => (window as any).__ARGOS__.afterEach());
+      expect(await gif.getAttribute("src")).toMatch(/masked-gif-endpoint$/);
     });
 
     test("does not pause GIFs when disabled", async ({ page }) => {

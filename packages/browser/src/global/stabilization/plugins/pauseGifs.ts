@@ -3,6 +3,12 @@ import type { Plugin } from "..";
 const BACKUP_ATTRIBUTE = "data-argos-gif-src";
 
 /**
+ * Attribute authors can set to flag an image as a GIF explicitly, e.g.
+ * `<img data-image-type="gif">`.
+ */
+const IMAGE_TYPE_ATTRIBUTE = "data-image-type";
+
+/**
  * GIFs currently being frozen for this screenshot cycle.
  * Freezing is asynchronous (we load a fresh copy to grab its first frame), so
  * `wait.for` polls this set to keep stabilization blocked until every GIF has
@@ -13,9 +19,14 @@ const pendingFreezes = new Set<HTMLImageElement>();
 /**
  * Detect animated GIFs from their resolved source. There is no cheap way to
  * inspect the decoded bytes, so we rely on the URL (file extension or the
- * `data:image/gif` MIME type).
+ * `data:image/gif` MIME type). Authors can also opt an image in explicitly with
+ * `data-image-type="gif"`, which is the only way to catch GIFs served from URLs
+ * that carry no `.gif` extension (e.g. a CDN endpoint).
  */
 function isGif(img: HTMLImageElement): boolean {
+  if (img.getAttribute(IMAGE_TYPE_ATTRIBUTE) === "gif") {
+    return true;
+  }
   const src = img.currentSrc || img.src;
   return /^data:image\/gif[;,]/i.test(src) || /\.gif(?:$|[?#])/i.test(src);
 }
