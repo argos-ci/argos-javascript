@@ -431,8 +431,9 @@ test.describe("#argosScreenshot", () => {
       // The animated GIF is now a static PNG snapshot, frozen on the red frame.
       expect(await gif.getAttribute("src")).toMatch(/^data:image\/png/);
 
+      // Cleanup restores the original GIF (as a resolved absolute URL).
       await page.evaluate(() => (window as any).__ARGOS__.afterEach());
-      expect(await gif.getAttribute("src")).toBe("masked-gif-endpoint");
+      expect(await gif.getAttribute("src")).toMatch(/masked-gif-endpoint$/);
     });
 
     test("does not pause GIFs when disabled", async ({ page }) => {
