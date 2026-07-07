@@ -49,36 +49,56 @@ export const createArgosScreenshotCommand = (
     // and we screenshot the iframe's `<body>`. Anything overflowing the iframe box
     // is not painted, so the screenshot gets cut. `setViewportSize` grows the iframe
     // *before* `argosCSS` (which injects `fitToContent`'s `zoom`) is applied, so it
-    // can't account for the final content size. Re-fit the iframe height here, after
+    // can't account for the final content size. Re-fit the iframe here, after
     // stabilization has injected `argosCSS`, so the whole content is painted.
     const userBeforeScreenshot = options?.beforeScreenshot;
     const optionsWithFit: ArgosScreenshotOptions = {
       ...options,
       beforeScreenshot: async (api) => {
         await userBeforeScreenshot?.(api);
-        await ctx.page.evaluate(() => {
-          const iframe = document.querySelector('iframe[data-vitest="true"]');
+        await ctx.page.evaluate(
+          ({ fitWidth }) => {
+            const iframe = document.querySelector('iframe[data-vitest="true"]');
 
-          if (
-            !(iframe instanceof HTMLIFrameElement) ||
-            !iframe.contentDocument
-          ) {
-            return;
-          }
+            if (
+              !(iframe instanceof HTMLIFrameElement) ||
+              !iframe.contentDocument
+            ) {
+              return;
+            }
 
-          const { body, documentElement } = iframe.contentDocument;
-          const contentHeight = Math.max(
-            body.scrollHeight,
-            body.offsetHeight,
-            documentElement.scrollHeight,
-          );
+            const { body, documentElement } = iframe.contentDocument;
+            const contentHeight = Math.max(
+              body.scrollHeight,
+              body.offsetHeight,
+              documentElement.scrollHeight,
+            );
 
-          // Only grow, never shrink: the iframe must contain the full content so
-          // it's painted, but we don't want to collapse an intentionally sized viewport.
-          if (contentHeight > iframe.clientHeight) {
-            iframe.style.height = `${contentHeight}px`;
-          }
-        });
+            // Only grow, never shrink: the iframe must contain the full content
+            // so it's painted, but we don't want to collapse an intentionally
+            // sized viewport.
+            if (contentHeight > iframe.clientHeight) {
+              iframe.style.height = `${contentHeight}px`;
+            }
+
+            // `fitToContent` fits the content in both dimensions, so the iframe
+            // must also grow horizontally to paint content wider than the
+            // viewport. Without `fitToContent` we keep the viewport width to
+            // match Playwright's `fullPage` semantics (full height, viewport
+            // width).
+            if (fitWidth) {
+              const contentWidth = Math.max(
+                body.scrollWidth,
+                body.offsetWidth,
+                documentElement.scrollWidth,
+              );
+              if (contentWidth > iframe.clientWidth) {
+                iframe.style.width = `${contentWidth}px`;
+              }
+            }
+          },
+          { fitWidth: Boolean(fitToContent) },
+        );
       },
     };
 
