@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.17](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.0.16...@argos-ci/storybook@6.0.17) (2026-07-07)
+
+
+### Bug Fixes
+
+* **storybook:** grow iframe to fit content after argosCSS in Vitest ([a73706f](https://github.com/argos-ci/argos-javascript/commit/a73706fec9cff30571c29ff35e2d74db762c4dea))
+
+
+
+
+
 ## [6.0.16](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.0.15...@argos-ci/storybook@6.0.16) (2026-07-04)
 
 **Note:** Version bump only for package @argos-ci/storybook
