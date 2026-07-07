@@ -44,6 +44,44 @@ export const createArgosScreenshotCommand = (
     );
     const after = await before(ctx);
 
+    const options = applyFitToContent(screenshotOptions, fitToContent);
+    // The story renders inside an `<iframe data-vitest="true">` on the host page
+    // and we screenshot the iframe's `<body>`. Anything overflowing the iframe box
+    // is not painted, so the screenshot gets cut. `setViewportSize` grows the iframe
+    // *before* `argosCSS` (which injects `fitToContent`'s `zoom`) is applied, so it
+    // can't account for the final content size. Re-fit the iframe height here, after
+    // stabilization has injected `argosCSS`, so the whole content is painted.
+    const userBeforeScreenshot = options?.beforeScreenshot;
+    const optionsWithFit: ArgosScreenshotOptions = {
+      ...options,
+      beforeScreenshot: async (api) => {
+        await userBeforeScreenshot?.(api);
+        await ctx.page.evaluate(() => {
+          const iframe = document.querySelector('iframe[data-vitest="true"]');
+
+          if (
+            !(iframe instanceof HTMLIFrameElement) ||
+            !iframe.contentDocument
+          ) {
+            return;
+          }
+
+          const { body, documentElement } = iframe.contentDocument;
+          const contentHeight = Math.max(
+            body.scrollHeight,
+            body.offsetHeight,
+            documentElement.scrollHeight,
+          );
+
+          // Only grow, never shrink: the iframe must contain the full content so
+          // it's painted, but we don't want to collapse an intentionally sized viewport.
+          if (contentHeight > iframe.clientHeight) {
+            iframe.style.height = `${contentHeight}px`;
+          }
+        });
+      },
+    };
+
     const attachments = await storybookArgosScreenshot(
       frame,
       {
@@ -111,7 +149,7 @@ export const createArgosScreenshotCommand = (
           );
         },
       },
-      applyFitToContent(screenshotOptions, fitToContent),
+      optionsWithFit,
     );
     await after();
     return attachments;
