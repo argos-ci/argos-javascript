@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.18](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.0.17...@argos-ci/storybook@6.0.18) (2026-07-07)
+
+
+### Bug Fixes
+
+* **storybook:** also fit iframe width for horizontal overflow in Vitest ([e89aeab](https://github.com/argos-ci/argos-javascript/commit/e89aeab6e85aeccf5e0913d7658219bcdbf22f6f))
+
+
+
+
+
 ## [6.0.17](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.0.16...@argos-ci/storybook@6.0.17) (2026-07-07)
 
 
