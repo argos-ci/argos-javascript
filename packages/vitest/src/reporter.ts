@@ -1,9 +1,13 @@
-import { upload, type UploadParameters } from "@argos-ci/core";
+import { upload } from "@argos-ci/core";
 import type { Vitest } from "vitest/node";
 import type { Reporter } from "vitest/reporters";
+import type { ArgosReporterConfig } from "./options";
 
-export type ArgosReporterConfig = UploadParameters;
+export type { ArgosReporterConfig };
 
+/**
+ * Vitest reporter that uploads the screenshots captured during the run to Argos.
+ */
 export class ArgosReporter implements Reporter {
   vitest!: Vitest;
   config: ArgosReporterConfig;

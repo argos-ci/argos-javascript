@@ -1,5 +1,5 @@
 import type { Plugin } from "vitest/config";
-import type { BrowserCommand, BrowserCommandContext } from "vitest/node";
+import type { BrowserCommand } from "vitest/node";
 import {
   storybookArgosScreenshot,
   type ArgosScreenshotOptions,
@@ -10,7 +10,15 @@ import {
   type FitToContent,
 } from "./utils/parameters";
 import type { Frame } from "playwright";
-import { ArgosReporter, type ArgosReporterConfig } from "./vitest-reporter";
+import {
+  ArgosReporter,
+  type ArgosReporterConfig,
+} from "@argos-ci/vitest/plugin";
+import {
+  resetTesterScale,
+  setIframeViewportSize,
+  fitIframeToContent,
+} from "@argos-ci/vitest/internal";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -42,7 +50,7 @@ export const createArgosScreenshotCommand = (
     const fitToContent = getFitToContentFromParameters(
       testContext.story.parameters,
     );
-    const after = await before(ctx);
+    const after = await resetTesterScale(ctx);
 
     const options = applyFitToContent(screenshotOptions, fitToContent);
     // The story renders inside an `<iframe data-vitest="true">` on the host page
@@ -56,49 +64,11 @@ export const createArgosScreenshotCommand = (
       ...options,
       beforeScreenshot: async (api) => {
         await userBeforeScreenshot?.(api);
-        await ctx.page.evaluate(
-          ({ fitWidth }) => {
-            const iframe = document.querySelector('iframe[data-vitest="true"]');
-
-            if (
-              !(iframe instanceof HTMLIFrameElement) ||
-              !iframe.contentDocument
-            ) {
-              return;
-            }
-
-            const { body, documentElement } = iframe.contentDocument;
-            const contentHeight = Math.max(
-              body.scrollHeight,
-              body.offsetHeight,
-              documentElement.scrollHeight,
-            );
-
-            // Only grow, never shrink: the iframe must contain the full content
-            // so it's painted, but we don't want to collapse an intentionally
-            // sized viewport.
-            if (contentHeight > iframe.clientHeight) {
-              iframe.style.height = `${contentHeight}px`;
-            }
-
-            // `fitToContent` fits the content in both dimensions, so the iframe
-            // must also grow horizontally to paint content wider than the
-            // viewport. Without `fitToContent` we keep the viewport width to
-            // match Playwright's `fullPage` semantics (full height, viewport
-            // width).
-            if (fitWidth) {
-              const contentWidth = Math.max(
-                body.scrollWidth,
-                body.offsetWidth,
-                documentElement.scrollWidth,
-              );
-              if (contentWidth > iframe.clientWidth) {
-                iframe.style.width = `${contentWidth}px`;
-              }
-            }
-          },
-          { fitWidth: Boolean(fitToContent) },
-        );
+        // `fitToContent` fits the content in both dimensions, so the iframe must
+        // also grow horizontally to paint content wider than the viewport.
+        // Without `fitToContent` we keep the viewport width to match Playwright's
+        // `fullPage` semantics (full height, viewport width).
+        await fitIframeToContent(ctx, { fitWidth: Boolean(fitToContent) });
       },
     };
 
@@ -108,65 +78,9 @@ export const createArgosScreenshotCommand = (
         ...testContext,
         playwrightLibraries: ["@storybook/addon-vitest"],
         setViewportSize: async (size) => {
-          await ctx.page.evaluate(
-            ({ size, fullPage }) => {
-              const iframe = document.querySelector(
-                'iframe[data-vitest="true"]',
-              );
-
-              if (!(iframe instanceof HTMLIFrameElement)) {
-                throw new Error("Vitest iframe not found");
-              }
-
-              if (!iframe.contentDocument) {
-                throw new Error("Vitest iframe contentDocument not found");
-              }
-
-              if (size === "initial") {
-                if (
-                  iframe.dataset.initialWidth &&
-                  iframe.dataset.initialHeight
-                ) {
-                  iframe.style.width = iframe.dataset.initialWidth;
-                  iframe.style.height = iframe.dataset.initialHeight;
-                }
-                return;
-              }
-
-              // Backup default width/height if not set
-              if (
-                !iframe.dataset.initialWidth &&
-                !iframe.dataset.initialHeight
-              ) {
-                iframe.dataset.initialWidth = iframe.style.width;
-                iframe.dataset.initialHeight = iframe.style.height;
-              }
-
-              if (size !== "default") {
-                iframe.style.width = `${size.width}px`;
-              }
-
-              if (fullPage) {
-                if (!iframe.contentWindow) {
-                  throw new Error(`Can't access iframe window`);
-                }
-                const viewportHeight =
-                  size === "default"
-                    ? iframe.contentWindow.innerHeight
-                    : size.height;
-
-                iframe.style.height = "auto";
-                iframe.style.height =
-                  viewportHeight < iframe.contentDocument.body.offsetHeight
-                    ? `${iframe.contentDocument.body.offsetHeight}px`
-                    : "100%";
-              } else if (size !== "default") {
-                iframe.style.height = "auto";
-                iframe.style.height = `${size.height}px`;
-              }
-            },
-            { size, fullPage: screenshotOptions.fullPage ?? !fitToContent },
-          );
+          await setIframeViewportSize(ctx, size, {
+            fullPage: screenshotOptions.fullPage ?? !fitToContent,
+          });
         },
       },
       optionsWithFit,
@@ -175,45 +89,6 @@ export const createArgosScreenshotCommand = (
     return attachments;
   };
 };
-
-/**
- * Run before taking the screenshots.
- * Remove the scale from vitest "vitest-tester" div
- * to avoid ending up with small screenshots.
- * @returns A function to restore the scale after the test.
- */
-async function before(
-  ctx: BrowserCommandContext,
-): Promise<() => Promise<void>> {
-  await ctx.page.evaluate(() => {
-    const tester = document.getElementById("vitest-tester");
-
-    if (!(tester instanceof HTMLElement)) {
-      return;
-    }
-
-    const scale = tester.getAttribute("data-scale");
-
-    if (!scale) {
-      throw new Error("Vitest iframe data-scale attribute not found");
-    }
-
-    tester.dataset.bckTransform = tester.style.transform;
-    tester.style.transform = `scale(1)`;
-  });
-
-  return async () => {
-    await ctx.page.evaluate(() => {
-      const tester = document.getElementById("vitest-tester");
-
-      if (!(tester instanceof HTMLElement)) {
-        return;
-      }
-
-      tester.style.transform = tester.dataset.bckTransform ?? "";
-    });
-  };
-}
 
 /**
  * Apply fitToContent options to the screenshot options.
@@ -268,7 +143,7 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
         test: {
           browser: {
             commands: {
-              argosScreenshot: createArgosScreenshotCommand({
+              argosStorybookScreenshot: createArgosScreenshotCommand({
                 ...otherOptions,
                 root,
               }),

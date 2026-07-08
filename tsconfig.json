@@ -14,6 +14,8 @@
       "@argos-ci/storybook/vitest-plugin": [
         "./packages/*/src/vitest-plugin.ts"
       ],
+      "@argos-ci/vitest/plugin": ["./packages/vitest/src/plugin.ts"],
+      "@argos-ci/vitest/internal": ["./packages/vitest/src/internal.ts"],
       "@argos-ci/util/browser": ["./packages/util/src/browser.ts"]
     },
     "lib": ["ES2022", "DOM"],

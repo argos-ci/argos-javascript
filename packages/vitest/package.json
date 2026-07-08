@@ -1,0 +1,83 @@
+{
+  "name": "@argos-ci/vitest",
+  "description": "Vitest SDK for visual testing with Argos.",
+  "version": "0.1.0",
+  "author": "Smooth Code",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argos-ci/argos-javascript.git",
+    "directory": "packages/vitest"
+  },
+  "homepage": "https://argos-ci.com/docs/vitest",
+  "bugs": {
+    "url": "https://github.com/argos-ci/argos-javascript/issues"
+  },
+  "keywords": [
+    "vitest",
+    "vitest-plugin",
+    "vitest-browser",
+    "screenshot",
+    "capture",
+    "testing",
+    "visual testing",
+    "argos",
+    "regression",
+    "visual regression"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.mts",
+      "import": "./dist/plugin.mjs",
+      "default": "./dist/plugin.mjs"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.mts",
+      "import": "./dist/internal.mjs",
+      "default": "./dist/internal.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@argos-ci/browser": "workspace:*",
+    "@argos-ci/core": "workspace:*",
+    "@argos-ci/playwright": "workspace:*",
+    "@argos-ci/util": "workspace:*"
+  },
+  "peerDependencies": {
+    "@vitest/browser": ">=4",
+    "@vitest/browser-playwright": ">=4",
+    "playwright": ">=1",
+    "vitest": ">=4"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitest/browser": "^4.1.9",
+    "@vitest/browser-playwright": "^4.1.9",
+    "playwright": "^1.61.0",
+    "vitest": "catalog:"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run --project unit",
+    "test-e2e": "vitest run --project e2e",
+    "install-playwright": "playwright install chromium --with-deps",
+    "build-e2e": "pnpm run install-playwright",
+    "e2e": "cross-env BUILD_NAME=\"argos-vitest-e2e-node-$NODE_VERSION-$OS\" UPLOAD_TO_ARGOS=true pnpm run test-e2e",
+    "check-types": "tsc",
+    "check-format": "prettier --check --ignore-unknown --ignore-path=./.gitignore --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
+    "lint": "eslint ."
+  }
+}

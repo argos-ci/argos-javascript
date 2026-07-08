@@ -5,6 +5,8 @@ package.json
 lerna.json
 CHANGELOG.md
 dist
+/packages/*/test-results
+/packages/*/screenshots
 /docs
 __fixtures__/screenshots/invalid.argos.json
 /packages/api-client/src/schema.ts
