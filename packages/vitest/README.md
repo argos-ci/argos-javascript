@@ -17,7 +17,7 @@
 
 Capture Argos screenshots directly from your [Vitest browser tests](https://vitest.dev/guide/browser/).
 
-Visit [argos-ci.com/docs](https://argos-ci.com/docs) for guides, API and more.
+Visit the [Vitest SDK documentation](https://argos-ci.com/docs/sdks-reference/vitest) for guides, API and more.
 
 ## Requirements
 
@@ -105,5 +105,6 @@ reporter when `uploadToArgos` is enabled.
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs)
+- [Official SDK Docs](https://argos-ci.com/docs/sdks-reference/vitest)
+- [Quickstart](https://argos-ci.com/docs/quickstart/vitest-quickstart)
 - [Discord](https://argos-ci.com/discord)
