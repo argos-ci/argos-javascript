@@ -82,6 +82,57 @@ export interface VitestScreenshotOptions {
 }
 
 /**
+ * Options passed when calling `argosSnapshot`.
+ *
+ * `argosSnapshot` serializes any value to a file that Argos picks up and diffs,
+ * mimicking {@link https://vitest.dev/guide/snapshot Vitest snapshots}. Unlike
+ * `argosScreenshot`, it does not need a browser and works both in Vitest browser
+ * tests and in plain Node tests.
+ *
+ * These options must be JSON-serializable so they can cross the Vitest
+ * browser/node RPC boundary — the only exception is `serialize`, which is
+ * applied on the test side *before* the value is sent to Node.
+ */
+export interface VitestSnapshotOptions {
+  /**
+   * Folder where the snapshot is written.
+   *
+   * In Node tests this defaults to `"./screenshots"`. In browser tests it
+   * defaults to the plugin `root` and can be overridden per call.
+   * @default "./screenshots"
+   */
+  root?: string;
+
+  /**
+   * Extension of the snapshot file. It also determines how Argos renders and
+   * diffs the snapshot (e.g. `.txt`, `.json`, `.yml`, `.html`, `.md`).
+   * @default ".txt"
+   */
+  extension?: string;
+
+  /**
+   * Tag or array of tags to attach to the snapshot.
+   */
+  tag?: string | string[];
+
+  /**
+   * Custom serializer used when `content` is not already a string.
+   * Defaults to `@vitest/pretty-format` (the serializer Vitest itself uses).
+   */
+  serialize?: (content: unknown) => string;
+}
+
+/**
+ * Subset of {@link VitestSnapshotOptions} that can cross the Vitest
+ * browser/node RPC boundary (everything but `serialize`, which is applied
+ * before the value is sent to Node).
+ */
+export type SerializableSnapshotOptions = Omit<
+  VitestSnapshotOptions,
+  "serialize"
+>;
+
+/**
  * Options for the Argos Vitest plugin.
  *
  * Accepts every option supported by the Playwright `argosScreenshot` function

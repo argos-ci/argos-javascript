@@ -1,14 +1,21 @@
 import type { Plugin } from "vitest/config";
 import { resolve } from "node:path";
 import { createArgosScreenshotCommand } from "./command";
+import { createArgosSnapshotCommand } from "./snapshot-command";
 import { ArgosReporter } from "./reporter";
 import type { ArgosVitestPluginOptions } from "./options";
 
-export { createArgosScreenshotCommand, ArgosReporter };
+export {
+  createArgosScreenshotCommand,
+  createArgosSnapshotCommand,
+  ArgosReporter,
+};
 export type { ArgosScreenshotCommandArgs } from "./command";
+export type { ArgosSnapshotCommandArgs } from "./snapshot-command";
 export type {
   ArgosVitestPluginOptions,
   VitestScreenshotOptions,
+  VitestSnapshotOptions,
   ArgosReporterConfig,
 } from "./options";
 
@@ -61,6 +68,10 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
           browser: {
             commands: {
               argosScreenshot: createArgosScreenshotCommand({
+                ...otherOptions,
+                root,
+              }),
+              argosSnapshot: createArgosSnapshotCommand({
                 ...otherOptions,
                 root,
               }),

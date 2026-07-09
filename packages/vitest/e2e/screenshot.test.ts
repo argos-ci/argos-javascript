@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from "vitest";
 import { server } from "vitest/browser";
-import { argosScreenshot } from "@argos-ci/vitest";
+import { argosScreenshot, argosSnapshot } from "@argos-ci/vitest";
 import type { ArgosAttachment } from "@argos-ci/playwright";
 
 /**
@@ -110,6 +110,39 @@ test("grows the iframe to capture content wider than the viewport", async () => 
   expect(screenshot).toBeDefined();
   const width = await readPngWidth(screenshot!);
   expect(width).toBeGreaterThan(1500);
+});
+
+test("writes a value snapshot that the reporter can upload", async () => {
+  // `argosSnapshot` works without a browser, but here we exercise the browser
+  // RPC path: the value is serialized in the browser, written on the node side.
+  const attachments = await argosSnapshot("payload", {
+    id: 1,
+    name: "Argos",
+    tags: ["a", "b"],
+  });
+  // The snapshot file + its metadata attachment.
+  expect(attachments.length).toBe(2);
+
+  const snapshot = attachments.find((a) => a.path.endsWith(".snapshot.txt"));
+  expect(snapshot).toBeDefined();
+  // The value is serialized with pretty-format, ready for Argos to diff.
+  const content = await server.commands.readFile(snapshot!.path);
+  expect(content).toContain('"name": "Argos"');
+
+  const metadata = attachments.find((a) => a.path.endsWith(".argos.json"));
+  expect(metadata).toBeDefined();
+  const parsed = JSON.parse(await server.commands.readFile(metadata!.path));
+  expect(parsed.sdk.name).toBe("@argos-ci/vitest");
+});
+
+test("writes a snapshot with a custom extension", async () => {
+  const attachments = await argosSnapshot("config", '{"enabled":true}', {
+    extension: ".json",
+  });
+  const snapshot = attachments.find((a) => a.path.endsWith(".snapshot.json"));
+  expect(snapshot).toBeDefined();
+  const content = await server.commands.readFile(snapshot!.path);
+  expect(content).toBe('{"enabled":true}');
 });
 
 test("captures an ARIA snapshot alongside the screenshot", async () => {
