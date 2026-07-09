@@ -1,9 +1,13 @@
-import { upload, type UploadParameters } from "@argos-ci/core";
+import { upload } from "@argos-ci/core";
 import type { Vitest } from "vitest/node";
 import type { Reporter } from "vitest/reporters";
+import type { ArgosReporterConfig } from "./options";
 
-export type ArgosReporterConfig = UploadParameters;
+export type { ArgosReporterConfig };
 
+/**
+ * Vitest reporter that uploads the screenshots captured during the run to Argos.
+ */
 export class ArgosReporter implements Reporter {
   vitest!: Vitest;
   config: ArgosReporterConfig;
@@ -26,7 +30,13 @@ export class ArgosReporter implements Reporter {
     if (this.vitest.config.watch) {
       return;
     }
-    const res = await upload(this.config);
+    const res = await upload({
+      // Default to uploading screenshots and ARIA snapshots. Without this,
+      // `upload` only matches images (`**/*.{png,jpg,jpeg}`) and the
+      // `.aria.yml` files produced by `ariaSnapshot: true` are skipped.
+      files: ["**/*.png", "**/*.aria.yml"],
+      ...this.config,
+    });
     console.log(`✅ Argos build created: ${res.build.url}`);
   }
 }

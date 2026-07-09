@@ -51,7 +51,8 @@
   "dependencies": {
     "@argos-ci/core": "workspace:*",
     "@argos-ci/playwright": "workspace:*",
-    "@argos-ci/util": "workspace:*"
+    "@argos-ci/util": "workspace:*",
+    "@argos-ci/vitest": "workspace:*"
   },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
@@ -62,6 +63,7 @@
     "@storybook/addon-vitest": "^10.4.6",
     "@storybook/react-vite": "^10.4.6",
     "@storybook/test-runner": "^0.24.4",
+    "@types/node": "catalog:",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitest/browser": "^4.1.9",

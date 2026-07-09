@@ -10,7 +10,7 @@ export type { ArgosScreenshotOptions };
 
 declare module "vitest/browser" {
   interface BrowserCommands {
-    argosScreenshot: (
+    argosStorybookScreenshot: (
       ...args: ArgosScreenshotCommandArgs
     ) => Promise<ArgosAttachment[]>;
   }
@@ -37,7 +37,7 @@ export function setupArgos(api: { afterEach: typeof vitest.afterEach }) {
     (globalThis as any).__ARGOS_STORYBOOK_STORY = story;
 
     // Take the screenshot.
-    await server.commands.argosScreenshot({
+    await server.commands.argosStorybookScreenshot({
       mode: "automatic",
       name: story.id,
       story: {
@@ -82,7 +82,7 @@ export async function argosScreenshot(
 
   // Load vitest/browser using dynamic import to avoid loading it in non-Vitest environments.
   const { server } = await import("vitest/browser");
-  await server.commands.argosScreenshot({
+  await server.commands.argosStorybookScreenshot({
     mode: "manual",
     name: `${story.id}/${name}`,
     story: {

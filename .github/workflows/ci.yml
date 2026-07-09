@@ -271,3 +271,29 @@ jobs:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
           OS: ${{ matrix.os }}
+
+  e2e-vitest:
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [lts/*]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run integration tests
+        run: pnpm exec -- turbo run e2e --filter=@argos-ci/vitest
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}

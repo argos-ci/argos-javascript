@@ -1,0 +1,105 @@
+---
+title: Vitest
+slug: /vitest
+---
+
+# Argos Vitest SDK
+
+Capture and review visual changes straight from your [Vitest browser tests](https://vitest.dev/guide/browser/) with Argos.
+
+The `@argos-ci/vitest` SDK takes screenshots while Vitest runs your tests in a real browser (using the [Playwright provider](https://vitest.dev/guide/browser/playwright)) and uploads them to Argos in your CI.
+
+## Requirements
+
+The SDK runs in [Vitest browser mode](https://vitest.dev/guide/browser/) with the Playwright provider. Install it alongside its peer dependencies:
+
+```sh
+npm install --save-dev @argos-ci/vitest vitest @vitest/browser @vitest/browser-playwright playwright
+```
+
+## Getting Started
+
+### 1. Register the plugin
+
+```ts title="vitest.config.ts"
+import { defineConfig } from "vitest/config";
+import { playwright } from "@vitest/browser-playwright";
+import { argosVitestPlugin } from "@argos-ci/vitest/plugin";
+
+export default defineConfig({
+  plugins: [
+    argosVitestPlugin({
+      // Upload the screenshots to Argos at the end of the run.
+      uploadToArgos: process.env.CI === "true",
+    }),
+  ],
+  test: {
+    browser: {
+      enabled: true,
+      headless: true,
+      provider: playwright(),
+      instances: [{ browser: "chromium" }],
+    },
+  },
+});
+```
+
+### 2. Take screenshots
+
+```ts title="Button.test.tsx"
+import { test } from "vitest";
+import { render } from "vitest-browser-react";
+import { argosScreenshot } from "@argos-ci/vitest";
+import { Button } from "./Button";
+
+test("Button", async () => {
+  render(<Button>Click me</Button>);
+  await argosScreenshot("button");
+});
+```
+
+## API Overview
+
+### `@argos-ci/vitest/plugin`
+
+Exposes the Vitest plugin that registers the `argosScreenshot` browser command and, when
+`uploadToArgos` is enabled, the reporter that uploads the screenshots.
+
+```ts
+import { argosVitestPlugin } from "@argos-ci/vitest/plugin";
+```
+
+- **`uploadToArgos`**: Set to `true` to upload the screenshots to Argos at the end of the run (default: `false`).
+- **`root`**: Folder where the screenshots are written (default: `"./screenshots"`).
+
+It also accepts every option of the [Playwright `argosScreenshot` function](/playwright#argosscreenshotpage-name-options) (used as defaults for every screenshot, including non-serializable options like `beforeScreenshot`) and every [upload parameter](https://js-sdk-reference.argos-ci.com/interfaces/UploadParameters.html) (e.g. `buildName`).
+
+### `@argos-ci/vitest`
+
+Take a screenshot from within a browser test.
+
+```ts
+import { argosScreenshot } from "@argos-ci/vitest";
+
+await argosScreenshot("my-screenshot", {
+  // Take a screenshot of a specific element.
+  element: "#my-element",
+  // Capture several viewports.
+  viewports: [{ width: 320, height: 480 }, "macbook-13"],
+});
+```
+
+- **`name`**: A unique name for the screenshot.
+- **`options`**: Serializable screenshot options. Because they cross the Vitest browser/node boundary, non-serializable options (functions, `Locator` elements) must be set on the plugin instead.
+
+#### Options
+
+- **`element`**: String selector of the element to capture.
+- **`viewports`**: Viewports to capture (a size, a [preset name](/viewports), or `{ preset, orientation }`).
+- **`fullPage`**: Capture the full page instead of fitting the screenshot to the content (default: `false`).
+- **`argosCSS`**: Custom CSS evaluated during the screenshot.
+- **`threshold`**: Sensitivity threshold between `0` and `1` (default: `0.5`).
+- **`tag`**: Tag or array of tags to attach to the screenshot.
+- **`ariaSnapshot`**: Capture an ARIA snapshot along with the screenshot (default: `false`).
+- **`disableHover`**: Disable hover effects before capturing (default: `true`).
+- **`stabilize`**: Wait for the UI to stabilize before capturing (default: `true`).
