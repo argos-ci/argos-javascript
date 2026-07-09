@@ -9,7 +9,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/vitest"
   },
-  "homepage": "https://argos-ci.com/docs",
+  "homepage": "https://argos-ci.com/docs/sdks-reference/vitest",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },

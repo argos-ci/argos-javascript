@@ -17,16 +17,25 @@
 
 Capture Argos screenshots directly from your [Vitest browser tests](https://vitest.dev/guide/browser/).
 
-Visit [argos-ci.com/docs](https://argos-ci.com/docs) for guides, API and more.
+Visit the [Vitest SDK documentation](https://argos-ci.com/docs/sdks-reference/vitest) for guides, API and more.
 
-## Requirements
+## Installation
 
-`@argos-ci/vitest` runs in [Vitest browser mode](https://vitest.dev/guide/browser/) with the
-[Playwright provider](https://vitest.dev/guide/browser/playwright). Install the following peer
-dependencies alongside it:
+Install the package:
 
 ```sh
-npm install --save-dev @argos-ci/vitest vitest @vitest/browser @vitest/browser-playwright playwright
+npm install --save-dev @argos-ci/vitest
+```
+
+`argosSnapshot` runs in any Vitest test — browser or Node — and needs nothing else.
+
+To capture screenshots with `argosScreenshot`, run your tests in
+[Vitest browser mode](https://vitest.dev/guide/browser/) with the
+[Playwright provider](https://vitest.dev/guide/browser/playwright) and install the
+following peer dependencies:
+
+```sh
+npm install --save-dev vitest @vitest/browser @vitest/browser-playwright playwright
 ```
 
 ## Usage
@@ -105,5 +114,6 @@ reporter when `uploadToArgos` is enabled.
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs)
+- [Official SDK Docs](https://argos-ci.com/docs/sdks-reference/vitest)
+- [Quickstart](https://argos-ci.com/docs/quickstart/vitest-quickstart)
 - [Discord](https://argos-ci.com/discord)
