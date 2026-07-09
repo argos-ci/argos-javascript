@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.0.18...@argos-ci/storybook@6.1.0) (2026-07-09)
+
+
+### Features
+
+* **vitest:** add standalone @argos-ci/vitest package ([e27f7d2](https://github.com/argos-ci/argos-javascript/commit/e27f7d2823ea8e60f50ae54977434cb5aa93448a))
+
+
+
+
+
 ## [6.0.18](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.0.17...@argos-ci/storybook@6.0.18) (2026-07-07)
 
 

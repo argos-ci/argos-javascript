@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/vitest",
   "description": "Vitest SDK for visual testing with Argos.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
@@ -65,8 +65,8 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@vitest/browser": "^4.1.9",
-    "@vitest/pretty-format": "^4.1.9",
     "@vitest/browser-playwright": "^4.1.9",
+    "@vitest/pretty-format": "^4.1.9",
     "playwright": "^1.61.0",
     "vitest": "catalog:"
   },

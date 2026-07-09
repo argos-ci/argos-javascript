@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.5.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.4.0...@argos-ci/core@6.5.0) (2026-07-09)
+
+
+### Features
+
+* **vitest:** add argosSnapshot for value snapshots anywhere ([0a6201f](https://github.com/argos-ci/argos-javascript/commit/0a6201f7e3ad8f26045c50130978a1aacc8fe6c6))
+
+
+
+
+
 # [6.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.3.0...@argos-ci/core@6.4.0) (2026-07-01)
 
 
