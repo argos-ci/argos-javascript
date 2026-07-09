@@ -30,7 +30,13 @@ export class ArgosReporter implements Reporter {
     if (this.vitest.config.watch) {
       return;
     }
-    const res = await upload(this.config);
+    const res = await upload({
+      // Default to uploading screenshots and ARIA snapshots. Without this,
+      // `upload` only matches images (`**/*.{png,jpg,jpeg}`) and the
+      // `.aria.yml` files produced by `ariaSnapshot: true` are skipped.
+      files: ["**/*.png", "**/*.aria.yml"],
+      ...this.config,
+    });
     console.log(`✅ Argos build created: ${res.build.url}`);
   }
 }

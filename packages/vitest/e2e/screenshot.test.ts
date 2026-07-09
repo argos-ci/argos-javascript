@@ -112,9 +112,16 @@ test("grows the iframe to capture content wider than the viewport", async () => 
   expect(width).toBeGreaterThan(1500);
 });
 
-test("forwards the ariaSnapshot option across the RPC boundary", async () => {
+test("captures an ARIA snapshot alongside the screenshot", async () => {
   mount(`<button>Click me</button>`);
   const attachments = await argosScreenshot("aria", { ariaSnapshot: true });
   // ariaSnapshot adds the aria + aria/metadata attachments: 2 -> 4.
   expect(attachments.length).toBe(4);
+
+  // The `.aria.yml` snapshot is written and contains the accessibility tree, so
+  // it can be picked up by the reporter's upload glob.
+  const aria = attachments.find((a) => a.path.endsWith(".aria.yml"));
+  expect(aria).toBeDefined();
+  const snapshot = await server.commands.readFile(aria!.path);
+  expect(snapshot).toContain('button "Click me"');
 });

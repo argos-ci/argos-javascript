@@ -25,15 +25,31 @@ describe("ArgosReporter", () => {
     vi.restoreAllMocks();
   });
 
-  it("uploads at the end of a non-watch run and logs the build URL", async () => {
+  it("uploads screenshots and ARIA snapshots at the end of a non-watch run and logs the build URL", async () => {
     const reporter = new ArgosReporter({ buildName: "test" });
     reporter.onInit(createVitest(false));
     await reporter.onTestRunEnd();
     expect(upload).toHaveBeenCalledTimes(1);
-    expect(upload).toHaveBeenCalledWith({ buildName: "test" });
+    expect(upload).toHaveBeenCalledWith({
+      files: ["**/*.png", "**/*.aria.yml"],
+      buildName: "test",
+    });
     expect(log).toHaveBeenCalledWith(
       expect.stringContaining("https://argos-ci.com/build/1"),
     );
+  });
+
+  it("lets the config override the default files glob", async () => {
+    const reporter = new ArgosReporter({
+      buildName: "test",
+      files: ["custom/**/*.png"],
+    });
+    reporter.onInit(createVitest(false));
+    await reporter.onTestRunEnd();
+    expect(upload).toHaveBeenCalledWith({
+      files: ["custom/**/*.png"],
+      buildName: "test",
+    });
   });
 
   it("propagates upload failures", async () => {
