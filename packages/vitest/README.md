@@ -7,7 +7,7 @@
   </a>
 </p>
 
-<p align="center"><strong>The open source visual testing platform for modern engineering teams.</strong></p>
+<p align="center"><strong>The open source visual testing platform for AI-native engineering teams.</strong></p>
 
 # Official Argos Vitest integration
 
@@ -17,7 +17,7 @@
 
 Capture Argos screenshots directly from your [Vitest browser tests](https://vitest.dev/guide/browser/).
 
-Visit [argos-ci.com/docs/vitest](https://argos-ci.com/docs/vitest) for guides, API and more.
+Visit [argos-ci.com/docs](https://argos-ci.com/docs) for guides, API and more.
 
 ## Requirements
 
@@ -73,5 +73,5 @@ test("Button", async () => {
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/)
+- [Official SDK Docs](https://argos-ci.com/docs)
 - [Discord](https://argos-ci.com/discord)

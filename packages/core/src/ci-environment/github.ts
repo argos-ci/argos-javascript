@@ -45,7 +45,7 @@ To resolve this, Argos requires a GITHUB_TOKEN to fetch the pull request associa
 
 GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 
-For more details, check out the documentation: Read more at https://argos-ci.com/docs/run-on-preview-deployment
+For more details, check out the documentation: Read more at https://argos-ci.com/docs/learn/how-to-guides/ci-pipelines/run-on-preview-deployments
 
 If you want to disable this warning, you can set the following environment variable:
 

@@ -380,7 +380,7 @@ export interface Config {
    * Build mode to use.
    * - "ci": Review visual changes introduced by a feature branch and prevent regressions.
    * - "monitoring": Track visual changes outside the standard CI flow, either on a schedule or before a release.
-   * @see https://argos-ci.com/docs/build-modes
+   * @see https://argos-ci.com/docs/learn/platform-fundamentals/build-modes
    */
   mode: "ci" | "monitoring" | null;
 

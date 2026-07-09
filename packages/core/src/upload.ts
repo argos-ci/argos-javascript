@@ -101,7 +101,7 @@ export interface UploadParameters {
    * Build mode to use.
    * - "ci": Review the visual changes introduced by a feature branch and prevent regressions.
    * - "monitoring": Track visual changes outside the standard CI flow, either on a schedule or before a release.
-   * @see https://argos-ci.com/docs/build-modes
+   * @see https://argos-ci.com/docs/learn/platform-fundamentals/build-modes
    * @default "ci"
    */
   mode?: "ci" | "monitoring";

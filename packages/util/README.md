@@ -7,16 +7,19 @@
   </a>
 </p>
 
-<p align="center"><strong>The open source visual testing plaform for modern engineering teams.</strong></p>
+<p align="center"><strong>The open source visual testing platform for AI-native engineering teams.</strong></p>
 
 # Argos Utilities
 
-Set of utilities used across all Argos SDKs.
+Shared utilities used across the Argos SDKs (screenshot metadata, name resolution, and other helpers).
 
 [![npm version](https://img.shields.io/npm/v/@argos-ci/util.svg)](https://www.npmjs.com/package/@argos-ci/util)
 [![npm dm](https://img.shields.io/npm/dm/@argos-ci/util.svg)](https://www.npmjs.com/package/@argos-ci/util)
 [![npm dt](https://img.shields.io/npm/dt/@argos-ci/util.svg)](https://www.npmjs.com/package/@argos-ci/util)
 
+> This package is an internal building block shared by the other Argos SDKs. You usually don't need to install it directly — pick the integration for your test framework instead.
+
 ## Links
 
 - [Official Docs](https://argos-ci.com/docs)
+- [Discord](https://argos-ci.com/discord)

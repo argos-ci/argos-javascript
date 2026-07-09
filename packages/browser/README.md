@@ -7,16 +7,19 @@
   </a>
 </p>
 
-<p align="center"><strong>The open source visual testing plaform for modern engineering teams.</strong></p>
+<p align="center"><strong>The open source visual testing platform for AI-native engineering teams.</strong></p>
 
 # Argos Browser
 
-Browser utilities to stabilize visual testing.
+Low-level browser utilities that stabilize the page before a screenshot is taken — waiting for fonts and images to load, hiding scrollbars and text carets, and resolving viewports.
 
 [![npm version](https://img.shields.io/npm/v/@argos-ci/browser.svg)](https://www.npmjs.com/package/@argos-ci/browser)
 [![npm dm](https://img.shields.io/npm/dm/@argos-ci/browser.svg)](https://www.npmjs.com/package/@argos-ci/browser)
 [![npm dt](https://img.shields.io/npm/dt/@argos-ci/browser.svg)](https://www.npmjs.com/package/@argos-ci/browser)
 
+> This package is an internal building block used by the higher-level Argos SDKs (Playwright, Cypress, Puppeteer, …). You usually don't need to install it directly — pick the integration for your test framework instead.
+
 ## Links
 
 - [Official SDK Docs](https://argos-ci.com/docs)
+- [Discord](https://argos-ci.com/discord)

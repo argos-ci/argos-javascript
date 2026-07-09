@@ -7,7 +7,7 @@
   </a>
 </p>
 
-<p align="center"><strong>The open source visual testing plaform for modern engineering teams.</strong></p>
+<p align="center"><strong>The open source visual testing platform for AI-native engineering teams.</strong></p>
 
 # Example of Argos + Storybook Vitest
 
@@ -23,7 +23,7 @@ Read [Argos documentations](https://argos-ci.com/docs) or explore [Storybook Tes
 
 ## Links
 
-- [Quickstart with Argos + Storybook + Vitest](https://argos-ci.com/docs/quickstart/storybook)
-- [Storybook SDK Reference](https://argos-ci.com/docs/storybook)
+- [Quickstart with Argos + Storybook + Vitest](https://argos-ci.com/docs/quickstart/storybook-quickstart)
+- [Storybook SDK Reference](https://argos-ci.com/docs/sdks-reference/storybook)
 - [Official Argos Docs](https://argos-ci.com/docs)
 - [Discord](https://argos-ci.com/discord)

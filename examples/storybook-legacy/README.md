@@ -7,7 +7,7 @@
   </a>
 </p>
 
-<p align="center"><strong>The open source visual testing plaform for modern engineering teams.</strong></p>
+<p align="center"><strong>The open source visual testing platform for AI-native engineering teams.</strong></p>
 
 # Example of Argos + Storybook and Storycap
 
@@ -17,7 +17,7 @@ This example showcases Argos Visual Testing integrated to [Storybook](https://st
 
 This example shows how configure GitHub Actions to run build Storybook and capture screenshots with Storycap on your CI.
 
-Read Argos' [Storybook (\<v8)](https://argos-ci.com/docs/quickstart/storybook-legacy) to learn how to integrate Argos with Storybook.
+Read Argos' [Storybook (\<v8)](https://argos-ci.com/docs/quickstart/storybook-quickstart/storybook-legacy-less-than-v8-quickstart) to learn how to integrate Argos with Storybook.
 
 ## Links
 

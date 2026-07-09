@@ -20,7 +20,7 @@ const DEFAULT_PLAYWRIGHT_VIEWPORT_SIZE = { width: 1280, height: 720 };
  * Stabilize the UI and takes a screenshot of the application under test.
  *
  * @example argosScreenshot(page, context, options)
- * @see https://argos-ci.com/docs/playwright#api-overview
+ * @see https://argos-ci.com/docs/sdks-reference/playwright
  */
 export async function argosScreenshot(
   /**

@@ -14,7 +14,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/core"
   },
-  "homepage": "https://argos-ci.com/docs/argos-cli",
+  "homepage": "https://argos-ci.com/docs/sdks-reference/argos-command-line-interface-cli",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
