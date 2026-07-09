@@ -9,7 +9,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/webdriverio"
   },
-  "homepage": "https://argos-ci.com/docs/webdriverio",
+  "homepage": "https://argos-ci.com/docs/sdks-reference/webdriverio",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },

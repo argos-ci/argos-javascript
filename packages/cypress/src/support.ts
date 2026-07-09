@@ -57,7 +57,7 @@ declare global {
       /**
        * Stabilize the UI and takes a screenshot of the application under test.
        *
-       * @see https://argos-ci.com/docs/cypress#api-overview
+       * @see https://argos-ci.com/docs/sdks-reference/cypress
        * @example
        *    cy.argosScreenshot("my-screenshot")
        *    cy.get(".post").argosScreenshot()

@@ -9,7 +9,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/gitlab"
   },
-  "homepage": "https://argos-ci.com/docs/gitlab",
+  "homepage": "https://argos-ci.com/docs/learn/integrations/gitlab-integration",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
