@@ -6,7 +6,16 @@ export default defineConfig([
     dts: true,
     format: ["esm"],
     deps: {
-      neverBundle: [/^@argos-ci\//, "playwright", /^vitest/, /^@vitest/],
+      // `@vitest/pretty-format` is intentionally bundled: keeping it external
+      // makes its own transitive dep (`tinyrainbow`) unresolvable when Vitest
+      // pre-bundles this package for the browser.
+      neverBundle: [
+        /^@argos-ci\//,
+        "playwright",
+        /^vitest/,
+        "@vitest/browser",
+        "@vitest/browser-playwright",
+      ],
     },
   },
   {
@@ -14,7 +23,16 @@ export default defineConfig([
     dts: true,
     format: ["esm"],
     deps: {
-      neverBundle: [/^@argos-ci\//, "playwright", /^vitest/, /^@vitest/],
+      // `@vitest/pretty-format` is intentionally bundled: keeping it external
+      // makes its own transitive dep (`tinyrainbow`) unresolvable when Vitest
+      // pre-bundles this package for the browser.
+      neverBundle: [
+        /^@argos-ci\//,
+        "playwright",
+        /^vitest/,
+        "@vitest/browser",
+        "@vitest/browser-playwright",
+      ],
     },
   },
   {
@@ -22,7 +40,16 @@ export default defineConfig([
     dts: true,
     format: ["esm"],
     deps: {
-      neverBundle: [/^@argos-ci\//, "playwright", /^vitest/, /^@vitest/],
+      // `@vitest/pretty-format` is intentionally bundled: keeping it external
+      // makes its own transitive dep (`tinyrainbow`) unresolvable when Vitest
+      // pre-bundles this package for the browser.
+      neverBundle: [
+        /^@argos-ci\//,
+        "playwright",
+        /^vitest/,
+        "@vitest/browser",
+        "@vitest/browser-playwright",
+      ],
     },
   },
 ]);

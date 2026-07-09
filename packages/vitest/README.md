@@ -71,6 +71,38 @@ test("Button", async () => {
 });
 ```
 
+## Snapshots
+
+`argosSnapshot` captures a snapshot of any value — not just a screenshot — and
+uploads it to Argos to diff across builds, mimicking
+[Vitest snapshots](https://vitest.dev/guide/snapshot). Unlike `argosScreenshot`,
+it does not need a browser and works in **both** browser and Node tests.
+
+```ts
+import { test } from "vitest";
+import { argosSnapshot } from "@argos-ci/vitest";
+
+test("API response", async () => {
+  const user = await fetchUser();
+  // Objects are serialized with `@vitest/pretty-format`, strings are written
+  // verbatim.
+  await argosSnapshot("user", user);
+});
+```
+
+Use the `extension` option to control how Argos renders and diffs the snapshot,
+and `tag` to attach tags:
+
+```ts
+await argosSnapshot("config", JSON.stringify(config, null, 2), {
+  extension: ".json",
+  tag: "config",
+});
+```
+
+Snapshots are written to the same folder as screenshots and uploaded by the
+reporter when `uploadToArgos` is enabled.
+
 ## Links
 
 - [Official SDK Docs](https://argos-ci.com/docs)

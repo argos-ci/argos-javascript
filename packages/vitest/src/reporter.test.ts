@@ -25,13 +25,14 @@ describe("ArgosReporter", () => {
     vi.restoreAllMocks();
   });
 
-  it("uploads screenshots and ARIA snapshots at the end of a non-watch run and logs the build URL", async () => {
+  it("uploads screenshots, ARIA and value snapshots at the end of a non-watch run and logs the build URL", async () => {
     const reporter = new ArgosReporter({ buildName: "test" });
     reporter.onInit(createVitest(false));
     await reporter.onTestRunEnd();
     expect(upload).toHaveBeenCalledTimes(1);
     expect(upload).toHaveBeenCalledWith({
-      files: ["**/*.png", "**/*.aria.yml"],
+      files: ["**/*.png", "**/*.aria.yml", "**/*.snapshot.*"],
+      ignore: ["**/*.argos.json"],
       buildName: "test",
     });
     expect(log).toHaveBeenCalledWith(
@@ -48,6 +49,7 @@ describe("ArgosReporter", () => {
     await reporter.onTestRunEnd();
     expect(upload).toHaveBeenCalledWith({
       files: ["custom/**/*.png"],
+      ignore: ["**/*.argos.json"],
       buildName: "test",
     });
   });

@@ -31,10 +31,15 @@ export class ArgosReporter implements Reporter {
       return;
     }
     const res = await upload({
-      // Default to uploading screenshots and ARIA snapshots. Without this,
-      // `upload` only matches images (`**/*.{png,jpg,jpeg}`) and the
-      // `.aria.yml` files produced by `ariaSnapshot: true` are skipped.
-      files: ["**/*.png", "**/*.aria.yml"],
+      // Default to uploading screenshots, ARIA snapshots and `argosSnapshot`
+      // files. Without this, `upload` only matches images
+      // (`**/*.{png,jpg,jpeg}`), so the `.aria.yml` files produced by
+      // `ariaSnapshot: true` and the `.snapshot.*` files produced by
+      // `argosSnapshot` would be skipped.
+      files: ["**/*.png", "**/*.aria.yml", "**/*.snapshot.*"],
+      // The `.snapshot.*` glob would otherwise also match the `.argos.json`
+      // metadata sidecars written next to each snapshot.
+      ignore: ["**/*.argos.json"],
       ...this.config,
     });
     console.log(`✅ Argos build created: ${res.build.url}`);

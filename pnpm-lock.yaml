@@ -409,6 +409,9 @@ importers:
       '@vitest/browser-playwright':
         specifier: ^4.1.9
         version: 4.1.9(msw@2.14.6(@types/node@22.19.21)(typescript@6.0.3))(playwright@1.61.0)(vite@7.3.3(@types/node@22.19.21)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))(vitest@4.1.9)
+      '@vitest/pretty-format':
+        specifier: ^4.1.9
+        version: 4.1.9
       playwright:
         specifier: ^1.61.0
         version: 1.61.0
