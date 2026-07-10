@@ -4,6 +4,7 @@ import {
   formatBuild,
   formatComment,
   formatComments,
+  formatProject,
   formatReview,
   formatReviews,
   formatSnapshotSummary,
@@ -46,6 +47,23 @@ describe("formatValue", () => {
   it("stringifies scalars", () => {
     expect(formatValue(0)).toBe("0");
     expect(formatValue("main")).toBe("main");
+  });
+});
+
+describe("formatProject", () => {
+  it("summarizes the created project", () => {
+    const project = {
+      id: "project-1",
+      name: "my-app",
+      account: { id: "account-1", slug: "acme" },
+      defaultBaseBranch: "main",
+      hasRemoteContentAccess: true,
+    } as ArgosAPISchema.components["schemas"]["Project"];
+    const output = formatProject(project);
+    expect(output).toContain("Created project acme/my-app.");
+    expect(output).toContain("ID: project-1");
+    expect(output).toContain("Account: acme");
+    expect(output).toContain("Default base branch: main");
   });
 });
 

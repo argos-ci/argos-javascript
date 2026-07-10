@@ -129,6 +129,19 @@ describe("#readConfig", () => {
     delete process.env.ARGOS_PARALLEL;
   });
 
+  it("reads threshold from env", async () => {
+    process.env.ARGOS_THRESHOLD = "0.8";
+    expect((await readDummyConfig()).threshold).toBe(0.8);
+    delete process.env.ARGOS_THRESHOLD;
+  });
+
+  it("threshold passed as argument takes priority over env variable", async () => {
+    process.env.ARGOS_THRESHOLD = "0.8";
+    const config = await readDummyConfig({ threshold: 0.2 });
+    expect(config.threshold).toBe(0.2);
+    delete process.env.ARGOS_THRESHOLD;
+  });
+
   it("reads merge queue pr numbers from env", async () => {
     process.env.ARGOS_MERGE_QUEUE_PRS = "101,102";
     const config = await readDummyConfig();

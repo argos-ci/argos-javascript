@@ -55,8 +55,9 @@ function explicitProjectPath(
   if (reference.owner && reference.project) {
     return { owner: reference.owner, project: reference.project };
   }
-  if (options.project) {
-    return parseProjectPathOrFail(options.project);
+  const project = options.project || process.env["ARGOS_PROJECT"];
+  if (project) {
+    return parseProjectPathOrFail(project);
   }
   return null;
 }
