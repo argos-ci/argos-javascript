@@ -457,6 +457,7 @@ export async function readConfig(options: Partial<Config> = {}) {
       options.referenceBranch || defaultConfig.referenceBranch || null,
     referenceCommit:
       options.referenceCommit || defaultConfig.referenceCommit || null,
+    threshold: options.threshold ?? defaultConfig.threshold ?? null,
     repository: ciEnv?.repository || null,
     originalRepository: ciEnv?.originalRepository || null,
     jobId: ciEnv?.jobId || null,

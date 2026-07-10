@@ -22,7 +22,7 @@ export function createProjectCommand(program: Command) {
     .addOption(jsonOption)
     .action(async (name: string, options: CreateProjectOptions) => {
       try {
-        const accountSlug = options.account;
+        const accountSlug = options.account || process.env["ARGOS_ACCOUNT"];
         if (!accountSlug) {
           fail(
             "An account is required. Use --account <slug> or set ARGOS_ACCOUNT.",

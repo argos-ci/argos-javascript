@@ -52,8 +52,7 @@ export function uploadCommand(program: Command) {
         "Mode of comparison applied. CI for visual regression testing, monitoring for visual monitoring.",
       )
         .default("ci")
-        .choices(["ci", "monitoring"])
-        .env("ARGOS_MODE"),
+        .choices(["ci", "monitoring"]),
     )
     .addOption(
       new Option(
@@ -65,32 +64,32 @@ export function uploadCommand(program: Command) {
       new Option(
         "--parallel-total <number>",
         "The number of parallel nodes being ran",
-      ).env("ARGOS_PARALLEL_TOTAL"),
+      ),
     )
     .addOption(parallelNonceOption)
     .addOption(
       new Option(
         "--parallel-index <number>",
         "The index of the parallel node being ran (must be at least 1)",
-      ).env("ARGOS_PARALLEL_INDEX"),
+      ),
     )
     .addOption(
       new Option(
         "--reference-branch <string>",
         "Branch used as baseline for screenshot comparison",
-      ).env("ARGOS_REFERENCE_BRANCH"),
+      ),
     )
     .addOption(
       new Option(
         "--reference-commit <string>",
         "Commit used as baseline for screenshot comparison",
-      ).env("ARGOS_REFERENCE_COMMIT"),
+      ),
     )
     .addOption(
       new Option(
         "--threshold <number>",
         "Sensitivity threshold between 0 and 1. The higher the threshold, the less sensitive the diff will be. Default to 0.5",
-      ).env("ARGOS_THRESHOLD"),
+      ),
     )
     .addOption(
       new Option(
