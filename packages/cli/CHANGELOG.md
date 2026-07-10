@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@6.1.4...@argos-ci/cli@6.2.0) (2026-07-10)
+
+
+### Features
+
+* add --skip-if-empty option to argos finalize ([#341](https://github.com/argos-ci/argos-javascript/issues/341)) ([b0c00eb](https://github.com/argos-ci/argos-javascript/commit/b0c00ebe9f9ad5d7248592bc5b89dc7f52bb72bf))
+* **cli:** add create-project command ([91a8494](https://github.com/argos-ci/argos-javascript/commit/91a849409e6910c338bb0def026f5ebdfcd0b674))
+
+
+
+
+
 ## [6.1.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@6.1.3...@argos-ci/cli@6.1.4) (2026-07-09)
 
 **Note:** Version bump only for package @argos-ci/cli

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.6.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.5.3...@argos-ci/core@6.6.0) (2026-07-10)
+
+
+### Features
+
+* add --skip-if-empty option to argos finalize ([#341](https://github.com/argos-ci/argos-javascript/issues/341)) ([b0c00eb](https://github.com/argos-ci/argos-javascript/commit/b0c00ebe9f9ad5d7248592bc5b89dc7f52bb72bf))
+
+
+
+
+
 ## [6.5.3](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.5.2...@argos-ci/core@6.5.3) (2026-07-09)
 
 **Note:** Version bump only for package @argos-ci/core
