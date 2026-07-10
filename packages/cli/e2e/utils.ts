@@ -34,6 +34,10 @@ export function run(
   const result = spawnSync("node", [cliPath, ...args], {
     encoding: "utf8",
     env,
+    // The default 1 MB buffer kills the child once its output outgrows it
+    // (status: null). The e2e suite approves the shared build on every run,
+    // so `review list` output grows unboundedly and eventually crossed it.
+    maxBuffer: 128 * 1024 * 1024,
   });
 
   const stdout = result.stdout ?? "";
@@ -42,7 +46,11 @@ export function run(
   if (result.status !== 0) {
     throw new CommandError(
       `Command failed: node ${cliPath} ${args.join(" ")}`,
-      { status: result.status, stdout, stderr },
+      {
+        status: result.status,
+        stdout,
+        stderr,
+      },
     );
   }
 
