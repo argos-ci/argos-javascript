@@ -6,6 +6,7 @@ type SnapshotDiffStatus = SnapshotDiff["status"];
 type BuildReview = ArgosAPISchema.components["schemas"]["BuildReview"];
 type Comment = ArgosAPISchema.components["schemas"]["Comment"];
 type User = ArgosAPISchema.components["schemas"]["User"];
+type Project = ArgosAPISchema.components["schemas"]["Project"];
 
 /** Render a scalar, using `-` for empty values. */
 export function formatValue(value: string | number | null | undefined): string {
@@ -27,6 +28,16 @@ export function formatMe(user: User): string {
     `Logged in to Argos as ${formatUser(user)}.`,
     `Slug: ${user.slug}`,
     `Name: ${formatValue(user.name)}`,
+  ].join("\n");
+}
+
+export function formatProject(project: Project): string {
+  return [
+    `Created project ${project.account.slug}/${project.name}.`,
+    `ID: ${project.id}`,
+    `Name: ${project.name}`,
+    `Account: ${project.account.slug}`,
+    `Default base branch: ${formatValue(project.defaultBaseBranch)}`,
   ].join("\n");
 }
 

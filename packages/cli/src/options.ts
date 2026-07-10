@@ -24,6 +24,12 @@ export const buildNameOption = new Option(
   "Name of the build, in case you want to run multiple Argos builds in a single CI job",
 ).env("ARGOS_BUILD_NAME");
 
+export type AccountOption = { account?: string | undefined };
+export const accountOption = new Option(
+  "--account <slug>",
+  "Slug of the account (personal or team) that will own the project",
+).env("ARGOS_ACCOUNT");
+
 export type JsonOption = { json?: boolean | undefined };
 export const jsonOption = new Option(
   "--json",
