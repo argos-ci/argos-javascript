@@ -13,6 +13,7 @@ import { logoutCommand } from "./commands/logout";
 import { deployCommand } from "./commands/deploy";
 import { whoamiCommand } from "./commands/whoami";
 import { createProjectCommand } from "./commands/create-project";
+import { analyticsCommand } from "./commands/analytics";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -37,6 +38,7 @@ logoutCommand(program);
 deployCommand(program);
 whoamiCommand(program);
 createProjectCommand(program);
+analyticsCommand(program);
 
 if (!process.argv.slice(2).length) {
   program.outputHelp();
