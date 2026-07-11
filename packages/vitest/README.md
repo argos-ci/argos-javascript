@@ -134,8 +134,9 @@ await argosSnapshot(JSON.stringify(config, null, 2), {
 });
 ```
 
-Snapshots are written to the same folder as screenshots and uploaded by the
-reporter when `uploadToArgos` is enabled.
+Screenshots and snapshots are both written to the `./snapshots` directory by
+default (configurable via the plugin `root` option) and uploaded by the reporter
+when `uploadToArgos` is enabled.
 
 ## Links
 

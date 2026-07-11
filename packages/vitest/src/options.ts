@@ -108,9 +108,9 @@ export interface VitestSnapshotOptions {
   /**
    * Folder where the snapshot is written.
    *
-   * In Node tests this defaults to `"./screenshots"`. In browser tests it
+   * In Node tests this defaults to `"./snapshots"`. In browser tests it
    * defaults to the plugin `root` and can be overridden per call.
-   * @default "./screenshots"
+   * @default "./snapshots"
    */
   root?: string;
 

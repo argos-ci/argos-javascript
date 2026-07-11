@@ -16,7 +16,7 @@ import { getArgosVitestVersion, getVitestVersion } from "./version";
  * Default folder where snapshots are written when no `root` is provided.
  * Matches the plugin default so Node and browser snapshots land together.
  */
-export const DEFAULT_SNAPSHOTS_ROOT = "./screenshots";
+export const DEFAULT_SNAPSHOTS_ROOT = "./snapshots";
 
 /**
  * Default extension of a serialized snapshot file.

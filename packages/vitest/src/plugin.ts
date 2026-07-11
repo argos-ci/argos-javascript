@@ -45,7 +45,7 @@ const cwd = process.cwd();
  */
 export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
   const {
-    root: unresolvedRoot = "./screenshots",
+    root: unresolvedRoot = "./snapshots",
     uploadToArgos,
     ...otherOptions
   } = options ?? {};
