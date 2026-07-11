@@ -1,7 +1,4 @@
-/** Minimal shape of a Vitest test task that we rely on. */
-type CurrentTest =
-  | { id: string; fullName: string; file?: { name?: string } | undefined }
-  | undefined;
+import { getCurrentTest } from "./test-context";
 
 /**
  * Maximum length of a single filename component on common filesystems (ext4,
@@ -24,29 +21,6 @@ function truncate(text: string, length: number): string {
     return text;
   }
   return `${text.slice(0, Math.max(0, length - 1))}…`;
-}
-
-/**
- * Get the current Vitest test task.
- *
- * Vitest >= 4.1 exposes `TestRunner.getCurrentTest()` from the `vitest` entry
- * point; the `vitest/suite` export is deprecated. We prefer the new API and
- * fall back to `vitest/suite` for older 4.x. Both are imported dynamically so
- * importing `@argos-ci/vitest` in a non-Vitest environment does not pull Vitest
- * in.
- */
-async function getCurrentTest(): Promise<CurrentTest> {
-  const vitest = (await import("vitest")) as {
-    TestRunner?: { getCurrentTest?: () => CurrentTest };
-  };
-  const runner = vitest.TestRunner;
-  if (runner?.getCurrentTest) {
-    return runner.getCurrentTest();
-  }
-  const suite = (await import("vitest/suite")) as {
-    getCurrentTest: () => CurrentTest;
-  };
-  return suite.getCurrentTest();
 }
 
 /**

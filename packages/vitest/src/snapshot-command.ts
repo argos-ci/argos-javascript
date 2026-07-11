@@ -1,5 +1,6 @@
 import type { BrowserCommand } from "vitest/node";
 import type { ArgosAttachment } from "@argos-ci/playwright";
+import type { TestMetadata } from "./metadata";
 import type {
   ArgosVitestPluginOptions,
   SerializableSnapshotOptions,
@@ -15,6 +16,7 @@ export type ArgosSnapshotCommandArgs = [
   name: string,
   content: string,
   options?: SerializableSnapshotOptions,
+  test?: TestMetadata,
 ];
 
 /**
@@ -25,7 +27,13 @@ export type ArgosSnapshotCommandArgs = [
 export const createArgosSnapshotCommand = (
   pluginOptions: ArgosVitestPluginOptions = {},
 ): BrowserCommand<ArgosSnapshotCommandArgs> => {
-  return async (_ctx, name, content, options): Promise<ArgosAttachment[]> => {
+  return async (
+    _ctx,
+    name,
+    content,
+    options,
+    test,
+  ): Promise<ArgosAttachment[]> => {
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -33,6 +41,6 @@ export const createArgosSnapshotCommand = (
       root: pluginOptions.root,
       ...options,
     };
-    return writeSnapshotFile(name, content, merged);
+    return writeSnapshotFile(name, content, merged, test);
   };
 };

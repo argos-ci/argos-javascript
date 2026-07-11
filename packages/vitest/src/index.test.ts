@@ -71,6 +71,17 @@ it("writes a snapshot from a Node test", async () => {
       a.path.endsWith("node-unit.snapshot.txt"),
     );
     expect(snapshot).toBeDefined();
+
+    // The metadata sidecar carries the Vitest test metadata.
+    const metadataAttachment = attachments.find((a) =>
+      a.path.endsWith(".argos.json"),
+    );
+    const metadata = JSON.parse(
+      await readFile(metadataAttachment!.path, "utf-8"),
+    );
+    expect(metadata.sdk.name).toBe("@argos-ci/vitest");
+    expect(metadata.test.title).toBe("writes a snapshot from a Node test");
+    expect(metadata.test.location.file).toContain("src/index.test.ts");
   } finally {
     await rm(root, { recursive: true, force: true });
   }

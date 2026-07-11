@@ -10,6 +10,7 @@ import type {
   VitestScreenshotOptions,
 } from "./options";
 import { resetTesterScale, setIframeViewportSize } from "./iframe";
+import type { TestMetadata } from "./metadata";
 import { screenshotFrame } from "./screenshot";
 import { getArgosVitestVersion } from "./version";
 
@@ -20,6 +21,7 @@ import { getArgosVitestVersion } from "./version";
 export type ArgosScreenshotCommandArgs = [
   name: string,
   options?: VitestScreenshotOptions,
+  test?: TestMetadata,
 ];
 
 /**
@@ -33,7 +35,7 @@ export type ArgosScreenshotCommandArgs = [
 export const createArgosScreenshotCommand = (
   pluginOptions: ArgosVitestPluginOptions = {},
 ): BrowserCommand<ArgosScreenshotCommandArgs> => {
-  return async (ctx, name, options) => {
+  return async (ctx, name, options, test) => {
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -50,6 +52,10 @@ export const createArgosScreenshotCommand = (
           sdk: { name: "@argos-ci/vitest", version },
           playwrightLibraries: ["@vitest/browser-playwright"],
           viewport,
+          // Injected so the Playwright SDK attaches the Vitest test metadata
+          // (Playwright's own `testInfo` is absent here). It resolves
+          // `location.file` relative to the git repository.
+          test,
         });
       };
 
