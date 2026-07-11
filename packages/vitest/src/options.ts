@@ -95,6 +95,15 @@ export interface VitestScreenshotOptions {
  */
 export interface VitestSnapshotOptions {
   /**
+   * Unique name of the snapshot.
+   *
+   * When omitted, Argos generates one automatically from the current test,
+   * mimicking {@link https://vitest.dev/guide/snapshot Vitest's snapshot naming}
+   * (`` `${test.fullName} ${count}` ``).
+   */
+  name?: string;
+
+  /**
    * Folder where the snapshot is written.
    *
    * In Node tests this defaults to `"./screenshots"`. In browser tests it
@@ -124,12 +133,13 @@ export interface VitestSnapshotOptions {
 
 /**
  * Subset of {@link VitestSnapshotOptions} that can cross the Vitest
- * browser/node RPC boundary (everything but `serialize`, which is applied
- * before the value is sent to Node).
+ * browser/node RPC boundary. Excludes `serialize` (applied before the value is
+ * sent to Node) and `name` (resolved on the test side and passed to the Node
+ * primitives as a separate argument).
  */
 export type SerializableSnapshotOptions = Omit<
   VitestSnapshotOptions,
-  "serialize"
+  "serialize" | "name"
 >;
 
 /**

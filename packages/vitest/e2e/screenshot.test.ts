@@ -60,6 +60,21 @@ test("captures a rendered element with the Argos Vitest SDK metadata", async () 
   expect(metadata.automationLibrary.name).toBe("@vitest/browser-playwright");
 });
 
+test("auto-names a screenshot from the current test", async () => {
+  mount(
+    `<div style="padding:40px;background:#22c55e;color:#fff;font:700 32px sans-serif;">Auto</div>`,
+  );
+  // No name: it is derived from the current test + a per-test counter, so the
+  // file lands under the test title with a ` 1` suffix.
+  const attachments = await argosScreenshot();
+  expect(attachments.length).toBe(2);
+
+  const screenshot = attachments.find((a) => a.path.endsWith(".png"));
+  expect(screenshot).toBeDefined();
+  expect(screenshot!.path).toContain("auto-names a screenshot");
+  expect(screenshot!.path).toContain(" 1.png");
+});
+
 test("captures a specific element via a selector", async () => {
   mount(
     `<div id="box" style="width:200px;height:120px;background:tomato"></div><p>ignored</p>`,
@@ -115,15 +130,20 @@ test("grows the iframe to capture content wider than the viewport", async () => 
 test("writes a value snapshot that the reporter can upload", async () => {
   // `argosSnapshot` works without a browser, but here we exercise the browser
   // RPC path: the value is serialized in the browser, written on the node side.
-  const attachments = await argosSnapshot("payload", {
-    id: 1,
-    name: "Argos",
-    tags: ["a", "b"],
-  });
+  const attachments = await argosSnapshot(
+    {
+      id: 1,
+      name: "Argos",
+      tags: ["a", "b"],
+    },
+    { name: "payload" },
+  );
   // The snapshot file + its metadata attachment.
   expect(attachments.length).toBe(2);
 
-  const snapshot = attachments.find((a) => a.path.endsWith(".snapshot.txt"));
+  const snapshot = attachments.find((a) =>
+    a.path.endsWith("payload.snapshot.txt"),
+  );
   expect(snapshot).toBeDefined();
   // The value is serialized with pretty-format, ready for Argos to diff.
   const content = await server.commands.readFile(snapshot!.path);
@@ -136,7 +156,8 @@ test("writes a value snapshot that the reporter can upload", async () => {
 });
 
 test("writes a snapshot with a custom extension", async () => {
-  const attachments = await argosSnapshot("config", '{"enabled":true}', {
+  const attachments = await argosSnapshot('{"enabled":true}', {
+    name: "config",
     extension: ".json",
   });
   const snapshot = attachments.find((a) => a.path.endsWith(".snapshot.json"));

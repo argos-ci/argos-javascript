@@ -1,4 +1,5 @@
 import type { ArgosAttachment } from "@argos-ci/playwright";
+import { resolveAutoName } from "./auto-name";
 import type {
   SerializableSnapshotOptions,
   VitestScreenshotOptions,
@@ -28,6 +29,10 @@ declare module "vitest/browser" {
  * Requires the {@link https://www.npmjs.com/package/@argos-ci/vitest Argos Vitest plugin}
  * to be registered in your Vitest config.
  *
+ * The `name` is optional: when omitted, Argos generates one automatically from
+ * the current test, mimicking {@link https://vitest.dev/guide/snapshot Vitest's
+ * snapshot naming} (`` `${test.fullName} ${count}` ``).
+ *
  * @example
  * ```ts
  * import { render } from "vitest-browser-react";
@@ -35,28 +40,43 @@ declare module "vitest/browser" {
  *
  * test("Button", async () => {
  *   render(<Button>Click me</Button>);
- *   await argosScreenshot("button");
+ *   await argosScreenshot("button"); // explicit name
+ *   await argosScreenshot();         // automatic name
  * });
  * ```
  *
- * @param name - Unique name of the screenshot.
+ * @param name - Unique name of the screenshot. Omit to generate one from the
+ *   current test.
  * @param options - Serializable screenshot options.
  * @returns The attachments captured, or an empty array outside of Vitest.
  */
 export async function argosScreenshot(
   name: string,
   options?: VitestScreenshotOptions,
+): Promise<ArgosAttachment[]>;
+export async function argosScreenshot(
+  options?: VitestScreenshotOptions,
+): Promise<ArgosAttachment[]>;
+export async function argosScreenshot(
+  nameOrOptions?: string | VitestScreenshotOptions,
+  maybeOptions?: VitestScreenshotOptions,
 ): Promise<ArgosAttachment[]> {
+  const name = typeof nameOrOptions === "string" ? nameOrOptions : undefined;
+  const options =
+    typeof nameOrOptions === "string" ? maybeOptions : nameOrOptions;
+
   // Only run in Vitest.
   const isVitest = await checkIsVitestEnv();
   if (!isVitest) {
     return [];
   }
 
+  const resolvedName = await resolveAutoName(name);
+
   // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
   // environments.
   const { server } = await import("vitest/browser");
-  return server.commands.argosScreenshot(name, options);
+  return server.commands.argosScreenshot(resolvedName, options);
 }
 
 /**
@@ -68,56 +88,66 @@ export async function argosScreenshot(
  * file that Argos picks up and diffs across builds. It works both in Vitest
  * browser tests and in plain Node tests.
  *
+ * The name is optional: pass it via `options.name`, or omit it to have Argos
+ * generate one automatically from the current test, mimicking
+ * {@link https://vitest.dev/guide/snapshot Vitest's snapshot naming}
+ * (`` `${test.fullName} ${count}` ``).
+ *
  * @example
  * ```ts
  * import { argosSnapshot } from "@argos-ci/vitest";
  *
  * test("API response", async () => {
  *   const data = await fetchUser();
- *   await argosSnapshot("user", data);
+ *   await argosSnapshot(data);                  // automatic name
+ *   await argosSnapshot(data, { name: "user" }); // explicit name
  * });
  * ```
  *
- * @param name - Unique name of the snapshot.
  * @param content - The value to snapshot. Strings are written as-is; any other
  *   value is serialized.
- * @param options - Snapshot options.
+ * @param options - Snapshot options, including an optional `name`.
  * @returns The attachments written, or an empty array outside of Vitest.
  */
 export async function argosSnapshot(
-  name: string,
   content: unknown,
   options: VitestSnapshotOptions = {},
 ): Promise<ArgosAttachment[]> {
-  if (!name) {
-    throw new Error("The `name` argument is required.");
-  }
-
   // Only run in Vitest.
   const isVitest = await checkIsVitestEnv();
   if (!isVitest) {
     return [];
   }
 
+  const resolvedName = await resolveAutoName(options.name);
+
   // Serialize on the test side (browser or Node), so values that only exist
   // here (DOM nodes, class instances, …) are serialized before crossing the RPC
   // boundary.
   const serialized = serializeSnapshot(content, options);
 
-  // The `serialize` function cannot cross the browser/node RPC boundary and is
-  // no longer needed once the value is serialized.
-  const { serialize: _serialize, ...serializableOptions } = options;
+  // `serialize` cannot cross the browser/node RPC boundary, and `name` is passed
+  // to the Node primitives as a separate argument — strip both.
+  const {
+    serialize: _serialize,
+    name: _name,
+    ...serializableOptions
+  } = options;
 
   if (checkIsBrowserEnv()) {
     // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
     // environments.
     const { server } = await import("vitest/browser");
-    return server.commands.argosSnapshot(name, serialized, serializableOptions);
+    return server.commands.argosSnapshot(
+      resolvedName,
+      serialized,
+      serializableOptions,
+    );
   }
 
   // Node: write directly to disk.
   const { writeSnapshotFile } = await import("./snapshot-file");
-  return writeSnapshotFile(name, serialized, serializableOptions);
+  return writeSnapshotFile(resolvedName, serialized, serializableOptions);
 }
 
 /**
