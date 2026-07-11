@@ -9,6 +9,18 @@ import { serializeSnapshot } from "./serialize";
 
 export type { VitestScreenshotOptions, VitestSnapshotOptions };
 
+/** Suffix appended to every captured file for its metadata sidecar. */
+const METADATA_SUFFIX = ".argos.json";
+
+/**
+ * Characters reserved after a screenshot name when building its filename: the
+ * `` ` vw-<width>` `` viewport suffix, the largest capture extension
+ * (`.aria.yml`), and the metadata sidecar. Keeps auto-generated names within
+ * the filesystem limit.
+ */
+const SCREENSHOT_NAME_RESERVED =
+  " vw-99999".length + ".aria.yml".length + METADATA_SUFFIX.length;
+
 declare module "vitest/browser" {
   interface BrowserCommands {
     argosScreenshot: (
@@ -31,7 +43,9 @@ declare module "vitest/browser" {
  *
  * The `name` is optional: when omitted, Argos generates one automatically from
  * the current test, mimicking {@link https://vitest.dev/guide/snapshot Vitest's
- * snapshot naming} (`` `${test.fullName} ${count}` ``).
+ * snapshot naming}. The name includes the test file path (Argos names are global
+ * across the build, unlike Vitest's per-file `.snap`), so names stay unique
+ * across files.
  *
  * @example
  * ```ts
@@ -41,7 +55,7 @@ declare module "vitest/browser" {
  * test("Button", async () => {
  *   render(<Button>Click me</Button>);
  *   await argosScreenshot("button"); // explicit name
- *   await argosScreenshot();         // automatic name
+ *   await argosScreenshot();         // -> "src/Button.test.tsx > Button 1"
  * });
  * ```
  *
@@ -71,7 +85,9 @@ export async function argosScreenshot(
     return [];
   }
 
-  const resolvedName = await resolveAutoName(name);
+  const resolvedName = await resolveAutoName(name, {
+    reservedLength: SCREENSHOT_NAME_RESERVED,
+  });
 
   // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
   // environments.
@@ -90,8 +106,9 @@ export async function argosScreenshot(
  *
  * The name is optional: pass it via `options.name`, or omit it to have Argos
  * generate one automatically from the current test, mimicking
- * {@link https://vitest.dev/guide/snapshot Vitest's snapshot naming}
- * (`` `${test.fullName} ${count}` ``).
+ * {@link https://vitest.dev/guide/snapshot Vitest's snapshot naming}. The name
+ * includes the test file path (Argos names are global across the build, unlike
+ * Vitest's per-file `.snap`), so names stay unique across files.
  *
  * @example
  * ```ts
@@ -99,7 +116,7 @@ export async function argosScreenshot(
  *
  * test("API response", async () => {
  *   const data = await fetchUser();
- *   await argosSnapshot(data);                  // automatic name
+ *   await argosSnapshot(data);                   // -> "src/user.test.ts > API response 1"
  *   await argosSnapshot(data, { name: "user" }); // explicit name
  * });
  * ```
@@ -119,7 +136,17 @@ export async function argosSnapshot(
     return [];
   }
 
-  const resolvedName = await resolveAutoName(options.name);
+  // Reserve room for the `.snapshot<ext>` suffix and the metadata sidecar so an
+  // auto-generated filename stays within the filesystem limit. Kept in sync with
+  // `writeSnapshotFile` in `snapshot-file.ts`.
+  const rawExtension = options.extension ?? ".txt";
+  const extension = rawExtension.startsWith(".")
+    ? rawExtension
+    : `.${rawExtension}`;
+  const resolvedName = await resolveAutoName(options.name, {
+    reservedLength:
+      ".snapshot".length + extension.length + METADATA_SUFFIX.length,
+  });
 
   // Serialize on the test side (browser or Node), so values that only exist
   // here (DOM nodes, class instances, …) are serialized before crossing the RPC

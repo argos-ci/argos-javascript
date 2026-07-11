@@ -98,8 +98,10 @@ export interface VitestSnapshotOptions {
    * Unique name of the snapshot.
    *
    * When omitted, Argos generates one automatically from the current test,
-   * mimicking {@link https://vitest.dev/guide/snapshot Vitest's snapshot naming}
-   * (`` `${test.fullName} ${count}` ``).
+   * mimicking {@link https://vitest.dev/guide/snapshot Vitest's snapshot naming}.
+   * The generated name includes the test file path so names stay unique across
+   * files (Argos names are global across the build, unlike Vitest's per-file
+   * `.snap`).
    */
   name?: string;
 

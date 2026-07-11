@@ -83,17 +83,21 @@ test("Button", async () => {
 ### Automatic naming
 
 The name is optional. When omitted, Argos derives one from the current test,
-just like [Vitest snapshots](https://vitest.dev/guide/snapshot)
-(`` `${test.fullName} ${count}` ``). Several unnamed captures in the same test
-get an incrementing counter so they stay unique:
+mimicking [Vitest snapshots](https://vitest.dev/guide/snapshot). Several unnamed
+captures in the same test get an incrementing counter so they stay unique:
 
 ```ts
 test("Button", async () => {
   render(<Button>Click me</Button>);
-  await argosScreenshot(); // -> "Button 1"
-  await argosScreenshot(); // -> "Button 2"
+  await argosScreenshot(); // -> "src/Button.test.tsx > Button 1"
+  await argosScreenshot(); // -> "src/Button.test.tsx > Button 2"
 });
 ```
+
+Unlike Vitest — which keeps a per-file `.snap`, so its keys only need to be
+unique within a file — Argos names are **global** across the build. The
+generated name therefore includes the test file path, so two tests with the same
+title in different files never collide.
 
 ## Snapshots
 
@@ -114,7 +118,7 @@ test("API response", async () => {
   const user = await fetchUser();
   // Objects are serialized with `@vitest/pretty-format`, strings are written
   // verbatim.
-  await argosSnapshot(user); // -> "API response 1"
+  await argosSnapshot(user); // -> "src/user.test.ts > API response 1"
   await argosSnapshot(user, { name: "user" }); // explicit name
 });
 ```
