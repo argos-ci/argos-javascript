@@ -118,7 +118,8 @@ describe("argos analytics", () => {
     expect(output.stdout).toContain("Screenshots:");
   });
 
-  test("accepts a date range, --group-by, and project filter", () => {
+  test("accepts a bounded date range and --group-by", () => {
+    // The API caps the range at 365 days, so use a fixed sub-year window.
     const output = run(
       [
         "analytics",
@@ -127,7 +128,9 @@ describe("argos analytics", () => {
         "--token",
         userAccessToken,
         "--from",
-        "2020-01-01",
+        "2024-01-01",
+        "--to",
+        "2024-06-01",
         "--group-by",
         "week",
         "--json",
