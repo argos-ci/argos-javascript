@@ -24,9 +24,12 @@ describe("createArgosSnapshotCommand", () => {
   it("writes the serialized content with the plugin root", async () => {
     const command = createArgosSnapshotCommand({ root: "/abs/screenshots" });
     await command(ctx, "user", "serialized");
-    expect(writeSnapshotFile).toHaveBeenCalledWith("user", "serialized", {
-      root: "/abs/screenshots",
-    });
+    expect(writeSnapshotFile).toHaveBeenCalledWith(
+      "user",
+      "serialized",
+      { root: "/abs/screenshots" },
+      undefined,
+    );
   });
 
   it("lets per-call options override the plugin root", async () => {
@@ -36,10 +39,28 @@ describe("createArgosSnapshotCommand", () => {
       extension: ".json",
       tag: "a",
     });
-    expect(writeSnapshotFile).toHaveBeenCalledWith("user", "serialized", {
-      root: "/other",
-      extension: ".json",
-      tag: "a",
-    });
+    expect(writeSnapshotFile).toHaveBeenCalledWith(
+      "user",
+      "serialized",
+      { root: "/other", extension: ".json", tag: "a" },
+      undefined,
+    );
+  });
+
+  it("forwards the test metadata to the writer", async () => {
+    const command = createArgosSnapshotCommand({ root: "/abs/screenshots" });
+    const test = {
+      id: "1_0_0",
+      title: "user",
+      titlePath: ["src/user.test.ts", "user"],
+      location: { file: "/abs/src/user.test.ts", line: 1, column: 1 },
+    };
+    await command(ctx, "user", "serialized", undefined, test);
+    expect(writeSnapshotFile).toHaveBeenCalledWith(
+      "user",
+      "serialized",
+      { root: "/abs/screenshots" },
+      test,
+    );
   });
 });

@@ -80,12 +80,35 @@ test("Button", async () => {
 });
 ```
 
+### Automatic naming
+
+The name is optional. When omitted, Argos derives one from the current test,
+mimicking [Vitest snapshots](https://vitest.dev/guide/snapshot). Several unnamed
+captures in the same test get an incrementing counter so they stay unique:
+
+```ts
+test("Button", async () => {
+  render(<Button>Click me</Button>);
+  await argosScreenshot(); // -> "src/Button.test.tsx > Button 1"
+  await argosScreenshot(); // -> "src/Button.test.tsx > Button 2"
+});
+```
+
+Unlike Vitest — which keeps a per-file `.snap`, so its keys only need to be
+unique within a file — Argos names are **global** across the build. The
+generated name therefore includes the test file path, so two tests with the same
+title in different files never collide.
+
 ## Snapshots
 
 `argosSnapshot` captures a snapshot of any value — not just a screenshot — and
 uploads it to Argos to diff across builds, mimicking
 [Vitest snapshots](https://vitest.dev/guide/snapshot). Unlike `argosScreenshot`,
 it does not need a browser and works in **both** browser and Node tests.
+
+The value comes first; the name is optional. Omit it to auto-name the snapshot
+from the current test (like screenshots above), or pass `options.name` to set it
+explicitly:
 
 ```ts
 import { test } from "vitest";
@@ -95,7 +118,8 @@ test("API response", async () => {
   const user = await fetchUser();
   // Objects are serialized with `@vitest/pretty-format`, strings are written
   // verbatim.
-  await argosSnapshot("user", user);
+  await argosSnapshot(user); // -> "src/user.test.ts > API response 1"
+  await argosSnapshot(user, { name: "user" }); // explicit name
 });
 ```
 
@@ -103,14 +127,16 @@ Use the `extension` option to control how Argos renders and diffs the snapshot,
 and `tag` to attach tags:
 
 ```ts
-await argosSnapshot("config", JSON.stringify(config, null, 2), {
+await argosSnapshot(JSON.stringify(config, null, 2), {
+  name: "config",
   extension: ".json",
   tag: "config",
 });
 ```
 
-Snapshots are written to the same folder as screenshots and uploaded by the
-reporter when `uploadToArgos` is enabled.
+Screenshots and snapshots are both written to the `./snapshots` directory by
+default (configurable via the plugin `root` option) and uploaded by the reporter
+when `uploadToArgos` is enabled.
 
 ## Links
 

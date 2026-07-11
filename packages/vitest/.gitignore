@@ -1,1 +1,4 @@
+/snapshots/
 /screenshots/
+/.vitest-attachments/
+/e2e/__screenshots__/

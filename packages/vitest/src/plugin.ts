@@ -45,7 +45,7 @@ const cwd = process.cwd();
  */
 export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
   const {
-    root: unresolvedRoot = "./screenshots",
+    root: unresolvedRoot = "./snapshots",
     uploadToArgos,
     ...otherOptions
   } = options ?? {};
@@ -65,6 +65,9 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
           include: ["@argos-ci/vitest"],
         },
         test: {
+          // Record each test's source location so Argos can attach it to the
+          // screenshot/snapshot metadata (and link back to the test source).
+          includeTaskLocation: true,
           browser: {
             commands: {
               argosScreenshot: createArgosScreenshotCommand({

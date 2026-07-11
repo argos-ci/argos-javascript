@@ -1,22 +1,45 @@
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import { getSnapshotMimeType } from "@argos-ci/core";
 import {
   createDirectory,
+  getGitRepositoryPath,
   getMetadataPath,
   getScreenshotName,
   writeMetadata,
   type ScreenshotMetadata,
 } from "@argos-ci/util";
 import type { ArgosAttachment } from "@argos-ci/playwright";
+import type { TestMetadata } from "./metadata";
 import type { SerializableSnapshotOptions } from "./options";
 import { getArgosVitestVersion, getVitestVersion } from "./version";
+
+/**
+ * Resolve a `test` metadata's `location.file` relative to the git repository,
+ * matching the Playwright SDK. The test side reports an absolute path.
+ */
+async function resolveTestLocation(test: TestMetadata): Promise<TestMetadata> {
+  if (!test?.location) {
+    return test;
+  }
+  const repositoryPath = await getGitRepositoryPath();
+  if (!repositoryPath) {
+    return test;
+  }
+  return {
+    ...test,
+    location: {
+      ...test.location,
+      file: relative(repositoryPath, test.location.file),
+    },
+  };
+}
 
 /**
  * Default folder where snapshots are written when no `root` is provided.
  * Matches the plugin default so Node and browser snapshots land together.
  */
-export const DEFAULT_SNAPSHOTS_ROOT = "./screenshots";
+export const DEFAULT_SNAPSHOTS_ROOT = "./snapshots";
 
 /**
  * Default extension of a serialized snapshot file.
@@ -47,6 +70,7 @@ export async function writeSnapshotFile(
   name: string,
   content: string,
   options: SerializableSnapshotOptions = {},
+  test?: TestMetadata,
 ): Promise<ArgosAttachment[]> {
   if (!name) {
     throw new Error("The `name` argument is required.");
@@ -57,9 +81,10 @@ export async function writeSnapshotFile(
   const filename = `${getScreenshotName(name)}${SNAPSHOT_INFIX}${extension}`;
   const snapshotPath = resolve(root, filename);
 
-  const [vitestVersion, sdkVersion] = await Promise.all([
+  const [vitestVersion, sdkVersion, resolvedTest] = await Promise.all([
     getVitestVersion(),
     getArgosVitestVersion(),
+    resolveTestLocation(test),
   ]);
 
   const tags = options.tag
@@ -74,6 +99,7 @@ export async function writeSnapshotFile(
     automationLibrary: { name: "vitest", version: vitestVersion },
     sdk: { name: "@argos-ci/vitest", version: sdkVersion },
     ...(tags ? { tags } : {}),
+    ...(resolvedTest ? { test: resolvedTest } : {}),
   };
 
   await createDirectory(dirname(snapshotPath));

@@ -54,10 +54,56 @@ test("captures a rendered element with the Argos Vitest SDK metadata", async () 
   expect(attachments.length).toBe(2);
 
   // The whole point of the package: the screenshot is attributed to this SDK
-  // and to the Playwright provider (proves setMetadataConfig propagated).
+  // and to Vitest as the automation library (proves setMetadataConfig
+  // propagated).
   const metadata = await readMetadata(attachments);
   expect(metadata.sdk.name).toBe("@argos-ci/vitest");
-  expect(metadata.automationLibrary.name).toBe("@vitest/browser-playwright");
+  expect(metadata.automationLibrary.name).toBe("vitest");
+});
+
+test("attaches the Vitest test metadata to the screenshot", async () => {
+  mount(`<div style="padding:20px">Metadata</div>`);
+  const attachments = await argosScreenshot("with-metadata");
+  const metadata = await readMetadata(attachments);
+
+  // Test metadata (injected from the Vitest test context, since Playwright's
+  // own testInfo is absent in a Vitest run).
+  expect(metadata.test.id).toBeTruthy();
+  expect(metadata.test.title).toBe(
+    "attaches the Vitest test metadata to the screenshot",
+  );
+  expect(metadata.test.titlePath).toEqual([
+    "e2e/screenshot.test.ts",
+    "attaches the Vitest test metadata to the screenshot",
+  ]);
+  // `location.file` is resolved relative to the git repository on the Node side.
+  expect(metadata.test.location.file).toContain(
+    "packages/vitest/e2e/screenshot.test.ts",
+  );
+  // `includeTaskLocation` (enabled by the plugin) provides real line/column.
+  expect(metadata.test.location.line).toBeGreaterThan(0);
+  expect(metadata.test.location.column).toBeGreaterThan(0);
+
+  // Browser-derived metadata comes for free through the Playwright SDK.
+  expect(metadata.browser.name).toBe("chromium");
+  expect(typeof metadata.url).toBe("string");
+  expect(["light", "dark"]).toContain(metadata.colorScheme);
+  expect(metadata.mediaType).toBe("screen");
+});
+
+test("auto-names a screenshot from the current test", async () => {
+  mount(
+    `<div style="padding:40px;background:#22c55e;color:#fff;font:700 32px sans-serif;">Auto</div>`,
+  );
+  // No name: it is derived from the current test + a per-test counter, so the
+  // file lands under the test title with a ` 1` suffix.
+  const attachments = await argosScreenshot();
+  expect(attachments.length).toBe(2);
+
+  const screenshot = attachments.find((a) => a.path.endsWith(".png"));
+  expect(screenshot).toBeDefined();
+  expect(screenshot!.path).toContain("auto-names a screenshot");
+  expect(screenshot!.path).toContain(" 1.png");
 });
 
 test("captures a specific element via a selector", async () => {
@@ -115,15 +161,20 @@ test("grows the iframe to capture content wider than the viewport", async () => 
 test("writes a value snapshot that the reporter can upload", async () => {
   // `argosSnapshot` works without a browser, but here we exercise the browser
   // RPC path: the value is serialized in the browser, written on the node side.
-  const attachments = await argosSnapshot("payload", {
-    id: 1,
-    name: "Argos",
-    tags: ["a", "b"],
-  });
+  const attachments = await argosSnapshot(
+    {
+      id: 1,
+      name: "Argos",
+      tags: ["a", "b"],
+    },
+    { name: "payload" },
+  );
   // The snapshot file + its metadata attachment.
   expect(attachments.length).toBe(2);
 
-  const snapshot = attachments.find((a) => a.path.endsWith(".snapshot.txt"));
+  const snapshot = attachments.find((a) =>
+    a.path.endsWith("payload.snapshot.txt"),
+  );
   expect(snapshot).toBeDefined();
   // The value is serialized with pretty-format, ready for Argos to diff.
   const content = await server.commands.readFile(snapshot!.path);
@@ -135,8 +186,35 @@ test("writes a value snapshot that the reporter can upload", async () => {
   expect(parsed.sdk.name).toBe("@argos-ci/vitest");
 });
 
+test("attaches the Vitest test metadata to the snapshot", async () => {
+  const attachments = await argosSnapshot(
+    { hello: "world" },
+    { name: "snapshot-metadata" },
+  );
+  const metadata = attachments.find((a) => a.path.endsWith(".argos.json"));
+  expect(metadata).toBeDefined();
+  const parsed = JSON.parse(await server.commands.readFile(metadata!.path));
+
+  // Snapshots have no browser, so Vitest is the automation library, but they
+  // still carry the test metadata.
+  expect(parsed.automationLibrary.name).toBe("vitest");
+  expect(parsed.test.id).toBeTruthy();
+  expect(parsed.test.title).toBe(
+    "attaches the Vitest test metadata to the snapshot",
+  );
+  expect(parsed.test.titlePath).toEqual([
+    "e2e/screenshot.test.ts",
+    "attaches the Vitest test metadata to the snapshot",
+  ]);
+  // `location.file` is resolved relative to the git repository on the Node side.
+  expect(parsed.test.location.file).toContain(
+    "packages/vitest/e2e/screenshot.test.ts",
+  );
+});
+
 test("writes a snapshot with a custom extension", async () => {
-  const attachments = await argosSnapshot("config", '{"enabled":true}', {
+  const attachments = await argosSnapshot('{"enabled":true}', {
+    name: "config",
     extension: ".json",
   });
   const snapshot = attachments.find((a) => a.path.endsWith(".snapshot.json"));
