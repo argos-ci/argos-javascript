@@ -50,7 +50,10 @@ export const createArgosScreenshotCommand = (
       const setMetadata = (viewport?: ViewportSize) => {
         DO_NOT_USE_setMetadataConfig({
           sdk: { name: "@argos-ci/vitest", version },
-          playwrightLibraries: ["@vitest/browser-playwright"],
+          // Report Vitest as the automation library (not the underlying
+          // `@vitest/browser-playwright` provider), so screenshots match the
+          // `vitest` automation library used by `argosSnapshot`.
+          playwrightLibraries: ["vitest"],
           viewport,
           // Injected so the Playwright SDK attaches the Vitest test metadata
           // (Playwright's own `testInfo` is absent here). It resolves

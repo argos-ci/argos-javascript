@@ -86,9 +86,7 @@ describe("createArgosScreenshotCommand", () => {
       name: "@argos-ci/vitest",
       version: "0.0.0-test",
     });
-    expect(metadata.playwrightLibraries).toContain(
-      "@vitest/browser-playwright",
-    );
+    expect(metadata.playwrightLibraries).toContain("vitest");
   });
 
   it("takes one screenshot per viewport with viewport-suffixed names", async () => {

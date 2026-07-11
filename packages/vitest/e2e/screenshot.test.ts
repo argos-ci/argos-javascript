@@ -54,10 +54,11 @@ test("captures a rendered element with the Argos Vitest SDK metadata", async () 
   expect(attachments.length).toBe(2);
 
   // The whole point of the package: the screenshot is attributed to this SDK
-  // and to the Playwright provider (proves setMetadataConfig propagated).
+  // and to Vitest as the automation library (proves setMetadataConfig
+  // propagated).
   const metadata = await readMetadata(attachments);
   expect(metadata.sdk.name).toBe("@argos-ci/vitest");
-  expect(metadata.automationLibrary.name).toBe("@vitest/browser-playwright");
+  expect(metadata.automationLibrary.name).toBe("vitest");
 });
 
 test("attaches the Vitest test metadata to the screenshot", async () => {
