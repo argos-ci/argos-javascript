@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@6.2.0...@argos-ci/cli@6.3.0) (2026-07-12)
+
+
+### Features
+
+* **cli:** add `analytics` command to fetch account analytics ([2948e9d](https://github.com/argos-ci/argos-javascript/commit/2948e9d44bc11a2465c1b81d7cd276747f112a9d)), closes [argos-ci/argos#2357](https://github.com/argos-ci/argos/issues/2357)
+* **cli:** add change ignore/unignore and test flakiness in build snapshots ([007a707](https://github.com/argos-ci/argos-javascript/commit/007a7077dc8b8402af54df26357fb57d7063196b))
+
+
+
+
+
 # [6.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@6.1.4...@argos-ci/cli@6.2.0) (2026-07-10)
 
 
