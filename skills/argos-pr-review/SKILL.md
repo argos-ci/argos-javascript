@@ -40,16 +40,31 @@ and evidence instead of posting — the CLI can't submit the review.
 
 2. **Fetch what changed** — `argos build snapshots <ref> --needs-review --json`.
    For each diff inspect `url` (diff mask), `base.url` (before), `head.url`
-   (after), and `head.metadata`.
+   (after), and `head.metadata`, plus the flakiness signals `test.metrics` and,
+   on a change, `change.occurrences` / `change.ignored` (used in step 3).
 
 3. **Judge each diff** against the inferred intent:
    - **Intentional** — matches the code change and renders cleanly.
    - **Regression** — broken layout/overlap, clipping, wrong state/theme/route,
      missing content, or a removed snapshot with no matching test removal.
-   - **Flaky** — a spinner/skeleton, async content not yet loaded, mid-animation,
-     drifting dynamic values, `head.metadata.test.retry > 0`, or identical
-     `score`/`head.url` across browsers (strong signal both captured the same
-     transient state). `retries` (the configured budget) is not itself a signal.
+   - **Flaky** — weigh two independent signals; when they agree, call it flaky
+     with confidence:
+     - _Test history_ — `test.metrics.flakiness` (0 stable → 1 flaky) and
+       `change.occurrences` (how many times this **exact** diff has recurred over
+       the metrics period). A high flakiness score or a recurring change is strong
+       evidence the diff is environmental noise, not this PR's work; `stability`
+       (builds without a change), `consistency` (do changes repeat identically),
+       and `uniqueChanges` explain _why_ it scores that way. `change.ignored: true`
+       is already known-flaky and auto-approved — never read it as a regression.
+     - _This capture_ — a spinner/skeleton, async content not yet loaded,
+       mid-animation, drifting dynamic values, `head.metadata.test.retry > 0`, or
+       identical `score`/`head.url` across browsers (both captured the same
+       transient state). `retries` (the configured budget) is not itself a signal.
+
+     Conversely, a **stable** test (`flakiness`→0, high `stability`, a first-time
+     change) that changed is more likely intentional or a real regression — don't
+     dismiss it as flaky on the visuals alone. Tune the window with
+     `build snapshots --metrics-period <24h|3d|7d|30d|90d>` (default `7d`).
 
 4. **Comment on specific diffs — the highest-value output of an agent review.**
    A binary approve/reject is cheap; specific, anchored feedback is what makes an
@@ -72,6 +87,11 @@ and evidence instead of posting — the CLI can't submit the review.
    - Request changes: `argos review create <ref> --token <pat> --event reject --body "<summary>"`
    - Neutral note only: `--event comment --body "<summary>"`
    - Add `--project owner/project` for build-number refs (not URLs).
+   - Silence a **confirmed recurring** flake so it stops blocking future builds:
+     `argos change ignore <change.id> --token <pat> --project owner/project`
+     (reverse with `change unignore`). Only ignore flakes the metrics confirm —
+     never to bypass a real diff; prefer a code fix
+     ([references/flaky-fixes.md](references/flaky-fixes.md)) when one exists.
    - Lead with the inferred intent, the snapshots reviewed, and the evidence. In
      the PR, cite the build URL and affected snapshot names; for flakes, name the
      signal and recommend a fix.
