@@ -2,17 +2,18 @@
 name: argos-cli
 description: >
   Operate Argos visual testing from the terminal with the `argos` CLI — inspect
-  builds and snapshot diffs, submit reviews, post comments, upload screenshots,
-  and manage CI builds. Use whenever running `argos` commands or working with
-  Argos builds, snapshots, or visual-regression reviews from a shell, script, or
-  CI pipeline. Load before running `argos` — it covers the token model and JSON
-  output contract that prevent silent failures.
+  builds and snapshot diffs, submit reviews, post comments, ignore flaky test
+  changes, fetch analytics, upload screenshots, and manage CI builds. Use
+  whenever running `argos` commands or working with Argos builds, snapshots,
+  flakiness, or visual-regression reviews from a shell, script, or CI pipeline.
+  Load before running `argos` — it covers the token model and JSON output
+  contract that prevent silent failures.
 license: MIT
 metadata:
   author: argos-ci
   homepage: https://argos-ci.com
   source: https://github.com/argos-ci/argos-javascript
-argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project owner/project` for build-number refs on review/comment commands.
+argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project owner/project` for build-number refs on review/comment commands and for every `change` command.
 ---
 
 # Argos CLI
@@ -31,28 +32,38 @@ command map.
 ## Authentication
 
 A `<buildReference>` is a build number (e.g. `72652`) or a full build URL. With a
-number, add `--project owner/project`; a URL already contains it.
+number, add `--project owner/project`; a URL already contains it. A `<changeId>`
+is not a build ref: it comes from a diff's `change.id` and does **not** carry the
+account, so every `change` command needs `--project owner/project` (or
+`ARGOS_PROJECT`).
 
 Two token types — pick by command:
 
-| Commands                               | Token                       | Resolution order                            |
-| -------------------------------------- | --------------------------- | ------------------------------------------- |
-| `build get`, `build snapshots`         | Project token               | `--token` › `ARGOS_TOKEN`                   |
-| `review *`, `comment *`                | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
-| `upload`, `finalize`, `skip`, `deploy` | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
+| Commands                                                           | Token                       | Resolution order                            |
+| ------------------------------------------------------------------ | --------------------------- | ------------------------------------------- |
+| `build get`, `build snapshots`                                     | Project token               | `--token` › `ARGOS_TOKEN`                   |
+| `review *`, `comment *`, `change *`, `analytics`, `create-project` | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
+| `upload`, `finalize`, `skip`, `deploy`                             | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
 
-Project tokens read build data but **cannot** review or comment — those need a
-PAT. If no suitable token is available, ask the user. For review/comment, if no
-PAT exists, report the conclusion and evidence instead of acting. `argos login`
-is for interactive humans, not CI.
+Project tokens read build data but **cannot** review, comment, or ignore
+changes — those need a PAT. If no suitable token is available, ask the user. For
+these actions, if no PAT exists, report the conclusion and evidence instead of
+acting. `argos login` is for interactive humans, not CI.
 
 ## Commands
 
-- **Inspect** — `build get <ref>` · `build snapshots <ref> [--needs-review]`
+- **Inspect** — `build get <ref>` · `build snapshots <ref> [--needs-review] [--metrics-period 24h|3d|7d|30d|90d]`
 - **Review** — `review list <ref>` · `review create <ref> --event <approve|reject|comment> [--body <md>]` · `review dismiss <ref> <reviewId>`
 - **Comment** — `comment list <ref>` · `comment create <ref> --body <md> [--reply-to <id>] [--diff <id>] [--draft]` · `comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <ref> <id>` · `comment react|unreact <ref> <id> <emoji>`
+- **Flakiness** — `change ignore <changeId> --project owner/project` · `change unignore <changeId> --project owner/project`
+- **Account** — `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
 - **CI** — `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
 - **Auth** — `login` · `logout`
+
+`build snapshots --json` enriches each diff with `test.metrics` (flakiness:
+`stability`, `consistency`, `flakiness`, all 0–1) and, on a change, `change`
+(`id`, `ignored`, `occurrences`). High `occurrences` or `flakiness` flags a
+change worth ignoring; pass its `change.id` to `change ignore`.
 
 ## Common flows
 
@@ -62,6 +73,15 @@ Review a build (inspect with a project token, decide with a PAT):
 ARGOS_TOKEN=<project-token> argos build snapshots <ref> --needs-review --json
 argos review create <ref> --token <pat> --event approve --json
 # regression: argos review create <ref> --token <pat> --event reject --body "..."
+```
+
+Silence a flaky change (inspect with a project token, ignore with a PAT).
+Ignored changes stop requiring review and are auto-approved on future builds:
+
+```bash
+ARGOS_TOKEN=<project-token> argos build snapshots <ref> --json   # read each diff's change.id + occurrences
+argos change ignore <changeId> --token <pat> --project owner/project
+# revert: argos change unignore <changeId> --token <pat> --project owner/project
 ```
 
 Upload screenshots in CI:
