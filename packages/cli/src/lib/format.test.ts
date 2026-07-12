@@ -2,6 +2,7 @@ import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { describe, expect, it } from "vitest";
 import {
   formatBuild,
+  formatChange,
   formatComment,
   formatComments,
   formatProject,
@@ -125,6 +126,79 @@ describe("formatSnapshots", () => {
     expect(output).toContain(
       "Review: https://app.argos-ci.com/o/p/builds/42/diff-1",
     );
+  });
+
+  it("surfaces flakiness metrics and the change id", () => {
+    const diffs = [
+      {
+        id: "diff-1",
+        name: "home / desktop",
+        status: "changed",
+        score: 0.1,
+        group: null,
+        url: null,
+        base: null,
+        head: null,
+        test: {
+          id: "P-abc",
+          name: "home",
+          buildName: "default",
+          metrics: {
+            total: 20,
+            changes: 5,
+            uniqueChanges: 4,
+            stability: 0.75,
+            consistency: 0.2,
+            flakiness: 0.6,
+          },
+        },
+        change: { id: "P-abc-xyz", ignored: true, occurrences: 12 },
+      },
+    ] as unknown as SnapshotDiff[];
+    const output = formatSnapshots(diffs, build);
+    expect(output).toContain(
+      "Flakiness: 0.60 (stability 0.75, consistency 0.20)",
+    );
+    expect(output).toContain("Change: P-abc-xyz [ignored] · 12 occurrences");
+  });
+
+  it("omits flakiness and change lines when absent", () => {
+    const diffs = [
+      {
+        id: "diff-1",
+        name: "home / desktop",
+        status: "unchanged",
+        score: null,
+        group: null,
+        url: null,
+        base: null,
+        head: null,
+        test: null,
+        change: null,
+      },
+    ] as unknown as SnapshotDiff[];
+    const output = formatSnapshots(diffs, build);
+    expect(output).not.toContain("Flakiness:");
+    expect(output).not.toContain("Change:");
+  });
+});
+
+describe("formatChange", () => {
+  it("summarizes an ignored change", () => {
+    const output = formatChange({
+      id: "P-abc-xyz",
+      ignored: true,
+      occurrences: 7,
+    });
+    expect(output).toContain("Change P-abc-xyz");
+    expect(output).toContain("Ignored: yes");
+    expect(output).toContain("Occurrences: 7");
+  });
+
+  it("reports an unignored change", () => {
+    expect(
+      formatChange({ id: "P-abc-xyz", ignored: false, occurrences: 0 }),
+    ).toContain("Ignored: no");
   });
 });
 

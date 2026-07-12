@@ -33,6 +33,11 @@ export type BuildTarget = ProjectPath & {
   buildNumber: string;
 };
 
+/** A resolved project, ready to drive project-scoped API calls. */
+export type ProjectTarget = ProjectPath & {
+  client: ArgosAPIClient;
+};
+
 /**
  * Resolve the API token, preferring an explicit token (`--token` /
  * `ARGOS_TOKEN`) over the one stored by `argos login`.
@@ -99,4 +104,22 @@ export async function resolveBuildTarget(
     project: project.name,
     buildNumber,
   };
+}
+
+/**
+ * Resolve a project-scoped command target: an authenticated client and the
+ * `owner`/`project` pair every project endpoint needs. The project path comes
+ * from `--project owner/project` or the `ARGOS_PROJECT` environment variable.
+ */
+export async function resolveProjectTarget(
+  options: TargetOptions,
+): Promise<ProjectTarget> {
+  const client = createApiClient(await resolveToken(options));
+  const projectPath = options.project || process.env["ARGOS_PROJECT"];
+  if (!projectPath) {
+    fail(
+      "--project <owner/project> is required. Pass it or set ARGOS_PROJECT.",
+    );
+  }
+  return { client, ...parseProjectPathOrFail(projectPath) };
 }

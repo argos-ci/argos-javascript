@@ -14,6 +14,7 @@ import { deployCommand } from "./commands/deploy";
 import { whoamiCommand } from "./commands/whoami";
 import { createProjectCommand } from "./commands/create-project";
 import { analyticsCommand } from "./commands/analytics";
+import { changeCommand } from "./commands/change";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -39,6 +40,7 @@ deployCommand(program);
 whoamiCommand(program);
 createProjectCommand(program);
 analyticsCommand(program);
+changeCommand(program);
 
 if (!process.argv.slice(2).length) {
   program.outputHelp();

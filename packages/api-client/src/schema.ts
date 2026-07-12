@@ -373,11 +373,51 @@ export interface paths {
         };
         /**
          * List a build's screenshot diffs
-         * @description List the screenshot diffs of a build, with pagination. Each diff compares a baseline screenshot to the one captured by the build. Use `onlyChanged` to return only the diffs that require review.
+         * @description List the screenshot diffs of a build, with pagination. Each diff compares a baseline screenshot to the one captured by the build. Each diff also carries its test's flakiness metrics and, when it is a change, its ignore state and occurrence count — so you can tell whether a change is worth reviewing or is just a flaky one. Use `needsReview` to return only the diffs that require review.
          */
-        get: operations["getBuildDiffs"];
+        get: operations["listBuildDiffs"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/changes/{changeId}/ignore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ignore a test change
+         * @description Ignore a test change so its diffs no longer require review and are automatically approved on future builds. Use it to silence a change that has been identified as flaky.
+         */
+        post: operations["ignoreChange"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/changes/{changeId}/unignore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unignore a test change
+         * @description Stop ignoring a test change so its diffs require review again on future builds.
+         */
+        post: operations["unignoreChange"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1123,6 +1163,42 @@ export interface components {
                 /** @description Content type of the snapshot file */
                 contentType: string;
             } | null;
+            test: components["schemas"]["Test"] | null;
+            change: components["schemas"]["Change"] | null;
+        };
+        /** @description Test associated to a diff, with flakiness metrics to help decide whether a change is worth reviewing. */
+        Test: {
+            /** @description Unique identifier of the test */
+            id: string;
+            /** @description Name of the test */
+            name: string;
+            /** @description Name of the build the test belongs to */
+            buildName: string;
+            metrics: components["schemas"]["TestMetrics"];
+        };
+        /** @description Flakiness metrics of a test over the requested period. */
+        TestMetrics: {
+            /** @description Number of builds in which this test ran over the metrics period. */
+            total: number;
+            /** @description Number of times the test changed (produced a diff) over the metrics period. */
+            changes: number;
+            /** @description Number of changes that were seen only once over the metrics period. A high ratio of unique changes is a strong flakiness signal. */
+            uniqueChanges: number;
+            /** @description Ratio of builds without a change, between 0 and 1. `1` means the test never changed. */
+            stability: number;
+            /** @description How consistent the changes are, between 0 and 1. `1` means changes repeat the same way; a low value means changes are erratic. */
+            consistency: number;
+            /** @description Overall flakiness score between 0 and 1, derived from stability and consistency. `0` means stable, `1` means highly flaky. */
+            flakiness: number;
+        };
+        /** @description A test change: a specific visual difference (fingerprint) of a test that can be ignored to silence flaky changes. */
+        Change: {
+            /** @description Unique identifier of the change (a test + fingerprint pair). Use it with the ignore/unignore endpoints. */
+            id: string;
+            /** @description Whether this change is currently ignored. Ignored changes no longer require review and are automatically approved. */
+            ignored: boolean;
+            /** @description Number of times this change has been seen over the metrics period. A high count for a recurring change is a strong flakiness signal. */
+            occurrences: number;
         };
         /** @description Build review */
         BuildReview: {
@@ -2493,7 +2569,7 @@ export interface operations {
             };
         };
     };
-    getBuildDiffs: {
+    listBuildDiffs: {
         parameters: {
             query?: {
                 /** @description Number of items per page (max 100) */
@@ -2502,6 +2578,8 @@ export interface operations {
                 page?: string;
                 /** @description Only return diffs that require review. Matches `changed`, `added`, and `removed`, except `removed` is excluded for subset builds. */
                 needsReview?: string;
+                /** @description Period over which the test flakiness metrics are computed. */
+                metricsPeriod?: "LAST_24_HOURS" | "LAST_3_DAYS" | "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
             };
             header?: never;
             path: {
@@ -2537,6 +2615,152 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    ignoreChange: {
+        parameters: {
+            query?: {
+                /** @description Period over which the test flakiness metrics are computed. */
+                metricsPeriod?: "LAST_24_HOURS" | "LAST_3_DAYS" | "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description Identifier of the change to update, as returned in a diff's `change.id`. */
+                changeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Change ignored — returns the updated change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Change"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unignoreChange: {
+        parameters: {
+            query?: {
+                /** @description Period over which the test flakiness metrics are computed. */
+                metricsPeriod?: "LAST_24_HOURS" | "LAST_3_DAYS" | "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description Identifier of the change to update, as returned in a diff's `change.id`. */
+                changeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Change unignored — returns the updated change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Change"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

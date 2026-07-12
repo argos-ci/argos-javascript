@@ -4,7 +4,14 @@ import { unwrap } from "../../lib/api";
 import { formatSnapshots } from "../../lib/format";
 import { handleCliError, output, type BaseCommandOptions } from "../../lib/run";
 import { resolveBuildTarget, type BuildTarget } from "../../lib/target";
-import { jsonOption, tokenOption } from "../../options";
+import {
+  jsonOption,
+  metricsPeriodOption,
+  type MetricsPeriod,
+  type MetricsPeriodOption,
+  toMetricsPeriod,
+  tokenOption,
+} from "../../options";
 import { Option } from "commander";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
@@ -28,7 +35,7 @@ async function fetchBuild(target: BuildTarget): Promise<Build> {
 /** Fetch every diff of a build, following pagination. */
 async function fetchAllDiffs(
   target: BuildTarget,
-  options: { needsReview: boolean },
+  options: { needsReview: boolean; metricsPeriod: MetricsPeriod },
 ): Promise<SnapshotDiff[]> {
   const { client, owner, project, buildNumber } = target;
   const results: SnapshotDiff[] = [];
@@ -42,6 +49,7 @@ async function fetchAllDiffs(
             query: {
               page: String(page),
               perPage: String(PER_PAGE),
+              metricsPeriod: options.metricsPeriod,
               ...(options.needsReview ? { needsReview: "true" } : {}),
             },
           },
@@ -67,12 +75,14 @@ export function registerBuildSnapshots(build: Command) {
         "Only include snapshot diffs that require review",
       ),
     )
+    .addOption(metricsPeriodOption)
     .addOption(tokenOption)
     .addOption(jsonOption)
     .action(
       async (
         reference: string,
-        options: BaseCommandOptions & { needsReview?: boolean },
+        options: BaseCommandOptions &
+          MetricsPeriodOption & { needsReview?: boolean },
       ) => {
         try {
           const target = await resolveBuildTarget(reference, options, {
@@ -92,6 +102,7 @@ export function registerBuildSnapshots(build: Command) {
 
           const diffs = await fetchAllDiffs(target, {
             needsReview: Boolean(options.needsReview),
+            metricsPeriod: toMetricsPeriod(options.metricsPeriod),
           });
           output(diffs, options, (data) => formatSnapshots(data, build));
         } catch (error) {

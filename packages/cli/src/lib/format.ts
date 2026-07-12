@@ -3,6 +3,8 @@ import type { ArgosAPISchema } from "@argos-ci/api-client";
 type Build = ArgosAPISchema.components["schemas"]["Build"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
+type TestMetrics = ArgosAPISchema.components["schemas"]["TestMetrics"];
+type Change = ArgosAPISchema.components["schemas"]["Change"];
 type BuildReview = ArgosAPISchema.components["schemas"]["BuildReview"];
 type Comment = ArgosAPISchema.components["schemas"]["Comment"];
 type User = ArgosAPISchema.components["schemas"]["User"];
@@ -94,6 +96,39 @@ export function formatBuild(build: Build): string {
   ].join("\n");
 }
 
+/** Render a 0–1 metric to two decimals, or `-` when absent. */
+function formatRatio(value: number | null | undefined): string {
+  return value === null || value === undefined ? "-" : value.toFixed(2);
+}
+
+/** Compact one-line summary of a test's flakiness metrics. */
+function formatFlakiness(metrics: TestMetrics): string {
+  return `${formatRatio(metrics.flakiness)} (stability ${formatRatio(metrics.stability)}, consistency ${formatRatio(metrics.consistency)})`;
+}
+
+/** Human-readable lines for a single snapshot diff. */
+function formatSnapshotDiff(diff: SnapshotDiff, build: Build): string[] {
+  const lines = [
+    `${diff.name} [${diff.status}]`,
+    `  Review: ${build.url}/${diff.id}`,
+    `  Mask: ${formatValue(diff.url)}`,
+    `  Base file: ${formatValue(diff.base?.url)}`,
+    `  Head file: ${formatValue(diff.head?.url)}`,
+    `  Score: ${formatValue(diff.score)}`,
+    `  Group: ${formatValue(diff.group)}`,
+  ];
+  if (diff.test) {
+    lines.push(`  Flakiness: ${formatFlakiness(diff.test.metrics)}`);
+  }
+  if (diff.change) {
+    const ignored = diff.change.ignored ? " [ignored]" : "";
+    lines.push(
+      `  Change: ${diff.change.id}${ignored} · ${diff.change.occurrences} occurrences`,
+    );
+  }
+  return lines;
+}
+
 export function formatSnapshots(diffs: SnapshotDiff[], build: Build): string {
   if (diffs.length === 0) {
     return "No snapshots found.";
@@ -103,19 +138,18 @@ export function formatSnapshots(diffs: SnapshotDiff[], build: Build): string {
     `Count: ${diffs.length}`,
     `Summary: ${formatSnapshotSummary(diffs)}`,
     "",
-    ...diffs.flatMap((diff) => [
-      `${diff.name} [${diff.status}]`,
-      `  Review: ${build.url}/${diff.id}`,
-      `  Mask: ${formatValue(diff.url)}`,
-      `  Base file: ${formatValue(diff.base?.url)}`,
-      `  Head file: ${formatValue(diff.head?.url)}`,
-      `  Score: ${formatValue(diff.score)}`,
-      `  Group: ${formatValue(diff.group)}`,
-      "",
-    ]),
+    ...diffs.flatMap((diff) => [...formatSnapshotDiff(diff, build), ""]),
   ]
     .slice(0, -1)
     .join("\n");
+}
+
+export function formatChange(change: Change): string {
+  return [
+    `Change ${change.id}`,
+    `Ignored: ${change.ignored ? "yes" : "no"}`,
+    `Occurrences: ${change.occurrences}`,
+  ].join("\n");
 }
 
 export function formatReview(review: BuildReview): string {

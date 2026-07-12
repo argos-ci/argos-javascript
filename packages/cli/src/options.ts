@@ -38,3 +38,40 @@ export const projectPathOption = new Option(
   "--project <owner/project>",
   "Project path in owner/project format. Required for build-number references on review and comment commands",
 );
+
+export const changeProjectPathOption = new Option(
+  "--project <owner/project>",
+  "Project the change belongs to, in owner/project format. Also ARGOS_PROJECT",
+);
+
+/** API values accepted by the `metricsPeriod` query parameter. */
+export type MetricsPeriod =
+  | "LAST_24_HOURS"
+  | "LAST_3_DAYS"
+  | "LAST_7_DAYS"
+  | "LAST_30_DAYS"
+  | "LAST_90_DAYS";
+
+const METRICS_PERIOD_BY_CHOICE = {
+  "24h": "LAST_24_HOURS",
+  "3d": "LAST_3_DAYS",
+  "7d": "LAST_7_DAYS",
+  "30d": "LAST_30_DAYS",
+  "90d": "LAST_90_DAYS",
+} as const satisfies Record<string, MetricsPeriod>;
+
+export type MetricsPeriodOption = { metricsPeriod: string };
+export const metricsPeriodOption = new Option(
+  "--metrics-period <period>",
+  "Window over which test flakiness metrics are computed",
+)
+  .choices(Object.keys(METRICS_PERIOD_BY_CHOICE))
+  .default("7d");
+
+/** Map a `--metrics-period` choice to the value the API expects. */
+export function toMetricsPeriod(choice: string): MetricsPeriod {
+  return (
+    METRICS_PERIOD_BY_CHOICE[choice as keyof typeof METRICS_PERIOD_BY_CHOICE] ??
+    "LAST_7_DAYS"
+  );
+}
