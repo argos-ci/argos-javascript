@@ -7,6 +7,8 @@ type BuildReview = ArgosAPISchema.components["schemas"]["BuildReview"];
 type Comment = ArgosAPISchema.components["schemas"]["Comment"];
 type User = ArgosAPISchema.components["schemas"]["User"];
 type Project = ArgosAPISchema.components["schemas"]["Project"];
+type AccountAnalytics =
+  ArgosAPISchema.components["schemas"]["AccountAnalytics"];
 
 /** Render a scalar, using `-` for empty values. */
 export function formatValue(value: string | number | null | undefined): string {
@@ -147,6 +149,56 @@ export function formatReviews(reviews: BuildReview[]): string {
   ]
     .slice(0, -1)
     .join("\n");
+}
+
+export function formatAnalytics(
+  analytics: AccountAnalytics,
+  context: {
+    account: string;
+    from: string;
+    to?: string | undefined;
+    groupBy: string;
+  },
+): string {
+  const { screenshots, builds } = analytics;
+  const lines = [
+    `Analytics for ${context.account}`,
+    `Period: ${context.from} → ${context.to ?? "now"} (grouped by ${context.groupBy})`,
+    "",
+    `Builds: ${builds.all.total}`,
+    `  Changes detected: ${builds.all.changesDetected}`,
+    `  No changes: ${builds.all.noChanges}`,
+    `  Accepted: ${builds.all.accepted}`,
+    `  Rejected: ${builds.all.rejected}`,
+    `Screenshots: ${screenshots.all.total}`,
+  ];
+
+  // Resolve project IDs (the keys of the `all.projects` count maps) to names.
+  const names = new Map<string, string>();
+  for (const project of [...builds.projects, ...screenshots.projects]) {
+    names.set(project.id, project.name);
+  }
+  const ids = new Set([
+    ...Object.keys(builds.all.projects),
+    ...Object.keys(screenshots.all.projects),
+  ]);
+  if (ids.size > 0) {
+    const rows = [...ids]
+      .map((id) => ({
+        name: names.get(id) ?? id,
+        builds: builds.all.projects[id] ?? 0,
+        screenshots: screenshots.all.projects[id] ?? 0,
+      }))
+      .sort((a, b) => b.builds - a.builds || b.screenshots - a.screenshots);
+    lines.push("", `Projects (${rows.length}):`);
+    for (const row of rows) {
+      lines.push(
+        `  ${row.name}: ${row.builds} builds, ${row.screenshots} screenshots`,
+      );
+    }
+  }
+
+  return lines.join("\n");
 }
 
 function indent(text: string): string {

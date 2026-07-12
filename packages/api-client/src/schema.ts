@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/accounts/{accountSlug}/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get account analytics
+         * @description Retrieve build and screenshot metrics for an account. The personal access token must be scoped to the account.
+         */
+        get: operations["getAccountAnalytics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builds": {
         parameters: {
             query?: never;
@@ -696,6 +716,67 @@ export interface components {
          * @example 42
          */
         BuildNumber: string;
+        AccountAnalytics: {
+            screenshots: {
+                series: {
+                    total: number;
+                    /** @description Counts keyed by project ID. Use the sibling `projects` array to resolve each project name. */
+                    projects: {
+                        [key: string]: number;
+                    };
+                    /** @description Unix timestamp in milliseconds at the start of the period. */
+                    ts: number;
+                }[];
+                all: {
+                    total: number;
+                    /** @description Counts keyed by project ID. Use the sibling `projects` array to resolve each project name. */
+                    projects: {
+                        [key: string]: number;
+                    };
+                };
+                projects: {
+                    id: string;
+                    name: string;
+                }[];
+            };
+            builds: {
+                series: {
+                    total: number;
+                    /** @description Counts keyed by project ID. Use the sibling `projects` array to resolve each project name. */
+                    projects: {
+                        [key: string]: number;
+                    };
+                    changesDetected: number;
+                    noChanges: number;
+                    accepted: number;
+                    rejected: number;
+                    /** @description Unix timestamp in milliseconds at the start of the period. */
+                    ts: number;
+                }[];
+                all: {
+                    total: number;
+                    /** @description Counts keyed by project ID. Use the sibling `projects` array to resolve each project name. */
+                    projects: {
+                        [key: string]: number;
+                    };
+                    changesDetected: number;
+                    noChanges: number;
+                    accepted: number;
+                    rejected: number;
+                };
+                projects: {
+                    id: string;
+                    name: string;
+                }[];
+            };
+        };
+        /** @description Error response */
+        Error: {
+            error: string;
+            details?: {
+                message: string;
+            }[];
+        };
         /** @description Build */
         Build: {
             id: components["schemas"]["BuildId"];
@@ -770,13 +851,6 @@ export interface components {
             sha: components["schemas"]["Sha1Hash"];
             /** @description The branch name */
             branch: string;
-        };
-        /** @description Error response */
-        Error: {
-            error: string;
-            details?: {
-                message: string;
-            }[];
         };
         /** @description A user. */
         User: {
@@ -1124,6 +1198,65 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getAccountAnalytics: {
+        parameters: {
+            query: {
+                /** @description Start of the analytics period, as an ISO 8601 datetime. */
+                from: string;
+                /** @description End of the analytics period, as an ISO 8601 datetime. Defaults to the current time. */
+                to?: string;
+                /** @description Time period used to group each series data point. */
+                groupBy: "day" | "week" | "month";
+                /** @description Optional project name filter. Pass one value or repeat the parameter for multiple projects. */
+                projectNames?: string | string[];
+            };
+            header?: never;
+            path: {
+                /** @description Slug of the account to retrieve analytics for. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Account analytics */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountAnalytics"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     createBuild: {
         parameters: {
             query?: never;
