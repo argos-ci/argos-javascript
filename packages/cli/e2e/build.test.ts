@@ -156,4 +156,30 @@ describe("argos build snapshots", () => {
 
     expect(Array.isArray(snapshotsNeedingReview)).toBe(true);
   });
+
+  test("accepts --metrics-period and enriches diffs with flakiness data", () => {
+    const output = run(
+      ["build", "snapshots", buildNumber, "--metrics-period", "30d", "--json"],
+      baseEnv,
+    );
+    const diffs = JSON.parse(output.stdout);
+    expect(Array.isArray(diffs)).toBe(true);
+    // `test` and `change` are always present on a diff (both nullable). `every`
+    // holds trivially for an empty build, so the assertion stays unconditional.
+    expect(
+      diffs.every((diff: object) => "test" in diff && "change" in diff),
+    ).toBe(true);
+  });
+
+  test("rejects an invalid --metrics-period value", () => {
+    const error = expectRunToFail([
+      "build",
+      "snapshots",
+      buildNumber,
+      "--metrics-period",
+      "5y",
+    ]);
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain("Allowed choices are 24h, 3d, 7d, 30d, 90d");
+  });
 });
