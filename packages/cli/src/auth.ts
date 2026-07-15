@@ -130,6 +130,11 @@ export async function getAccessToken(): Promise<string | undefined> {
       await saveOAuthTokens(tokens);
       return tokens.accessToken;
     } catch (err) {
+      // A still-valid legacy personal access token is a usable fallback when
+      // the OAuth refresh cannot complete.
+      if (config.token) {
+        return config.token;
+      }
       if (err instanceof OAuthTokenError) {
         // The server rejected the refresh token — the session is really gone.
         console.warn(
