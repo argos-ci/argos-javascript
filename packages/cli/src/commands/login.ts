@@ -27,16 +27,18 @@ const CALLBACK_ERROR_HTML = `<!DOCTYPE html><html lang="en">
 
 type CallbackResult = { code: string; state: string };
 
-function color(text: string, code: number) {
-  if (!process.stderr.isTTY || process.env["NO_COLOR"]) {
+function color(text: string, code: number, isTTY: boolean | undefined) {
+  if (!isTTY || process.env["NO_COLOR"]) {
     return text;
   }
   return `\x1b[${code}m${text}\x1b[0m`;
 }
 
-const successColor = (text: string) => color(text, 32);
-const warningColor = (text: string) => color(text, 33);
-const errorColor = (text: string) => color(text, 31);
+// Colors are gated on the stream each message is written to: success/info go to
+// stdout via console.log, warnings/errors to stderr via console.warn/error.
+const successColor = (text: string) => color(text, 32, process.stdout.isTTY);
+const warningColor = (text: string) => color(text, 33, process.stderr.isTTY);
+const errorColor = (text: string) => color(text, 31, process.stderr.isTTY);
 
 function startCallbackServer(): Promise<{
   port: number;
