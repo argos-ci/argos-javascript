@@ -104,6 +104,12 @@ async function postToken(
       data?.error_description ?? data?.error ?? `HTTP ${response.status}`;
     throw new Error(message);
   }
+  // A response without a refresh token would be persisted as a token set with
+  // `refreshToken: undefined`, which `parseOAuthTokenSet` later rejects — the
+  // whole OAuth block would be silently dropped and the user logged out.
+  if (typeof data.refresh_token !== "string" || data.refresh_token === "") {
+    throw new Error("Token endpoint response is missing a refresh token.");
+  }
   return data;
 }
 
