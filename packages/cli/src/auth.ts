@@ -52,6 +52,16 @@ function parseConfig(raw: string): Config | null {
   }
 
   const record = parsed as Record<string, unknown>;
+  // A present-but-non-string `token` means a corrupted config; treat it as
+  // invalid so the caller clears the file and prompts a re-login, rather than
+  // silently ignoring it.
+  if (
+    "token" in record &&
+    record.token !== undefined &&
+    typeof record.token !== "string"
+  ) {
+    return null;
+  }
   const config: Config = {};
   if (typeof record.token === "string") {
     config.token = record.token;

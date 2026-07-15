@@ -135,6 +135,19 @@ describe("auth token storage", () => {
     );
   });
 
+  test("clears config files with a non-string token", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const configPath = getConfigPath();
+    await mkdir(dirname(configPath), { recursive: true });
+    await writeFile(configPath, JSON.stringify({ token: 123 }));
+
+    await expect(getAccessToken()).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalledWith(
+      "Warning: Config file is invalid and has been cleared. Run `argos login` again.",
+    );
+  });
+
   test("ignores config files without credentials", async () => {
     const configPath = getConfigPath();
     await mkdir(dirname(configPath), { recursive: true });
