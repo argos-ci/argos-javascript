@@ -39,6 +39,21 @@ export type OAuthTokenSet = {
   scope: string;
 };
 
+/**
+ * A token endpoint request that reached the server and was rejected by it
+ * (non-2xx / OAuth error), as opposed to a transient network failure. Lets
+ * callers tell "your session is gone, log in again" from "the network is down".
+ */
+export class OAuthTokenError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+    this.name = "OAuthTokenError";
+  }
+}
+
 type TokenEndpointResponse = {
   access_token: string;
   refresh_token: string;
@@ -102,7 +117,7 @@ async function postToken(
   if (!response.ok || !data?.access_token) {
     const message =
       data?.error_description ?? data?.error ?? `HTTP ${response.status}`;
-    throw new Error(message);
+    throw new OAuthTokenError(message, data?.error);
   }
   // A response without a refresh token would be persisted as a token set with
   // `refreshToken: undefined`, which `parseOAuthTokenSet` later rejects — the

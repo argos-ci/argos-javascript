@@ -2,7 +2,7 @@ import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
-import { refreshTokenSet, type OAuthTokenSet } from "./lib/oauth";
+import { OAuthTokenError, refreshTokenSet, type OAuthTokenSet } from "./lib/oauth";
 
 function getConfigPaths() {
   const configDir = resolve(homedir(), ".config", "argos-ci");
@@ -129,10 +129,19 @@ export async function getAccessToken(): Promise<string | undefined> {
       const tokens = await refreshTokenSet(config.oauth.refreshToken);
       await saveOAuthTokens(tokens);
       return tokens.accessToken;
-    } catch {
-      console.warn(
-        "Warning: Your Argos session has expired. Run `argos login` again.",
-      );
+    } catch (err) {
+      if (err instanceof OAuthTokenError) {
+        // The server rejected the refresh token — the session is really gone.
+        console.warn(
+          "Warning: Your Argos session has expired. Run `argos login` again.",
+        );
+      } else {
+        // Transient failure (offline, DNS, timeout): don't claim the session
+        // expired, and keep the stored tokens so a later retry can succeed.
+        console.warn(
+          "Warning: Could not reach Argos to refresh your session. Check your connection and try again.",
+        );
+      }
       return undefined;
     }
   }
