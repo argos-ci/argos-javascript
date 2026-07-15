@@ -128,7 +128,10 @@ async function postToken(
   // A missing/non-numeric `expires_in` would make `expiresAt` NaN, which passes
   // the `typeof === "number"` check on read but makes `Date.now() < expiresAt`
   // always false — forcing a token refresh on every single command.
-  if (typeof data.expires_in !== "number" || !Number.isFinite(data.expires_in)) {
+  if (
+    typeof data.expires_in !== "number" ||
+    !Number.isFinite(data.expires_in)
+  ) {
     throw new Error("Token endpoint response is missing a valid expiry.");
   }
   return data;
