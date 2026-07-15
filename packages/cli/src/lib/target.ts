@@ -1,5 +1,5 @@
 import type { ArgosAPIClient } from "@argos-ci/api-client";
-import { getStoredToken } from "../auth";
+import { getAccessToken } from "../auth";
 import { createApiClient, unwrap } from "./api";
 import {
   parseBuildReferenceOrFail,
@@ -44,7 +44,7 @@ export type ProjectTarget = ProjectPath & {
  */
 export async function resolveToken(options: TargetOptions): Promise<string> {
   const token =
-    options.token || process.env["ARGOS_TOKEN"] || (await getStoredToken());
+    options.token || process.env["ARGOS_TOKEN"] || (await getAccessToken());
   if (!token) {
     fail(
       "No Argos token found. Use --token, set ARGOS_TOKEN, or run `argos login`.",

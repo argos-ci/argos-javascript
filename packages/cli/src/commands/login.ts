@@ -1,15 +1,15 @@
-import type { Command } from "commander";
+import { randomBytes } from "node:crypto";
 import { createServer } from "node:http";
-import { createHash, randomBytes } from "node:crypto";
+import type { Command } from "commander";
 import open from "open";
-import { createClient } from "@argos-ci/api-client";
-import { saveToken } from "../auth";
 
-const APP_BASE_URL =
-  process.env["ARGOS_APP_BASE_URL"] ?? "https://app.argos-ci.com/";
-
-const API_BASE_URL =
-  process.env["ARGOS_API_BASE_URL"] ?? "https://api.argos-ci.com/v2/";
+import { saveOAuthTokens } from "../auth";
+import {
+  buildAuthorizeUrl,
+  exchangeAuthorizationCode,
+  generatePkce,
+  getAppBaseUrl,
+} from "../lib/oauth";
 
 const LOGIN_CLI_SUCCESS_ROUTE = `/auth/cli/success`;
 
@@ -27,16 +27,18 @@ const CALLBACK_ERROR_HTML = `<!DOCTYPE html><html lang="en">
 
 type CallbackResult = { code: string; state: string };
 
-function color(text: string, code: number) {
-  if (!process.stderr.isTTY || process.env["NO_COLOR"]) {
+function color(text: string, code: number, isTTY: boolean | undefined) {
+  if (!isTTY || process.env["NO_COLOR"]) {
     return text;
   }
-  return `\u001B[${code}m${text}\u001B[0m`;
+  return `\x1b[${code}m${text}\x1b[0m`;
 }
 
-const successColor = (text: string) => color(text, 32);
-const warningColor = (text: string) => color(text, 33);
-const errorColor = (text: string) => color(text, 31);
+// Colors are gated on the stream each message is written to: success/info go to
+// stdout via console.log, warnings/errors to stderr via console.warn/error.
+const successColor = (text: string) => color(text, 32, process.stdout.isTTY);
+const warningColor = (text: string) => color(text, 33, process.stderr.isTTY);
+const errorColor = (text: string) => color(text, 31, process.stderr.isTTY);
 
 function startCallbackServer(): Promise<{
   port: number;
@@ -61,7 +63,7 @@ function startCallbackServer(): Promise<{
     };
 
     const server = createServer((req, res) => {
-      const url = new URL(req.url ?? "/", "http://localhost");
+      const url = new URL(req.url ?? "/", "http://127.0.0.1");
 
       if (url.pathname !== "/callback") {
         res.writeHead(404, { Connection: "close" });
@@ -101,7 +103,7 @@ function startCallbackServer(): Promise<{
       }
 
       res.writeHead(302, {
-        Location: new URL(LOGIN_CLI_SUCCESS_ROUTE, APP_BASE_URL).href,
+        Location: new URL(LOGIN_CLI_SUCCESS_ROUTE, getAppBaseUrl()).href,
         Connection: "close",
       });
       res.end(() => {
@@ -130,10 +132,7 @@ export function loginCommand(program: Command) {
     .description("Log in to Argos by opening your browser")
     .action(async () => {
       const state = randomBytes(16).toString("hex");
-      const codeVerifier = randomBytes(32).toString("base64url");
-      const codeChallenge = createHash("sha256")
-        .update(codeVerifier)
-        .digest("base64url");
+      const { codeVerifier, codeChallenge } = generatePkce();
 
       let port: number;
       let waitForCallback: () => Promise<CallbackResult>;
@@ -148,16 +147,20 @@ export function loginCommand(program: Command) {
         process.exit(1);
       }
 
-      const loginUrl = new URL("/auth/cli", APP_BASE_URL);
-      loginUrl.searchParams.set("port", port.toString());
-      loginUrl.searchParams.set("state", state);
-      loginUrl.searchParams.set("pkce", codeChallenge);
+      // Loopback redirect (RFC 8252): the registered `argos-cli` redirect URIs
+      // match this host regardless of the ephemeral port.
+      const redirectUri = `http://127.0.0.1:${port}/callback`;
+      const authorizeUrl = buildAuthorizeUrl({
+        redirectUri,
+        state,
+        codeChallenge,
+      });
 
       console.log("\nOpening browser for authentication…");
-      console.log(`If the browser doesn't open, visit:\n  ${loginUrl.href}\n`);
+      console.log(`If the browser doesn't open, visit:\n  ${authorizeUrl}\n`);
 
       if (process.env["ARGOS_CLI_DISABLE_BROWSER"] !== "1") {
-        await open(loginUrl.href).catch((err) => {
+        await open(authorizeUrl).catch((err) => {
           console.warn(
             warningColor(
               `Warning: Failed to open browser — ${err instanceof Error ? err.message : String(err)}`,
@@ -190,25 +193,24 @@ export function loginCommand(program: Command) {
         process.exit(1);
       }
 
-      const client = createClient({ baseUrl: API_BASE_URL });
-
-      const { data, error } = await client.POST("/auth/cli/token", {
-        body: {
+      try {
+        const tokens = await exchangeAuthorizationCode({
           code: result.code,
-          code_verifier: codeVerifier,
-        },
-      });
-
-      if (error || !data?.token) {
+          codeVerifier,
+          redirectUri,
+        });
+        await saveOAuthTokens(tokens);
+      } catch (err) {
         console.error(
           errorColor(
-            "Error: Authentication failed. Please run `argos login` again.",
+            `Error: Authentication failed${
+              err instanceof Error ? ` — ${err.message}` : ""
+            }. Please run \`argos login\` again.`,
           ),
         );
         process.exit(1);
       }
 
-      await saveToken(data.token);
       console.log(successColor("Logged in to Argos successfully."));
     });
 }

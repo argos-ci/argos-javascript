@@ -1,6 +1,12 @@
-import { readFile, writeFile, mkdir, rename, unlink } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
+import { resolve } from "node:path";
+
+import {
+  OAuthTokenError,
+  refreshTokenSet,
+  type OAuthTokenSet,
+} from "./lib/oauth";
 
 function getConfigPaths() {
   const configDir = resolve(homedir(), ".config", "argos-ci");
@@ -8,8 +14,34 @@ function getConfigPaths() {
 }
 
 type Config = {
+  /**
+   * Legacy long-lived personal access token from a pre-OAuth `argos login`.
+   * Still honored so existing installs keep working until the next login.
+   */
   token?: string;
+  /** OAuth token set from the current `argos login` flow. */
+  oauth?: OAuthTokenSet;
 };
+
+function parseOAuthTokenSet(value: unknown): OAuthTokenSet | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  if (
+    typeof record.accessToken === "string" &&
+    typeof record.refreshToken === "string" &&
+    typeof record.expiresAt === "number"
+  ) {
+    return {
+      accessToken: record.accessToken,
+      refreshToken: record.refreshToken,
+      expiresAt: record.expiresAt,
+      scope: typeof record.scope === "string" ? record.scope : "",
+    };
+  }
+  return undefined;
+}
 
 function parseConfig(raw: string): Config | null {
   let parsed: unknown;
@@ -24,16 +56,25 @@ function parseConfig(raw: string): Config | null {
   }
 
   const record = parsed as Record<string, unknown>;
-
-  if (!("token" in record) || record.token === undefined) {
-    return {};
-  }
-
-  if (typeof record.token !== "string") {
+  // A present-but-non-string `token` means a corrupted config; treat it as
+  // invalid so the caller clears the file and prompts a re-login, rather than
+  // silently ignoring it.
+  if (
+    "token" in record &&
+    record.token !== undefined &&
+    typeof record.token !== "string"
+  ) {
     return null;
   }
-
-  return { token: record.token };
+  const config: Config = {};
+  if (typeof record.token === "string") {
+    config.token = record.token;
+  }
+  const oauth = parseOAuthTokenSet(record.oauth);
+  if (oauth) {
+    config.oauth = oauth;
+  }
+  return config;
 }
 
 async function clearConfig(): Promise<void> {
@@ -79,16 +120,66 @@ async function writeConfig(config: Config): Promise<void> {
   await rename(tmpPath, configPath);
 }
 
-export async function getStoredToken(): Promise<string | undefined> {
-  const config = await readConfig();
-  return config?.token;
+/** Persist the OAuth token set from a successful login or refresh. */
+export async function saveOAuthTokens(tokens: OAuthTokenSet): Promise<void> {
+  await writeConfig({ oauth: tokens });
 }
 
-export async function saveToken(token: string): Promise<void> {
+/**
+ * Return a valid access token for API calls, or `undefined` when not logged in.
+ * Transparently refreshes (and persists) an expired OAuth access token, and
+ * falls back to a legacy personal access token when present.
+ */
+export async function getAccessToken(): Promise<string | undefined> {
   const config = await readConfig();
-  await writeConfig({ ...(config ?? {}), token });
+  if (!config) {
+    return undefined;
+  }
+  if (config.oauth) {
+    if (Date.now() < config.oauth.expiresAt) {
+      return config.oauth.accessToken;
+    }
+    try {
+      const tokens = await refreshTokenSet(config.oauth.refreshToken);
+      await saveOAuthTokens(tokens);
+      return tokens.accessToken;
+    } catch (err) {
+      // A still-valid legacy personal access token is a usable fallback when
+      // the OAuth refresh cannot complete.
+      if (config.token) {
+        return config.token;
+      }
+      if (err instanceof OAuthTokenError) {
+        // The server rejected the refresh token — the session is really gone.
+        console.warn(
+          "Warning: Your Argos session has expired. Run `argos login` again.",
+        );
+      } else {
+        // Transient failure (offline, DNS, timeout): don't claim the session
+        // expired, and keep the stored tokens so a later retry can succeed.
+        console.warn(
+          "Warning: Could not reach Argos to refresh your session. Check your connection and try again.",
+        );
+      }
+      return undefined;
+    }
+  }
+  return config.token;
 }
 
-export async function removeToken(): Promise<void> {
+/** Read the stored credentials without refreshing (used by `logout`). */
+export async function getStoredCredentials(): Promise<{
+  legacyToken?: string;
+  oauth?: OAuthTokenSet;
+}> {
+  const config = await readConfig();
+  return {
+    legacyToken: config?.token,
+    oauth: config?.oauth,
+  };
+}
+
+/** Remove all stored credentials. */
+export async function clearStoredCredentials(): Promise<void> {
   await writeConfig({});
 }
