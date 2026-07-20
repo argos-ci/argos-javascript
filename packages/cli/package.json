@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/cli",
   "description": "Command-line (CLI) for visual testing with Argos.",
-  "version": "6.3.0",
+  "version": "6.4.0",
   "bin": {
     "argos": "./bin/argos-cli.js"
   },

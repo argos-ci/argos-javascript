@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@6.3.0...@argos-ci/cli@6.4.0) (2026-07-20)
+
+
+### Bug Fixes
+
+* **cli:** don't report transient refresh failures as expired sessions ([92e4aad](https://github.com/argos-ci/argos-javascript/commit/92e4aad95b6269e51fff24a45db3a971b5853237))
+* **cli:** fall back to a legacy token when OAuth refresh fails ([dd5c012](https://github.com/argos-ci/argos-javascript/commit/dd5c012e7e31730ebb2bb76c9579f8aa0b250d3b))
+* **cli:** gate login colors on the destination stream ([ea834e7](https://github.com/argos-ci/argos-javascript/commit/ea834e777cea4fb6d456b1378a1742964d6c1be4))
+* **cli:** reject token responses without a refresh token ([ab6bdb9](https://github.com/argos-ci/argos-javascript/commit/ab6bdb9c31f517747cf3a35dc05bbd4f9d852d8a))
+* **cli:** reject token responses without a valid expiry ([68d6bdc](https://github.com/argos-ci/argos-javascript/commit/68d6bdc8514d69d2c5ad6d5ad20951073e99bead))
+* **cli:** treat a non-string token as an invalid config ([17b3752](https://github.com/argos-ci/argos-javascript/commit/17b37529d4ad6f441afdfdd00521b8657012437d))
+
+
+### Features
+
+* **cli:** use OAuth 2.1 for argos login (ARG-426) ([848e472](https://github.com/argos-ci/argos-javascript/commit/848e472e8e06b9498635d908f2c6ab8828d199cf))
+
+
+
+
+
 # [6.3.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/cli@6.2.0...@argos-ci/cli@6.3.0) (2026-07-12)
 
 
