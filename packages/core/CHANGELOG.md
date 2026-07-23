@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.6.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.6.1...@argos-ci/core@6.6.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **core:** resolve the merge base locally when a ref is missing on origin ([8b16c16](https://github.com/argos-ci/argos-javascript/commit/8b16c1647464e77e8507162e09be5bea1410dc31))
+
+
+
+
+
 ## [6.6.1](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/core@6.6.0...@argos-ci/core@6.6.1) (2026-07-12)
 
 **Note:** Version bump only for package @argos-ci/core
