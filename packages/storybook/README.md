@@ -17,7 +17,7 @@
 
 Capture and review visual changes of your [Storybook](https://storybook.js.org/) stories with Argos. It runs your stories in a real browser and uploads a screenshot of each one to Argos in your CI.
 
-Visit the [Storybook SDK documentation](https://argos-ci.com/docs/sdks-reference/storybook) for guides, the API reference, and more.
+Visit the [Storybook SDK documentation](https://argos-ci.com/docs/reference/storybook) for guides, the API reference, and more.
 
 ## Installation
 
@@ -61,6 +61,6 @@ export const Example: Story = {
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/sdks-reference/storybook)
+- [Official SDK Docs](https://argos-ci.com/docs/reference/storybook)
 - [Quickstart](https://argos-ci.com/docs/quickstart/storybook-quickstart)
 - [Discord](https://argos-ci.com/discord)

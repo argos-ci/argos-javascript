@@ -9,7 +9,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/puppeteer"
   },
-  "homepage": "https://argos-ci.com/docs/sdks-reference/puppeteer",
+  "homepage": "https://argos-ci.com/docs/reference/puppeteer",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },

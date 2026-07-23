@@ -17,7 +17,7 @@
 
 Capture stable Argos screenshots from your [Cypress](https://www.cypress.io/) tests.
 
-Visit the [Cypress SDK documentation](https://argos-ci.com/docs/sdks-reference/cypress) for guides, the API reference, and more.
+Visit the [Cypress SDK documentation](https://argos-ci.com/docs/reference/cypress) for guides, the API reference, and more.
 
 ## Installation
 
@@ -69,6 +69,6 @@ describe("Homepage", () => {
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/sdks-reference/cypress)
+- [Official SDK Docs](https://argos-ci.com/docs/reference/cypress)
 - [Quickstart](https://argos-ci.com/docs/quickstart/cypress-quickstart)
 - [Discord](https://argos-ci.com/discord)

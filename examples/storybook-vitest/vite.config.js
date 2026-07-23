@@ -23,7 +23,7 @@ export default defineConfig({
         })
       
         // The plugin will capture screenshots of your stories and upload them to Argos.
-        // See options at: https://argos-ci.com/docs/sdks-reference/storybook
+        // See options at: https://argos-ci.com/docs/reference/storybook
         argosVitestPlugin({
           // Upload to Argos on CI only.
           uploadToArgos: !!process.env.CI,

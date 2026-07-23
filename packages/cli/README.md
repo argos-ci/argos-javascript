@@ -17,7 +17,7 @@ Interact with and upload screenshots to [argos-ci.com](https://argos-ci.com) fro
 [![npm dm](https://img.shields.io/npm/dm/@argos-ci/cli.svg)](https://www.npmjs.com/package/@argos-ci/cli)
 [![npm dt](https://img.shields.io/npm/dt/@argos-ci/cli.svg)](https://www.npmjs.com/package/@argos-ci/cli)
 
-Visit the [Argos CLI documentation](https://argos-ci.com/docs/sdks-reference/argos-command-line-interface-cli) for the full command reference and more.
+Visit the [Argos CLI documentation](https://argos-ci.com/docs/reference/argos-command-line-interface-cli) for the full command reference and more.
 
 ## Installation
 
@@ -41,5 +41,5 @@ npx @argos-ci/cli --help
 
 ## Links
 
-- [Official CLI Docs](https://argos-ci.com/docs/sdks-reference/argos-command-line-interface-cli)
+- [Official CLI Docs](https://argos-ci.com/docs/reference/argos-command-line-interface-cli)
 - [Discord](https://argos-ci.com/discord)

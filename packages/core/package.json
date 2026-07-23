@@ -18,7 +18,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/core"
   },
-  "homepage": "https://argos-ci.com/docs/sdks-reference/node.js-sdk",
+  "homepage": "https://argos-ci.com/docs/reference/node.js-sdk",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },

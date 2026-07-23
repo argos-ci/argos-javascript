@@ -24,6 +24,6 @@ Read [Argos documentations](https://argos-ci.com/docs) or explore [Storybook Tes
 ## Links
 
 - [Quickstart with Argos + Storybook + Vitest](https://argos-ci.com/docs/quickstart/storybook-quickstart)
-- [Storybook SDK Reference](https://argos-ci.com/docs/sdks-reference/storybook)
+- [Storybook SDK Reference](https://argos-ci.com/docs/reference/storybook)
 - [Official Argos Docs](https://argos-ci.com/docs)
 - [Discord](https://argos-ci.com/discord)

@@ -17,7 +17,7 @@ Node.js SDK for visual testing with Argos. It powers the Argos CLI and the highe
 [![npm dm](https://img.shields.io/npm/dm/@argos-ci/core.svg)](https://www.npmjs.com/package/@argos-ci/core)
 [![npm dt](https://img.shields.io/npm/dt/@argos-ci/core.svg)](https://www.npmjs.com/package/@argos-ci/core)
 
-Visit the [Node.js SDK documentation](https://argos-ci.com/docs/sdks-reference/node.js-sdk) for guides, the API reference, and more.
+Visit the [Node.js SDK documentation](https://argos-ci.com/docs/reference/node.js-sdk) for guides, the API reference, and more.
 
 ## Installation
 
@@ -46,6 +46,6 @@ console.log(`Build created: ${build.url}`);
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/sdks-reference/node.js-sdk)
+- [Official SDK Docs](https://argos-ci.com/docs/reference/node.js-sdk)
 - [API Reference](https://js-sdk-reference.argos-ci.com)
 - [Discord](https://argos-ci.com/discord)

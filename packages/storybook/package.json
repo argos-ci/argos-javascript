@@ -9,7 +9,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/storybook"
   },
-  "homepage": "https://argos-ci.com/docs/sdks-reference/storybook",
+  "homepage": "https://argos-ci.com/docs/reference/storybook",
   "keywords": [
     "storybook",
     "storybook-addon",

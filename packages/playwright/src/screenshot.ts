@@ -133,7 +133,7 @@ export type ArgosScreenshotOptions = {
  *
  * @example
  *    argosScreenshot(page, "my-screenshot")
- * @see https://argos-ci.com/docs/sdks-reference/playwright
+ * @see https://argos-ci.com/docs/reference/playwright
  */
 export async function argosScreenshot(
   /**
