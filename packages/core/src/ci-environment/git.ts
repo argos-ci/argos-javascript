@@ -176,7 +176,12 @@ function checkIsMissingRemoteRefError(error: unknown): boolean {
  */
 function checkLocalRefExists(ref: string): boolean {
   try {
-    execFileSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]);
+    execFileSync("git", [
+      "rev-parse",
+      "--verify",
+      "--quiet",
+      `${ref}^{commit}`,
+    ]);
     return true;
   } catch {
     return false;
