@@ -76,6 +76,47 @@ function checkIsDynamicBuildName(
   return Boolean(typeof buildName === "object" && buildName);
 }
 
+/**
+ * Chromium launch arguments recommended to stabilize font rendering
+ * and get consistent Argos screenshots.
+ */
+const RECOMMENDED_CHROMIUM_ARGS = [
+  "--disable-lcd-text",
+  "--font-render-hinting=none",
+];
+
+/**
+ * Warn if the Playwright config is missing the recommended Chromium launch
+ * options used to stabilize screenshots.
+ */
+function checkLaunchOptions(config: FullConfig) {
+  for (const project of config.projects) {
+    // These flags only apply to Chromium. The browser defaults to Chromium
+    // when `browserName` is not set.
+    const browserName = project.use.browserName ?? "chromium";
+    if (browserName !== "chromium") {
+      continue;
+    }
+
+    const args = project.use.launchOptions?.args ?? [];
+    const missing = RECOMMENDED_CHROMIUM_ARGS.filter(
+      (arg) => !args.includes(arg),
+    );
+
+    if (missing.length > 0) {
+      const projectLabel = project.name || "default";
+      console.warn(
+        chalk.yellow(
+          `⚠️  Argos: Playwright project "${projectLabel}" is missing recommended launchOptions args: ${missing.join(
+            ", ",
+          )}.\n` +
+            `   Add them to stabilize font rendering and get consistent screenshots. See https://argos-ci.com/docs/reference/playwright`,
+        ),
+      );
+    }
+  }
+}
+
 export function createArgosReporterOptions<T extends string[]>(
   options: ArgosReporterOptions<T>,
 ): ArgosReporterOptions<T> {
@@ -161,6 +202,7 @@ class ArgosReporter implements Reporter {
   onBegin(config: FullConfig) {
     debug("ArgosReporter:onBegin");
     this.playwrightConfig = config;
+    checkLaunchOptions(config);
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {

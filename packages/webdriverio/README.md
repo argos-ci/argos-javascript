@@ -17,11 +17,11 @@
 
 Capture stable Argos screenshots from your [WebdriverIO](https://webdriver.io) tests.
 
-Visit the [WebdriverIO SDK documentation](https://argos-ci.com/docs/sdks-reference/webdriverio) for guides, the API reference, and more.
+Visit the [WebdriverIO SDK documentation](https://argos-ci.com/docs/reference/webdriverio) for guides, the API reference, and more.
 
 ## Installation
 
-Install the SDK alongside the [Argos CLI](https://argos-ci.com/docs/sdks-reference/argos-command-line-interface-cli), which uploads the screenshots to Argos:
+Install the SDK alongside the [Argos CLI](https://argos-ci.com/docs/reference/argos-command-line-interface-cli), which uploads the screenshots to Argos:
 
 ```sh
 npm install --save-dev @argos-ci/webdriverio @argos-ci/cli
@@ -50,6 +50,6 @@ npx @argos-ci/cli upload ./screenshots
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/sdks-reference/webdriverio)
+- [Official SDK Docs](https://argos-ci.com/docs/reference/webdriverio)
 - [Quickstart](https://argos-ci.com/docs/quickstart/webdriverio-quickstart)
 - [Discord](https://argos-ci.com/discord)

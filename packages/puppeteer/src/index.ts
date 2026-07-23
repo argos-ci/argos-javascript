@@ -231,7 +231,7 @@ ${reasons.map((reason) => `- ${reason}`).join("\n")}
  *
  * @example
  *    argosScreenshot(page, "my-screenshot")
- * @see https://argos-ci.com/docs/sdks-reference/puppeteer
+ * @see https://argos-ci.com/docs/reference/puppeteer
  */
 export async function argosScreenshot(
   /**

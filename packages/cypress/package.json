@@ -9,7 +9,7 @@
     "url": "https://github.com/argos-ci/argos-javascript.git",
     "directory": "packages/cypress"
   },
-  "homepage": "https://argos-ci.com/docs/sdks-reference/cypress",
+  "homepage": "https://argos-ci.com/docs/reference/cypress",
   "bugs": {
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },

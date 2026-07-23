@@ -17,7 +17,7 @@
 
 Capture stable Argos screenshots from your [Playwright](https://playwright.dev/) tests, and report failure screenshots and traces to Argos.
 
-Visit the [Playwright SDK documentation](https://argos-ci.com/docs/sdks-reference/playwright) for guides, the API reference, and more.
+Visit the [Playwright SDK documentation](https://argos-ci.com/docs/reference/playwright) for guides, the API reference, and more.
 
 ## Installation
 
@@ -65,6 +65,6 @@ test("screenshot homepage", async ({ page }) => {
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/sdks-reference/playwright)
+- [Official SDK Docs](https://argos-ci.com/docs/reference/playwright)
 - [Quickstart](https://argos-ci.com/docs/quickstart/playwright-quickstart)
 - [Discord](https://argos-ci.com/discord)
