@@ -9,7 +9,13 @@ import type {
  * Configuration for the Argos Vitest reporter.
  * @see https://js-sdk-reference.argos-ci.com/interfaces/UploadParameters.html
  */
-export type ArgosReporterConfig = UploadParameters;
+export interface ArgosReporterConfig extends UploadParameters {
+  /**
+   * If true, the reporter will not fail the test run when the upload fails.
+   * @default false
+   */
+  ignoreUploadFailures?: boolean;
+}
 
 /**
  * Options passed when calling `argosScreenshot` from a browser test.

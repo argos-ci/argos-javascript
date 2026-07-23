@@ -60,24 +60,40 @@ export class ArgosReporter implements Reporter {
     if (this.vitest.config.watch) {
       return;
     }
-    // Auto-detect `vitest --shard=<index>/<count>` and map it to Argos parallel
-    // options, so users only need `ARGOS_PARALLEL_NONCE`.
-    const parallel = await getParallelFromConfig(this.vitest.config);
-    const res = await upload({
-      // Default to uploading screenshots, ARIA snapshots and `argosSnapshot`
-      // files. Without this, `upload` only matches images
-      // (`**/*.{png,jpg,jpeg}`), so the `.aria.yml` files produced by
-      // `ariaSnapshot: true` and the `.snapshot.*` files produced by
-      // `argosSnapshot` would be skipped.
-      files: ["**/*.png", "**/*.aria.yml", "**/*.snapshot.*"],
-      // The `.snapshot.*` glob would otherwise also match the `.argos.json`
-      // metadata sidecars written next to each snapshot.
-      ignore: ["**/*.argos.json"],
-      // Auto-detected from the shard config; an explicit `parallel` in the
-      // reporter config still wins (spread below).
-      parallel: parallel ?? undefined,
-      ...this.config,
-    });
-    console.log(`✅ Argos build created: ${res.build.url}`);
+    const { ignoreUploadFailures, ...uploadParameters } = this.config;
+    try {
+      // Auto-detect `vitest --shard=<index>/<count>` and map it to Argos parallel
+      // options, so users only need `ARGOS_PARALLEL_NONCE`.
+      const parallel = await getParallelFromConfig(this.vitest.config);
+      const res = await upload({
+        // Default to uploading screenshots, ARIA snapshots and `argosSnapshot`
+        // files. Without this, `upload` only matches images
+        // (`**/*.{png,jpg,jpeg}`), so the `.aria.yml` files produced by
+        // `ariaSnapshot: true` and the `.snapshot.*` files produced by
+        // `argosSnapshot` would be skipped.
+        files: ["**/*.png", "**/*.aria.yml", "**/*.snapshot.*"],
+        // The `.snapshot.*` glob would otherwise also match the `.argos.json`
+        // metadata sidecars written next to each snapshot.
+        ignore: ["**/*.argos.json"],
+        // Auto-detected from the shard config; an explicit `parallel` in the
+        // reporter config still wins (spread below).
+        parallel: parallel ?? undefined,
+        ...uploadParameters,
+      });
+      console.log(`✅ Argos build created: ${res.build.url}`);
+    } catch (error) {
+      // Vitest decides the exit code before reporters run `onTestRunEnd`, so
+      // an error thrown here would surface as an "Unhandled Error" without
+      // failing the run (exit code 0). Report it and fail the run explicitly.
+      console.error(`❌ Error while creating the Argos build`);
+      console.error(error);
+      if (ignoreUploadFailures) {
+        console.warn(
+          "⚠️ Upload failure ignored due to the `ignoreUploadFailures` option",
+        );
+      } else {
+        process.exitCode = 1;
+      }
+    }
   }
 }
