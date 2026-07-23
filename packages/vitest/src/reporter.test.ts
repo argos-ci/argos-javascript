@@ -34,6 +34,9 @@ function argosConfig(
 
 describe("ArgosReporter", () => {
   let log: ReturnType<typeof vi.spyOn>;
+  let error: ReturnType<typeof vi.spyOn>;
+  let warn: ReturnType<typeof vi.spyOn>;
+  let savedExitCode: typeof process.exitCode;
 
   beforeEach(() => {
     upload.mockReset();
@@ -43,9 +46,14 @@ describe("ArgosReporter", () => {
     readConfig.mockReset();
     readConfig.mockResolvedValue(argosConfig());
     log = vi.spyOn(console, "log").mockImplementation(() => {});
+    error = vi.spyOn(console, "error").mockImplementation(() => {});
+    warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    savedExitCode = process.exitCode;
+    process.exitCode = undefined;
   });
 
   afterEach(() => {
+    process.exitCode = savedExitCode;
     vi.restoreAllMocks();
   });
 
@@ -78,11 +86,52 @@ describe("ArgosReporter", () => {
     });
   });
 
-  it("propagates upload failures", async () => {
+  it("reports upload failures and fails the run without throwing", async () => {
+    // A rejection from the reporter hook would surface in Vitest as an
+    // "Unhandled Error" without failing the run: the reporter must catch it
+    // and fail the run through the process exit code instead.
     upload.mockRejectedValue(new Error("upload failed"));
     const reporter = new ArgosReporter({ buildName: "test" });
     reporter.onInit(createVitest({}));
-    await expect(reporter.onTestRunEnd()).rejects.toThrow("upload failed");
+    await expect(reporter.onTestRunEnd()).resolves.toBeUndefined();
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining("Error while creating the Argos build"),
+    );
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "upload failed" }),
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it("does not fail the run on upload failure with `ignoreUploadFailures`", async () => {
+    upload.mockRejectedValue(new Error("upload failed"));
+    const reporter = new ArgosReporter({
+      buildName: "test",
+      ignoreUploadFailures: true,
+    });
+    reporter.onInit(createVitest({}));
+    await expect(reporter.onTestRunEnd()).resolves.toBeUndefined();
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining("Error while creating the Argos build"),
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("ignoreUploadFailures"),
+    );
+    expect(process.exitCode).toBe(undefined);
+  });
+
+  it("does not pass `ignoreUploadFailures` to upload", async () => {
+    const reporter = new ArgosReporter({
+      buildName: "test",
+      ignoreUploadFailures: true,
+    });
+    reporter.onInit(createVitest({}));
+    await reporter.onTestRunEnd();
+    expect(upload).toHaveBeenCalledWith({
+      files: ["**/*.png", "**/*.aria.yml", "**/*.snapshot.*"],
+      ignore: ["**/*.argos.json"],
+      buildName: "test",
+    });
   });
 
   it("does not upload in watch mode", async () => {
@@ -122,14 +171,18 @@ describe("ArgosReporter", () => {
     );
   });
 
-  it("throws when sharding without ARGOS_PARALLEL_NONCE", async () => {
+  it("fails the run when sharding without ARGOS_PARALLEL_NONCE", async () => {
     readConfig.mockResolvedValue(argosConfig({ parallelNonce: null }));
     const reporter = new ArgosReporter({ buildName: "test" });
     reporter.onInit(createVitest({ shard: { index: 1, count: 4 } }));
-    await expect(reporter.onTestRunEnd()).rejects.toThrow(
-      "ARGOS_PARALLEL_NONCE",
-    );
+    await expect(reporter.onTestRunEnd()).resolves.toBeUndefined();
     expect(upload).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining("ARGOS_PARALLEL_NONCE"),
+      }),
+    );
+    expect(process.exitCode).toBe(1);
   });
 
   it("lets ARGOS_PARALLEL_TOTAL/INDEX override the shard values", async () => {
