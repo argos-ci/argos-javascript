@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   branch,
   getMergeBaseCommitSha,
@@ -77,6 +77,88 @@ describe("#getMergeBaseCommitSha (command injection)", () => {
     }
 
     expect(existsSync(markerFile)).toBe(false);
+  });
+});
+
+describe("#getMergeBaseCommitSha (refs missing on origin)", () => {
+  let cwd: string;
+  let root: string;
+  let repoDir: string;
+  /** SHA of the tip of `main`, pushed to origin — the expected merge base. */
+  let mainSha: string;
+  let warn: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    cwd = process.cwd();
+    root = mkdtempSync(join(tmpdir(), "argos-git-missing-ref-test-"));
+    repoDir = join(root, "repo");
+
+    const bareDir = join(root, "origin.git");
+    execFileSync("git", ["init", "--bare", bareDir]);
+    execFileSync("git", ["init", repoDir]);
+    const git = (...args: string[]) =>
+      execFileSync("git", ["-C", repoDir, ...args]);
+    git("remote", "add", "origin", bareDir);
+    git("config", "user.email", "test@argos-ci.com");
+    git("config", "user.name", "Argos Test");
+
+    // `main` has two commits and is pushed to origin.
+    git("commit", "--allow-empty", "-m", "commit 0");
+    git("commit", "--allow-empty", "-m", "commit 1");
+    git("branch", "-M", "main");
+    git("push", "origin", "main");
+    mainSha = git("rev-parse", "HEAD").toString().trim();
+
+    // `feature` branches off `main` with one commit, and is NOT pushed —
+    // the state of a first local run on a feature branch.
+    git("checkout", "-b", "feature");
+    git("commit", "--allow-empty", "-m", "feature commit");
+
+    warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    process.chdir(repoDir);
+  });
+
+  afterEach(() => {
+    process.chdir(cwd);
+    warn.mockRestore();
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("falls back to the local ref when the head branch is not on origin", async () => {
+    const sha = await getMergeBaseCommitSha({ base: "main", head: "feature" });
+    expect(sha).toBe(mainSha);
+    // A branch not pushed yet is expected: no warning.
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("returns null when the head ref exists neither on origin nor locally", async () => {
+    const sha = await getMergeBaseCommitSha({ base: "main", head: "ghost" });
+    expect(sha).toBe(null);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("returns null when the base ref exists neither on origin nor locally", async () => {
+    const sha = await getMergeBaseCommitSha({ base: "ghost", head: "main" });
+    expect(sha).toBe(null);
+  });
+
+  it("falls back to the local history and warns when origin is unreachable", async () => {
+    execFileSync("git", [
+      "-C",
+      repoDir,
+      "remote",
+      "set-url",
+      "origin",
+      join(root, "nonexistent.git"),
+    ]);
+    const sha = await getMergeBaseCommitSha({ base: "main", head: "feature" });
+    expect(sha).toBe(mainSha);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('failed to fetch "feature"'),
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('failed to fetch "main"'),
+    );
   });
 });
 

@@ -162,38 +162,139 @@ function checkIsExecError(
 }
 
 /**
+ * Check whether a git fetch error means the requested ref does not exist on
+ * the remote, e.g. a branch that has not been pushed to origin yet.
+ */
+function checkIsMissingRemoteRefError(error: unknown): boolean {
+  return getGitErrorOutput(error)
+    .toLowerCase()
+    .includes("couldn't find remote ref");
+}
+
+/**
+ * Check that a ref exists in the local repository and points to a commit.
+ */
+function checkLocalRefExists(ref: string): boolean {
+  try {
+    execFileSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Ref usable in the merge-base computation.
+ */
+type MergeBaseRef = {
+  /**
+   * Ref to pass to `git merge-base`, or `null` when the ref is unavailable
+   * both on origin and locally.
+   */
+  ref: string | null;
+  /** Whether fetching again with a greater depth can deepen the history. */
+  fetchable: boolean;
+};
+
+/**
+ * Fetch a ref from origin to make it available for the merge-base computation.
+ *
+ * When the fetch fails, fall back to the history available locally instead of
+ * failing the whole upload — the merge base is only used to find the baseline
+ * and a build without baseline is better than no build at all:
+ * - When the ref is missing on origin (e.g. a branch not pushed yet, common on
+ *   a first local run), prefer the local ref, which is the exact state being
+ *   built. Expected, so only logged in debug mode.
+ * - For other failures (network, authentication…), prefer the target of a
+ *   previous fetch (the freshest known remote state) and surface a warning.
+ */
+async function fetchMergeBaseRef(input: {
+  ref: string;
+  depth: number;
+  target: string;
+}): Promise<MergeBaseRef> {
+  try {
+    await gitFetch(input);
+    return { ref: input.target, fetchable: true };
+  } catch (error) {
+    const isMissingRemoteRef = checkIsMissingRemoteRefError(error);
+    if (isMissingRemoteRef) {
+      debug(
+        `Ref "${input.ref}" not found on origin, falling back to local history`,
+        getGitErrorOutput(error),
+      );
+    } else {
+      console.warn(
+        `Argos failed to fetch "${input.ref}" from origin, falling back to the local history to find the merge base.`,
+      );
+      debug(`git fetch failed for "${input.ref}"`, getGitErrorOutput(error));
+    }
+    const candidates = isMissingRemoteRef
+      ? [input.ref, input.target]
+      : [input.target, input.ref];
+    const ref = candidates.find((ref) => checkLocalRefExists(ref)) ?? null;
+    return { ref, fetchable: false };
+  }
+}
+
+/**
  * Get the merge base commit SHA.
  * Fetch both base and head with depth and then run merge base.
  * Try to find a merge base with a depth of 1000 max.
+ *
+ * Never fails when a ref can't be fetched from origin: falls back to the local
+ * history and returns `null` when no merge base can be found, which resolves
+ * to a build without baseline (see `resolveBaseline`).
  */
 export async function getMergeBaseCommitSha(input: {
   base: string;
   head: string;
 }): Promise<string | null> {
-  let depth = 200;
-
   const argosBaseRef = `argos/${input.base}`;
   const argosHeadRef = `argos/${input.head}`;
 
-  while (depth < 1000) {
-    await gitFetch({ ref: input.head, depth, target: argosHeadRef });
-    await gitFetch({ ref: input.base, depth, target: argosBaseRef });
-    const mergeBase = gitMergeBase({
-      base: argosBaseRef,
-      head: argosHeadRef,
-    });
+  let head: MergeBaseRef | null = null;
+  let base: MergeBaseRef | null = null;
+
+  for (let depth = 200; depth < 1000; depth += 200) {
+    if (!head || head.fetchable) {
+      head = await fetchMergeBaseRef({
+        ref: input.head,
+        depth,
+        target: argosHeadRef,
+      });
+    }
+    if (!base || base.fetchable) {
+      base = await fetchMergeBaseRef({
+        ref: input.base,
+        depth,
+        target: argosBaseRef,
+      });
+    }
+
+    // A ref unavailable both on origin and locally: no merge base can be found.
+    if (!head.ref || !base.ref) {
+      debug(
+        `No usable ref for "${!head.ref ? input.head : input.base}", no merge base`,
+      );
+      return null;
+    }
+
+    const mergeBase = gitMergeBase({ base: base.ref, head: head.ref });
     if (mergeBase) {
       return mergeBase;
     }
-    depth += 200;
+
+    // No ref can be deepened: fetching again would not bring more history.
+    if (!head.fetchable && !base.fetchable) {
+      break;
+    }
   }
 
-  if (isDebugEnabled) {
-    const headShas = listShas(argosHeadRef);
-    const baseShas = listShas(argosBaseRef);
-    debug(
-      `No merge base found for ${input.head} and ${input.base} with depth ${depth}`,
-    );
+  if (isDebugEnabled && head?.ref && base?.ref) {
+    const headShas = listShas(head.ref);
+    const baseShas = listShas(base.ref);
+    debug(`No merge base found for ${input.head} and ${input.base}`);
     debug(
       `Found ${headShas.length} commits in ${input.head}: ${headShas.join(", ")}`,
     );
