@@ -15,6 +15,7 @@ import {
 import {
   getMetadataPath,
   getScreenshotName,
+  normalizeBaseNames,
   validateThreshold,
   writeMetadata,
   type ScreenshotMetadata,
@@ -86,6 +87,23 @@ export type ArgosScreenshotOptions = {
    * @default 0.5
    */
   threshold?: number;
+
+  /**
+   * Name, or list of names, to compare this screenshot against instead of its
+   * own name. A list is tried in order and the first name found in the baseline
+   * build wins, which lets a brand new screenshot fall back to an existing one
+   * rather than showing up as added.
+   *
+   * The screenshot's own name is not implicitly included: list it first to keep
+   * comparing against itself when it exists.
+   *
+   * @example
+   *    // Compare "home-variant-b" against itself, or against "home" if it is new.
+   *    argosScreenshot(page, "home-variant-b", {
+   *      baseName: ["home-variant-b", "home"],
+   *    })
+   */
+  baseName?: string | string[];
 
   /**
    * Folder where the screenshots will be saved if not using the Argos reporter.
@@ -160,8 +178,11 @@ export async function argosScreenshot(
     root = DEFAULT_SCREENSHOT_ROOT,
     ariaSnapshot,
     disableHover = true,
+    baseName,
     ...playwrightOptions
   } = options;
+
+  const baseNames = normalizeBaseNames(baseName);
 
   if (!handler) {
     throw new Error("A Playwright `handler` object is required.");
@@ -194,8 +215,11 @@ export async function argosScreenshot(
   const context = getStabilizationContext(options);
   const afterAll = await beforeAll(handler, context, { disableHover });
 
-  const stabilizeAndScreenshot = async (name: string) => {
-    const names = getSnapshotNames(name, testInfo);
+  const stabilizeAndScreenshot = async (
+    name: string,
+    baseNames: string[] | null,
+  ) => {
+    const names = getSnapshotNames(name, testInfo, baseNames);
     const { path: screenshotPath, metadata } = await getPathAndMetadata({
       handler,
       extension: PNG_EXTENSION,
@@ -249,10 +273,10 @@ export async function argosScreenshot(
           ...metadata,
           transient: {
             parentName: `${names.name}${PNG_EXTENSION}`,
-            ...(metadata.transient.baseName
+            ...(names.baseNames
               ? {
-                  baseName: screenshotToSnapshotPath(
-                    metadata.transient.baseName,
+                  baseName: names.baseNames.map((baseName) =>
+                    screenshotToSnapshotPath(`${baseName}${PNG_EXTENSION}`),
                   ),
                 }
               : {}),
@@ -326,8 +350,12 @@ export async function argosScreenshot(
     for (const viewport of viewports) {
       const viewportSize = resolveViewport(viewport);
       await setViewportSize(handler, viewportSize);
+      // The viewport suffix is part of the name, so the baselines need it too.
       const attachments = await stabilizeAndScreenshot(
         getScreenshotName(name, { viewportWidth: viewportSize.width }),
+        baseNames?.map((baseName) =>
+          getScreenshotName(baseName, { viewportWidth: viewportSize.width }),
+        ) ?? null,
       );
       allAttachments.push(...attachments);
     }
@@ -338,7 +366,7 @@ export async function argosScreenshot(
     }
     await setViewportSize(handler, originalViewportSize);
   } else {
-    const attachments = await stabilizeAndScreenshot(name);
+    const attachments = await stabilizeAndScreenshot(name, baseNames);
     allAttachments.push(...attachments);
   }
 

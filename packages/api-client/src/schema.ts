@@ -632,7 +632,15 @@ export interface components {
         ScreenshotInput: {
             key: string;
             name: string;
-            baseName?: string | null;
+            /**
+             * @description Name(s) to compare this screenshot against, instead of its own name. An array is tried in order: the first name that exists in the baseline wins, which lets a new screenshot fall back to an existing one.
+             * @example home.png
+             * @example [
+             *       "home-variant-b.png",
+             *       "home.png"
+             *     ]
+             */
+            baseName?: (string | string[]) | null;
             parentName?: string | null;
             metadata?: {
                 /**

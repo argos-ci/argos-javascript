@@ -153,7 +153,11 @@ export function getViewportSize(page: Page) {
 
 type SnapshotNames = {
   name: string;
-  baseName: string | null;
+  /**
+   * Names to compare against, in priority order, or `null` to compare against
+   * `name` itself.
+   */
+  baseNames: string[] | null;
 };
 
 /**
@@ -175,27 +179,31 @@ export async function setViewportSize(page: Page, viewportSize: ViewportSize) {
 export function getSnapshotNames(
   name: string,
   testInfo: TestInfo | null,
+  baseNames?: string[] | null,
 ): SnapshotNames {
-  if (testInfo) {
-    // The project name is empty when no `projects` are configured in the
-    // Playwright config. In that case we must not prefix the name, otherwise it
-    // becomes an absolute path (e.g. `/my-screenshot`) and `path.resolve(root,
-    // name)` resolves it to the filesystem root.
-    const projectName = testInfo.project.name
-      ? `${testInfo.project.name}/${name}`
-      : name;
+  // The project name is empty when no `projects` are configured in the
+  // Playwright config. In that case we must not prefix the name, otherwise it
+  // becomes an absolute path (e.g. `/my-screenshot`) and `path.resolve(root,
+  // name)` resolves it to the filesystem root.
+  const prefix = testInfo?.project.name ? `${testInfo.project.name}/` : "";
+  const prefixedName = `${prefix}${name}`;
+  // User-provided names live in the same namespace as the snapshot name, so
+  // they get the same project prefix.
+  const prefixedBaseNames =
+    baseNames && baseNames.length > 0
+      ? baseNames.map((baseName) => `${prefix}${baseName}`)
+      : null;
 
-    if (testInfo.repeatEachIndex > 0) {
-      return {
-        name: `${projectName} repeat-${testInfo.repeatEachIndex}`,
-        baseName: projectName,
-      };
-    }
-
-    return { name: projectName, baseName: null };
+  if (testInfo && testInfo.repeatEachIndex > 0) {
+    return {
+      name: `${prefixedName} repeat-${testInfo.repeatEachIndex}`,
+      // A repeat has no baseline of its own, so it compares against the
+      // non-repeated snapshot — unless the user named its baselines.
+      baseNames: prefixedBaseNames ?? [prefixedName],
+    };
   }
 
-  return { name, baseName: null };
+  return { name: prefixedName, baseNames: prefixedBaseNames };
 }
 
 /**
@@ -227,10 +235,8 @@ export async function prepare(args: {
   ]);
 }
 
-type ScreenshotMetadataWithBaseName = ScreenshotMetadata & {
-  transient: Partial<NonNullable<ScreenshotMetadata["transient"]>> & {
-    baseName: string;
-  };
+type ScreenshotMetadataWithTransient = ScreenshotMetadata & {
+  transient: NonNullable<ScreenshotMetadata["transient"]>;
 };
 
 /**
@@ -244,7 +250,7 @@ export async function getPathAndMetadata(args: {
   root: string;
   useArgosReporter: boolean;
 }): Promise<{
-  metadata: ScreenshotMetadataWithBaseName;
+  metadata: ScreenshotMetadataWithTransient;
   path: string;
 }> {
   const { handler, testInfo, names, extension, root, useArgosReporter } = args;
@@ -302,12 +308,14 @@ export async function getPathAndMetadata(args: {
 
   metadata.transient = {};
 
-  if (names.baseName) {
-    metadata.transient.baseName = `${names.baseName}${extension}`;
+  if (names.baseNames) {
+    metadata.transient.baseName = names.baseNames.map(
+      (baseName) => `${baseName}${extension}`,
+    );
   }
 
   return {
-    metadata: metadata as ScreenshotMetadataWithBaseName,
+    metadata: metadata as ScreenshotMetadataWithTransient,
     path,
   };
 }
