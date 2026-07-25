@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.2.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.1.8...@argos-ci/storybook@6.2.0) (2026-07-25)
+
+
+### Features
+
+* **playwright:** warn when recommended Chromium launch options are missing ([a8f6c55](https://github.com/argos-ci/argos-javascript/commit/a8f6c556362962da57eb0e6d21f18ee2bf622a09))
+
+
+
+
+
 ## [6.1.8](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/storybook@6.1.7...@argos-ci/storybook@6.1.8) (2026-07-23)
 
 **Note:** Version bump only for package @argos-ci/storybook

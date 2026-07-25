@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.3.7...@argos-ci/playwright@7.4.0) (2026-07-25)
+
+
+### Features
+
+* expose a baseName option to set fallback baselines ([ab26668](https://github.com/argos-ci/argos-javascript/commit/ab26668e3a40ba405e7ca9143c5df9398d47fb73))
+* **playwright:** warn when recommended Chromium launch options are missing ([a8f6c55](https://github.com/argos-ci/argos-javascript/commit/a8f6c556362962da57eb0e6d21f18ee2bf622a09))
+
+
+
+
+
 ## [7.3.7](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/playwright@7.3.6...@argos-ci/playwright@7.3.7) (2026-07-23)
 
 **Note:** Version bump only for package @argos-ci/playwright

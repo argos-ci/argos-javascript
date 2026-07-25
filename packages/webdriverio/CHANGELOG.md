@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.7.19...@argos-ci/webdriverio@0.8.0) (2026-07-25)
+
+
+### Features
+
+* **playwright:** warn when recommended Chromium launch options are missing ([a8f6c55](https://github.com/argos-ci/argos-javascript/commit/a8f6c556362962da57eb0e6d21f18ee2bf622a09))
+
+
+
+
+
 ## [0.7.19](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/webdriverio@0.7.18...@argos-ci/webdriverio@0.7.19) (2026-07-23)
 
 **Note:** Version bump only for package @argos-ci/webdriverio

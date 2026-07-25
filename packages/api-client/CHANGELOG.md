@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.27.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.26.0...@argos-ci/api-client@0.27.0) (2026-07-25)
+
+
+### Features
+
+* expose a baseName option to set fallback baselines ([ab26668](https://github.com/argos-ci/argos-javascript/commit/ab26668e3a40ba405e7ca9143c5df9398d47fb73))
+
+
+
+
+
 # [0.26.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.25.0...@argos-ci/api-client@0.26.0) (2026-07-12)
 
 

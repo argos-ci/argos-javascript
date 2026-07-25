@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@4.0.4...@argos-ci/util@4.1.0) (2026-07-25)
+
+
+### Features
+
+* expose a baseName option to set fallback baselines ([ab26668](https://github.com/argos-ci/argos-javascript/commit/ab26668e3a40ba405e7ca9143c5df9398d47fb73))
+
+
+
+
+
 ## [4.0.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@4.0.3...@argos-ci/util@4.0.4) (2026-07-09)
 
 **Note:** Version bump only for package @argos-ci/util

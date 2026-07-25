@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/vitest@0.3.2...@argos-ci/vitest@0.4.0) (2026-07-25)
+
+
+### Features
+
+* expose a baseName option to set fallback baselines ([ab26668](https://github.com/argos-ci/argos-javascript/commit/ab26668e3a40ba405e7ca9143c5df9398d47fb73))
+* **playwright:** warn when recommended Chromium launch options are missing ([a8f6c55](https://github.com/argos-ci/argos-javascript/commit/a8f6c556362962da57eb0e6d21f18ee2bf622a09))
+
+
+
+
+
 ## [0.3.2](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/vitest@0.3.1...@argos-ci/vitest@0.3.2) (2026-07-23)
 
 
