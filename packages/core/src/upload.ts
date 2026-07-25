@@ -172,7 +172,7 @@ interface Screenshot {
   optimizedPath: string;
   metadata: ScreenshotMetadata | null;
   threshold: number | null;
-  baseName: string | null;
+  baseName: string | string[] | null;
   pwTrace: {
     path: string;
     hash: string;

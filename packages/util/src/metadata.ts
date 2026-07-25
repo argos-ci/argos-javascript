@@ -92,8 +92,12 @@ export type ScreenshotMetadata = {
   transient?: {
     /** Threshold configured for this screenshot. */
     threshold?: number;
-    /** Override the name to find the comparison baseline. */
-    baseName?: string;
+    /**
+     * Name(s) used to find the comparison baseline, instead of the snapshot's
+     * own name. Several names are tried in order: the first one that exists in
+     * the baseline wins.
+     */
+    baseName?: string | string[];
     /** Name of the parent screenshot. */
     parentName?: string;
   };

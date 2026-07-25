@@ -4,7 +4,7 @@ import {
   type ArgosAttachment,
 } from "@argos-ci/playwright";
 import { resolveViewport, type ViewportSize } from "@argos-ci/browser";
-import { getScreenshotName } from "@argos-ci/util";
+import { getScreenshotName, normalizeBaseNames } from "@argos-ci/util";
 import type {
   ArgosVitestPluginOptions,
   VitestScreenshotOptions,
@@ -41,6 +41,7 @@ export const createArgosScreenshotCommand = (
     }
 
     const merged: ArgosVitestPluginOptions = { ...pluginOptions, ...options };
+    const baseNames = normalizeBaseNames(merged.baseName);
     const fullPage = merged.fullPage ?? false;
     const fitWidth = !fullPage;
 
@@ -74,7 +75,15 @@ export const createArgosScreenshotCommand = (
           const shot = await screenshotFrame(
             ctx,
             getScreenshotName(name, { viewportWidth: size.width }),
-            merged,
+            {
+              ...merged,
+              // The viewports loop is reimplemented here rather than delegated
+              // to the Playwright SDK, so the viewport suffix has to be applied
+              // to the baselines as well as to the name.
+              baseName: baseNames?.map((baseName) =>
+                getScreenshotName(baseName, { viewportWidth: size.width }),
+              ),
+            },
             // Keep the fixed viewport width, only grow the height to fit.
             { fitWidth: false },
           );

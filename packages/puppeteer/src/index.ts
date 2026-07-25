@@ -14,6 +14,7 @@ import {
 import {
   type ScreenshotMetadata,
   getScreenshotName,
+  normalizeBaseNames,
   readVersionFromPackage,
   validateThreshold,
   writeMetadata,
@@ -68,6 +69,23 @@ export type ArgosScreenshotOptions = Omit<
    * @default 0.5
    */
   threshold?: number;
+
+  /**
+   * Name, or list of names, to compare this screenshot against instead of its
+   * own name. A list is tried in order and the first name found in the baseline
+   * build wins, which lets a brand new screenshot fall back to an existing one
+   * rather than showing up as added.
+   *
+   * The screenshot's own name is not implicitly included: list it first to keep
+   * comparing against itself when it exists.
+   *
+   * @example
+   *    // Compare "home-variant-b" against itself, or against "home" if it is new.
+   *    argosScreenshot(page, "home-variant-b", {
+   *      baseName: ["home-variant-b", "home"],
+   *    })
+   */
+  baseName?: string | string[];
 
   /**
    * Wait for the UI to stabilize before taking the screenshot.
@@ -251,8 +269,11 @@ export async function argosScreenshot(
     element,
     viewports,
     argosCSS: _argosCSS,
+    baseName,
     ...puppeteerOptions
   } = options;
+
+  const baseNames = normalizeBaseNames(baseName);
   if (!page) {
     throw new Error("A Puppeteer `page` object is required.");
   }
@@ -269,7 +290,9 @@ export async function argosScreenshot(
   const afterAll = await beforeAll(page, options);
   const fullPage = checkIsFullPage(options);
 
-  async function collectMetadata(): Promise<ScreenshotMetadata> {
+  async function collectMetadata(
+    baseNames: string[] | null,
+  ): Promise<ScreenshotMetadata> {
     const [
       colorScheme,
       mediaType,
@@ -315,6 +338,10 @@ export async function argosScreenshot(
 
     metadata.transient = {};
 
+    if (baseNames) {
+      metadata.transient.baseName = baseNames;
+    }
+
     if (options?.tag) {
       metadata.tags = Array.isArray(options.tag) ? options.tag : [options.tag];
     }
@@ -327,14 +354,17 @@ export async function argosScreenshot(
     return metadata;
   }
 
-  async function stabilizeAndScreenshot(name: string) {
+  async function stabilizeAndScreenshot(
+    name: string,
+    baseNames: string[] | null,
+  ) {
     await waitForReadiness(page, options);
     const afterEach = await beforeEach(page, options);
     await waitForReadiness(page, options);
 
     const [screenshotPath, metadata] = await Promise.all([
       getScreenshotPath(name),
-      collectMetadata(),
+      collectMetadata(baseNames),
     ]);
 
     await writeMetadata(screenshotPath, metadata);
@@ -375,14 +405,18 @@ export async function argosScreenshot(
     for (const viewport of viewports) {
       const viewportSize = resolveViewport(viewport);
       await setViewportSize(page, viewportSize);
+      // The viewport suffix is part of the name, so the baselines need it too.
       await stabilizeAndScreenshot(
         getScreenshotName(name, { viewportWidth: viewportSize.width }),
+        baseNames?.map((baseName) =>
+          getScreenshotName(baseName, { viewportWidth: viewportSize.width }),
+        ) ?? null,
       );
     }
     // Restore the original viewport
     await setViewportSize(page, originalViewport);
   } else {
-    await stabilizeAndScreenshot(name);
+    await stabilizeAndScreenshot(name, baseNames);
   }
 
   await afterAll();

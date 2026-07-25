@@ -40,6 +40,7 @@
   "scripts": {
     "build": "tsdown",
     "check-types": "tsc",
+    "test": "vitest run src",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."
   },

@@ -10,6 +10,7 @@ import { getGlobalScript } from "@argos-ci/browser";
 import {
   getMetadataPath,
   getScreenshotName,
+  normalizeBaseNames,
   type ScreenshotMetadata,
   validateThreshold,
 } from "@argos-ci/util/browser";
@@ -35,6 +36,23 @@ type ArgosScreenshotOptions = Partial<
    * @default 0.5
    */
   threshold?: number;
+
+  /**
+   * Name, or list of names, to compare this screenshot against instead of its
+   * own name. A list is tried in order and the first name found in the baseline
+   * build wins, which lets a brand new screenshot fall back to an existing one
+   * rather than showing up as added.
+   *
+   * The screenshot's own name is not implicitly included: list it first to keep
+   * comparing against itself when it exists.
+   *
+   * @example
+   *    // Compare "home-variant-b" against itself, or against "home" if it is new.
+   *    cy.argosScreenshot("home-variant-b", {
+   *      baseName: ["home-variant-b", "home"],
+   *    })
+   */
+  baseName?: string | string[];
 
   /**
    * Wait for the UI to stabilize before taking the screenshot.
@@ -177,7 +195,15 @@ Cypress.Commands.add(
   "argosScreenshot",
   { prevSubject: ["optional", "element", "window", "document"] },
   (subject, name, options = {}) => {
-    const { viewports, argosCSS: _argosCSS, tag, ...cypressOptions } = options;
+    const {
+      viewports,
+      argosCSS: _argosCSS,
+      tag,
+      baseName,
+      ...cypressOptions
+    } = options;
+
+    const baseNames = normalizeBaseNames(baseName);
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -192,7 +218,7 @@ Cypress.Commands.add(
 
     const afterAll = beforeAll(options);
 
-    function stabilizeAndScreenshot(name: string) {
+    function stabilizeAndScreenshot(name: string, baseNames: string[] | null) {
       waitForReadiness(options);
       const afterEach = beforeEach(options);
       waitForReadiness(options);
@@ -248,6 +274,10 @@ Cypress.Commands.add(
 
         metadata.transient = {};
 
+        if (baseNames) {
+          metadata.transient.baseName = baseNames;
+        }
+
         if (tag) {
           metadata.tags = Array.isArray(tag) ? tag : [tag];
         }
@@ -267,8 +297,12 @@ Cypress.Commands.add(
       for (const viewport of viewports) {
         const viewportSize = resolveViewport(viewport);
         cy.viewport(viewportSize.width, viewportSize.height);
+        // The viewport suffix is part of the name, so the baselines need it too.
         stabilizeAndScreenshot(
           getScreenshotName(name, { viewportWidth: viewportSize.width }),
+          baseNames?.map((baseName) =>
+            getScreenshotName(baseName, { viewportWidth: viewportSize.width }),
+          ) ?? null,
         );
       }
 
@@ -278,7 +312,7 @@ Cypress.Commands.add(
         Cypress.config("viewportHeight"),
       );
     } else {
-      stabilizeAndScreenshot(name);
+      stabilizeAndScreenshot(name, baseNames);
     }
 
     afterAll();

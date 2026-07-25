@@ -162,24 +162,61 @@ describe("getSnapshotNames", () => {
 
   it("prefixes the name with the project name", () => {
     const names = getSnapshotNames("hero", createMockTestInfo("chromium"));
-    expect(names).toEqual({ name: "chromium/hero", baseName: null });
+    expect(names).toEqual({ name: "chromium/hero", baseNames: null });
   });
 
   it("does not prefix the name when the project name is empty", () => {
     // No `projects` configured in the Playwright config: the project name is
     // empty. Prefixing would produce an absolute path (`/hero`).
     const names = getSnapshotNames("hero", createMockTestInfo(""));
-    expect(names).toEqual({ name: "hero", baseName: null });
+    expect(names).toEqual({ name: "hero", baseNames: null });
   });
 
   it("returns the bare name when there is no test info", () => {
     const names = getSnapshotNames("hero", null);
-    expect(names).toEqual({ name: "hero", baseName: null });
+    expect(names).toEqual({ name: "hero", baseNames: null });
   });
 
   it("handles repeated tests with an empty project name", () => {
     const names = getSnapshotNames("hero", createMockTestInfo("", 2));
-    expect(names).toEqual({ name: "hero repeat-2", baseName: "hero" });
+    expect(names).toEqual({ name: "hero repeat-2", baseNames: ["hero"] });
+  });
+
+  it("prefixes the base names with the project name", () => {
+    const names = getSnapshotNames(
+      "home-variant-b",
+      createMockTestInfo("chromium"),
+      ["home-variant-b", "home"],
+    );
+    expect(names).toEqual({
+      name: "chromium/home-variant-b",
+      baseNames: ["chromium/home-variant-b", "chromium/home"],
+    });
+  });
+
+  it("keeps the base names when there is no test info", () => {
+    const names = getSnapshotNames("home-variant-b", null, ["home"]);
+    expect(names).toEqual({
+      name: "home-variant-b",
+      baseNames: ["home"],
+    });
+  });
+
+  it("ignores an empty list of base names", () => {
+    const names = getSnapshotNames("hero", createMockTestInfo("chromium"), []);
+    expect(names).toEqual({ name: "chromium/hero", baseNames: null });
+  });
+
+  it("lets the base names win over the implicit repeat baseline", () => {
+    const names = getSnapshotNames(
+      "home-variant-b",
+      createMockTestInfo("", 2),
+      ["home-variant-b", "home"],
+    );
+    expect(names).toEqual({
+      name: "home-variant-b repeat-2",
+      baseNames: ["home-variant-b", "home"],
+    });
   });
 });
 

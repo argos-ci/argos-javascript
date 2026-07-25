@@ -63,6 +63,23 @@ export interface VitestScreenshotOptions {
   threshold?: number;
 
   /**
+   * Name, or list of names, to compare this screenshot against instead of its
+   * own name. A list is tried in order and the first name found in the baseline
+   * build wins, which lets a brand new screenshot fall back to an existing one
+   * rather than showing up as added.
+   *
+   * The screenshot's own name is not implicitly included: list it first to keep
+   * comparing against itself when it exists.
+   *
+   * @example
+   *    // Compare "home-variant-b" against itself, or against "home" if it is new.
+   *    argosScreenshot("home-variant-b", {
+   *      baseName: ["home-variant-b", "home"],
+   *    })
+   */
+  baseName?: string | string[];
+
+  /**
    * Tag or array of tags to attach to the screenshot.
    */
   tag?: string | string[];
