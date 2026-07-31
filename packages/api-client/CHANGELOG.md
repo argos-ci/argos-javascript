@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.28.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.27.0...@argos-ci/api-client@0.28.0) (2026-07-31)
+
+
+### Features
+
+* **cli:** add test and test-comment commands ([5a2bce5](https://github.com/argos-ci/argos-javascript/commit/5a2bce515595173ae726b739bc0cdf345bef66ce))
+
+
+
+
+
 # [0.27.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/api-client@0.26.0...@argos-ci/api-client@0.27.0) (2026-07-25)
 
 
