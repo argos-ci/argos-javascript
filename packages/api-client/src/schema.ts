@@ -24,6 +24,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/accounts/{accountSlug}/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an account's projects
+         * @description List the projects of an account that are visible to the authenticated user, most recently active first. Results are paginated. The token must be scoped to the account.
+         */
+        get: operations["listProjects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builds": {
         parameters: {
             query?: never;
@@ -233,7 +253,7 @@ export interface paths {
         };
         /**
          * Get the current user
-         * @description Retrieve the user associated with the personal access token used to authenticate the request.
+         * @description Retrieve the user associated with the token used to authenticate the request, with the accounts (personal and teams) the token can access. Account slugs are the `owner` used in other API paths.
          */
         get: operations["getMe"];
         put?: never;
@@ -333,9 +353,9 @@ export interface paths {
         };
         /**
          * List a project's builds
-         * @description List the builds of a project, most recent first. Results are paginated. Use `distinctName` to return only the latest build per name and commit.
+         * @description List the builds of a project, most recent first. Results are paginated. Use `search` to match builds by name, branch or commit, and `distinctName` to return only the latest build per name and commit.
          */
-        get: operations["getProjectBuilds"];
+        get: operations["listBuilds"];
         put?: never;
         post?: never;
         delete?: never;
@@ -477,15 +497,15 @@ export interface paths {
         };
         /**
          * List the comments on a build
-         * @description List the comments on a build, with pagination.
+         * @description List the comments on a build.
          */
-        get: operations["listComments"];
+        get: operations["listBuildComments"];
         put?: never;
         /**
          * Post a comment (or reply) on a build
          * @description Post a comment on a build. Start a new thread, reply to an existing one with `threadId`, optionally anchor the comment to a screenshot diff, or attach it to your pending review with `addToReview`.
          */
-        post: operations["createComment"];
+        post: operations["createBuildComment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -503,21 +523,21 @@ export interface paths {
          * Get a single comment on a build
          * @description Retrieve a single comment on a build by its ID.
          */
-        get: operations["getComment"];
+        get: operations["getBuildComment"];
         put?: never;
         post?: never;
         /**
          * Delete a comment on a build
          * @description Delete a comment on a build. Only the comment's author can delete it.
          */
-        delete: operations["deleteComment"];
+        delete: operations["deleteBuildComment"];
         options?: never;
         head?: never;
         /**
          * Update a comment on a build
          * @description Update the body of a comment on a build. Only the comment's author can edit it.
          */
-        patch: operations["updateComment"];
+        patch: operations["updateBuildComment"];
         trace?: never;
     };
     "/projects/{owner}/{project}/builds/{buildNumber}/comments/{commentId}/reactions": {
@@ -530,15 +550,15 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Add an emoji reaction to a comment
-         * @description Add an emoji reaction to a comment on behalf of the authenticated user.
+         * Add an emoji reaction to a comment on a build
+         * @description Add an emoji reaction to a comment on a build, on behalf of the authenticated user.
          */
-        post: operations["addCommentReaction"];
+        post: operations["addBuildCommentReaction"];
         /**
-         * Remove an emoji reaction from a comment
-         * @description Remove an emoji reaction previously added by the authenticated user from a comment.
+         * Remove an emoji reaction from a comment on a build
+         * @description Remove an emoji reaction previously added by the authenticated user from a comment on a build.
          */
-        delete: operations["removeCommentReaction"];
+        delete: operations["removeBuildCommentReaction"];
         options?: never;
         head?: never;
         patch?: never;
@@ -554,10 +574,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Mark a comment thread as resolved
-         * @description Mark a comment thread as resolved.
+         * Mark a build comment thread as resolved
+         * @description Mark a comment thread on a build as resolved.
          */
-        post: operations["resolveCommentThread"];
+        post: operations["resolveBuildCommentThread"];
         delete?: never;
         options?: never;
         head?: never;
@@ -574,10 +594,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reopen a resolved comment thread
-         * @description Reopen a previously resolved comment thread.
+         * Reopen a resolved build comment thread
+         * @description Reopen a previously resolved comment thread on a build.
          */
-        post: operations["unresolveCommentThread"];
+        post: operations["unresolveBuildCommentThread"];
         delete?: never;
         options?: never;
         head?: never;
@@ -594,15 +614,195 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Subscribe to a comment thread's notifications
-         * @description Subscribe the authenticated user to a comment thread to receive notifications about new replies.
+         * Subscribe to a build comment thread's notifications
+         * @description Subscribe the authenticated user to a comment thread on a build to receive notifications about new replies.
          */
-        post: operations["subscribeCommentThread"];
+        post: operations["subscribeBuildCommentThread"];
         /**
-         * Unsubscribe from a comment thread's notifications
-         * @description Unsubscribe the authenticated user from a comment thread's notifications.
+         * Unsubscribe from a build comment thread's notifications
+         * @description Unsubscribe the authenticated user from a build comment thread's notifications.
          */
-        delete: operations["unsubscribeCommentThread"];
+        delete: operations["unsubscribeBuildCommentThread"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a test and its flakiness metrics
+         * @description Get a test with its flakiness metrics over a period: how many builds ran it, how many times it changed, and how stable and consistent those changes were. The metrics also come bucketed over time, so you can tell a test that has always been flaky from one that started recently. Pair it with `listTestChanges` to see what actually keeps changing.
+         */
+        get: operations["getTest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a test's changes
+         * @description List the distinct changes a test produced over a period, the ones that came back most often first. Each change is one exact visual difference, with how many times it reappeared, whether it is ignored, and the diff of its latest occurrence — so you can look at what moved. A change that keeps reappearing while nothing in the UI changed is a flaky one: fix what makes it unstable, or silence it with `ignoreChange`.
+         */
+        get: operations["listTestChanges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the comments on a test
+         * @description List the comments on a test.
+         */
+        get: operations["listTestComments"];
+        put?: never;
+        /**
+         * Post a comment (or reply) on a test
+         * @description Post a comment on a test. Start a new thread, or reply to an existing one with `threadId`.
+         */
+        post: operations["createTestComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single comment on a test
+         * @description Retrieve a single comment on a test by its ID.
+         */
+        get: operations["getTestComment"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a comment on a test
+         * @description Delete a comment on a test. Only the comment's author can delete it.
+         */
+        delete: operations["deleteTestComment"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a comment on a test
+         * @description Update the body of a comment on a test. Only the comment's author can edit it.
+         */
+        patch: operations["updateTestComment"];
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/comments/{commentId}/reactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add an emoji reaction to a comment on a test
+         * @description Add an emoji reaction to a comment on a test, on behalf of the authenticated user.
+         */
+        post: operations["addTestCommentReaction"];
+        /**
+         * Remove an emoji reaction from a comment on a test
+         * @description Remove an emoji reaction previously added by the authenticated user from a comment on a test.
+         */
+        delete: operations["removeTestCommentReaction"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/comments/{commentId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a test comment thread as resolved
+         * @description Mark a comment thread on a test as resolved.
+         */
+        post: operations["resolveTestCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/comments/{commentId}/unresolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopen a resolved test comment thread
+         * @description Reopen a previously resolved comment thread on a test.
+         */
+        post: operations["unresolveTestCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/comments/{commentId}/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subscribe to a test comment thread's notifications
+         * @description Subscribe the authenticated user to a comment thread on a test to receive notifications about new replies.
+         */
+        post: operations["subscribeTestCommentThread"];
+        /**
+         * Unsubscribe from a test comment thread's notifications
+         * @description Unsubscribe the authenticated user from a test comment thread's notifications.
+         */
+        delete: operations["unsubscribeTestCommentThread"];
         options?: never;
         head?: never;
         patch?: never;
@@ -764,6 +964,15 @@ export interface components {
          * @example 42
          */
         BuildNumber: string;
+        /** @description The ID of the comment */
+        CommentId: string;
+        /** @description ID of any comment in the thread */
+        ThreadCommentId: string;
+        /**
+         * @description The test identifier, as returned in a diff's `test.id`
+         * @example WEB-xf23d
+         */
+        TestId: string;
         AccountAnalytics: {
             screenshots: {
                 series: {
@@ -825,10 +1034,36 @@ export interface components {
                 message: string;
             }[];
         };
+        /** @description Page information */
+        PageInfo: {
+            /** @description Total number of items */
+            total: number;
+            /** @description Current page number */
+            page: number;
+            /** @description Number of items per page */
+            perPage: number;
+        };
+        /** @description Project */
+        Project: {
+            id: string;
+            account: components["schemas"]["Account"];
+            name: string;
+            defaultBaseBranch: string;
+            hasRemoteContentAccess: boolean;
+        };
+        /** @description Account */
+        Account: {
+            id: string;
+            slug: string;
+        };
         /** @description Build */
         Build: {
             id: components["schemas"]["BuildId"];
-            number: components["schemas"]["BuildNumberOutput"];
+            /**
+             * @description The build number
+             * @example 42
+             */
+            number: number;
             /** @description The head reference of the build */
             head: components["schemas"]["BuildGitReference"];
             /** @description The base reference of the build */
@@ -900,33 +1135,22 @@ export interface components {
             /** @description The branch name */
             branch: string;
         };
-        /** @description A user. */
-        User: {
+        /** @description The authenticated user. */
+        Me: {
             id: string;
             slug: string;
             name: string | null;
+            /** @description The accounts this token can access: the personal account and the teams selected when the token was created or authorized. */
+            accounts: components["schemas"]["MeAccount"][];
         };
-        /** @description Project */
-        Project: {
+        /** @description An account (personal or team) accessible to the token. */
+        MeAccount: {
             id: string;
-            account: components["schemas"]["Account"];
-            name: string;
-            defaultBaseBranch: string;
-            hasRemoteContentAccess: boolean;
-        };
-        /** @description Account */
-        Account: {
-            id: string;
+            /** @description Account slug, used as the `owner` in API paths. */
             slug: string;
-        };
-        /** @description Page information */
-        PageInfo: {
-            /** @description Total number of items */
-            total: number;
-            /** @description Current page number */
-            page: number;
-            /** @description Number of items per page */
-            perPage: number;
+            name: string | null;
+            /** @enum {string} */
+            type: "user" | "team";
         };
         /** @description Snapshot diff */
         SnapshotDiff: {
@@ -1226,10 +1450,19 @@ export interface components {
             /** @description Date the review was created. */
             date: string;
         };
-        /** @description A comment posted on a build. */
+        /** @description A user. */
+        User: {
+            id: string;
+            slug: string;
+            name: string | null;
+        };
+        /** @description A comment posted on a build or on a test. */
         Comment: {
             id: string;
-            buildId: string;
+            /** @description Build this comment is posted on, null when it is posted on a test. */
+            buildId: string | null;
+            /** @description Test this comment is posted on, null when it is posted on a build. */
+            testId: string | null;
             /** @description Root comment ID when this comment is a reply. */
             threadId: string | null;
             /** @description Rich-text JSON content of the comment. */
@@ -1268,11 +1501,87 @@ export interface components {
                 users: components["schemas"]["User"][];
             }[];
         };
+        /** @description A test with its flakiness metrics, both aggregated and over time, and when it first and last changed. */
+        TestDetails: {
+            /** @description Unique identifier of the test */
+            id: string;
+            /** @description Name of the test */
+            name: string;
+            /** @description Name of the build the test belongs to */
+            buildName: string;
+            metrics: components["schemas"]["TestMetrics"];
+            status: components["schemas"]["TestStatus"];
+            /**
+             * Format: date-time
+             * @description When Argos first saw this test.
+             */
+            createdAt: string;
+            /**
+             * Format: uri
+             * @description URL of the test in Argos.
+             */
+            url: string;
+            /** @description The test's metrics bucketed over the requested period, oldest first. Use it to tell a test that has always been flaky from one that only started recently. */
+            series: components["schemas"]["TestMetricsDataPoint"][];
+            /** @description The first time this test ever changed, whatever the period. Null when it never changed. */
+            firstSeenChange: components["schemas"]["TestChangeOccurrence"] | null;
+            /** @description The last time this test changed, whatever the period. Null when it never changed. */
+            lastSeenChange: components["schemas"]["TestChangeOccurrence"] | null;
+        };
         /**
-         * @description The build number
-         * @example 42
+         * @description `ongoing` when the test still runs — it showed up in the latest build of its build name. `removed` when it did not, so it was deleted, renamed or skipped.
+         * @enum {string}
          */
-        BuildNumberOutput: unknown;
+        TestStatus: "ongoing" | "removed";
+        /** @description One bucket of a test's metrics over time. The bucket size is derived from the requested period. */
+        TestMetricsDataPoint: {
+            /**
+             * Format: date-time
+             * @description Start of the time bucket.
+             */
+            date: string;
+            /** @description Number of builds in which the test ran in this bucket. */
+            total: number;
+            /** @description Number of times the test changed in this bucket. */
+            changes: number;
+            /** @description Number of those changes that were seen only once. */
+            uniqueChanges: number;
+        };
+        /** @description A single appearance of a change, in the build that saw it. */
+        TestChangeOccurrence: {
+            /**
+             * Format: date-time
+             * @description When the diff was captured.
+             */
+            date: string;
+            /** @description Public URL of the diff image. Null when the image is no longer available. */
+            url: string | null;
+            /**
+             * @description Number of the build that captured the diff.
+             * @example 42
+             */
+            buildNumber: number;
+            /**
+             * Format: uri
+             * @description URL of that build in Argos.
+             */
+            buildUrl: string;
+        };
+        /** @description One distinct change of a test: an exact visual difference, with how often it came back over the period. A change that keeps reappearing while nothing in the UI changed is a flaky one. */
+        TestChange: {
+            /** @description Unique identifier of the change (a test + fingerprint pair). Use it with the ignore/unignore endpoints. */
+            id: string;
+            /** @description Whether this change is currently ignored. Ignored changes no longer require review and are automatically approved. */
+            ignored: boolean;
+            /** @description Number of times this change has been seen over the metrics period. A high count for a recurring change is a strong flakiness signal. */
+            occurrences: number;
+            /** @description The first time this change was seen over the period. */
+            firstSeen: components["schemas"]["TestChangeOccurrence"];
+            /** @description The last time this change was seen over the period. */
+            lastSeen: components["schemas"]["TestChangeOccurrence"];
+            /** @description The diff captured the last time the change was seen, with the baseline and the captured snapshot, so you can look at what moved. */
+            diff: components["schemas"]["SnapshotDiff"];
+        };
     };
     responses: never;
     parameters: never;
@@ -1323,6 +1632,73 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listProjects: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Slug of the account to list projects for. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of projects */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["Project"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2151,7 +2527,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["User"];
+                    "application/json": components["schemas"]["Me"];
                 };
             };
             /** @description Unauthorized */
@@ -2427,7 +2803,7 @@ export interface operations {
             };
         };
     };
-    getProjectBuilds: {
+    listBuilds: {
         parameters: {
             query?: {
                 /** @description Number of items per page (max 100) */
@@ -2436,6 +2812,8 @@ export interface operations {
                 page?: string;
                 head?: string;
                 headSha?: components["schemas"]["Sha1Hash"];
+                /** @description Search builds by name, branch (substring) or commit (prefix). */
+                search?: string;
                 /** @description Only return the latest builds created, unique by name and commit. */
                 distinctName?: string;
             };
@@ -3039,7 +3417,7 @@ export interface operations {
             };
         };
     };
-    listComments: {
+    listBuildComments: {
         parameters: {
             query?: never;
             header?: never;
@@ -3053,7 +3431,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Build comments, oldest first. Replies carry a threadId pointing at their root comment. */
+            /** @description Comments, oldest first. Replies carry a threadId pointing at their root comment. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3109,7 +3487,7 @@ export interface operations {
             };
         };
     };
-    createComment: {
+    createBuildComment: {
         parameters: {
             query?: never;
             header?: never;
@@ -3206,7 +3584,7 @@ export interface operations {
             };
         };
     };
-    getComment: {
+    getBuildComment: {
         parameters: {
             query?: never;
             header?: never;
@@ -3216,7 +3594,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description The ID of the comment */
-                commentId: string;
+                commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
         };
@@ -3278,7 +3656,7 @@ export interface operations {
             };
         };
     };
-    deleteComment: {
+    deleteBuildComment: {
         parameters: {
             query?: never;
             header?: never;
@@ -3288,7 +3666,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description The ID of the comment */
-                commentId: string;
+                commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
         };
@@ -3350,7 +3728,7 @@ export interface operations {
             };
         };
     };
-    updateComment: {
+    updateBuildComment: {
         parameters: {
             query?: never;
             header?: never;
@@ -3360,7 +3738,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description The ID of the comment */
-                commentId: string;
+                commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
         };
@@ -3431,7 +3809,7 @@ export interface operations {
             };
         };
     };
-    addCommentReaction: {
+    addBuildCommentReaction: {
         parameters: {
             query?: never;
             header?: never;
@@ -3441,7 +3819,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description The ID of the comment */
-                commentId: string;
+                commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
         };
@@ -3510,7 +3888,7 @@ export interface operations {
             };
         };
     };
-    removeCommentReaction: {
+    removeBuildCommentReaction: {
         parameters: {
             query: {
                 /** @description The emoji reaction to remove. */
@@ -3523,7 +3901,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description The ID of the comment */
-                commentId: string;
+                commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
         };
@@ -3585,7 +3963,7 @@ export interface operations {
             };
         };
     };
-    resolveCommentThread: {
+    resolveBuildCommentThread: {
         parameters: {
             query?: never;
             header?: never;
@@ -3595,7 +3973,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description ID of any comment in the thread */
-                commentId: string;
+                commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
         };
@@ -3657,7 +4035,7 @@ export interface operations {
             };
         };
     };
-    unresolveCommentThread: {
+    unresolveBuildCommentThread: {
         parameters: {
             query?: never;
             header?: never;
@@ -3667,7 +4045,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description ID of any comment in the thread */
-                commentId: string;
+                commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
         };
@@ -3729,7 +4107,7 @@ export interface operations {
             };
         };
     };
-    subscribeCommentThread: {
+    subscribeBuildCommentThread: {
         parameters: {
             query?: never;
             header?: never;
@@ -3739,7 +4117,7 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description ID of any comment in the thread */
-                commentId: string;
+                commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
         };
@@ -3801,7 +4179,7 @@ export interface operations {
             };
         };
     };
-    unsubscribeCommentThread: {
+    unsubscribeBuildCommentThread: {
         parameters: {
             query?: never;
             header?: never;
@@ -3811,7 +4189,962 @@ export interface operations {
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
                 /** @description ID of any comment in the thread */
-                commentId: string;
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unsubscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getTest: {
+        parameters: {
+            query?: {
+                /** @description Period over which the test flakiness metrics are computed. */
+                metricsPeriod?: "LAST_24_HOURS" | "LAST_3_DAYS" | "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The test and its flakiness metrics */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestDetails"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listTestChanges: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Period over which the test flakiness metrics are computed. */
+                metricsPeriod?: "LAST_24_HOURS" | "LAST_3_DAYS" | "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
+                /** @description Restrict the changes to the ones currently ignored (`true`) or to the ones still under review (`false`). Omit it to get both. */
+                ignored?: "true" | "false";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of the test's changes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["TestChange"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listTestComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comments, oldest first. Replies carry a threadId pointing at their root comment. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createTestComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
+                    };
+                    /** @description Root comment ID to reply to. */
+                    threadId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Comment created successfully — returns the comment */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getTestComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description The ID of the comment */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteTestComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description The ID of the comment */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment deleted successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateTestComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description The ID of the comment */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Comment updated successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    addTestCommentReaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description The ID of the comment */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The emoji to react with. */
+                    emoji: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Reaction added — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeTestCommentReaction: {
+        parameters: {
+            query: {
+                /** @description The emoji reaction to remove. */
+                emoji: string;
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description The ID of the comment */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reaction removed — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resolveTestCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description ID of any comment in the thread */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread resolved — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unresolveTestCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description ID of any comment in the thread */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread reopened — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    subscribeTestCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description ID of any comment in the thread */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unsubscribeTestCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+                /** @description ID of any comment in the thread */
+                commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
         };

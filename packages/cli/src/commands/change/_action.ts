@@ -53,8 +53,10 @@ export function defineChangeAction(opts: {
           options: BaseCommandOptions & MetricsPeriodOption,
         ) => {
           try {
-            const { client, owner, project } =
-              await resolveProjectTarget(options);
+            const { client, owner, project } = await resolveProjectTarget(
+              options,
+              { auth: "user" },
+            );
             const result = await opts.perform({
               client,
               owner,

@@ -4,6 +4,10 @@ type Build = ArgosAPISchema.components["schemas"]["Build"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
 type TestMetrics = ArgosAPISchema.components["schemas"]["TestMetrics"];
+type TestDetails = ArgosAPISchema.components["schemas"]["TestDetails"];
+type TestChange = ArgosAPISchema.components["schemas"]["TestChange"];
+type TestChangeOccurrence =
+  ArgosAPISchema.components["schemas"]["TestChangeOccurrence"];
 type Change = ArgosAPISchema.components["schemas"]["Change"];
 type BuildReview = ArgosAPISchema.components["schemas"]["BuildReview"];
 type Comment = ArgosAPISchema.components["schemas"]["Comment"];
@@ -139,6 +143,52 @@ export function formatSnapshots(diffs: SnapshotDiff[], build: Build): string {
     `Summary: ${formatSnapshotSummary(diffs)}`,
     "",
     ...diffs.flatMap((diff) => [...formatSnapshotDiff(diff, build), ""]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+/** When and where a change was captured, on one line. */
+function formatOccurrence(occurrence: TestChangeOccurrence): string {
+  return `${occurrence.date} in build #${occurrence.buildNumber}`;
+}
+
+export function formatTest(test: TestDetails): string {
+  const lines = [
+    `Test ${test.id} [${test.status}]`,
+    `Name: ${test.name}`,
+    `Build name: ${test.buildName}`,
+    `Flakiness: ${formatFlakiness(test.metrics)}`,
+    `Builds: ${test.metrics.total}`,
+    `Changes: ${test.metrics.changes} (${test.metrics.uniqueChanges} seen only once)`,
+  ];
+  if (test.firstSeenChange) {
+    lines.push(`First change: ${formatOccurrence(test.firstSeenChange)}`);
+  }
+  if (test.lastSeenChange) {
+    lines.push(`Last change: ${formatOccurrence(test.lastSeenChange)}`);
+  }
+  lines.push(`URL: ${test.url}`);
+  return lines.join("\n");
+}
+
+export function formatTestChanges(changes: TestChange[]): string {
+  if (changes.length === 0) {
+    return "No changes found.";
+  }
+  return [
+    `Changes (${changes.length})`,
+    "",
+    ...changes.flatMap((change) => [
+      `${change.id}${change.ignored ? " [ignored]" : ""}`,
+      `  Occurrences: ${change.occurrences}`,
+      `  First seen: ${formatOccurrence(change.firstSeen)}`,
+      `  Last seen: ${formatOccurrence(change.lastSeen)}`,
+      `  Mask: ${formatValue(change.diff.url)}`,
+      `  Base file: ${formatValue(change.diff.base?.url)}`,
+      `  Head file: ${formatValue(change.diff.head?.url)}`,
+      "",
+    ]),
   ]
     .slice(0, -1)
     .join("\n");
