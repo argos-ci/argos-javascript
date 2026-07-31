@@ -110,16 +110,26 @@ export async function resolveBuildTarget(
  * Resolve a project-scoped command target: an authenticated client and the
  * `owner`/`project` pair every project endpoint needs. The project path comes
  * from `--project owner/project` or the `ARGOS_PROJECT` environment variable.
+ *
+ * With `auth: "project"` a missing project path falls back to the token's own
+ * project, the way {@link resolveBuildTarget} does — that only resolves for a
+ * project token, so read-only commands work out of the box in CI. `auth: "user"`
+ * requires the path, since a personal access token is not bound to a project.
  */
 export async function resolveProjectTarget(
   options: TargetOptions,
+  { auth }: { auth: AuthMode },
 ): Promise<ProjectTarget> {
   const client = createApiClient(await resolveToken(options));
   const projectPath = options.project || process.env["ARGOS_PROJECT"];
-  if (!projectPath) {
+  if (projectPath) {
+    return { client, ...parseProjectPathOrFail(projectPath) };
+  }
+  if (auth === "user") {
     fail(
       "--project <owner/project> is required. Pass it or set ARGOS_PROJECT.",
     );
   }
-  return { client, ...parseProjectPathOrFail(projectPath) };
+  const project = unwrap(await client.GET("/project"));
+  return { client, owner: project.account.slug, project: project.name };
 }

@@ -44,6 +44,11 @@ export const changeProjectPathOption = new Option(
   "Project the change belongs to, in owner/project format. Also ARGOS_PROJECT",
 );
 
+export const testProjectPathOption = new Option(
+  "--project <owner/project>",
+  "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+);
+
 /** API values accepted by the `metricsPeriod` query parameter. */
 export type MetricsPeriod =
   | "LAST_24_HOURS"
