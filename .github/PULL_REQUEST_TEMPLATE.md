@@ -22,4 +22,4 @@ Optional checks:
 
 ## Further comments
 
-*Optional* : Feel free to explain your motivation, share useful information or a feature screenshot.
+_Optional_ : Feel free to explain your motivation, share useful information or a feature screenshot.

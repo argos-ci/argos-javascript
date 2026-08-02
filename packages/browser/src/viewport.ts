@@ -78,9 +78,7 @@ export type ViewportPresetOption = {
 };
 
 export type ViewportOption =
-  | ViewportSize
-  | ViewportPresetOption
-  | ViewportPreset;
+  ViewportSize | ViewportPresetOption | ViewportPreset;
 
 function resolveViewportPreset(
   preset: ViewportPreset,

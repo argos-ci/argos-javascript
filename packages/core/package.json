@@ -46,7 +46,7 @@
     "fast-glob": "^3.3.3",
     "mime-types": "^3.0.2",
     "p-retry": "^8.0.0",
-    "sharp": "^0.35.2",
+    "sharp": "^0.35.3",
     "tmp": "^0.2.7"
   },
   "devDependencies": {
@@ -57,7 +57,7 @@
     "@types/node": "catalog:",
     "@types/tmp": "^0.2.6",
     "@vercel/repository-dispatch": "^0.1.0",
-    "msw": "^2.14.6",
+    "msw": "^2.15.0",
     "vitest": "catalog:"
   },
   "scripts": {

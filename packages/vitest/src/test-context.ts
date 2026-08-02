@@ -29,8 +29,7 @@ export interface CurrentTask extends CurrentSuite {
         type: string;
         message?: string;
         location?:
-          | { file?: string; line?: number; column?: number }
-          | undefined;
+          { file?: string; line?: number; column?: number } | undefined;
       }>
     | undefined;
   result?: { retryCount?: number; repeatCount?: number } | undefined;

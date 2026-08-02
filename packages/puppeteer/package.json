@@ -51,9 +51,9 @@
     "@types/node": "catalog:",
     "expect-puppeteer": "^11.0.0",
     "jest": "^30.4.2",
-    "jest-light-runner": "^0.7.12",
+    "jest-light-runner": "^0.8.1",
     "jest-puppeteer": "^11.0.0",
-    "puppeteer": "^25.1.0"
+    "puppeteer": "^25.4.0"
   },
   "scripts": {
     "build": "tsdown && cp ./src/index.cjs ./dist",

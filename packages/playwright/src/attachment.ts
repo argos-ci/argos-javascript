@@ -8,10 +8,7 @@ export type ArgosAttachment = {
 };
 
 type ArgosAttachmentType =
-  | "screenshot"
-  | "aria"
-  | "screenshot/metadata"
-  | "aria/metadata";
+  "screenshot" | "aria" | "screenshot/metadata" | "aria/metadata";
 
 export function getAttachmentName(name: string, type: ArgosAttachmentType) {
   return `argos/${type}___${name}`;
