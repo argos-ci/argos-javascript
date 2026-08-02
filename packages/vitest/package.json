@@ -64,10 +64,10 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@vitest/browser": "^4.1.9",
-    "@vitest/browser-playwright": "^4.1.9",
-    "@vitest/pretty-format": "^4.1.9",
-    "playwright": "^1.61.0",
+    "@vitest/browser": "^4.1.10",
+    "@vitest/browser-playwright": "^4.1.10",
+    "@vitest/pretty-format": "^4.1.10",
+    "playwright": "^1.62.1",
     "vitest": "catalog:"
   },
   "scripts": {
