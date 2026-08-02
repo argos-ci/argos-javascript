@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.5](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fbrowser%406.4.4...%40argos-ci%2Fbrowser%406.4.5) (2026-08-02)
+
+**Note:** Version bump only for package @argos-ci/browser
+
+
+
+
+
 ## [6.4.4](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/browser@6.4.3...@argos-ci/browser@6.4.4) (2026-07-09)
 
 **Note:** Version bump only for package @argos-ci/browser
