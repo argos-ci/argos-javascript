@@ -13,6 +13,16 @@ export const VITEST_IFRAME_SELECTOR = 'iframe[data-vitest="true"]';
 export const VITEST_TESTER_ID = "vitest-tester";
 
 /**
+ * Attribute holding the iframe's inline size from before Argos resized it, as
+ * JSON.
+ *
+ * The presence of the attribute — not the values it holds — is what marks the
+ * size as backed up: the original `style.width`/`style.height` are usually
+ * empty strings, which are indistinguishable from "nothing was saved yet".
+ */
+const SIZE_BACKUP_ATTRIBUTE = "data-argos-size-backup";
+
+/**
  * Remove the scale from the Vitest `#vitest-tester` element before taking a
  * screenshot to avoid ending up with small screenshots.
  * @returns A function to restore the scale after the screenshot.
@@ -58,7 +68,7 @@ export async function resetTesterScale(
  * box is not painted, so the iframe must be sized to hold the content.
  *
  * @param size - The viewport size, `"default"` to keep the natural size, or
- *   `"initial"` to restore the size backed up on the first resize.
+ *   `"initial"` to restore the size the iframe had before Argos resized it.
  * @param options.fullPage - When `true`, grow the height to fit the content
  *   while keeping the viewport width (Playwright-style full page).
  */
@@ -68,7 +78,7 @@ export async function setIframeViewportSize(
   options: { fullPage?: boolean } = {},
 ): Promise<void> {
   await ctx.page.evaluate(
-    ({ size, fullPage, selector }) => {
+    ({ size, fullPage, selector, backupAttribute }) => {
       const iframe = document.querySelector(selector);
 
       if (!(iframe instanceof HTMLIFrameElement)) {
@@ -80,17 +90,26 @@ export async function setIframeViewportSize(
       }
 
       if (size === "initial") {
-        if (iframe.dataset.initialWidth && iframe.dataset.initialHeight) {
-          iframe.style.width = iframe.dataset.initialWidth;
-          iframe.style.height = iframe.dataset.initialHeight;
+        const backup = iframe.getAttribute(backupAttribute);
+        if (backup !== null) {
+          const { width, height } = JSON.parse(backup);
+          iframe.style.width = width;
+          iframe.style.height = height;
+          // Drop the backup so the next screenshot saves the size the iframe
+          // actually has then, rather than restoring a stale one.
+          iframe.removeAttribute(backupAttribute);
         }
         return;
       }
 
-      // Backup default width/height if not set
-      if (!iframe.dataset.initialWidth && !iframe.dataset.initialHeight) {
-        iframe.dataset.initialWidth = iframe.style.width;
-        iframe.dataset.initialHeight = iframe.style.height;
+      if (!iframe.hasAttribute(backupAttribute)) {
+        iframe.setAttribute(
+          backupAttribute,
+          JSON.stringify({
+            width: iframe.style.width,
+            height: iframe.style.height,
+          }),
+        );
       }
 
       if (size !== "default") {
@@ -118,6 +137,7 @@ export async function setIframeViewportSize(
       size,
       fullPage: options.fullPage ?? false,
       selector: VITEST_IFRAME_SELECTOR,
+      backupAttribute: SIZE_BACKUP_ATTRIBUTE,
     },
   );
 }
@@ -125,9 +145,12 @@ export async function setIframeViewportSize(
 /**
  * Grow the Vitest iframe to fit its content so nothing is clipped.
  *
- * This must run *after* `argosCSS` (which may inject a `zoom`) is applied,
- * because `setIframeViewportSize` sizes the iframe *before* the content's final
- * size is known. It only ever grows the iframe, never shrinks it.
+ * This must run once the content has reached its final size — after `argosCSS`
+ * (which may inject a `zoom`) is applied *and* after stabilization has waited
+ * for images and fonts. `setIframeViewportSize` sizes the iframe before any of
+ * that, so it can't account for the final content size. It only ever grows the
+ * iframe, never shrinks it; use `setIframeViewportSize(ctx, "initial")` to
+ * restore the original size afterwards.
  *
  * @param options.fitWidth - Also grow the iframe horizontally to paint content
  *   wider than the viewport. When `false`, only the height grows (to match
@@ -138,11 +161,21 @@ export async function fitIframeToContent(
   options: { fitWidth: boolean },
 ): Promise<void> {
   await ctx.page.evaluate(
-    ({ fitWidth, selector }) => {
+    ({ fitWidth, selector, backupAttribute }) => {
       const iframe = document.querySelector(selector);
 
       if (!(iframe instanceof HTMLIFrameElement) || !iframe.contentDocument) {
         return;
+      }
+
+      if (!iframe.hasAttribute(backupAttribute)) {
+        iframe.setAttribute(
+          backupAttribute,
+          JSON.stringify({
+            width: iframe.style.width,
+            height: iframe.style.height,
+          }),
+        );
       }
 
       const { body, documentElement } = iframe.contentDocument;
@@ -170,6 +203,10 @@ export async function fitIframeToContent(
         }
       }
     },
-    { fitWidth: options.fitWidth, selector: VITEST_IFRAME_SELECTOR },
+    {
+      fitWidth: options.fitWidth,
+      selector: VITEST_IFRAME_SELECTOR,
+      backupAttribute: SIZE_BACKUP_ATTRIBUTE,
+    },
   );
 }

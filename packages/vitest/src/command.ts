@@ -99,6 +99,10 @@ export const createArgosScreenshotCommand = (
 
       return attachments;
     } finally {
+      // The iframe was grown to fit the content, so restore it: Vitest reuses
+      // the same iframe for every test in the file, and a leftover size would
+      // pad the next screenshots with blank space.
+      await setIframeViewportSize(ctx, "initial");
       await restore();
     }
   };
