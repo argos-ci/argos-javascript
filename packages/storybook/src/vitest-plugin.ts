@@ -131,13 +131,18 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
     ...otherOptions
   } = options ?? {};
   const root = resolve(cwd, unresolvedRoot);
-  const setupFile = resolve(
-    dirname(fileURLToPath(import.meta.url)),
-    "./vitest-setup-file.mjs",
-  );
+  const distDir = dirname(fileURLToPath(import.meta.url));
+  const setupFile = resolve(distDir, "./vitest-setup-file.mjs");
+  const channelSetupFile = resolve(distDir, "./vitest-setup-channel-file.mjs");
   return {
     name: "@argos-ci/storybook/vitest-plugin",
     configureVitest({ vitest, project }) {
+      // Ahead of the user's setup files: it installs the Storybook channel that
+      // addon preview modules capture when they are imported.
+      project.config.setupFiles.unshift(channelSetupFile);
+      // After them: `afterEach` hooks run in reverse registration order, so
+      // registering last is what makes the screenshot happen before Storybook
+      // unmounts the story.
       project.config.setupFiles.push(setupFile);
 
       if (uploadToArgos) {
@@ -149,7 +154,10 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
     config() {
       return {
         optimizeDeps: {
-          include: ["@argos-ci/storybook/internal/vitest-setup-file"],
+          include: [
+            "@argos-ci/storybook/internal/vitest-setup-file",
+            "@argos-ci/storybook/internal/vitest-setup-channel-file",
+          ],
         },
         test: {
           browser: {

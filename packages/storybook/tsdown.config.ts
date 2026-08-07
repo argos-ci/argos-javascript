@@ -23,7 +23,7 @@ export default defineConfig([
     },
   },
   {
-    entry: ["src/vitest-setup-file.ts"],
+    entry: ["src/vitest-setup-file.ts", "src/vitest-setup-channel-file.ts"],
     dts: false,
     format: ["esm"],
     deps: {
