@@ -89,6 +89,39 @@ describe("createArgosScreenshotCommand", () => {
     expect(metadata.playwrightLibraries).toContain("vitest");
   });
 
+  it("waits for stabilization before sizing the iframe to the content", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx, evaluate } = createCtx();
+
+    await command(ctx, "shot");
+
+    const [, , opts] = argosScreenshot.mock.calls[0]!;
+    const evaluateCallsBefore = evaluate.mock.calls.length;
+    const runStabilization = vi.fn(async () => {
+      // Nothing has been measured yet: content that is still loading (images,
+      // fonts) would make the page look shorter than it ends up being.
+      expect(evaluate).toHaveBeenCalledTimes(evaluateCallsBefore);
+    });
+
+    await opts.beforeScreenshot({ runStabilization });
+
+    expect(runStabilization).toHaveBeenCalledTimes(1);
+    // The iframe is only grown once the content has settled.
+    expect(evaluate.mock.calls.length).toBeGreaterThan(evaluateCallsBefore);
+  });
+
+  it("restores the iframe size once the screenshot is taken", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx, evaluate } = createCtx();
+
+    await command(ctx, "shot");
+
+    // Vitest reuses the same iframe for every test in the file, so the size it
+    // was grown to must not leak into the next screenshot.
+    const sizes = evaluate.mock.calls.map((call) => call[1]?.size);
+    expect(sizes).toContain("initial");
+  });
+
   it("takes one screenshot per viewport with viewport-suffixed names", async () => {
     const command = createArgosScreenshotCommand();
     const { ctx } = createCtx();

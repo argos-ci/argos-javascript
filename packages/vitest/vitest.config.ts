@@ -2,6 +2,7 @@ import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
 import { argosVitestPlugin } from "./dist/plugin.mjs";
+import { slowImagePlugin } from "./e2e/slow-image-plugin";
 
 export default defineConfig({
   test: {
@@ -21,6 +22,7 @@ export default defineConfig({
             uploadToArgos: process.env.UPLOAD_TO_ARGOS === "true",
             buildName: process.env.BUILD_NAME,
           }),
+          slowImagePlugin(),
         ],
         test: {
           name: "e2e",

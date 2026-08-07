@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from "vitest";
 import { server } from "vitest/browser";
 import { argosScreenshot, argosSnapshot } from "@argos-ci/vitest";
 import type { ArgosAttachment } from "@argos-ci/playwright";
+import { SLOW_IMAGE_URL } from "./slow-image";
 
 /**
  * These tests run in a real browser (Vitest browser mode + Playwright) and
@@ -29,15 +30,51 @@ async function readMetadata(attachments: ArgosAttachment[]) {
   return JSON.parse(await server.commands.readFile(metadata.path));
 }
 
-/** Decode a PNG's pixel width from its IHDR chunk (big-endian uint32 @ byte 16). */
-async function readPngWidth(attachment: ArgosAttachment) {
+/** Decode a PNG's pixel size from its IHDR chunk (big-endian uint32s @ byte 16). */
+async function readPngSize(attachment: ArgosAttachment) {
   const bin = await server.commands.readFile(attachment.path, "latin1");
-  return (
-    (bin.charCodeAt(16) << 24) |
-    (bin.charCodeAt(17) << 16) |
-    (bin.charCodeAt(18) << 8) |
-    bin.charCodeAt(19)
+  const readUint32 = (offset: number) =>
+    (bin.charCodeAt(offset) << 24) |
+    (bin.charCodeAt(offset + 1) << 16) |
+    (bin.charCodeAt(offset + 2) << 8) |
+    bin.charCodeAt(offset + 3);
+  return { width: readUint32(16), height: readUint32(20) };
+}
+
+/** Decode a captured PNG so its pixels can be asserted on. */
+async function readPngImageData(attachment: ArgosAttachment) {
+  const binary = await server.commands.readFile(attachment.path, "latin1");
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  const bitmap = await createImageBitmap(
+    new Blob([bytes], { type: "image/png" }),
   );
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("No 2d context available");
+  }
+  context.drawImage(bitmap, 0, 0);
+  return context.getImageData(0, 0, bitmap.width, bitmap.height);
+}
+
+/**
+ * Check that a horizontal band of the capture is fully white, which is what
+ * areas of the page the browser never painted look like.
+ */
+function checkIsBandBlank(image: ImageData, top: number, bottom: number) {
+  for (let y = top; y < bottom; y++) {
+    for (let x = 0; x < image.width; x++) {
+      const index = (y * image.width + x) * 4;
+      if (
+        image.data[index] !== 255 ||
+        image.data[index + 1] !== 255 ||
+        image.data[index + 2] !== 255
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 beforeEach(() => {
@@ -154,8 +191,43 @@ test("grows the iframe to capture content wider than the viewport", async () => 
   const attachments = await argosScreenshot("wide");
   const screenshot = attachments.find((a) => a.path.endsWith("wide.png"));
   expect(screenshot).toBeDefined();
-  const width = await readPngWidth(screenshot!);
+  const { width } = await readPngSize(screenshot!);
   expect(width).toBeGreaterThan(1500);
+});
+
+test("does not inherit the size of a previous, larger capture", async () => {
+  // The `tall` and `wide` tests above grow the Vitest iframe, which is shared by
+  // every test in the file. It has to be restored afterwards, otherwise later
+  // captures are padded with blank space.
+  mount(`<div style="width:120px;height:60px;background:#0ea5e9"></div>`);
+  const attachments = await argosScreenshot("small-after-big");
+  const screenshot = attachments.find((a) =>
+    a.path.endsWith("small-after-big.png"),
+  );
+  expect(screenshot).toBeDefined();
+  const { width, height } = await readPngSize(screenshot!);
+  expect(width).toBeLessThan(1000);
+  expect(height).toBeLessThan(1000);
+});
+
+test("paints content that only appears once slow images have loaded", async () => {
+  // An `<img>` takes no space until it loads, so the page grows taller while
+  // the screenshot flow waits for it. The iframe must be sized from the final
+  // layout: sizing it earlier leaves the bottom of the page unpainted.
+  mount(
+    `<div style="height:900px;background:#111"></div>` +
+      `<img src="${SLOW_IMAGE_URL}" style="display:block">`,
+  );
+  const attachments = await argosScreenshot("slow-image");
+  const screenshot = attachments.find((a) => a.path.endsWith("slow-image.png"));
+  expect(screenshot).toBeDefined();
+
+  const image = await readPngImageData(screenshot!);
+  // 900px of content plus the 300px image once it has loaded.
+  expect(image.height).toBeGreaterThanOrEqual(1200);
+  // The image is the last thing on the page, so the bottom of the capture must
+  // not be blank.
+  expect(checkIsBandBlank(image, image.height - 50, image.height)).toBe(false);
 });
 
 test("writes a value snapshot that the reporter can upload", async () => {
