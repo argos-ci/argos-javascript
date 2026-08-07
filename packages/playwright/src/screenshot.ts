@@ -126,11 +126,11 @@ export type ArgosScreenshotOptions = {
 
   /**
    * Run a function before taking the screenshot.
-   * When using viewports, this function will run before taking sreenshots on each viewport.
+   * When using viewports, this function will run before taking screenshots on each viewport.
    */
   beforeScreenshot?: (api: {
     /**
-     * Run Argos stabilization alorithm.
+     * Run Argos stabilization algorithm.
      * Accepts an object to customize the stabilization.
      * Note that this function is independent of the `stabilize` option.
      */
@@ -139,7 +139,7 @@ export type ArgosScreenshotOptions = {
 
   /**
    * Run a function after taking the screenshot.
-   * When using viewports, this function will run after taking sreenshots on each viewport.
+   * When using viewports, this function will run after taking screenshots on each viewport.
    */
   afterScreenshot?: () => Promise<void> | void;
 } & LocatorOptions &
@@ -147,7 +147,7 @@ export type ArgosScreenshotOptions = {
   ScreenshotOptions<PageScreenshotOptions>;
 
 /**
- * Stabilize the UI and takes a screenshot of the application under test.
+ * Stabilize the UI and take a screenshot of the application under test.
  *
  * @example
  *    argosScreenshot(page, "my-screenshot")
