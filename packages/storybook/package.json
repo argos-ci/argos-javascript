@@ -43,6 +43,7 @@
       "default": "./dist/vitest-plugin.mjs"
     },
     "./internal/vitest-setup-file": "./dist/vitest-setup-file.mjs",
+    "./internal/vitest-setup-channel-file": "./dist/vitest-setup-channel-file.mjs",
     "./package.json": "./package.json"
   },
   "engines": {
@@ -84,6 +85,7 @@
     "build": "tsdown && cp ./src/test-runner.cjs ./dist",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "test": "vitest run --config vitest.unit.config.ts",
     "test-storybook": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules test-storybook",
     "install-playwright": "playwright install chromium --with-deps",
     "argos-upload-runner": "argos upload screenshots --build-name \"argos-storybook-test-runner-e2e-node-$NODE_VERSION-$OS\"",
