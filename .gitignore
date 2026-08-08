@@ -2,6 +2,8 @@
 node_modules
 # Dist
 dist/
+# TypeScript incremental build info
+*.tsbuildinfo
 # Generated docs
 /docs
 # Storybook
