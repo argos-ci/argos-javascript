@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.7.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.6.1...%40argos-ci%2Fcli%406.7.0) (2026-08-08)
+
+### Features
+
+* **cli:** expose team, project, test and review management ([148648a](https://github.com/argos-ci/argos-javascript/commit/148648aaca98493b3294c308379137f18d025f0b)), closes [argos-ci/argos#2440](https://github.com/argos-ci/argos/issues/2440)
+
+
 ## [6.6.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.6.0...%40argos-ci%2Fcli%406.6.1) (2026-08-02)
 
 **Note:** Version bump only for package @argos-ci/cli
