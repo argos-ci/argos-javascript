@@ -6,6 +6,7 @@ import {
   formatComment,
   formatComments,
   formatCreatedProject,
+  formatMediaFeedback,
   formatProject,
   formatReview,
   formatReviews,
@@ -19,6 +20,7 @@ type Build = ArgosAPISchema.components["schemas"]["Build"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type BuildReview = ArgosAPISchema.components["schemas"]["BuildReview"];
 type Comment = ArgosAPISchema.components["schemas"]["Comment"];
+type MediaFeedback = ArgosAPISchema.components["schemas"]["MediaFeedback"];
 
 const build = {
   number: 42,
@@ -351,5 +353,66 @@ describe("formatComment / formatComments", () => {
     const output = formatComments([comment, reply]);
     expect(output).toContain("#c1 [thread]");
     expect(output).toContain("#c2 [reply]");
+  });
+});
+
+describe("formatMediaFeedback", () => {
+  const comment = {
+    id: "c1",
+    threadId: null,
+    text: "This button is misaligned",
+    author: { id: "u1", slug: "alice", name: "Alice" },
+    screenshotDiffId: null,
+    anchor: { type: "point", x: 0.62, y: 0.34 },
+    pending: false,
+    resolvedAt: null,
+    editedAt: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    reactions: [],
+  } as unknown as Comment;
+
+  const entry = {
+    media: {
+      id: "42",
+      name: "checkout-after.png",
+      url: "https://app.argos-ci.com/m/tok",
+      fileUrl: "https://files.argos-ci.com/media/1/abc.png",
+      posterUrl: null,
+      width: 375,
+      height: 720,
+    },
+    comments: [comment],
+  } as unknown as MediaFeedback;
+
+  it("reports an empty review", () => {
+    expect(formatMediaFeedback({ results: [] })).toBe("No feedback found.");
+  });
+
+  it("groups comments under the media and counts them", () => {
+    const output = formatMediaFeedback({ results: [entry] });
+    expect(output).toContain("Feedback on 1 media (1 comment)");
+    expect(output).toContain("checkout-after.png");
+    expect(output).toContain("ID: 42");
+    // The file URL is what lets an agent go and look at the image it must fix.
+    expect(output).toContain(
+      "File: https://files.argos-ci.com/media/1/abc.png",
+    );
+    expect(output).toContain("This button is misaligned");
+  });
+
+  it("shows where on the media a comment points", () => {
+    // A media comment has an anchor and no diff behind it, so the pin has to be
+    // reported on its own — otherwise the coordinates never reach the reader.
+    expect(formatMediaFeedback({ results: [entry] })).toContain(
+      "Pinned: point 0.62,0.34",
+    );
+  });
+
+  it("pluralizes the comment count", () => {
+    const twice = {
+      ...entry,
+      comments: [comment, { ...comment, id: "c2" }],
+    } as unknown as MediaFeedback;
+    expect(formatMediaFeedback({ results: [twice] })).toContain("(2 comments)");
   });
 });

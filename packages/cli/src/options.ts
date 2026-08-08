@@ -55,6 +55,11 @@ export const testProjectPathOption = new Option(
   "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
 );
 
+export const mediaProjectPathOption = new Option(
+  "--project <owner/project>",
+  "Project the media belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+);
+
 export const managedProjectPathOption = new Option(
   "--project <owner/project>",
   "Project to act on, in owner/project format. Also ARGOS_PROJECT",

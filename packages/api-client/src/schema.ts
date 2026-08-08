@@ -220,26 +220,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/accounts/{accountSlug}/media": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List a team's media
-         * @description List the standalone images and videos uploaded to a team, most recent first. Requires administrator access to the team.
-         */
-        get: operations["listMedia"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/media": {
         parameters: {
             query?: never;
@@ -309,6 +289,146 @@ export interface paths {
          */
         post: operations["finalizeMedia"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the comments on a media
+         * @description List the comments on an uploaded media, oldest first. A comment may carry an `anchor` pinning it to a point on the image, which is how reviewers mark up a screenshot.
+         */
+        get: operations["listMediaComments"];
+        put?: never;
+        /**
+         * Post a comment (or reply) on a media
+         * @description Post a comment on an uploaded media. Start a new thread, or reply to an existing one with `threadId`. Pass an `anchor` to pin the comment to a point on the image — normalized coordinates, so it survives any scaling — which is how a reviewer marks up a screenshot.
+         */
+        post: operations["createMediaComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single comment on a media
+         * @description Retrieve a single comment on a media by its ID.
+         */
+        get: operations["getMediaComment"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a comment on a media
+         * @description Delete a comment on a media. Only the comment's author can delete it.
+         */
+        delete: operations["deleteMediaComment"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a comment on a media
+         * @description Update the body of a comment on a media. Only the comment's author can edit it.
+         */
+        patch: operations["updateMediaComment"];
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/reactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add an emoji reaction to a comment on a media
+         * @description Add an emoji reaction to a comment on a media, on behalf of the authenticated user.
+         */
+        post: operations["addMediaCommentReaction"];
+        /**
+         * Remove an emoji reaction from a comment on a media
+         * @description Remove an emoji reaction previously added by the authenticated user from a comment on a media.
+         */
+        delete: operations["removeMediaCommentReaction"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a media comment thread as resolved
+         * @description Mark a comment thread on a media as resolved.
+         */
+        post: operations["resolveMediaCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/unresolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopen a resolved media comment thread
+         * @description Reopen a previously resolved comment thread on a media.
+         */
+        post: operations["unresolveMediaCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subscribe to a media comment thread's notifications
+         * @description Subscribe the authenticated user to a comment thread on a media to receive notifications about new replies.
+         */
+        post: operations["subscribeMediaCommentThread"];
+        /**
+         * Unsubscribe from a media comment thread's notifications
+         * @description Unsubscribe the authenticated user from a media comment thread's notifications.
+         */
+        delete: operations["unsubscribeMediaCommentThread"];
         options?: never;
         head?: never;
         patch?: never;
@@ -744,6 +864,48 @@ export interface paths {
          * @description Move a project to another account, optionally renaming it. The token must be scoped to both accounts, and the acting user must administer the project as well as the account receiving it.
          */
         post: operations["transferProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's media
+         * @description List the standalone images and videos uploaded to a project, most recent first.
+         */
+        get: operations["listMedia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/media/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the feedback on a project's media
+         * @description Every comment left on a project's uploaded media, grouped by media — the whole review in one call.
+         *
+         *     This is the endpoint to use after a human has marked up screenshots and asked you to act on their feedback. Filter to a pull request with `prNumber` and to open threads with `resolved=false`, then read each comment's `anchor` to see which part of the image it points at.
+         */
+        get: operations["listMediaFeedback"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1388,6 +1550,10 @@ export interface components {
          * @enum {string}
          */
         TeamUserLevel: "owner" | "member" | "contributor";
+        /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+        CommentId: string;
+        /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+        ThreadCommentId: string;
         /** @description SHA1 hash */
         Sha1Hash: string;
         GitBranch: string;
@@ -1653,10 +1819,6 @@ export interface components {
          * @example WEB-xf23d
          */
         TestId: string;
-        /** @description The public ID of the comment (e.g. `comment-xf23d`) */
-        CommentId: string;
-        /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
-        ThreadCommentId: string;
         /** @description An account with its plan and current-period usage, to watch consumption against the plan. */
         AccountDetails: {
             id: string;
@@ -1875,6 +2037,52 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** @description A comment posted on a build or on a test. */
+        Comment: {
+            /** @description Public ID of the comment (e.g. `comment-xf23d`) — the one the app links to, and the one every endpoint taking a comment ID expects. */
+            id: string;
+            /** @description Build this comment is posted on, null when it is posted on a test. */
+            buildId: string | null;
+            /** @description Test this comment is posted on, null when it is posted on a build. */
+            testId: string | null;
+            /** @description Root comment ID when this comment is a reply. */
+            threadId: string | null;
+            /** @description Rich-text JSON content of the comment. */
+            body: unknown;
+            /** @description Plain-text rendering of the comment content. */
+            text: string;
+            author: components["schemas"]["User"] | null;
+            /** @description Screenshot diff this comment is anchored to, if any. */
+            screenshotDiffId: string | null;
+            /** @description Where the comment points on its screenshot diff. Null means the whole diff. */
+            anchor: ({
+                /** @constant */
+                type: "point";
+                x: number;
+                y: number;
+            } | {
+                /** @constant */
+                type: "lines";
+                from: number;
+                to: number;
+            }) | null;
+            /** @description Whether the comment belongs to a pending (unsubmitted) review and is only visible to its author. */
+            pending: boolean;
+            /** @description Date the thread was resolved, null if not resolved. Only set on a root comment. */
+            resolvedAt: string | null;
+            /** @description Date the comment was last edited, null if never edited. */
+            editedAt: string | null;
+            /** @description Date the comment was posted. */
+            createdAt: string;
+            reactions: {
+                /** @description The emoji used for the reaction. */
+                emoji: string;
+                /** @description Number of users who reacted with this emoji. */
+                count: number;
+                /** @description The users who reacted with this emoji. */
+                users: components["schemas"]["User"][];
+            }[];
+        };
         /** @description Build */
         Build: {
             id: components["schemas"]["BuildId"];
@@ -1997,6 +2205,29 @@ export interface components {
             id: string;
             user: components["schemas"]["User"];
             level: components["schemas"]["ProjectUserLevel"];
+        };
+        /** @description Comments left on one media */
+        MediaFeedback: {
+            /** @description The media the comments were left on */
+            media: {
+                id: string;
+                name: string;
+                /**
+                 * Format: uri
+                 * @description Share page URL
+                 */
+                url: string;
+                /**
+                 * Format: uri
+                 * @description URL of the image or video itself, for an agent that wants to look at it.
+                 */
+                fileUrl: string;
+                posterUrl: string | null;
+                width: number | null;
+                height: number | null;
+            };
+            /** @description The comments on this media, oldest first. A comment's `anchor` gives the normalized (x, y) it points at, so an agent can tell which part of the screenshot the feedback is about. */
+            comments: components["schemas"]["Comment"][];
         };
         /** @description Snapshot diff */
         SnapshotDiff: {
@@ -2305,52 +2536,6 @@ export interface components {
         NotificationSubscription: {
             /** @description Whether the authenticated user now receives notifications for this resource. */
             subscribed: boolean;
-        };
-        /** @description A comment posted on a build or on a test. */
-        Comment: {
-            /** @description Public ID of the comment (e.g. `comment-xf23d`) — the one the app links to, and the one every endpoint taking a comment ID expects. */
-            id: string;
-            /** @description Build this comment is posted on, null when it is posted on a test. */
-            buildId: string | null;
-            /** @description Test this comment is posted on, null when it is posted on a build. */
-            testId: string | null;
-            /** @description Root comment ID when this comment is a reply. */
-            threadId: string | null;
-            /** @description Rich-text JSON content of the comment. */
-            body: unknown;
-            /** @description Plain-text rendering of the comment content. */
-            text: string;
-            author: components["schemas"]["User"] | null;
-            /** @description Screenshot diff this comment is anchored to, if any. */
-            screenshotDiffId: string | null;
-            /** @description Where the comment points on its screenshot diff. Null means the whole diff. */
-            anchor: ({
-                /** @constant */
-                type: "point";
-                x: number;
-                y: number;
-            } | {
-                /** @constant */
-                type: "lines";
-                from: number;
-                to: number;
-            }) | null;
-            /** @description Whether the comment belongs to a pending (unsubmitted) review and is only visible to its author. */
-            pending: boolean;
-            /** @description Date the thread was resolved, null if not resolved. Only set on a root comment. */
-            resolvedAt: string | null;
-            /** @description Date the comment was last edited, null if never edited. */
-            editedAt: string | null;
-            /** @description Date the comment was posted. */
-            createdAt: string;
-            reactions: {
-                /** @description The emoji used for the reaction. */
-                emoji: string;
-                /** @description Number of users who reacted with this emoji. */
-                count: number;
-                /** @description The users who reacted with this emoji. */
-                users: components["schemas"]["User"][];
-            }[];
         };
         /** @description A test with its flakiness metrics over the requested period. Fetch the test itself for its history and the changes behind the score. */
         TestSummary: components["schemas"]["Test"];
@@ -3524,86 +3709,6 @@ export interface operations {
             };
         };
     };
-    listMedia: {
-        parameters: {
-            query?: {
-                /** @description Number of items per page (max 100) */
-                perPage?: string;
-                /** @description Page number */
-                page?: string;
-                /** @description Match media on their file name or slug. */
-                search?: string;
-                /** @description Restrict to images or to videos. */
-                type?: "image" | "video";
-            };
-            header?: never;
-            path: {
-                /** @description Slug of the team to list media for. */
-                accountSlug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of media */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        pageInfo: components["schemas"]["PageInfo"];
-                        results: components["schemas"]["Media"][];
-                    };
-                };
-            };
-            /** @description Invalid parameters */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
     createMedia: {
         parameters: {
             query?: never;
@@ -3634,8 +3739,11 @@ export interface operations {
                     visibility?: ("team" | "public") | null;
                     /** @description How long to keep the media, in days. Clamped to your plan's maximum. */
                     retentionDays?: number | null;
-                    /** @description Team to upload to. Required with a personal access token; ignored with a project token, which already identifies its team. */
-                    accountSlug?: string | null;
+                    /**
+                     * @description Project to upload to, as `owner/project`. Required with a personal access token; ignored with a project token, which already identifies its project.
+                     * @example acme/web
+                     */
+                    project?: string | null;
                     /** @description Pull request to attach the media to. With `comment`, Argos maintains a single comment on it listing every media uploaded, editing it in place rather than posting a new one each time. */
                     prNumber?: number | null;
                     /** @description Post (or update) the managed pull request comment. Requires `prNumber` and a project connected to GitHub. */
@@ -3857,6 +3965,814 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Media"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMediaComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comments, oldest first. Replies carry a threadId pointing at their root comment. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
+                    };
+                    /** @description Public ID of the root comment to reply to (e.g. `comment-xf23d`). */
+                    threadId?: string;
+                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0–1) coordinates; lines is a 1-based inclusive range. */
+                    anchor?: {
+                        /** @constant */
+                        type: "point";
+                        x: number;
+                        y: number;
+                    } | {
+                        /** @constant */
+                        type: "lines";
+                        from: number;
+                        to: number;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Comment created successfully — returns the comment */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment deleted successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Comment updated successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    addMediaCommentReaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The emoji to react with. */
+                    emoji: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Reaction added — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeMediaCommentReaction: {
+        parameters: {
+            query: {
+                /** @description The emoji reaction to remove. */
+                emoji: string;
+            };
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reaction removed — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resolveMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread resolved — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unresolveMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread reopened — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    subscribeMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unsubscribeMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unsubscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
                 };
             };
             /** @description Invalid parameters */
@@ -5707,6 +6623,161 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMedia: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Match media on their file name or slug. */
+                search?: string;
+                /** @description Restrict to images or to videos. */
+                type?: "image" | "video";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["Media"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMediaFeedback: {
+        parameters: {
+            query?: {
+                /** @description Only media attached to this pull request. Omit for every media in the project. */
+                prNumber?: string;
+                /** @description Filter by thread resolution. `false` is what you want when acting on feedback: it leaves out what has already been dealt with. */
+                resolved?: "true" | "false";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Feedback grouped by media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        results: components["schemas"]["MediaFeedback"][];
+                    };
                 };
             };
             /** @description Invalid parameters */

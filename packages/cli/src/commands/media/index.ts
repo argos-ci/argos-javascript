@@ -1,5 +1,7 @@
 import type { Command } from "commander";
+import { registerMediaComment } from "./comment";
 import { registerMediaDelete } from "./delete";
+import { registerMediaFeedback } from "./feedback";
 import { registerMediaGet } from "./get";
 import { registerMediaList } from "./list";
 import { registerMediaUpload } from "./upload";
@@ -14,4 +16,6 @@ export function mediaCommand(program: Command) {
   registerMediaList(media);
   registerMediaGet(media);
   registerMediaDelete(media);
+  registerMediaFeedback(media);
+  registerMediaComment(media);
 }

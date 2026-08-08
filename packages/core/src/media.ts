@@ -54,14 +54,15 @@ export interface UploadMediaParameters {
   apiBaseUrl?: string;
 
   /**
-   * Team to upload to. Required when authenticating with a personal access
-   * token; ignored with a project token, which already identifies its team.
+   * Project to upload to, as `owner/project`. Required when authenticating with
+   * a personal access token; ignored with a project token, which already
+   * identifies its project.
    */
-  accountSlug?: string;
+  project?: string;
 
   /**
-   * Stable identifier, unique per team. Re-uploading the same slug replaces the
-   * file in place, so a Markdown embed already posted to a pull request keeps
+   * Stable identifier, unique per project. Re-uploading the same slug replaces
+   * the file in place, so a Markdown embed already posted to a pull request keeps
    * pointing at the new version instead of going stale.
    *
    * With several files, each one gets the slug suffixed with its index.
@@ -164,7 +165,7 @@ async function uploadOne(args: {
       slug,
       visibility: params.visibility ?? null,
       retentionDays: params.retentionDays ?? null,
-      accountSlug: params.accountSlug ?? null,
+      project: params.project ?? null,
       prNumber: params.prNumber ?? null,
       comment: params.comment ?? null,
     },

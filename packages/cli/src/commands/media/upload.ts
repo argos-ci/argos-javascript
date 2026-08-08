@@ -5,11 +5,16 @@ import { uploadMedia, type Media } from "@argos-ci/core";
 import { fail } from "../../lib/cli-error";
 import { formatMediaList } from "../../lib/format";
 import { handleCliError, output } from "../../lib/run";
-import { jsonOption, tokenOption, type JsonOption } from "../../options";
+import {
+  jsonOption,
+  mediaProjectPathOption,
+  tokenOption,
+  type JsonOption,
+} from "../../options";
 
 type UploadMediaOptions = JsonOption & {
   token?: string | undefined;
-  account?: string | undefined;
+  project?: string | undefined;
   slug?: string | undefined;
   visibility?: "team" | "public" | undefined;
   retention?: string | undefined;
@@ -25,16 +30,11 @@ export function registerMediaUpload(media: Command) {
       "Upload images or videos and print their share URLs and Markdown embeds",
     )
     .addOption(tokenOption)
-    .addOption(
-      new Option(
-        "--account <slug>",
-        "Team to upload to. Required with a personal access token; ignored with a project token",
-      ),
-    )
+    .addOption(mediaProjectPathOption)
     .addOption(
       new Option(
         "--slug <slug>",
-        "Stable identifier, unique per team. Re-uploading the same slug replaces the file in place, so a Markdown embed already posted to a pull request never goes stale",
+        "Stable identifier, unique per project. Re-uploading the same slug replaces the file in place, so a Markdown embed already posted to a pull request never goes stale",
       ),
     )
     .addOption(
@@ -74,7 +74,7 @@ export function registerMediaUpload(media: Command) {
         const results = await uploadMedia({
           files,
           token: options.token,
-          accountSlug: options.account,
+          project: options.project,
           slug: options.slug,
           visibility: options.visibility,
           retentionDays: parseRetention(options.retention),

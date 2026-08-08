@@ -1,6 +1,7 @@
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
+type MediaFeedback = ArgosAPISchema.components["schemas"]["MediaFeedback"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
 type TestMetrics = ArgosAPISchema.components["schemas"]["TestMetrics"];
@@ -366,11 +367,15 @@ export function formatComment(comment: Comment): string {
   if (comment.threadId) {
     lines.push(`Reply to: ${comment.threadId}`);
   }
+  const anchor = formatAnchor(comment.anchor);
   if (comment.screenshotDiffId) {
-    const anchor = formatAnchor(comment.anchor);
     lines.push(
       `Diff: ${comment.screenshotDiffId}${anchor ? ` (${anchor})` : ""}`,
     );
+  } else if (anchor) {
+    // A comment on a media carries an anchor with no diff behind it: the point is
+    // on the media itself. Without this the pin would not show up at all.
+    lines.push(`Pinned: ${anchor}`);
   }
   if (comment.pending) {
     lines.push("Pending: draft (only visible to you)");
@@ -690,4 +695,34 @@ export function formatMediaList(list: Media[]): string {
     return "No media found.";
   }
   return [`Media (${list.length})`, "", ...list.map(formatMedia)].join("\n");
+}
+
+/**
+ * A project's media review: every media that has comments, and what was said.
+ *
+ * Ordered media-first because that is how the work reads — look at this image,
+ * here is what to change about it — and it keeps each comment's pin next to the
+ * `fileUrl` an agent needs to actually go and look.
+ */
+export function formatMediaFeedback(response: {
+  results: MediaFeedback[];
+}): string {
+  const { results } = response;
+  if (results.length === 0) {
+    return "No feedback found.";
+  }
+  const total = results.reduce((sum, entry) => sum + entry.comments.length, 0);
+  return [
+    `Feedback on ${results.length} media (${total} ${total === 1 ? "comment" : "comments"})`,
+    ...results.map((entry) =>
+      [
+        entry.media.name,
+        `  ID: ${entry.media.id}`,
+        `  URL: ${entry.media.url}`,
+        `  File: ${entry.media.fileUrl}`,
+        "",
+        indent(entry.comments.map(formatComment).join("\n\n")),
+      ].join("\n"),
+    ),
+  ].join("\n\n");
 }

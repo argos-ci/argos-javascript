@@ -8,13 +8,14 @@ description: >
   before/after of a UI change, a recording of a reproduction — and need it
   visible to a human who cannot run your shell. GitHub has no public API for
   comment attachments, so this is how an agent working from a terminal gets an
-  image into a pull request at all.
+  image into a pull request at all. Also covers reading back the comments a human
+  left on those screenshots, so you can act on visual feedback you cannot see.
 license: MIT
 metadata:
   author: argos-ci
   homepage: https://argos-ci.com
   source: https://github.com/argos-ci/argos-javascript
-argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--account <slug>` when using a personal access token.
+argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project <owner/project>` when using a personal access token.
 ---
 
 # Argos media upload
@@ -82,6 +83,35 @@ This needs a project token and a project connected to GitHub — which is what C
 holds. Without it, put the Markdown in the pull request body or in a comment you
 write yourself.
 
+## Reading the feedback you were given
+
+A human can comment on an uploaded screenshot, and pin a comment to a **spot** on
+it. That is how you get told "this button is misaligned" about a pixel you cannot
+look at. Read the whole review in one call:
+
+```bash
+argos media feedback --pr 1234
+```
+
+Each comment comes back with the media it is about, a `File:` URL you can fetch to
+look at the image yourself, and — when it is pinned — `Pinned: point x,y` in
+normalized 0–1 coordinates of the image's width and height. `0.62,0.34` means 62%
+across and 34% down.
+
+Only open threads are listed, so what comes back is what is left to do. Add
+`--all` to include threads already dealt with.
+
+Then close the loop on each one:
+
+```bash
+argos media comment create <mediaId> --reply-to <threadId> --body "Fixed in abc1234."
+argos media comment resolve <mediaId> <threadId>
+```
+
+Resolve only what you actually fixed. A resolved thread disappears from the next
+`media feedback`, so resolving something you skipped is how feedback gets silently
+dropped — reply explaining why instead, and leave it open.
+
 ## Stable links across re-runs
 
 A media uploaded without a slug is a new media every time, so re-running your
@@ -94,7 +124,7 @@ argos media upload after.png --slug pr-1234-after
 
 Re-uploading the same slug replaces the file in place and keeps the same URL, so
 Markdown already posted to a pull request shows the new version. With several
-files, each gets the slug suffixed by its index.
+files, each gets the slug suffixed by its index. A slug is unique per project.
 
 ## Visibility, and what it does not cover
 
@@ -109,13 +139,20 @@ uploading it anyway.
 
 ## Authentication
 
-| Command                         | Token                                                  |
-| ------------------------------- | ------------------------------------------------------ |
-| `media upload`, `get`, `delete` | Project token (`ARGOS_TOKEN`) or personal access token |
-| `media list`                    | Personal access token, **team administrator only**     |
+| Command                                   | Token                                                  |
+| ----------------------------------------- | ------------------------------------------------------ |
+| `media upload`, `get`, `list`, `feedback` | Project token (`ARGOS_TOKEN`) or personal access token |
+| `media delete`                            | Project administrator                                  |
+| `media comment …`                         | Personal access token with review access               |
 
-With a personal access token, `media upload` needs `--account <slug>` to know
-which team to upload to; a project token already identifies its own team.
+Media belongs to a **project**, so it inherits that project's access — including
+transferring with it. With a personal access token, pass `--project
+<owner/project>` (or set `ARGOS_PROJECT`); a project token already identifies its
+own project.
+
+Posting or resolving a comment is a write on the project's review surface, so it
+needs a personal access token. A project token can read feedback but not answer
+it.
 
 ## What it costs
 

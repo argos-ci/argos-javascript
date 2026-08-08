@@ -4,11 +4,11 @@ import { unwrap } from "../../lib/api";
 import { formatMediaList } from "../../lib/format";
 import { fetchPages } from "../../lib/pagination";
 import { handleCliError, output } from "../../lib/run";
-import { resolveAccountTarget } from "../../lib/target";
+import { resolveProjectTarget } from "../../lib/target";
 import {
-  accountSlugOption,
   jsonOption,
   limitOption,
+  mediaProjectPathOption,
   toLimit,
   tokenOption,
   type JsonOption,
@@ -18,7 +18,7 @@ import {
 type ListMediaOptions = JsonOption &
   LimitOption & {
     token?: string | undefined;
-    account?: string | undefined;
+    project?: string | undefined;
     search?: string | undefined;
     type?: "image" | "video" | undefined;
   };
@@ -27,7 +27,7 @@ export function registerMediaList(media: Command) {
   media
     .command("list")
     .description(
-      "List a team's uploaded media, most recent first. Requires administrator access to the team",
+      "List a project's uploaded media, most recent first. A project token lists its own project",
     )
     .addOption(limitOption)
     .addOption(new Option("--search <query>", "Match media on name or slug"))
@@ -38,18 +38,20 @@ export function registerMediaList(media: Command) {
       ]),
     )
     .addOption(tokenOption)
-    .addOption(accountSlugOption)
+    .addOption(mediaProjectPathOption)
     .addOption(jsonOption)
     .action(async (options: ListMediaOptions) => {
       try {
-        const { client, accountSlug } = await resolveAccountTarget(options);
+        const { client, owner, project } = await resolveProjectTarget(options, {
+          auth: "project",
+        });
         const results = await fetchPages(
           toLimit(options.limit),
           async (pagination) =>
             unwrap(
-              await client.GET("/accounts/{accountSlug}/media", {
+              await client.GET("/projects/{owner}/{project}/media", {
                 params: {
-                  path: { accountSlug },
+                  path: { owner, project },
                   query: {
                     ...pagination,
                     ...(options.search ? { search: options.search } : {}),
@@ -61,7 +63,7 @@ export function registerMediaList(media: Command) {
         );
         output(results, options, formatMediaList);
       } catch (error) {
-        handleCliError(error, "user");
+        handleCliError(error, "project");
       }
     });
 }
