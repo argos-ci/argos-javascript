@@ -38,3 +38,16 @@ export function unwrap<T>(result: {
   }
   return result.data;
 }
+
+/**
+ * Like {@link unwrap} for endpoints that answer `204 No Content`: it only
+ * checks the request succeeded, since there is no body to return.
+ */
+export function unwrapEmpty(result: {
+  error?: unknown;
+  response: Response;
+}): void {
+  if (!result.response.ok) {
+    throwAPIError(result.error, result.response);
+  }
+}

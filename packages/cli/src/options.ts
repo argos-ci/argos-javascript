@@ -1,4 +1,5 @@
 import { Option } from "commander";
+import { fail } from "./lib/cli-error";
 
 export type ParallelNonceOption = { parallelNonce?: string | undefined };
 export const parallelNonceOption = new Option(
@@ -27,6 +28,11 @@ export const accountOption = new Option(
   "Slug of the account (personal or team) that will own the project",
 );
 
+export const accountSlugOption = new Option(
+  "--account <slug>",
+  "Slug of the account (personal or team) to act on. Also ARGOS_ACCOUNT",
+);
+
 export type JsonOption = { json?: boolean | undefined };
 export const jsonOption = new Option(
   "--json",
@@ -48,6 +54,29 @@ export const testProjectPathOption = new Option(
   "--project <owner/project>",
   "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
 );
+
+export const managedProjectPathOption = new Option(
+  "--project <owner/project>",
+  "Project to act on, in owner/project format. Also ARGOS_PROJECT",
+);
+
+/** Default number of items a paginated command fetches. */
+export const DEFAULT_LIMIT = 100;
+
+export type LimitOption = { limit: string };
+export const limitOption = new Option(
+  "--limit <number>",
+  "Maximum number of items to fetch, following pagination as needed",
+).default(String(DEFAULT_LIMIT));
+
+/** Parse a `--limit` value into a positive integer, or abort. */
+export function toLimit(value: string): number {
+  const limit = Number(value);
+  if (!Number.isInteger(limit) || limit < 1) {
+    fail(`--limit must be a positive integer, received "${value}".`);
+  }
+  return limit;
+}
 
 /** API values accepted by the `metricsPeriod` query parameter. */
 export type MetricsPeriod =

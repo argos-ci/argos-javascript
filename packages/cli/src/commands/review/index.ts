@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { registerReviewCreate } from "./create";
 import { registerReviewDismiss } from "./dismiss";
 import { registerReviewList } from "./list";
+import { registerReviewReviewer } from "./reviewer";
 
 export function reviewCommand(program: Command) {
   const review = program
@@ -10,4 +11,5 @@ export function reviewCommand(program: Command) {
   registerReviewList(review);
   registerReviewCreate(review);
   registerReviewDismiss(review);
+  registerReviewReviewer(review);
 }

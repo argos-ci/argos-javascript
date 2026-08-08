@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import { createApiClient, unwrap } from "../lib/api";
 import { fail } from "../lib/cli-error";
-import { formatProject } from "../lib/format";
+import { formatCreatedProject } from "../lib/format";
 import { handleCliError, output } from "../lib/run";
 import { resolveToken } from "../lib/target";
 import { accountOption, jsonOption, tokenOption } from "../options";
@@ -34,7 +34,7 @@ export function createProjectCommand(program: Command) {
             body: { name, accountSlug },
           }),
         );
-        output(project, options, formatProject);
+        output(project, options, formatCreatedProject);
       } catch (error) {
         handleCliError(error, "user");
       }
