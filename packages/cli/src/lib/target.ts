@@ -26,6 +26,11 @@ export type TargetOptions = {
   project?: string | undefined;
 };
 
+export type AccountTargetOptions = {
+  token?: string | undefined;
+  account?: string | undefined;
+};
+
 /** A resolved build, ready to drive API calls. */
 export type BuildTarget = ProjectPath & {
   client: ArgosAPIClient;
@@ -38,11 +43,19 @@ export type ProjectTarget = ProjectPath & {
   client: ArgosAPIClient;
 };
 
+/** A resolved account, ready to drive account-scoped API calls. */
+export type AccountTarget = {
+  client: ArgosAPIClient;
+  accountSlug: string;
+};
+
 /**
  * Resolve the API token, preferring an explicit token (`--token` /
  * `ARGOS_TOKEN`) over the one stored by `argos login`.
  */
-export async function resolveToken(options: TargetOptions): Promise<string> {
+export async function resolveToken(options: {
+  token?: string | undefined;
+}): Promise<string> {
   const token =
     options.token || process.env["ARGOS_TOKEN"] || (await getAccessToken());
   if (!token) {
@@ -132,4 +145,21 @@ export async function resolveProjectTarget(
   }
   const project = unwrap(await client.GET("/project"));
   return { client, owner: project.account.slug, project: project.name };
+}
+
+/**
+ * Resolve an account-scoped command target: an authenticated client and the
+ * account slug, taken from `--account <slug>` or the `ARGOS_ACCOUNT`
+ * environment variable. Account endpoints all act as a user, so the token must
+ * be a personal access token scoped to that account.
+ */
+export async function resolveAccountTarget(
+  options: AccountTargetOptions,
+): Promise<AccountTarget> {
+  const accountSlug = options.account || process.env["ARGOS_ACCOUNT"];
+  if (!accountSlug) {
+    fail("An account is required. Use --account <slug> or set ARGOS_ACCOUNT.");
+  }
+  const client = createApiClient(await resolveToken(options));
+  return { client, accountSlug };
 }

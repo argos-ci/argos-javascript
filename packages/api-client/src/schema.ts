@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+    "/accounts/{accountSlug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an account
+         * @description Retrieve an account with its plan and current-period usage. Use it to watch screenshot consumption against the plan before it runs over.
+         */
+        get: operations["getAccount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update a team's defaults
+         * @description Change the role given to users that join a team through its invite link or a verified email domain. Requires administrator access to the team.
+         */
+        patch: operations["updateAccount"];
+        trace?: never;
+    };
     "/accounts/{accountSlug}/analytics": {
         parameters: {
             query?: never;
@@ -38,6 +62,158 @@ export interface paths {
         get: operations["listProjects"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a team's members
+         * @description List the members of a team, with their role. Requires administrator access to the team.
+         */
+        get: operations["listAccountMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove a member
+         * @description Remove a user from a team. Requires administrator access to the team. The last member of a team cannot be removed; removing the second-to-last one promotes the remaining member to owner.
+         */
+        delete: operations["removeAccountMember"];
+        options?: never;
+        head?: never;
+        /**
+         * Change a member's role
+         * @description Change the role of an existing team member. Requires administrator access to the team.
+         */
+        patch: operations["setAccountMemberLevel"];
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List pending invites
+         * @description List the pending invitations to join a team, most recent first. Requires administrator access to the team.
+         */
+        get: operations["listAccountInvites"];
+        put?: never;
+        /**
+         * Invite members
+         * @description Invite people to a team by email. Each invited address receives an email with a link to join. Re-inviting an address that already has a pending invite refreshes it. Requires administrator access to the team.
+         */
+        post: operations["createAccountInvites"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/invites/{inviteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Cancel an invite
+         * @description Cancel a pending invitation, invalidating its link. Requires administrator access to the team.
+         */
+        delete: operations["cancelAccountInvite"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/domains": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a team's email domains
+         * @description List the email domains a team is open to. Requires administrator access to the team.
+         */
+        get: operations["listTeamDomains"];
+        put?: never;
+        /**
+         * Open a team to an email domain
+         * @description Add an email domain to a team, so anyone signing up with a verified address on it joins automatically. Requires administrator access to the team, and you must yourself hold a verified address on the domain — a team can only be opened to a domain its administrator demonstrably belongs to. Public email providers are refused.
+         */
+        post: operations["addTeamDomain"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/domains/{domain}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Close a team to an email domain
+         * @description Remove an email domain from a team. New sign-ups on it no longer join automatically; members who already joined stay. Requires administrator access to the team.
+         */
+        delete: operations["removeTeamDomain"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/invite-link/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset the invite link
+         * @description Rotate the team's shared invite link, invalidating the previous one. Anyone holding the old link can no longer use it to join. Requires administrator access to the team.
+         */
+        post: operations["resetAccountInviteLink"];
         delete?: never;
         options?: never;
         head?: never;
@@ -341,6 +517,142 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /**
+         * Update a project
+         * @description Update a project's settings. Only the fields present in the request are changed. Requires administrator access to the project.
+         */
+        patch: operations["updateProject"];
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/automation-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's automation rules
+         * @description List the automation rules of a project, most recent first. Requires administrator access to the project.
+         */
+        get: operations["listAutomationRules"];
+        put?: never;
+        /**
+         * Create an automation rule
+         * @description Create an automation rule on a project. Requires administrator access to the project. Action targets must belong to the project's account.
+         */
+        post: operations["createAutomationRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/automation-rules/{ruleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an automation rule
+         * @description Retrieve a single automation rule. Requires administrator access to the project.
+         */
+        get: operations["getAutomationRule"];
+        /**
+         * Update an automation rule
+         * @description Replace an automation rule's definition. Requires administrator access to the project. The whole definition is replaced, so send the events, conditions and actions you want the rule to end up with.
+         */
+        put: operations["updateAutomationRule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/automation-rules/{ruleId}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deactivate an automation rule
+         * @description Stop a rule from firing. Rules are never deleted — a deactivated one keeps its run history, which is what tells you why something fired. Requires administrator access to the project.
+         */
+        post: operations["deactivateAutomationRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/contributors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's contributors
+         * @description List the users explicitly granted access to a project, with their level. Team owners and members are not listed — they reach every project through their team role. The authenticated user comes first when they are one of them.
+         */
+        get: operations["listProjectContributors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/contributors/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Grant a contributor access to a project
+         * @description Grant a user access to a project, or change the level they already hold. Requires administrator access to the project. Only meaningful for team contributors: owners and members already reach every project.
+         */
+        put: operations["setProjectContributor"];
+        post?: never;
+        /**
+         * Revoke a contributor's access
+         * @description Revoke a user's access to a project. Requires administrator access to the project, except when removing yourself — a contributor can always walk away from a project.
+         */
+        delete: operations["removeProjectContributor"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Transfer a project
+         * @description Move a project to another account, optionally renaming it. The token must be scoped to both accounts, and the acting user must administer the project as well as the account receiving it.
+         */
+        post: operations["transferProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
         patch?: never;
         trace?: never;
     };
@@ -463,6 +775,82 @@ export interface paths {
          */
         post: operations["createReview"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/reviewers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a build's requested reviewers
+         * @description List the users currently requested to review a build.
+         */
+        get: operations["listBuildReviewers"];
+        put?: never;
+        /**
+         * Request reviewers on a build
+         * @description Ask users to review a build. Each newly-requested reviewer is notified. Idempotent: users already requested are left untouched and not notified again. Users without access to the project are ignored, and you cannot request yourself.
+         */
+        post: operations["addBuildReviewers"];
+        /**
+         * Cancel review requests on a build
+         * @description Cancel the review requests standing on a build. Removing a user that was not requested is a no-op.
+         */
+        delete: operations["removeBuildReviewers"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/builds/{buildNumber}/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subscribe to a build
+         * @description Start receiving notifications about a build — new comments, reviews, and status changes. Clears a previous explicit unsubscription.
+         */
+        post: operations["subscribeBuild"];
+        /**
+         * Unsubscribe from a build
+         * @description Stop receiving notifications about a build. Recorded as an intentional unsubscription, so Argos will not auto-subscribe you to it again.
+         */
+        delete: operations["unsubscribeBuild"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests/{testId}/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subscribe to a test
+         * @description Start receiving notifications about a test — new comments and the changes it produces. Clears a previous explicit unsubscription.
+         */
+        post: operations["subscribeTest"];
+        /**
+         * Unsubscribe from a test
+         * @description Stop receiving notifications about a test. Recorded as an intentional unsubscription, so Argos will not auto-subscribe you to it again.
+         */
+        delete: operations["unsubscribeTest"];
         options?: never;
         head?: never;
         patch?: never;
@@ -623,6 +1011,90 @@ export interface paths {
          * @description Unsubscribe the authenticated user from a build comment thread's notifications.
          */
         delete: operations["unsubscribeBuildCommentThread"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's tests
+         * @description List the tests currently running in a project, flakiest first. A test is listed when it appeared in the latest reference build of its build name — tests that were deleted, renamed or skipped drop out. Use it to find what to stabilise: the first page is the project's flakiness backlog.
+         */
+        get: operations["listTests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/deployments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's deployments
+         * @description List a project's deployments, most recent first. Use `environment` to keep only the production ones — the deployments that answer "what is live right now?".
+         */
+        get: operations["listProjectDeployments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/domain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a project's deployment domain
+         * @description Retrieve the domain the project's production deployments are served on.
+         */
+        get: operations["getProjectDomain"];
+        /**
+         * Set a project's deployment domain
+         * @description Set the domain the project's production deployments are served on. Requires administrator access to the project. Only domains under the Argos deployments domain are accepted, and reserved slugs are refused.
+         */
+        put: operations["updateProjectDomain"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/ignored-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's ignored changes
+         * @description List the changes currently ignored in a project, most recently ignored first. Use it to audit what has been silenced and to unignore anything that should be reviewed again.
+         */
+        get: operations["listIgnoredChanges"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -812,6 +1284,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description Role given to users that join a team through its invite link or a verified email domain.
+         * @enum {string}
+         */
+        TeamDefaultUserLevel: "member" | "contributor";
+        /**
+         * @description Role of a user on a team. Owners administer the team, members see every project, contributors only the projects they are added to.
+         * @enum {string}
+         */
+        TeamUserLevel: "owner" | "member" | "contributor";
         /** @description SHA1 hash */
         Sha1Hash: string;
         GitBranch: string;
@@ -960,19 +1442,161 @@ export interface components {
             };
         };
         /**
+         * @description When to post the summary check on a pull request: `always`, `never`, or `auto` (only once the project has a baseline).
+         * @enum {string}
+         */
+        SummaryCheck: "always" | "never" | "auto";
+        /**
+         * @description Access level given to team members that are not explicit contributors on the project. `null` means they get no access.
+         * @enum {string}
+         */
+        ProjectUserLevel: "admin" | "reviewer" | "viewer";
+        /** @description How flaky changes are ignored on a project. */
+        IgnoreConfig: {
+            /** @description Whether changes can be ignored on this project. */
+            enabled: boolean;
+            /** @description Auto-ignore settings, `null` when auto-ignore is off. */
+            autoIgnore: {
+                /** @description Number of times a change must reappear before it is ignored automatically. */
+                changes: number;
+            } | null;
+        };
+        /**
+         * @description Who can reach the project's deployments: anyone (`public`), anyone with the domain (`domain-private`), or team members only (`private`, teams only).
+         * @enum {string}
+         */
+        DeploymentAuth: "public" | "domain-private" | "private";
+        /**
+         * @description An event an automation rule can react to.
+         * @enum {string}
+         */
+        AutomationEvent: "build.completed" | "build.reviewed";
+        /** @description A condition narrowing when a rule fires. Conditions are combined with AND; wrap one in `{ not: … }` to negate it, or `{ glob: … }` to match a branch by pattern. */
+        AutomationCondition: (({
+            /** @constant */
+            type: "build-branch";
+            value: string;
+        } | {
+            /** @constant */
+            type: "build-conclusion";
+            value: ("no-changes" | "changes-detected") | null;
+        } | {
+            /** @constant */
+            type: "build-mode";
+            value: ("ci" | "monitoring") | null;
+        } | {
+            /** @constant */
+            type: "build-name";
+            value: string;
+        } | {
+            /** @constant */
+            type: "build-type";
+            value: ("reference" | "check" | "orphan" | "skipped") | null;
+        }) | {
+            glob: {
+                /** @constant */
+                type: "build-branch";
+                value: string;
+            };
+        }) | {
+            not: ({
+                /** @constant */
+                type: "build-branch";
+                value: string;
+            } | {
+                /** @constant */
+                type: "build-conclusion";
+                value: ("no-changes" | "changes-detected") | null;
+            } | {
+                /** @constant */
+                type: "build-mode";
+                value: ("ci" | "monitoring") | null;
+            } | {
+                /** @constant */
+                type: "build-name";
+                value: string;
+            } | {
+                /** @constant */
+                type: "build-type";
+                value: ("reference" | "check" | "orphan" | "skipped") | null;
+            }) | {
+                glob: {
+                    /** @constant */
+                    type: "build-branch";
+                    value: string;
+                };
+            };
+        };
+        /** @description An action to run. Slack channels are addressed by `slackId` when known, otherwise by `name`; Teams and Discord by the id of a webhook registered on the project's account. */
+        AutomationActionInput: {
+            /** @constant */
+            type: "sendSlackMessage";
+            payload: {
+                /** @default  */
+                slackId: string;
+                name: string;
+            };
+        } | {
+            /** @constant */
+            type: "sendMsTeamsMessage";
+            payload: {
+                webhookId: string;
+            };
+        } | {
+            /** @constant */
+            type: "sendDiscordMessage";
+            payload: {
+                webhookId: string;
+            };
+        };
+        /**
          * @description The build number
          * @example 42
          */
         BuildNumber: string;
-        /** @description The ID of the comment */
-        CommentId: string;
-        /** @description ID of any comment in the thread */
-        ThreadCommentId: string;
         /**
          * @description The test identifier, as returned in a diff's `test.id`
          * @example WEB-xf23d
          */
         TestId: string;
+        /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+        CommentId: string;
+        /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+        ThreadCommentId: string;
+        /** @description An account with its plan and current-period usage, to watch consumption against the plan. */
+        AccountDetails: {
+            id: string;
+            slug: string;
+            name: string | null;
+            /** @enum {string} */
+            type: "user" | "team";
+            /** @description The account's plan, `null` when it has none. */
+            plan: {
+                name: string;
+                includedScreenshots: number;
+            } | null;
+            /** @description Start of the current billing period. */
+            periodStartDate: string | null;
+            /** @description End of the current billing period. */
+            periodEndDate: string | null;
+            /** @description Screenshots used since the start of the current period. */
+            currentPeriodScreenshots: number;
+            /** @description Screenshots included in the plan for a period. */
+            includedScreenshots: number;
+            /** @description Used screenshots over included screenshots. Above `1` the account is over its plan and pays for the extra. */
+            consumptionRatio: number;
+            /** @description Cost accrued so far this period for screenshots beyond the plan, in the subscription's currency. */
+            additionalScreenshotsCost: number;
+            /** @description Role given to users joining through the invite link or a verified domain. `null` on a personal account. */
+            defaultUserLevel: components["schemas"]["TeamDefaultUserLevel"] | null;
+        };
+        /** @description Error response */
+        Error: {
+            error: string;
+            details?: {
+                message: string;
+            }[];
+        };
         AccountAnalytics: {
             screenshots: {
                 series: {
@@ -1027,13 +1651,6 @@ export interface components {
                 }[];
             };
         };
-        /** @description Error response */
-        Error: {
-            error: string;
-            details?: {
-                message: string;
-            }[];
-        };
         /** @description Page information */
         PageInfo: {
             /** @description Total number of items */
@@ -1050,11 +1667,68 @@ export interface components {
             name: string;
             defaultBaseBranch: string;
             hasRemoteContentAccess: boolean;
+            /** @description Glob matching the branches whose builds are approved automatically. */
+            autoApprovedBranchGlob: string;
+            /** @description Glob matching the branches whose deployments are treated as production. */
+            deploymentProductionBranchGlob: string;
+            /** @description Whether the project is private. Resolved from the linked repository unless overridden. */
+            private: boolean;
+            summaryCheck: components["schemas"]["SummaryCheck"];
+            /** @description Whether Argos comments on pull requests. */
+            prCommentEnabled: boolean;
+            /** @description Whether builds can authenticate with a GitHub Actions OIDC token instead of a project token. */
+            githubActionsOidcEnabled: boolean;
+            /** @description Whether builds from forked pull requests can be uploaded without a token. */
+            tokenlessAuthEnabled: boolean;
+            /** @description Whether deployments are served for this project. */
+            deploymentEnabled: boolean;
+            deploymentAuth: components["schemas"]["DeploymentAuth"];
+            defaultUserLevel: components["schemas"]["ProjectUserLevel"] | null;
+            ignoreConfig: components["schemas"]["IgnoreConfigOutput"];
         };
         /** @description Account */
         Account: {
             id: string;
             slug: string;
+        };
+        /** @description A member of a team. */
+        TeamMember: {
+            /** @description Identifier of the membership, not of the user. */
+            id: string;
+            user: components["schemas"]["User"];
+            level: components["schemas"]["TeamUserLevel"];
+        };
+        /** @description A user. */
+        User: {
+            id: string;
+            slug: string;
+            name: string | null;
+        };
+        /** @description A pending invitation to join a team. */
+        TeamInvite: {
+            id: string;
+            /** Format: email */
+            email: string;
+            level: components["schemas"]["TeamUserLevel"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** @description Whether the invite is past its expiry date. Expired invites stay listed until they are cancelled or re-sent. */
+            expired: boolean;
+        };
+        /** @description An email domain the team is open to: anyone signing up with a verified address on it joins automatically, at the team's default role. */
+        TeamDomain: {
+            domain: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        InviteLink: {
+            /**
+             * Format: uri
+             * @description The team's new shared invite link. Anyone with it joins at the team's default role.
+             */
+            inviteLink: string;
         };
         /** @description Build */
         Build: {
@@ -1151,6 +1825,33 @@ export interface components {
             name: string | null;
             /** @enum {string} */
             type: "user" | "team";
+        };
+        /** @description A rule that runs actions when a build event matches its conditions. */
+        AutomationRule: {
+            id: string;
+            name: string;
+            /** @description Whether the rule still fires. Deactivated rules keep their run history. */
+            active: boolean;
+            events: components["schemas"]["AutomationEvent"][];
+            conditions: components["schemas"]["AutomationConditionOutput"][];
+            /** @description The actions as stored, with their targets already resolved (a Slack channel id, a webhook id). */
+            actions: {
+                action: string;
+                actionPayload: {
+                    [key: string]: unknown;
+                };
+            }[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description A contributor explicitly granted access to a project. Team owners and members reach every project without appearing here. */
+        ProjectContributor: {
+            /** @description Identifier of the grant, not of the user. */
+            id: string;
+            user: components["schemas"]["User"];
+            level: components["schemas"]["ProjectUserLevel"];
         };
         /** @description Snapshot diff */
         SnapshotDiff: {
@@ -1450,14 +2151,19 @@ export interface components {
             /** @description Date the review was created. */
             date: string;
         };
-        /** @description A user. */
-        User: {
-            id: string;
-            slug: string;
-            name: string | null;
+        /** @description The review requests standing on a build. */
+        BuildReviewers: {
+            /** @description The users currently requested to review the build. */
+            reviewers: components["schemas"]["User"][];
+        };
+        /** @description A notification subscription. */
+        NotificationSubscription: {
+            /** @description Whether the authenticated user now receives notifications for this resource. */
+            subscribed: boolean;
         };
         /** @description A comment posted on a build or on a test. */
         Comment: {
+            /** @description Public ID of the comment (e.g. `comment-xf23d`) — the one the app links to, and the one every endpoint taking a comment ID expects. */
             id: string;
             /** @description Build this comment is posted on, null when it is posted on a test. */
             buildId: string | null;
@@ -1500,6 +2206,24 @@ export interface components {
                 /** @description The users who reacted with this emoji. */
                 users: components["schemas"]["User"][];
             }[];
+        };
+        /** @description A test with its flakiness metrics over the requested period. Fetch the test itself for its history and the changes behind the score. */
+        TestSummary: components["schemas"]["Test"];
+        /** @description A project's production deployment domain. */
+        ProjectDomain: {
+            /** @description The project's production deployment domain, `null` when deployments are disabled or no domain is set. */
+            domain: string | null;
+        };
+        /** @description A change currently ignored in a project: it no longer requires review and is approved automatically. */
+        IgnoredChange: {
+            /** @description Identifier of the ignored change, accepted by the unignore endpoint. */
+            id: string;
+            /** @description The test the ignored change belongs to. */
+            test: {
+                id: string;
+                name: string;
+                buildName: string;
+            };
         };
         /** @description A test with its flakiness metrics, both aggregated and over time, and when it first and last changed. */
         TestDetails: {
@@ -1582,6 +2306,72 @@ export interface components {
             /** @description The diff captured the last time the change was seen, with the baseline and the captured snapshot, so you can look at what moved. */
             diff: components["schemas"]["SnapshotDiff"];
         };
+        /** @description How flaky changes are ignored on a project. */
+        IgnoreConfigOutput: {
+            /** @description Whether changes can be ignored on this project. */
+            enabled: boolean;
+            /** @description Auto-ignore settings, `null` when auto-ignore is off. */
+            autoIgnore: {
+                /** @description Number of times a change must reappear before it is ignored automatically. */
+                changes: number;
+            } | null;
+        };
+        /** @description A condition narrowing when a rule fires. Conditions are combined with AND; wrap one in `{ not: … }` to negate it, or `{ glob: … }` to match a branch by pattern. */
+        AutomationConditionOutput: (({
+            /** @constant */
+            type: "build-branch";
+            value: string;
+        } | {
+            /** @constant */
+            type: "build-conclusion";
+            value: ("no-changes" | "changes-detected") | null;
+        } | {
+            /** @constant */
+            type: "build-mode";
+            value: ("ci" | "monitoring") | null;
+        } | {
+            /** @constant */
+            type: "build-name";
+            value: string;
+        } | {
+            /** @constant */
+            type: "build-type";
+            value: ("reference" | "check" | "orphan" | "skipped") | null;
+        }) | {
+            glob: {
+                /** @constant */
+                type: "build-branch";
+                value: string;
+            };
+        }) | {
+            not: ({
+                /** @constant */
+                type: "build-branch";
+                value: string;
+            } | {
+                /** @constant */
+                type: "build-conclusion";
+                value: ("no-changes" | "changes-detected") | null;
+            } | {
+                /** @constant */
+                type: "build-mode";
+                value: ("ci" | "monitoring") | null;
+            } | {
+                /** @constant */
+                type: "build-name";
+                value: string;
+            } | {
+                /** @constant */
+                type: "build-type";
+                value: ("reference" | "check" | "orphan" | "skipped") | null;
+            }) | {
+                glob: {
+                    /** @constant */
+                    type: "build-branch";
+                    value: string;
+                };
+            };
+        };
     };
     responses: never;
     parameters: never;
@@ -1591,6 +2381,148 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account to retrieve. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account with its plan and usage */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDetails"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    defaultUserLevel: components["schemas"]["TeamDefaultUserLevel"];
+                };
+            };
+        };
+        responses: {
+            /** @description The updated account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDetails"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getAccountAnalytics: {
         parameters: {
             query: {
@@ -1699,6 +2631,736 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listAccountMembers: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Match members on their name, slug, or email address. */
+                search?: string;
+                /** @description Restrict to the given roles, comma-separated (e.g. `owner,member`). */
+                levels?: string;
+                /** @description Ordering of the results. Defaults to `date`, most recently added first. */
+                orderBy?: "date" | "name-asc" | "name-desc";
+            };
+            header?: never;
+            path: {
+                /** @description Slug of the team to list members for. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of team members */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["TeamMember"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeAccountMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+                /** @description Identifier of the user to act on — the `user.id` returned by `listAccountMembers`, which is the user's account id. */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Member removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    setAccountMemberLevel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+                /** @description Identifier of the user to act on — the `user.id` returned by `listAccountMembers`, which is the user's account id. */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    level: components["schemas"]["TeamUserLevel"];
+                };
+            };
+        };
+        responses: {
+            /** @description The updated membership */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listAccountInvites: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Match invites on their email address. */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of pending invites */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["TeamInvite"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createAccountInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The people to invite. */
+                    members: {
+                        /** Format: email */
+                        email: string;
+                        level: components["schemas"]["TeamUserLevel"];
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The invites that were created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvite"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    cancelAccountInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+                /** @description Identifier of the invite, as returned when listing them. */
+                inviteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invite cancelled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listTeamDomains: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The team's email domains */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamDomain"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    addTeamDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The email domain, e.g. `acme.com`. */
+                    domain: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The domain the team is now open to */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamDomain"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeTeamDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+                /** @description The email domain to remove. */
+                domain: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Domain removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resetAccountInviteLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the team. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The new invite link */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteLink"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2803,6 +4465,770 @@ export interface operations {
             };
         };
     };
+    updateProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description New name for the project. Must be unique within the owning account (case-insensitive). */
+                    name?: string;
+                    /** @description Branch used as the baseline when no better one applies. `null` falls back to the repository's default branch. */
+                    defaultBaseBranch?: string | null;
+                    /** @description Glob matching the branches whose builds are approved automatically. `null` falls back to the default base branch. */
+                    autoApprovedBranchGlob?: string | null;
+                    /** @description Glob matching the branches whose deployments count as production. `null` falls back to the repository's default branch. */
+                    deploymentProductionBranchGlob?: string | null;
+                    /** @description Force the project's privacy. `null` inherits it from the linked repository. */
+                    private?: boolean | null;
+                    summaryCheck?: components["schemas"]["SummaryCheck"];
+                    /** @description Access given to team members that are not contributors on this project. `null` gives them none. */
+                    defaultUserLevel?: components["schemas"]["ProjectUserLevel"] | null;
+                    ignoreConfig?: components["schemas"]["IgnoreConfig"];
+                    deploymentEnabled?: boolean;
+                    deploymentAuth?: components["schemas"]["DeploymentAuth"];
+                    githubActionsOidcEnabled?: boolean;
+                    tokenlessAuthEnabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listAutomationRules: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Restrict to rules that still fire (`true`) or to deactivated ones (`false`). Omit for both. */
+                active?: "true" | "false";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of automation rules */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["AutomationRule"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createAutomationRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    events: components["schemas"]["AutomationEvent"][];
+                    /** @default [] */
+                    conditions?: components["schemas"]["AutomationCondition"][];
+                    actions: components["schemas"]["AutomationActionInput"][];
+                };
+            };
+        };
+        responses: {
+            /** @description The created rule */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutomationRule"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getAutomationRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description Identifier of the automation rule. */
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The automation rule */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutomationRule"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateAutomationRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description Identifier of the automation rule. */
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    events: components["schemas"]["AutomationEvent"][];
+                    /** @default [] */
+                    conditions?: components["schemas"]["AutomationCondition"][];
+                    actions: components["schemas"]["AutomationActionInput"][];
+                };
+            };
+        };
+        responses: {
+            /** @description The updated rule */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutomationRule"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deactivateAutomationRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description Identifier of the automation rule. */
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The deactivated rule */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutomationRule"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listProjectContributors: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of contributors */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["ProjectContributor"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    setProjectContributor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description Identifier of the user — the `user.id` returned by `listAccountMembers` or `listProjectContributors`. */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    level: components["schemas"]["ProjectUserLevel"];
+                };
+            };
+        };
+        responses: {
+            /** @description The granted access */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectContributor"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeProjectContributor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description Identifier of the user — the `user.id` returned by `listAccountMembers` or `listProjectContributors`. */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Access revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    transferProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Slug of the account that will own the project. */
+                    targetAccountSlug: string;
+                    /** @description Name to give the project on the target account. Defaults to its current name, which must be free there. */
+                    name?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The transferred project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     listBuilds: {
         parameters: {
             query?: {
@@ -3345,6 +5771,510 @@ export interface operations {
             };
         };
     };
+    listBuildReviewers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The users requested to review the build */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuildReviewers"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    addBuildReviewers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Identifiers of the users to act on — the `id` of a user as returned by `listBuildReviewers` or `getMe`. */
+                    userIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The users requested to review the build */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuildReviewers"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeBuildReviewers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Identifiers of the users to act on — the `id` of a user as returned by `listBuildReviewers` or `getMe`. */
+                    userIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The users still requested to review the build */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuildReviewers"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    subscribeBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscribed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationSubscription"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unsubscribeBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The build number */
+                buildNumber: components["schemas"]["BuildNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unsubscribed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationSubscription"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    subscribeTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscribed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationSubscription"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unsubscribeTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description The test identifier, as returned in a diff's `test.id` */
+                testId: components["schemas"]["TestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unsubscribed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationSubscription"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     dismissReview: {
         parameters: {
             query?: never;
@@ -3506,7 +6436,7 @@ export interface operations {
                     body: string | {
                         [key: string]: unknown;
                     };
-                    /** @description Root comment ID to reply to. */
+                    /** @description Public ID of the root comment to reply to (e.g. `comment-xf23d`). */
                     threadId?: string;
                     /** @description Screenshot diff to anchor the comment to. Required when anchor is set. */
                     screenshotDiffId?: string;
@@ -3593,7 +6523,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -3665,7 +6595,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -3737,7 +6667,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -3818,7 +6748,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -3900,7 +6830,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -3972,7 +6902,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
@@ -4044,7 +6974,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
@@ -4116,7 +7046,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
@@ -4188,7 +7118,7 @@ export interface operations {
                 project: string;
                 /** @description The build number */
                 buildNumber: components["schemas"]["BuildNumber"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
@@ -4224,6 +7154,363 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listTests: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Period over which the test flakiness metrics are computed. */
+                metricsPeriod?: "LAST_24_HOURS" | "LAST_3_DAYS" | "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
+                /** @description Restrict to the tests of a single build name. */
+                buildName?: string;
+                /** @description Match tests on their name. */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of the project's tests, flakiest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["TestSummary"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listProjectDeployments: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Restrict to one environment. */
+                environment?: "preview" | "production";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of deployments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: {
+                            id: string;
+                            /** @enum {string} */
+                            status: "pending" | "ready" | "error";
+                            /** @enum {string} */
+                            environment: "preview" | "production";
+                            branch: components["schemas"]["GitBranch"];
+                            commitSha: components["schemas"]["Sha256Hash"];
+                            /** Format: uri */
+                            url: string;
+                            createdAt: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getProjectDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The production deployment domain */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectDomain"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateProjectDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The full domain to serve production deployments on, under the Argos deployments domain — e.g. `acme-web.argos-ci.live`.
+                     * @example acme-web.argos-ci.live
+                     */
+                    domain: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated production deployment domain */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectDomain"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listIgnoredChanges: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of the project's ignored changes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["IgnoredChange"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4477,7 +7764,7 @@ export interface operations {
                     body: string | {
                         [key: string]: unknown;
                     };
-                    /** @description Root comment ID to reply to. */
+                    /** @description Public ID of the root comment to reply to (e.g. `comment-xf23d`). */
                     threadId?: string;
                 };
             };
@@ -4548,7 +7835,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -4620,7 +7907,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -4692,7 +7979,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -4773,7 +8060,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -4855,7 +8142,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description The ID of the comment */
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["CommentId"];
             };
             cookie?: never;
@@ -4927,7 +8214,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
@@ -4999,7 +8286,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
@@ -5071,7 +8358,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;
@@ -5143,7 +8430,7 @@ export interface operations {
                 project: string;
                 /** @description The test identifier, as returned in a diff's `test.id` */
                 testId: components["schemas"]["TestId"];
-                /** @description ID of any comment in the thread */
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
                 commentId: components["schemas"]["ThreadCommentId"];
             };
             cookie?: never;

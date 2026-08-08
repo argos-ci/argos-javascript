@@ -15,6 +15,23 @@ type User = ArgosAPISchema.components["schemas"]["User"];
 type Project = ArgosAPISchema.components["schemas"]["Project"];
 type AccountAnalytics =
   ArgosAPISchema.components["schemas"]["AccountAnalytics"];
+type AccountDetails = ArgosAPISchema.components["schemas"]["AccountDetails"];
+type TeamMember = ArgosAPISchema.components["schemas"]["TeamMember"];
+type TeamInvite = ArgosAPISchema.components["schemas"]["TeamInvite"];
+type TeamDomain = ArgosAPISchema.components["schemas"]["TeamDomain"];
+type InviteLink = ArgosAPISchema.components["schemas"]["InviteLink"];
+type ProjectContributor =
+  ArgosAPISchema.components["schemas"]["ProjectContributor"];
+type ProjectDomain = ArgosAPISchema.components["schemas"]["ProjectDomain"];
+type IgnoredChange = ArgosAPISchema.components["schemas"]["IgnoredChange"];
+type TestSummary = ArgosAPISchema.components["schemas"]["TestSummary"];
+type BuildReviewers = ArgosAPISchema.components["schemas"]["BuildReviewers"];
+type NotificationSubscription =
+  ArgosAPISchema.components["schemas"]["NotificationSubscription"];
+type AutomationRule = ArgosAPISchema.components["schemas"]["AutomationRule"];
+/** A deployment as returned by `listProjectDeployments`; it has no named schema. */
+export type ProjectDeployment =
+  ArgosAPISchema.operations["listProjectDeployments"]["responses"][200]["content"]["application/json"]["results"][number];
 
 /** Render a scalar, using `-` for empty values. */
 export function formatValue(value: string | number | null | undefined): string {
@@ -22,6 +39,11 @@ export function formatValue(value: string | number | null | undefined): string {
     return "-";
   }
   return String(value);
+}
+
+/** Render a flag as `yes` / `no`. */
+function formatBoolean(value: boolean): string {
+  return value ? "yes" : "no";
 }
 
 function formatUser(user: User | null | undefined): string {
@@ -39,7 +61,7 @@ export function formatMe(user: User): string {
   ].join("\n");
 }
 
-export function formatProject(project: Project): string {
+export function formatCreatedProject(project: Project): string {
   return [
     `Created project ${project.account.slug}/${project.name}.`,
     `ID: ${project.id}`,
@@ -47,6 +69,33 @@ export function formatProject(project: Project): string {
     `Account: ${project.account.slug}`,
     `Default base branch: ${formatValue(project.defaultBaseBranch)}`,
   ].join("\n");
+}
+
+export function formatProject(project: Project): string {
+  return [
+    `Project ${project.account.slug}/${project.name}`,
+    `ID: ${project.id}`,
+    `Visibility: ${project.private ? "private" : "public"}`,
+    `Default base branch: ${formatValue(project.defaultBaseBranch)}`,
+    `Auto-approved branches: ${formatValue(project.autoApprovedBranchGlob)}`,
+    `Summary check: ${project.summaryCheck}`,
+    `PR comment: ${formatBoolean(project.prCommentEnabled)}`,
+    `Default user level: ${formatValue(project.defaultUserLevel)}`,
+    `Ignore changes: ${formatIgnoreConfig(project.ignoreConfig)}`,
+    `Deployments: ${formatBoolean(project.deploymentEnabled)} (${project.deploymentAuth}, production branches ${formatValue(project.deploymentProductionBranchGlob)})`,
+    `GitHub Actions OIDC: ${formatBoolean(project.githubActionsOidcEnabled)}`,
+    `Tokenless auth: ${formatBoolean(project.tokenlessAuthEnabled)}`,
+  ].join("\n");
+}
+
+function formatIgnoreConfig(config: Project["ignoreConfig"]): string {
+  if (!config.enabled) {
+    return "disabled";
+  }
+  const autoIgnore = config.autoIgnore;
+  return autoIgnore
+    ? `enabled, auto-ignore after ${autoIgnore.changes} occurrences`
+    : "enabled, auto-ignore off";
 }
 
 export function formatStats(stats: Build["stats"]): string {
@@ -358,6 +407,237 @@ export function formatComments(comments: Comment[]): string {
         "",
       ];
     }),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+export function formatAccount(account: AccountDetails): string {
+  const lines = [
+    `Account ${account.slug} (${account.type})`,
+    `ID: ${account.id}`,
+    `Name: ${formatValue(account.name)}`,
+    `Plan: ${formatValue(account.plan?.name)}`,
+    `Period: ${formatValue(account.periodStartDate)} → ${formatValue(account.periodEndDate)}`,
+    `Screenshots: ${account.currentPeriodScreenshots} / ${account.includedScreenshots} (${Math.round(account.consumptionRatio * 100)}%)`,
+  ];
+  if (account.additionalScreenshotsCost > 0) {
+    lines.push(
+      `Additional screenshots cost: ${account.additionalScreenshotsCost}`,
+    );
+  }
+  if (account.defaultUserLevel) {
+    lines.push(`Default user level: ${account.defaultUserLevel}`);
+  }
+  return lines.join("\n");
+}
+
+export function formatMembers(members: TeamMember[]): string {
+  if (members.length === 0) {
+    return "No members found.";
+  }
+  return [
+    `Members (${members.length})`,
+    "",
+    ...members.map(
+      (member) =>
+        `${formatUser(member.user)} [${member.level}] · user ${member.user.id}`,
+    ),
+  ].join("\n");
+}
+
+export function formatMember(member: TeamMember): string {
+  return [
+    `Member ${formatUser(member.user)}`,
+    `Level: ${member.level}`,
+    `User ID: ${member.user.id}`,
+  ].join("\n");
+}
+
+export function formatInvites(invites: TeamInvite[]): string {
+  if (invites.length === 0) {
+    return "No pending invites found.";
+  }
+  return [
+    `Invites (${invites.length})`,
+    "",
+    ...invites.map(
+      (invite) =>
+        `${invite.email} [${invite.level}${invite.expired ? ", expired" : ""}] · ${invite.id} · expires ${invite.expiresAt}`,
+    ),
+  ].join("\n");
+}
+
+export function formatInviteLink(link: InviteLink): string {
+  return `Invite link: ${link.inviteLink}`;
+}
+
+export function formatDomains(domains: TeamDomain[]): string {
+  if (domains.length === 0) {
+    return "No email domains found.";
+  }
+  return [
+    `Email domains (${domains.length})`,
+    "",
+    ...domains.map((domain) => `${domain.domain} · added ${domain.createdAt}`),
+  ].join("\n");
+}
+
+export function formatDomain(domain: TeamDomain): string {
+  return [`Domain ${domain.domain}`, `Added: ${domain.createdAt}`].join("\n");
+}
+
+export function formatContributors(contributors: ProjectContributor[]): string {
+  if (contributors.length === 0) {
+    return "No contributors found.";
+  }
+  return [
+    `Contributors (${contributors.length})`,
+    "",
+    ...contributors.map(
+      (contributor) =>
+        `${formatUser(contributor.user)} [${contributor.level}] · user ${contributor.user.id}`,
+    ),
+  ].join("\n");
+}
+
+export function formatContributor(contributor: ProjectContributor): string {
+  return [
+    `Contributor ${formatUser(contributor.user)}`,
+    `Level: ${contributor.level}`,
+    `User ID: ${contributor.user.id}`,
+  ].join("\n");
+}
+
+export function formatDeployments(deployments: ProjectDeployment[]): string {
+  if (deployments.length === 0) {
+    return "No deployments found.";
+  }
+  return [
+    `Deployments (${deployments.length})`,
+    "",
+    ...deployments.flatMap((deployment) => [
+      `${deployment.id} [${deployment.status}, ${deployment.environment}]`,
+      `  Branch: ${formatValue(deployment.branch)}`,
+      `  Commit: ${formatValue(deployment.commitSha)}`,
+      `  Date: ${deployment.createdAt}`,
+      `  URL: ${deployment.url}`,
+      "",
+    ]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+export function formatProjectDomain(domain: ProjectDomain): string {
+  return `Deployment domain: ${formatValue(domain.domain)}`;
+}
+
+export function formatIgnoredChanges(changes: IgnoredChange[]): string {
+  if (changes.length === 0) {
+    return "No ignored changes found.";
+  }
+  return [
+    `Ignored changes (${changes.length})`,
+    "",
+    ...changes.flatMap((change) => [
+      change.id,
+      `  Test: ${change.test.name} (${change.test.buildName})`,
+      `  Test ID: ${change.test.id}`,
+      "",
+    ]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+export function formatTests(tests: TestSummary[]): string {
+  if (tests.length === 0) {
+    return "No tests found.";
+  }
+  return [
+    `Tests (${tests.length})`,
+    "",
+    ...tests.flatMap((test) => [
+      `${test.name} (${test.buildName})`,
+      `  ID: ${test.id}`,
+      `  Flakiness: ${formatFlakiness(test.metrics)}`,
+      `  Changes: ${test.metrics.changes} over ${test.metrics.total} builds`,
+      "",
+    ]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+export function formatReviewers(data: BuildReviewers): string {
+  if (data.reviewers.length === 0) {
+    return "No reviewers requested.";
+  }
+  return [
+    `Requested reviewers (${data.reviewers.length})`,
+    "",
+    ...data.reviewers.map((user) => `${formatUser(user)} · user ${user.id}`),
+  ].join("\n");
+}
+
+export function formatSubscription(
+  subscription: NotificationSubscription,
+): string {
+  return subscription.subscribed
+    ? "Subscribed: you will receive notifications."
+    : "Unsubscribed: you will no longer receive notifications.";
+}
+
+/** One line per condition, rendering the `not` and `glob` wrappers inline. */
+function formatConditions(conditions: AutomationRule["conditions"]): string[] {
+  return conditions.map((condition) => {
+    if ("not" in condition) {
+      const inner = condition.not;
+      return "glob" in inner
+        ? `not ${inner.glob.type} matches ${inner.glob.value}`
+        : `not ${inner.type} is ${formatValue(inner.value)}`;
+    }
+    if ("glob" in condition) {
+      return `${condition.glob.type} matches ${condition.glob.value}`;
+    }
+    return `${condition.type} is ${formatValue(condition.value)}`;
+  });
+}
+
+export function formatAutomationRule(rule: AutomationRule): string {
+  const lines = [
+    `Rule ${rule.name} [${rule.active ? "active" : "inactive"}]`,
+    `ID: ${rule.id}`,
+    `Events: ${rule.events.join(", ")}`,
+  ];
+  const conditions = formatConditions(rule.conditions);
+  lines.push(
+    conditions.length > 0
+      ? `Conditions: ${conditions.join(" AND ")}`
+      : "Conditions: none",
+  );
+  lines.push(
+    `Actions: ${rule.actions.map((action) => action.action).join(", ")}`,
+  );
+  lines.push(`Updated: ${rule.updatedAt}`);
+  return lines.join("\n");
+}
+
+export function formatAutomationRules(rules: AutomationRule[]): string {
+  if (rules.length === 0) {
+    return "No automation rules found.";
+  }
+  return [
+    `Automation rules (${rules.length})`,
+    "",
+    ...rules.flatMap((rule) => [
+      `${rule.name} [${rule.active ? "active" : "inactive"}]`,
+      `  ID: ${rule.id}`,
+      `  Events: ${rule.events.join(", ")}`,
+      `  Actions: ${rule.actions.map((action) => action.action).join(", ")}`,
+      "",
+    ]),
   ]
     .slice(0, -1)
     .join("\n");

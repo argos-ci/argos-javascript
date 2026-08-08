@@ -5,6 +5,7 @@ import {
   formatChange,
   formatComment,
   formatComments,
+  formatCreatedProject,
   formatProject,
   formatReview,
   formatReviews,
@@ -51,7 +52,7 @@ describe("formatValue", () => {
   });
 });
 
-describe("formatProject", () => {
+describe("formatCreatedProject", () => {
   it("summarizes the created project", () => {
     const project = {
       id: "project-1",
@@ -60,11 +61,68 @@ describe("formatProject", () => {
       defaultBaseBranch: "main",
       hasRemoteContentAccess: true,
     } as ArgosAPISchema.components["schemas"]["Project"];
-    const output = formatProject(project);
+    const output = formatCreatedProject(project);
     expect(output).toContain("Created project acme/my-app.");
     expect(output).toContain("ID: project-1");
     expect(output).toContain("Account: acme");
     expect(output).toContain("Default base branch: main");
+  });
+});
+
+describe("formatProject", () => {
+  it("summarizes the project settings", () => {
+    const project = {
+      id: "project-1",
+      name: "my-app",
+      account: { id: "account-1", slug: "acme" },
+      defaultBaseBranch: "main",
+      hasRemoteContentAccess: true,
+      autoApprovedBranchGlob: "main",
+      deploymentProductionBranchGlob: "main",
+      private: true,
+      summaryCheck: "auto",
+      prCommentEnabled: true,
+      githubActionsOidcEnabled: false,
+      tokenlessAuthEnabled: false,
+      deploymentEnabled: true,
+      deploymentAuth: "public",
+      defaultUserLevel: "reviewer",
+      ignoreConfig: { enabled: true, autoIgnore: { changes: 3 } },
+    } as ArgosAPISchema.components["schemas"]["Project"];
+    const output = formatProject(project);
+    expect(output).toContain("Project acme/my-app");
+    expect(output).toContain("Visibility: private");
+    expect(output).toContain("Summary check: auto");
+    expect(output).toContain(
+      "Ignore changes: enabled, auto-ignore after 3 occurrences",
+    );
+    expect(output).toContain(
+      "Deployments: yes (public, production branches main)",
+    );
+  });
+
+  it("reports a disabled ignore config", () => {
+    const project = {
+      id: "project-1",
+      name: "my-app",
+      account: { id: "account-1", slug: "acme" },
+      defaultBaseBranch: "main",
+      autoApprovedBranchGlob: "main",
+      deploymentProductionBranchGlob: "main",
+      private: false,
+      summaryCheck: "never",
+      prCommentEnabled: false,
+      githubActionsOidcEnabled: false,
+      tokenlessAuthEnabled: false,
+      deploymentEnabled: false,
+      deploymentAuth: "private",
+      defaultUserLevel: null,
+      ignoreConfig: { enabled: false, autoIgnore: null },
+    } as unknown as ArgosAPISchema.components["schemas"]["Project"];
+    const output = formatProject(project);
+    expect(output).toContain("Visibility: public");
+    expect(output).toContain("Ignore changes: disabled");
+    expect(output).toContain("Default user level: -");
   });
 });
 

@@ -16,6 +16,9 @@ import { createProjectCommand } from "./commands/create-project";
 import { analyticsCommand } from "./commands/analytics";
 import { changeCommand } from "./commands/change";
 import { testCommand } from "./commands/test";
+import { accountCommand } from "./commands/account";
+import { projectCommand } from "./commands/project";
+import { automationCommand } from "./commands/automation";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -43,6 +46,9 @@ createProjectCommand(program);
 analyticsCommand(program);
 changeCommand(program);
 testCommand(program);
+accountCommand(program);
+projectCommand(program);
+automationCommand(program);
 
 if (!process.argv.slice(2).length) {
   program.outputHelp();
