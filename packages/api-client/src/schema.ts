@@ -220,6 +220,100 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/accounts/{accountSlug}/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a team's media
+         * @description List the standalone images and videos uploaded to a team, most recent first. Requires administrator access to the team.
+         */
+        get: operations["listMedia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a media upload
+         * @description Register a standalone image or video and receive a signed target to upload it to.
+         *
+         *     Uploading takes three calls:
+         *
+         *     1. `POST /media` — declare the file and get back an `upload` target.
+         *     2. `POST` the file to `upload.url` as `multipart/form-data`, appending every entry of `upload.fields` **before** the `file` part.
+         *     3. `POST /media/{mediaId}/finalize` — confirm the bytes landed.
+         *
+         *     When `upload` comes back `null`, Argos already holds this exact file and steps 2 and 3 are unnecessary.
+         *
+         *     The `argos media upload` CLI command does all of this in one step.
+         */
+        post: operations["createMedia"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a media
+         * @description Retrieve a single media by its ID, including its share URL and ready-to-paste Markdown.
+         */
+        get: operations["getMedia"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a media
+         * @description Delete a media and the files behind it. Any share link or pull request embed pointing at it stops working immediately.
+         */
+        delete: operations["deleteMedia"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finalize a media upload
+         * @description Confirm that a media's bytes have been uploaded. Argos reads the object back, starts processing it (poster frame for videos, metadata stripping), bills it to the screenshot meter, and updates the managed pull request comment when one was requested.
+         */
+        post: operations["finalizeMedia"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builds": {
         parameters: {
             query?: never;
@@ -1729,6 +1823,57 @@ export interface components {
              * @description The team's new shared invite link. Anyone with it joins at the team's default role.
              */
             inviteLink: string;
+        };
+        /** @description A standalone image or video uploaded to Argos */
+        Media: {
+            /** @description Unique identifier of the media */
+            id: string;
+            /** @description Original file name */
+            name: string;
+            /** @description Stable per-team identifier. Re-uploading the same slug replaces the file in place, keeping this URL valid. */
+            slug: string | null;
+            /**
+             * Format: uri
+             * @description Share page URL. This is the link to put in a pull request or a chat message.
+             */
+            url: string;
+            /** @description Ready-to-paste Markdown. Images embed directly; videos embed their poster frame linked to the share page, because GitHub only renders inline players for media it hosts itself. */
+            markdown: string;
+            /** @description Poster frame of a video, derived by the image CDN. Always `null` for images. */
+            posterUrl: string | null;
+            /** @description Content type of the media */
+            contentType: string;
+            /** @description Size of the media, in bytes */
+            sizeBytes: number;
+            /** @description Width, in pixels */
+            width: number | null;
+            /** @description Height, in pixels */
+            height: number | null;
+            /**
+             * @description Who can open the media share page. `team` requires an Argos session with access to the owning account; `public` only requires the share URL.
+             * @enum {string}
+             */
+            visibility: "team" | "public";
+            /**
+             * @description `pending` until the bytes are uploaded, then `ready`. There is no processing step — Argos serves the bytes it was given.
+             * @enum {string}
+             */
+            status: "pending" | "ready";
+            /** @description When the media is deleted. Counted from the upload, not from the last view. */
+            expiresAt: string | null;
+            createdAt: string;
+        };
+        /** @description Signed upload target */
+        MediaUploadTarget: {
+            /**
+             * Format: uri
+             * @description URL to POST the file to, as `multipart/form-data`.
+             */
+            url: string;
+            /** @description Form fields that must be appended **before** the file part, in order, for the upload to be accepted. */
+            fields: {
+                [key: string]: string;
+            };
         };
         /** @description Build */
         Build: {
@@ -3330,6 +3475,388 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InviteLink"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMedia: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Match media on their file name or slug. */
+                search?: string;
+                /** @description Restrict to images or to videos. */
+                type?: "image" | "video";
+            };
+            header?: never;
+            path: {
+                /** @description Slug of the team to list media for. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["Media"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description File name, used for display and as the Markdown alt text.
+                     * @example before.png
+                     * @example checkout-flow.mp4
+                     */
+                    name: string;
+                    /** @description Content type of the media file */
+                    contentType: string;
+                    /** @description Size of the file in bytes. Checked against your plan's limit before the upload is signed. */
+                    size: number;
+                    /** @description SHA-256 of the file contents, hex encoded. Uploading the same file twice is free: Argos recognizes the hash and skips the transfer. */
+                    hash: string;
+                    /**
+                     * @description Stable identifier, unique per team. Re-uploading the same slug replaces the file in place, so a Markdown embed already posted to a pull request never goes stale.
+                     * @example pr-1234-checkout-before
+                     */
+                    slug?: string | null;
+                    visibility?: ("team" | "public") | null;
+                    /** @description How long to keep the media, in days. Clamped to your plan's maximum. */
+                    retentionDays?: number | null;
+                    /** @description Team to upload to. Required with a personal access token; ignored with a project token, which already identifies its team. */
+                    accountSlug?: string | null;
+                    /** @description Pull request to attach the media to. With `comment`, Argos maintains a single comment on it listing every media uploaded, editing it in place rather than posting a new one each time. */
+                    prNumber?: number | null;
+                    /** @description Post (or update) the managed pull request comment. Requires `prNumber` and a project connected to GitHub. */
+                    comment?: boolean | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The registered media and where to upload it */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        media: components["schemas"]["Media"];
+                        /** @description Where to send the bytes, or `null` when Argos already holds this exact file — in which case the media is ready and nothing needs uploading. */
+                        upload: components["schemas"]["MediaUploadTarget"] | null;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Media details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Media deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    finalizeMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The finalized media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
                 };
             };
             /** @description Invalid parameters */

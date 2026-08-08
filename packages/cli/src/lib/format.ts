@@ -24,6 +24,7 @@ type ProjectContributor =
   ArgosAPISchema.components["schemas"]["ProjectContributor"];
 type ProjectDomain = ArgosAPISchema.components["schemas"]["ProjectDomain"];
 type IgnoredChange = ArgosAPISchema.components["schemas"]["IgnoredChange"];
+type Media = ArgosAPISchema.components["schemas"]["Media"];
 type TestSummary = ArgosAPISchema.components["schemas"]["TestSummary"];
 type BuildReviewers = ArgosAPISchema.components["schemas"]["BuildReviewers"];
 type NotificationSubscription =
@@ -641,4 +642,52 @@ export function formatAutomationRules(rules: AutomationRule[]): string {
   ]
     .slice(0, -1)
     .join("\n");
+}
+
+/** Format bytes the way a file listing does. */
+function formatMediaSize(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  const kb = bytes / 1024;
+  if (kb < 1024) {
+    return `${Math.round(kb)} KB`;
+  }
+  const mb = kb / 1024;
+  return mb < 10 ? `${mb.toFixed(1)} MB` : `${Math.round(mb)} MB`;
+}
+
+/**
+ * Format one media.
+ *
+ * The Markdown embed comes last and on its own line: it is what a caller copies,
+ * and burying it between fields makes it harder to select.
+ */
+export function formatMedia(media: Media): string {
+  const details = [
+    media.contentType,
+    formatMediaSize(media.sizeBytes),
+    media.width && media.height ? `${media.width}x${media.height}` : null,
+    media.visibility,
+    media.status,
+  ].filter((part): part is string => Boolean(part));
+
+  return [
+    media.name,
+    `  ID: ${media.id}`,
+    media.slug ? `  Slug: ${media.slug}` : null,
+    `  ${details.join(" · ")}`,
+    media.expiresAt ? `  Expires: ${media.expiresAt}` : null,
+    `  URL: ${media.url}`,
+    `  Markdown: ${media.markdown}`,
+  ]
+    .filter((line): line is string => line !== null)
+    .join("\n");
+}
+
+export function formatMediaList(list: Media[]): string {
+  if (list.length === 0) {
+    return "No media found.";
+  }
+  return [`Media (${list.length})`, "", ...list.map(formatMedia)].join("\n");
 }

@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, afterEach } from "vitest";
 import { setupServer } from "msw/node";
 import { createBuild } from "./handlers/createBuild";
+import { createMedia, finalizeMedia } from "./handlers/createMedia";
 import { finalizeBuilds } from "./handlers/finalizeBuilds";
 import { getProject } from "./handlers/getProject";
 import { updateBuild } from "./handlers/updateBuild";
@@ -12,6 +13,8 @@ export const server = setupServer(
   updateBuild,
   uploadScreenshot,
   getProject,
+  createMedia,
+  finalizeMedia,
 );
 
 export const setupMockServer = () => {
