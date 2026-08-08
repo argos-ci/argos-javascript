@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.2.2...%40argos-ci%2Fstorybook%406.2.3) (2026-08-08)
+
+### Bug Fixes
+
+* **storybook:** install a shared Storybook channel for portable stories ([7663676](https://github.com/argos-ci/argos-javascript/commit/766367655bea45934a63a263252735ab462022ad))
+* **vitest:** size the Vitest iframe from the settled layout ([ef30244](https://github.com/argos-ci/argos-javascript/commit/ef302441ba8934a00295bfad9711f7f719b6d0cd))
+
+
 ## [6.2.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.2.1...%40argos-ci%2Fstorybook%406.2.2) (2026-08-02)
 
 **Note:** Version bump only for package @argos-ci/storybook

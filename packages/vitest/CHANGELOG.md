@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.4.2...%40argos-ci%2Fvitest%400.4.3) (2026-08-08)
+
+### Bug Fixes
+
+* **vitest:** size the Vitest iframe from the settled layout ([ef30244](https://github.com/argos-ci/argos-javascript/commit/ef302441ba8934a00295bfad9711f7f719b6d0cd))
+
+
 ## [0.4.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.4.1...%40argos-ci%2Fvitest%400.4.2) (2026-08-02)
 
 **Note:** Version bump only for package @argos-ci/vitest
