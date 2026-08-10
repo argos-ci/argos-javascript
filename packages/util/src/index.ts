@@ -1,4 +1,5 @@
 export * from "./base-name";
+export * from "./capture-index";
 export * from "./fs";
 export * from "./git";
 export * from "./introspection";

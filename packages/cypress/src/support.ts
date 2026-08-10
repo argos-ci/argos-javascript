@@ -10,6 +10,8 @@ import { getGlobalScript } from "@argos-ci/browser";
 import {
   getMetadataPath,
   getScreenshotName,
+  getTestRunKey,
+  nextCaptureIndex,
   normalizeBaseNames,
   type ScreenshotMetadata,
   validateThreshold,
@@ -216,6 +218,15 @@ Cypress.Commands.add(
 
     injectArgos();
 
+    // One index per command, not per file: the viewport variants below are the
+    // same step of the journey seen at several widths, so they share it.
+    const captureIndex = nextCaptureIndex(
+      getTestRunKey({
+        titlePath: Cypress.currentTest.titlePath,
+        retry: Cypress.currentRetry,
+      }),
+    );
+
     const afterAll = beforeAll(options);
 
     function stabilizeAndScreenshot(name: string, baseNames: string[] | null) {
@@ -270,6 +281,7 @@ Cypress.Commands.add(
             name: "@argos-ci/cypress",
             version,
           },
+          capture: { index: captureIndex },
         };
 
         metadata.transient = {};
