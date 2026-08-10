@@ -32,12 +32,14 @@ declare module "vitest/browser" {
       name: string,
       options?: VitestScreenshotOptions,
       test?: TestMetadata,
+      captureIndex?: number | null,
     ) => Promise<ArgosAttachment[]>;
     argosSnapshot: (
       name: string,
       content: string,
       options?: SerializableSnapshotOptions,
       test?: TestMetadata,
+      captureIndex?: number | null,
     ) => Promise<ArgosAttachment[]>;
   }
 }
