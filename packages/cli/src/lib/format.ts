@@ -748,6 +748,131 @@ export function formatMediaList(list: Media[]): string {
 }
 
 /**
+ * What `media upload` prints: the listing, then one Markdown block embedding
+ * everything that was just uploaded.
+ *
+ * The per-media `Markdown:` lines are what you copy to embed *one* of them, and
+ * reassembling a table out of several by hand — pairing the halves, escaping the
+ * names — is work the caller should not be doing. This is the thing to paste
+ * after uploading a batch.
+ *
+ * Only past one media: for a single upload the table says nothing its own
+ * `Markdown:` line does not, and printing one is noise.
+ */
+export function formatUploadedMediaList(list: Media[]): string {
+  const listing = formatMediaList(list);
+
+  if (list.length < 2) {
+    return listing;
+  }
+
+  return [listing, "", "Markdown for all of them:", "", mediaTable(list)].join(
+    "\n",
+  );
+}
+
+/** One row of the embed table: a before/after pair, or a lone media. */
+type MediaRow = {
+  name: string;
+  description: string | null;
+  before: Media | null;
+  after: Media | null;
+};
+
+/**
+ * Group an upload so a pair's two halves land in one row.
+ *
+ * Keyed on the name, which is what a pair shares — the same grouping the
+ * managed pull request comment does, so a table pasted by hand reads like the
+ * one Argos posts. A media with no state is its own row, keyed separately so a
+ * standalone `checkout.png` never absorbs a `checkout.png` that is half of a
+ * pair.
+ */
+function groupMediaByPair(list: Media[]): MediaRow[] {
+  const rows = new Map<string, MediaRow>();
+
+  for (const media of list) {
+    const key = media.state ? `pair:${media.name}` : `solo:${media.id}`;
+    const row = rows.get(key) ?? {
+      name: media.name,
+      description: null,
+      before: null,
+      after: null,
+    };
+    if (media.state === "before") {
+      row.before = media;
+    } else {
+      row.after = media;
+    }
+    // The description belongs to the pair, and the "after" is the half it
+    // describes.
+    row.description = row.after?.description ?? row.before?.description ?? null;
+    rows.set(key, row);
+  }
+
+  return [...rows.values()];
+}
+
+/**
+ * The Markdown table itself.
+ *
+ * Each cell is the embed the API already built for that media, so what a caller
+ * pastes points at the same bytes and the same share page the pull request
+ * comment does — and the alt text arrives already escaped for a table cell.
+ */
+function mediaTable(list: Media[]): string {
+  const rows = groupMediaByPair(list);
+  const hasPairs = rows.some((row) => row.before && row.after);
+  const hasNotes = rows.some((row) => row.description);
+
+  const headers = hasPairs ? ["Name", "Before", "After"] : ["Name", "Preview"];
+  if (hasNotes) {
+    headers.push("Notes");
+  }
+
+  const body = rows.flatMap((row) => {
+    const solo = row.after ?? row.before;
+    if (!solo) {
+      return [];
+    }
+    const cells = hasPairs
+      ? [
+          escapeTableCell(row.name),
+          row.before?.markdown ?? "",
+          row.after?.markdown ?? "",
+        ]
+      : [escapeTableCell(row.name), solo.markdown];
+    if (hasNotes) {
+      cells.push(row.description ? escapeTableCell(row.description) : "");
+    }
+    return [`| ${cells.join(" | ")} |`];
+  });
+
+  return [
+    `| ${headers.join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...body,
+  ].join("\n");
+}
+
+/**
+ * Escape a value so it stays inside its table cell.
+ *
+ * Backslashes first: escaping turns `|` into `\|`, so a value already ending in
+ * a backslash would have that backslash escaped by ours and let the pipe
+ * through — the very break this prevents. A line ending has no escape at all
+ * since it ends the row outright, so it becomes the `<br>` a cell renders a
+ * break with. All three forms of it, because a lone carriage return ends a row
+ * too.
+ */
+function escapeTableCell(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|")
+    .replace(/\r\n|[\r\n]/g, "<br>");
+}
+
+/**
  * Format a media's versions.
  *
  * The id leads each entry because that is what this listing is for: a comment

@@ -58,6 +58,8 @@ appended to.
 ```bash
 argos media upload after.png --pr 1234              # the pull request exists
 argos media upload after.png --branch feat/checkout # it does not, yet
+argos media upload after.png                        # ask gh which one you are on
+argos media upload after.png --no-pr                # attach it to nothing
 ```
 
 `--branch` is the one to reach for while working. The media is **staged**: it has
@@ -65,12 +67,21 @@ its share URL immediately, and the moment a pull request opens for that branch
 Argos attaches it and posts the comment on its own. You do not have to come back
 and connect the two. `--pr` publishes straight away.
 
-Passing neither uploads a loose media: a share URL and nothing else. That is the
-right call for a chat message or an issue, where you paste the Markdown yourself.
-Neither flag is inferred from the environment, CI included — an upload does not
-post to a pull request unless you asked it to. Two consequences worth knowing
-before you leave them off: nothing will ever attach that media to a pull request,
-and since a loose media's identity is only its name, uploading `shot.png` from two
+**Passing neither runs detection**: Argos asks the GitHub CLI for the pull request
+of the branch you are on, and publishes there. That is usually what you want —
+you are working in a pull request and screenshotting what you changed. It happens
+only when you pass neither flag; `--pr` is taken as given, and `--branch` is
+already an answer, so detection never overrides the staging you asked for.
+
+Detection never fails an upload. No `gh`, not signed in, no pull request open
+yet, not a git repository — all mean "nothing to attach to", and you get the
+share URL anyway. **Check the output**: `published to PR #1234` versus
+`staged` / neither tells you which happened, and it is the only way to know.
+
+Pass `--no-pr` when the screenshot has nothing to do with the branch that happens
+to be checked out — a chat message, an issue, a scratch capture. Two consequences
+of a media attached to nothing: nothing will ever attach it to a pull request
+later, and since its identity is only its name, uploading `shot.png` from two
 different branches makes them versions of one media rather than two.
 
 Commenting needs the project connected to GitHub, and pull request comments
@@ -92,20 +103,33 @@ checkout.png (after)
   image/webp · 184 KB · 1440x900 · public · ready
   URL: https://app.argos-ci.com/m/kQ8vN2pXr4tYw7...
   File: https://media.argos-ci.com/media/12/a1b2c3.webp
-  Markdown: ![checkout.png](https://app.argos-ci.com/m/kQ8vN2pXr4tYw7...)
+  Markdown: [![checkout.png](https://media.argos-ci.com/media/12/a1b2c3.webp)](https://app.argos-ci.com/m/kQ8vN2pXr4tYw7...)
 ```
 
-**Paste the `Markdown` line verbatim.** Do not hand-write the embed:
+**Paste the `Markdown` line verbatim.** It is a picture linked to the share page:
+the media shows inline, and clicking it opens the page where a human can compare
+versions and comment.
 
-- For an **image**, the Markdown is a plain `![alt](url)`.
-- For a **video**, it is the **poster frame wrapped in a link** to the share
-  page. GitHub renders an inline player only for media it hosts itself, so a
-  `<video>` tag or a bare `.mp4` link pointing at Argos renders as a dead link.
-  The poster-in-a-link is the form that actually shows something.
+**Never build the embed yourself from `URL`.** That is an HTML page, so
+`![alt](URL)` renders as a broken image everywhere you paste it. The image part
+has to be the file, which is what the `Markdown` line already gives you.
+
+The picture is the file for an image and the **poster frame** for a video —
+GitHub renders an inline player only for media it hosts itself, so a `<video>`
+tag or a bare `.mp4` link pointing at Argos renders as a dead link.
+
+Uploading several files prints one more block at the end: the whole batch as a
+Markdown table, pairs side by side in one row. Paste that when you want all of
+them at once instead of assembling the individual lines.
 
 `URL` is the share page, for a human. `File` is the image or video itself, for
 you: fetch it when you want to look at what you just uploaded. Use `--json` when
 you parse the output.
+
+A **public** media's share link also unfurls on its own — Argos serves OpenGraph
+and oEmbed with the page — so pasting the bare `URL` into Slack or an issue shows
+the screenshot. A **team** link does not, deliberately: it would leak the file
+name to anyone holding it. Pass `--visibility public` when a link has to travel.
 
 ## Before/after pairs
 
