@@ -3,13 +3,13 @@ import { Option } from "commander";
 import ora from "ora";
 import { uploadMedia, type Media, type MediaState } from "@argos-ci/core";
 import { getApiBaseUrl } from "../../lib/api";
-import { formatMediaList } from "../../lib/format";
+import { formatUploadedMediaList } from "../../lib/format";
+import { resolveUploadPrNumber } from "../../lib/media-pr";
 import { handleCliError, output } from "../../lib/run";
 import { resolveOptionalToken } from "../../lib/target";
 import {
   jsonOption,
   mediaProjectPathOption,
-  toPrNumber,
   tokenOption,
   type JsonOption,
 } from "../../options";
@@ -18,7 +18,11 @@ type UploadMediaOptions = JsonOption & {
   token?: string | undefined;
   project?: string | undefined;
   branch?: string | undefined;
-  pr?: string | undefined;
+  /**
+   * The pull request to publish to: a number as given, `false` for `--no-pr`,
+   * or absent when the caller said nothing and autodetection should run.
+   */
+  pr?: string | false | undefined;
   state?: MediaState | undefined;
   description?: string | undefined;
   visibility?: "team" | "public" | undefined;
@@ -43,7 +47,13 @@ export function registerMediaUpload(media: Command) {
     .addOption(
       new Option(
         "--pr <number>",
-        "Pull request to publish the media to. Argos keeps one comment on it listing every media uploaded, edited in place",
+        "Pull request to publish the media to. Argos keeps one comment on it listing every media uploaded, edited in place. Detected with the GitHub CLI when neither this nor --branch is given",
+      ),
+    )
+    .addOption(
+      new Option(
+        "--no-pr",
+        "Skip pull request detection and upload the media unattached",
       ),
     )
     .addOption(
@@ -91,8 +101,7 @@ export function registerMediaUpload(media: Command) {
           apiBaseUrl: getApiBaseUrl(),
           project: options.project,
           branch: options.branch,
-          prNumber:
-            options.pr === undefined ? undefined : toPrNumber(options.pr),
+          prNumber: await resolveUploadPrNumber(options),
           state: options.state,
           description: options.description,
           visibility: options.visibility,
@@ -100,7 +109,7 @@ export function registerMediaUpload(media: Command) {
         });
 
         spinner?.stop();
-        output(results, options, formatMediaList);
+        output(results, options, formatUploadedMediaList);
       } catch (error) {
         spinner?.stop();
         handleCliError(error, "project");
