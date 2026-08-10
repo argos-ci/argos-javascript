@@ -438,7 +438,21 @@ describe("formatMedia / formatMediaList", () => {
       version: 2,
       versionCount: 3,
     } as unknown as Media;
-    expect(formatMedia(revised)).toContain("Version: 2 of 3");
+    expect(formatMedia(revised)).toContain("Version: 2 (3 uploaded)");
+  });
+
+  it("does not present the version as a fraction of the uploaded count", () => {
+    // `version` counts every version created, `versionCount` only the ones whose
+    // bytes landed, so an abandoned upload in between makes the first exceed the
+    // second — "3 of 2" would be nonsense.
+    const afterAbandonedUpload = {
+      ...media,
+      version: 3,
+      versionCount: 2,
+    } as unknown as Media;
+    const output = formatMedia(afterAbandonedUpload);
+    expect(output).toContain("Version: 3 (2 uploaded)");
+    expect(output).not.toContain("of 2");
   });
 });
 

@@ -71,7 +71,7 @@ humans, not CI.
 - **Team** — `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
 - **Account** — `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
 - **Media** — `media upload <files...> [--branch <b> | --pr <n>] [--state before|after] [--description <text>] [--visibility team|public] [--no-compress]` · `media list [--branch <b>] [--pr <n>] [--stage staged|published] [--search <q>] [--type image|video]` · `media get|delete|versions <mediaId>` · `media update <mediaId> [--name <n>] [--description <text>] [--branch <b>]`
-- **Media comments** — `media comment list|create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
+- **Media comments** — `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
 - **CI** — `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
 - **Auth** — `login` · `logout`
 

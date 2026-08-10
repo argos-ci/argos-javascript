@@ -67,6 +67,11 @@ and connect the two. `--pr` publishes straight away.
 
 Passing neither uploads a loose media: a share URL and nothing else. That is the
 right call for a chat message or an issue, where you paste the Markdown yourself.
+Neither flag is inferred from the environment, CI included — an upload does not
+post to a pull request unless you asked it to. Two consequences worth knowing
+before you leave them off: nothing will ever attach that media to a pull request,
+and since a loose media's identity is only its name, uploading `shot.png` from two
+different branches makes them versions of one media rather than two.
 
 Commenting needs the project connected to GitHub, and pull request comments
 enabled on it (`argos project get`). Without that the upload still succeeds and
@@ -148,8 +153,11 @@ look at. Find the media, then read its threads:
 
 ```bash
 argos media list --branch feat/checkout --json      # or --pr 1234
-argos media comment list 4821 --json
+argos media comment list 4821 --json                # open threads; --all for settled ones
 ```
+
+`media comment list` shows **open threads only**, so what comes back is what is
+left to do. Add `--all` to see the ones already dealt with.
 
 Each comment carries the pin as `Pinned: point x,y` in normalized 0–1 coordinates
 of the image (`0.62,0.34` is 62% across, 34% down), and the media's `File:` URL is

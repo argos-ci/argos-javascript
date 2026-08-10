@@ -48,7 +48,10 @@ export function registerMediaUpdate(media: Command) {
     .action(async (mediaId: string, options: UpdateMediaOptions) => {
       try {
         const body = {
-          ...(options.name === undefined ? {} : { name: options.name }),
+          // Truthiness, like the two below: an empty value is a caller clearing a
+          // field, and a name has no cleared state — so it drops out and the
+          // "nothing to update" guard below reports it.
+          ...(options.name ? { name: options.name } : {}),
           ...(options.description === undefined
             ? {}
             : { description: options.description || null }),

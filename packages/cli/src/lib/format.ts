@@ -359,15 +359,17 @@ function formatReactions(reactions: Comment["reactions"]): string | null {
   return reactions.map((r) => `${r.emoji} ${r.count}`).join(" ");
 }
 
-export function formatComment(comment: Comment): string {
-  const lines = [
-    `Comment #${comment.id}`,
-    `Author: ${formatUser(comment.author)}`,
-  ];
-  if (comment.threadId) {
-    lines.push(`Reply to: ${comment.threadId}`);
-  }
+/**
+ * What a comment points at: the diff or the spot on the media, and the upload that
+ * spot describes.
+ *
+ * Shared by the single-comment and list renderings, because a pin a listing does
+ * not print is a review an agent cannot act on.
+ */
+function formatCommentTarget(comment: Comment): string[] {
+  const lines: string[] = [];
   const anchor = formatAnchor(comment.anchor);
+
   if (comment.screenshotDiffId) {
     lines.push(
       `Diff: ${comment.screenshotDiffId}${anchor ? ` (${anchor})` : ""}`,
@@ -377,12 +379,26 @@ export function formatComment(comment: Comment): string {
     // on the media itself. Without this the pin would not show up at all.
     lines.push(`Pinned: ${anchor}`);
   }
+
   if (comment.mediaVersionId) {
     // The version the pin was placed on. It only matters once the media has been
     // re-uploaded, but that is exactly when reading the pin against the newest
     // file points at the wrong pixel — `argos media versions` resolves it.
     lines.push(`Media version: ${comment.mediaVersionId}`);
   }
+
+  return lines;
+}
+
+export function formatComment(comment: Comment): string {
+  const lines = [
+    `Comment #${comment.id}`,
+    `Author: ${formatUser(comment.author)}`,
+  ];
+  if (comment.threadId) {
+    lines.push(`Reply to: ${comment.threadId}`);
+  }
+  lines.push(...formatCommentTarget(comment));
   if (comment.pending) {
     lines.push("Pending: draft (only visible to you)");
   }
@@ -415,6 +431,11 @@ export function formatComments(comments: Comment[]): string {
       ].filter(Boolean);
       return [
         `#${comment.id} [${tags.join(", ")}] ${formatUser(comment.author)}`,
+        // Where it points, and on which upload. A pin is the whole content of a
+        // comment on a screenshot, so a listing that drops it says nothing about
+        // what has to change — and the version is what resolves the pin to the
+        // bytes its author was looking at.
+        ...formatCommentTarget(comment).map((line) => indent(line)),
         indent(comment.text),
         "",
       ];
@@ -702,10 +723,12 @@ export function formatMedia(media: Media): string {
     `  ID: ${media.id}`,
     `  ${formatMediaStage(media)}`,
     `  ${formatMediaDetails(media)} · ${media.visibility} · ${media.status}`,
-    // Only worth a line once there is history: a first upload is version 1 of 1,
-    // and saying so on every line is noise.
+    // Only worth a line once there is history: a first upload is version 1, and
+    // saying so on every line is noise. Not "x of y" — `version` counts every
+    // version created, `versionCount` only the ones whose bytes landed, so an
+    // abandoned upload in between makes the two disagree.
     media.versionCount > 1
-      ? `  Version: ${media.version} of ${media.versionCount}`
+      ? `  Version: ${media.version} (${media.versionCount} uploaded)`
       : null,
     media.description ? `  Description: ${media.description}` : null,
     media.expiresAt ? `  Expires: ${media.expiresAt}` : null,
