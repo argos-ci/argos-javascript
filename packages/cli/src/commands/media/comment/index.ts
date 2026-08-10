@@ -15,7 +15,7 @@ export function registerMediaComment(media: Command) {
   const comment = media
     .command("comment")
     .description(
-      "List, post, and act on the comments left on a media. To read a whole review at once, use `argos media feedback`",
+      "List, post, and act on the comments left on a media — the feedback a human pinned to a spot on your screenshot",
     );
   registerMediaCommentList(comment);
   registerMediaCommentCreate(comment);

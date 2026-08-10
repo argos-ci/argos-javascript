@@ -1,10 +1,11 @@
 import type { Command } from "commander";
 import { registerMediaComment } from "./comment";
 import { registerMediaDelete } from "./delete";
-import { registerMediaFeedback } from "./feedback";
 import { registerMediaGet } from "./get";
 import { registerMediaList } from "./list";
+import { registerMediaUpdate } from "./update";
 import { registerMediaUpload } from "./upload";
+import { registerMediaVersions } from "./versions";
 
 export function mediaCommand(program: Command) {
   const media = program
@@ -15,7 +16,8 @@ export function mediaCommand(program: Command) {
   registerMediaUpload(media);
   registerMediaList(media);
   registerMediaGet(media);
+  registerMediaUpdate(media);
   registerMediaDelete(media);
-  registerMediaFeedback(media);
+  registerMediaVersions(media);
   registerMediaComment(media);
 }

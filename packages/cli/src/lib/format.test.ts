@@ -6,7 +6,9 @@ import {
   formatComment,
   formatComments,
   formatCreatedProject,
-  formatMediaFeedback,
+  formatMedia,
+  formatMediaList,
+  formatMediaVersions,
   formatProject,
   formatReview,
   formatReviews,
@@ -20,7 +22,8 @@ type Build = ArgosAPISchema.components["schemas"]["Build"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type BuildReview = ArgosAPISchema.components["schemas"]["BuildReview"];
 type Comment = ArgosAPISchema.components["schemas"]["Comment"];
-type MediaFeedback = ArgosAPISchema.components["schemas"]["MediaFeedback"];
+type Media = ArgosAPISchema.components["schemas"]["Media"];
+type MediaVersion = ArgosAPISchema.components["schemas"]["MediaVersion"];
 
 const build = {
   number: 42,
@@ -340,6 +343,20 @@ describe("formatComment / formatComments", () => {
     expect(output).toContain("👍 2");
   });
 
+  it("shows where on a media a comment points, and which upload it points at", () => {
+    // A media comment has an anchor and no diff behind it, so the pin has to be
+    // reported on its own — otherwise the coordinates never reach the reader.
+    const pinned = {
+      ...comment,
+      mediaId: "42",
+      mediaVersionId: "media-version-9",
+      anchor: { type: "point", x: 0.62, y: 0.34 },
+    } as unknown as Comment;
+    const output = formatComment(pinned);
+    expect(output).toContain("Pinned: point 0.62,0.34");
+    expect(output).toContain("Media version: media-version-9");
+  });
+
   it("reports an empty comment list", () => {
     expect(formatComments([])).toBe("No comments found.");
   });
@@ -356,63 +373,99 @@ describe("formatComment / formatComments", () => {
   });
 });
 
-describe("formatMediaFeedback", () => {
-  const comment = {
-    id: "c1",
-    threadId: null,
-    text: "This button is misaligned",
-    author: { id: "u1", slug: "alice", name: "Alice" },
-    screenshotDiffId: null,
-    anchor: { type: "point", x: 0.62, y: 0.34 },
-    pending: false,
-    resolvedAt: null,
-    editedAt: null,
+describe("formatMedia / formatMediaList", () => {
+  const media = {
+    id: "42",
+    name: "checkout.png",
+    state: "after",
+    description: null,
+    stage: "staged",
+    branch: "feat/checkout",
+    prNumber: null,
+    url: "https://app.argos-ci.com/m/tok",
+    markdown: "![checkout.png](https://app.argos-ci.com/m/tok)",
+    version: 1,
+    versionCount: 1,
+    fileUrl: "https://files.argos-ci.com/media/1/abc.webp",
+    posterUrl: null,
+    contentType: "image/webp",
+    sizeBytes: 188_416,
+    width: 1440,
+    height: 900,
+    visibility: "public",
+    status: "ready",
+    expiresAt: null,
     createdAt: "2026-01-01T00:00:00.000Z",
-    reactions: [],
-  } as unknown as Comment;
+  } as unknown as Media;
 
-  const entry = {
-    media: {
-      id: "42",
-      name: "checkout-after.png",
-      url: "https://app.argos-ci.com/m/tok",
-      fileUrl: "https://files.argos-ci.com/media/1/abc.png",
-      posterUrl: null,
-      width: 375,
-      height: 720,
-    },
-    comments: [comment],
-  } as unknown as MediaFeedback;
-
-  it("reports an empty review", () => {
-    expect(formatMediaFeedback({ results: [] })).toBe("No feedback found.");
+  it("reports an empty list", () => {
+    expect(formatMediaList([])).toBe("No media found.");
   });
 
-  it("groups comments under the media and counts them", () => {
-    const output = formatMediaFeedback({ results: [entry] });
-    expect(output).toContain("Feedback on 1 media (1 comment)");
-    expect(output).toContain("checkout-after.png");
-    expect(output).toContain("ID: 42");
-    // The file URL is what lets an agent go and look at the image it must fix.
+  it("labels which half of a pair the media is", () => {
+    expect(formatMedia(media)).toContain("checkout.png (after)");
+  });
+
+  it("says a staged media is waiting on a pull request for its branch", () => {
+    expect(formatMedia(media)).toContain("staged on feat/checkout");
+  });
+
+  it("names the pull request a published media went to", () => {
+    const published = {
+      ...media,
+      stage: "published",
+      prNumber: 1234,
+    } as unknown as Media;
+    expect(formatMedia(published)).toContain("published to PR #1234");
+  });
+
+  it("prints the details, the file and the embed to paste", () => {
+    const output = formatMedia(media);
+    expect(output).toContain("image/webp · 184 KB · 1440x900 · public · ready");
+    // The file URL is what lets an agent go and look at the image itself.
     expect(output).toContain(
-      "File: https://files.argos-ci.com/media/1/abc.png",
+      "File: https://files.argos-ci.com/media/1/abc.webp",
     );
-    expect(output).toContain("This button is misaligned");
-  });
-
-  it("shows where on the media a comment points", () => {
-    // A media comment has an anchor and no diff behind it, so the pin has to be
-    // reported on its own — otherwise the coordinates never reach the reader.
-    expect(formatMediaFeedback({ results: [entry] })).toContain(
-      "Pinned: point 0.62,0.34",
+    expect(output).toContain(
+      "Markdown: ![checkout.png](https://app.argos-ci.com/m/tok)",
     );
   });
 
-  it("pluralizes the comment count", () => {
-    const twice = {
-      ...entry,
-      comments: [comment, { ...comment, id: "c2" }],
-    } as unknown as MediaFeedback;
-    expect(formatMediaFeedback({ results: [twice] })).toContain("(2 comments)");
+  it("only mentions the version once there is history", () => {
+    expect(formatMedia(media)).not.toContain("Version:");
+    const revised = {
+      ...media,
+      version: 2,
+      versionCount: 3,
+    } as unknown as Media;
+    expect(formatMedia(revised)).toContain("Version: 2 of 3");
+  });
+});
+
+describe("formatMediaVersions", () => {
+  const version = {
+    id: "media-version-9",
+    number: 2,
+    fileUrl: "https://files.argos-ci.com/media/1/def.webp",
+    posterUrl: null,
+    contentType: "image/webp",
+    sizeBytes: 2048,
+    width: 1440,
+    height: 900,
+    expiresAt: null,
+    createdAt: "2026-01-02T00:00:00.000Z",
+  } as unknown as MediaVersion;
+
+  it("reports an empty history", () => {
+    expect(formatMediaVersions([])).toBe("No versions found.");
+  });
+
+  it("prints the id a comment points at, and the file to look at", () => {
+    const output = formatMediaVersions([version]);
+    expect(output).toContain("#2 · image/webp · 2 KB · 1440x900");
+    expect(output).toContain("ID: media-version-9");
+    expect(output).toContain(
+      "File: https://files.argos-ci.com/media/1/def.webp",
+    );
   });
 });

@@ -105,10 +105,13 @@ convict.addFormat({
   coerce: toIntArray,
 });
 
+/** Argos API used unless one is named explicitly or by `ARGOS_API_BASE_URL`. */
+export const DEFAULT_API_BASE_URL = "https://api.argos-ci.com/v2/";
+
 const schema = {
   apiBaseUrl: {
     env: "ARGOS_API_BASE_URL",
-    default: "https://api.argos-ci.com/v2/",
+    default: DEFAULT_API_BASE_URL,
     format: mustBeApiBaseUrl,
   },
   commit: {

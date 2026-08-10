@@ -5,12 +5,12 @@ type CreateMediaRequestBody = {
   contentType: string;
   size: number;
   hash: string;
-  slug?: string | null;
+  state?: "before" | "after" | null;
+  description?: string | null;
   visibility?: "team" | "public" | null;
-  retentionDays?: number | null;
-  accountSlug?: string | null;
+  project?: string | null;
   prNumber?: number | null;
-  comment?: boolean | null;
+  branch?: string | null;
 };
 
 function buildMedia(body: CreateMediaRequestBody, status: string) {
@@ -19,11 +19,18 @@ function buildMedia(body: CreateMediaRequestBody, status: string) {
   return {
     id: "42",
     name: body.name,
-    slug: body.slug ?? null,
+    state: body.state ?? null,
+    description: body.description ?? null,
+    stage: body.prNumber ? "published" : "staged",
+    branch: body.branch ?? null,
+    prNumber: body.prNumber ?? null,
     url: shareUrl,
     markdown: isVideo
       ? `[▶ ${body.name}](${shareUrl})`
       : `![${body.name}](${shareUrl})`,
+    version: 1,
+    versionCount: 1,
+    fileUrl: `${shareUrl}/file`,
     posterUrl: isVideo ? `${shareUrl}/ik-thumbnail.jpg?tr=so-1` : null,
     contentType: body.contentType,
     sizeBytes: body.size,
@@ -49,7 +56,7 @@ export const createMedia = http.post<never, CreateMediaRequestBody>(
         media: buildMedia(body, "pending"),
         upload: {
           url: "https://api.s3.dev/upload/media",
-          fields: { key: "media/1/hash.png" },
+          fields: { key: "media/1/hash.webp" },
         },
       },
       { status: 201 },

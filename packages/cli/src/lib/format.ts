@@ -1,7 +1,6 @@
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
-type MediaFeedback = ArgosAPISchema.components["schemas"]["MediaFeedback"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
 type TestMetrics = ArgosAPISchema.components["schemas"]["TestMetrics"];
@@ -26,6 +25,7 @@ type ProjectContributor =
 type ProjectDomain = ArgosAPISchema.components["schemas"]["ProjectDomain"];
 type IgnoredChange = ArgosAPISchema.components["schemas"]["IgnoredChange"];
 type Media = ArgosAPISchema.components["schemas"]["Media"];
+type MediaVersion = ArgosAPISchema.components["schemas"]["MediaVersion"];
 type TestSummary = ArgosAPISchema.components["schemas"]["TestSummary"];
 type BuildReviewers = ArgosAPISchema.components["schemas"]["BuildReviewers"];
 type NotificationSubscription =
@@ -377,6 +377,12 @@ export function formatComment(comment: Comment): string {
     // on the media itself. Without this the pin would not show up at all.
     lines.push(`Pinned: ${anchor}`);
   }
+  if (comment.mediaVersionId) {
+    // The version the pin was placed on. It only matters once the media has been
+    // re-uploaded, but that is exactly when reading the pin against the newest
+    // file points at the wrong pixel — `argos media versions` resolves it.
+    lines.push(`Media version: ${comment.mediaVersionId}`);
+  }
   if (comment.pending) {
     lines.push("Pending: draft (only visible to you)");
   }
@@ -662,6 +668,28 @@ function formatMediaSize(bytes: number): string {
   return mb < 10 ? `${mb.toFixed(1)} MB` : `${Math.round(mb)} MB`;
 }
 
+/** Content type, size, dimensions — the same middle line everywhere media prints. */
+function formatMediaDetails(media: Media | MediaVersion): string {
+  return [
+    media.contentType,
+    formatMediaSize(media.sizeBytes),
+    media.width && media.height ? `${media.width}x${media.height}` : null,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
+}
+
+/**
+ * Where a media stands: attached to a pull request and listed in its comment, or
+ * waiting on one to open for its branch.
+ */
+function formatMediaStage(media: Media): string {
+  if (media.stage === "published") {
+    return media.prNumber ? `published to PR #${media.prNumber}` : "published";
+  }
+  return media.branch ? `staged on ${media.branch}` : "staged";
+}
+
 /**
  * Format one media.
  *
@@ -669,21 +697,20 @@ function formatMediaSize(bytes: number): string {
  * and burying it between fields makes it harder to select.
  */
 export function formatMedia(media: Media): string {
-  const details = [
-    media.contentType,
-    formatMediaSize(media.sizeBytes),
-    media.width && media.height ? `${media.width}x${media.height}` : null,
-    media.visibility,
-    media.status,
-  ].filter((part): part is string => Boolean(part));
-
   return [
-    media.name,
+    media.state ? `${media.name} (${media.state})` : media.name,
     `  ID: ${media.id}`,
-    media.slug ? `  Slug: ${media.slug}` : null,
-    `  ${details.join(" · ")}`,
+    `  ${formatMediaStage(media)}`,
+    `  ${formatMediaDetails(media)} · ${media.visibility} · ${media.status}`,
+    // Only worth a line once there is history: a first upload is version 1 of 1,
+    // and saying so on every line is noise.
+    media.versionCount > 1
+      ? `  Version: ${media.version} of ${media.versionCount}`
+      : null,
+    media.description ? `  Description: ${media.description}` : null,
     media.expiresAt ? `  Expires: ${media.expiresAt}` : null,
     `  URL: ${media.url}`,
+    `  File: ${media.fileUrl}`,
     `  Markdown: ${media.markdown}`,
   ]
     .filter((line): line is string => line !== null)
@@ -698,31 +725,28 @@ export function formatMediaList(list: Media[]): string {
 }
 
 /**
- * A project's media review: every media that has comments, and what was said.
+ * Format a media's versions.
  *
- * Ordered media-first because that is how the work reads — look at this image,
- * here is what to change about it — and it keeps each comment's pin next to the
- * `fileUrl` an agent needs to actually go and look.
+ * The id leads each entry because that is what this listing is for: a comment
+ * records the `mediaVersionId` its author was looking at, and matching it here is
+ * how feedback written on an earlier upload gets read against the right file.
  */
-export function formatMediaFeedback(response: {
-  results: MediaFeedback[];
-}): string {
-  const { results } = response;
-  if (results.length === 0) {
-    return "No feedback found.";
+export function formatMediaVersions(versions: MediaVersion[]): string {
+  if (versions.length === 0) {
+    return "No versions found.";
   }
-  const total = results.reduce((sum, entry) => sum + entry.comments.length, 0);
   return [
-    `Feedback on ${results.length} media (${total} ${total === 1 ? "comment" : "comments"})`,
-    ...results.map((entry) =>
-      [
-        entry.media.name,
-        `  ID: ${entry.media.id}`,
-        `  URL: ${entry.media.url}`,
-        `  File: ${entry.media.fileUrl}`,
-        "",
-        indent(entry.comments.map(formatComment).join("\n\n")),
-      ].join("\n"),
-    ),
-  ].join("\n\n");
+    `Versions (${versions.length})`,
+    "",
+    ...versions.flatMap((version) => [
+      `#${version.number} · ${formatMediaDetails(version)} · ${version.createdAt}`,
+      `  ID: ${version.id}`,
+      `  File: ${version.fileUrl}`,
+      version.expiresAt ? `  Expires: ${version.expiresAt}` : null,
+      "",
+    ]),
+  ]
+    .filter((line): line is string => line !== null)
+    .slice(0, -1)
+    .join("\n");
 }

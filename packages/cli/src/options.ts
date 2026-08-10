@@ -83,6 +83,15 @@ export function toLimit(value: string): number {
   return limit;
 }
 
+/** Parse a `--pr` value into a pull request number, or abort. */
+export function toPrNumber(value: string): number {
+  const prNumber = Number(value);
+  if (!Number.isInteger(prNumber) || prNumber < 1) {
+    fail(`--pr must be a positive integer, received "${value}".`);
+  }
+  return prNumber;
+}
+
 /** API values accepted by the `metricsPeriod` query parameter. */
 export type MetricsPeriod =
   | "LAST_24_HOURS"

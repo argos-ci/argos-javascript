@@ -1,13 +1,15 @@
 import type { Command } from "commander";
 import { Option } from "commander";
 import ora from "ora";
-import { uploadMedia, type Media } from "@argos-ci/core";
-import { fail } from "../../lib/cli-error";
+import { uploadMedia, type Media, type MediaState } from "@argos-ci/core";
+import { getApiBaseUrl } from "../../lib/api";
 import { formatMediaList } from "../../lib/format";
 import { handleCliError, output } from "../../lib/run";
+import { resolveOptionalToken } from "../../lib/target";
 import {
   jsonOption,
   mediaProjectPathOption,
+  toPrNumber,
   tokenOption,
   type JsonOption,
 } from "../../options";
@@ -15,11 +17,12 @@ import {
 type UploadMediaOptions = JsonOption & {
   token?: string | undefined;
   project?: string | undefined;
-  slug?: string | undefined;
-  visibility?: "team" | "public" | undefined;
-  retention?: string | undefined;
+  branch?: string | undefined;
   pr?: string | undefined;
-  comment?: boolean | undefined;
+  state?: MediaState | undefined;
+  description?: string | undefined;
+  visibility?: "team" | "public" | undefined;
+  compress?: boolean | undefined;
 };
 
 export function registerMediaUpload(media: Command) {
@@ -33,8 +36,26 @@ export function registerMediaUpload(media: Command) {
     .addOption(mediaProjectPathOption)
     .addOption(
       new Option(
-        "--slug <slug>",
-        "Stable identifier, unique per project. Re-uploading the same slug replaces the file in place, so a Markdown embed already posted to a pull request never goes stale",
+        "--branch <branch>",
+        "Branch the media belongs to. Use this when the pull request does not exist yet: Argos publishes the media and comments on the pull request by itself once one opens for that branch",
+      ),
+    )
+    .addOption(
+      new Option(
+        "--pr <number>",
+        "Pull request to publish the media to. Argos keeps one comment on it listing every media uploaded, edited in place",
+      ),
+    )
+    .addOption(
+      new Option(
+        "--state <state>",
+        "Which half of a before/after pair these files are. Inferred from a file name ending in -before or -after",
+      ).choices(["before", "after"]),
+    )
+    .addOption(
+      new Option(
+        "--description <text>",
+        "Prose shown under the media in the pull request comment",
       ),
     )
     .addOption(
@@ -45,17 +66,8 @@ export function registerMediaUpload(media: Command) {
     )
     .addOption(
       new Option(
-        "--retention <days>",
-        "How long to keep the media, in days. Clamped to your plan's maximum",
-      ),
-    )
-    .addOption(
-      new Option("--pr <number>", "Pull request to attach the media to"),
-    )
-    .addOption(
-      new Option(
-        "--comment",
-        "Maintain a single Argos comment on the pull request listing every media uploaded to it, edited in place. Requires --pr",
+        "--no-compress",
+        "Upload images exactly as they are instead of converting them to WebP",
       ),
     )
     .addOption(jsonOption)
@@ -73,13 +85,18 @@ export function registerMediaUpload(media: Command) {
       try {
         const results = await uploadMedia({
           files,
-          token: options.token,
+          // Resolved here rather than left to the SDK so a token from
+          // `argos login` works, like it does for every other media command.
+          token: await resolveOptionalToken(options),
+          apiBaseUrl: getApiBaseUrl(),
           project: options.project,
-          slug: options.slug,
+          branch: options.branch,
+          prNumber:
+            options.pr === undefined ? undefined : toPrNumber(options.pr),
+          state: options.state,
+          description: options.description,
           visibility: options.visibility,
-          retentionDays: parseRetention(options.retention),
-          prNumber: parsePrNumber(options.pr),
-          comment: options.comment,
+          compress: options.compress,
         });
 
         spinner?.stop();
@@ -89,28 +106,6 @@ export function registerMediaUpload(media: Command) {
         handleCliError(error, "project");
       }
     });
-}
-
-function parseRetention(value: string | undefined): number | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-  const days = Number(value);
-  if (!Number.isInteger(days) || days < 1) {
-    fail(`--retention must be a positive integer, received "${value}".`);
-  }
-  return days;
-}
-
-function parsePrNumber(value: string | undefined): number | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-  const prNumber = Number(value);
-  if (!Number.isInteger(prNumber) || prNumber < 1) {
-    fail(`--pr must be a positive integer, received "${value}".`);
-  }
-  return prNumber;
 }
 
 export type { Media };

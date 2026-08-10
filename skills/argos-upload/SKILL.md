@@ -3,13 +3,14 @@ name: argos-upload
 description: >
   Upload a screenshot, an image or a screen recording to Argos and get a
   shareable URL plus ready-to-paste Markdown, so it can be embedded in a pull
-  request, an issue, a changelog or a chat message. Use whenever you have
-  produced a visual artifact — a Playwright video or trace screenshot, a
-  before/after of a UI change, a recording of a reproduction — and need it
-  visible to a human who cannot run your shell. GitHub has no public API for
-  comment attachments, so this is how an agent working from a terminal gets an
-  image into a pull request at all. Also covers reading back the comments a human
-  left on those screenshots, so you can act on visual feedback you cannot see.
+  request, an issue, a changelog or a chat message — or attached to a branch or
+  pull request, where Argos posts and maintains the comment itself. Use whenever
+  you have produced a visual artifact — a Playwright video or trace screenshot, a
+  before/after of a UI change, a recording of a reproduction — and need it visible
+  to a human who cannot run your shell. GitHub has no public API for comment
+  attachments, so this is how an agent working from a terminal gets an image into
+  a pull request at all. Also covers reading back the comments a human pinned to
+  those screenshots, so you can act on visual feedback you cannot see.
 license: MIT
 metadata:
   author: argos-ci
@@ -24,18 +25,19 @@ argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--pr
 to a build or a test run — and prints a share URL and a Markdown embed for each.
 
 ```bash
-argos media upload before.png after.png
+argos media upload checkout-before.png checkout-after.png --branch feat/checkout
 ```
 
 Run `argos media --help` for exact flags. This skill covers the parts `--help`
-cannot: when to upload, and how to embed the result so it actually renders.
+cannot: when to upload, how the result reaches a human, and how to read back what
+they say about it.
 
 ## When to upload
 
 Upload when a change is **visual** and a human has to see it to judge it:
 
-- You changed UI and opened a pull request. A before/after pair in the
-  description saves the reviewer from checking out your branch.
+- You changed UI and are working on a branch or a pull request. A before/after
+  pair saves the reviewer from checking out your branch.
 - You recorded a Playwright video or a screen recording of a bug reproduction.
 - You are reporting a rendering problem that a code snippet cannot convey.
 
@@ -47,16 +49,45 @@ Do not upload build screenshots that Argos already has. If a visual test run
 produced them, they are already in the build and linked from the pull request —
 use `argos build snapshots` instead.
 
+## Getting it into a pull request
+
+Name where the media belongs and Argos does the posting. It keeps **one** comment
+per pull request listing every media attached to it, edited in place rather than
+appended to.
+
+```bash
+argos media upload after.png --pr 1234              # the pull request exists
+argos media upload after.png --branch feat/checkout # it does not, yet
+```
+
+`--branch` is the one to reach for while working. The media is **staged**: it has
+its share URL immediately, and the moment a pull request opens for that branch
+Argos attaches it and posts the comment on its own. You do not have to come back
+and connect the two. `--pr` publishes straight away.
+
+Passing neither uploads a loose media: a share URL and nothing else. That is the
+right call for a chat message or an issue, where you paste the Markdown yourself.
+
+Commenting needs the project connected to GitHub, and pull request comments
+enabled on it (`argos project get`). Without that the upload still succeeds and
+you paste the Markdown yourself.
+
+Two things `--branch` will not do: publish to a pull request opened **from a
+fork** (a fork's branch name is chosen by an outsider, so Argos never matches
+staged media against it), and publish anything whose bytes never landed.
+
 ## Embedding the result
 
 The command prints, per file:
 
 ```
-after.png
+checkout.png (after)
   ID: 4821
+  staged on feat/checkout
   image/webp · 184 KB · 1440x900 · public · ready
   URL: https://app.argos-ci.com/m/kQ8vN2pXr4tYw7...
-  Markdown: ![after.png](https://app.argos-ci.com/m/kQ8vN2pXr4tYw7...)
+  File: https://media.argos-ci.com/media/12/a1b2c3.webp
+  Markdown: ![checkout.png](https://app.argos-ci.com/m/kQ8vN2pXr4tYw7...)
 ```
 
 **Paste the `Markdown` line verbatim.** Do not hand-write the embed:
@@ -67,71 +98,104 @@ after.png
   `<video>` tag or a bare `.mp4` link pointing at Argos renders as a dead link.
   The poster-in-a-link is the form that actually shows something.
 
-Use `--json` when you parse the output.
+`URL` is the share page, for a human. `File` is the image or video itself, for
+you: fetch it when you want to look at what you just uploaded. Use `--json` when
+you parse the output.
 
-## Attaching to a pull request
+## Before/after pairs
 
-With `--pr <number> --comment`, Argos maintains **one** comment on the pull
-request listing every media uploaded to it, edited in place rather than appended
-to:
+A file name ending in `-before` or `-after` is read as a label, not as part of the
+name: `checkout-before.png` and `checkout-after.png` both upload as `checkout.png`,
+one as each half of a pair, and the pull request comment shows them side by side
+for comparison. That is the whole reason to name them that way.
 
 ```bash
-argos media upload before.png after.png --pr 1234 --comment
+argos media upload checkout-before.png checkout-after.png --branch feat/checkout
 ```
 
-This needs a project token and a project connected to GitHub — which is what CI
-holds. Without it, put the Markdown in the pull request body or in a comment you
-write yourself.
+`--state before|after` sets it explicitly, for files that are not named that way.
+It applies to every file in the command, so do not pass it to a pair — both halves
+would land on the same name and state, and the second would replace the first.
+The CLI refuses that rather than doing it.
+
+`--description "<prose>"` adds a line under the media in the comment. Use it to
+say what the reviewer is looking at when the image does not speak for itself.
+
+## Re-uploading: versions, and one stable link
+
+Uploading the same **name** again on the same branch or pull request adds a
+**version** rather than creating a second media. The share URL does not change
+and always shows the newest version, so Markdown already posted to a pull request
+picks up the new image with nothing to edit — re-run your command after a fix and
+the review updates itself.
+
+Byte-identical bytes are not a new version, and cost nothing: Argos recognizes
+the file and skips both the transfer and the meter.
+
+A media's name and branch are its identity, so they are fixed once it is
+published. While it is still staged you can correct them:
+
+```bash
+argos media update 4821 --name checkout.png --branch feat/checkout
+argos media update 4821 --no-branch          # detach: nothing will publish it
+```
 
 ## Reading the feedback you were given
 
-A human can comment on an uploaded screenshot, and pin a comment to a **spot** on
+A human can comment on an uploaded screenshot and pin a comment to a **spot** on
 it. That is how you get told "this button is misaligned" about a pixel you cannot
-look at. Read the whole review in one call:
+look at. Find the media, then read its threads:
 
 ```bash
-argos media feedback --pr 1234
+argos media list --branch feat/checkout --json      # or --pr 1234
+argos media comment list 4821 --json
 ```
 
-Each comment comes back with the media it is about, a `File:` URL you can fetch to
-look at the image yourself, and — when it is pinned — `Pinned: point x,y` in
-normalized 0–1 coordinates of the image's width and height. `0.62,0.34` means 62%
-across and 34% down.
-
-Only open threads are listed, so what comes back is what is left to do. Add
-`--all` to include threads already dealt with.
-
-Then close the loop on each one:
+Each comment carries the pin as `Pinned: point x,y` in normalized 0–1 coordinates
+of the image (`0.62,0.34` is 62% across, 34% down), and the media's `File:` URL is
+what you fetch to go and look. A comment also carries the **media version** it was
+written against: if `versionCount` is above 1, the pin describes the bytes of
+_that_ upload, so resolve it before trusting the coordinates.
 
 ```bash
-argos media comment create <mediaId> --reply-to <threadId> --body "Fixed in abc1234."
-argos media comment resolve <mediaId> <threadId>
+argos media versions 4821 --json   # match the comment's media version ID, use its file
 ```
 
-Resolve only what you actually fixed. A resolved thread disappears from the next
-`media feedback`, so resolving something you skipped is how feedback gets silently
-dropped — reply explaining why instead, and leave it open.
-
-## Stable links across re-runs
-
-A media uploaded without a slug is a new media every time, so re-running your
-command leaves a stale embed pointing at the previous upload. Pass `--slug` to
-get a link that survives a re-run:
+Then close the loop on each thread:
 
 ```bash
-argos media upload after.png --slug pr-1234-after
+argos media comment create 4821 --reply-to <threadId> --body "Fixed in abc1234."
+argos media comment resolve 4821 <threadId>
 ```
 
-Re-uploading the same slug replaces the file in place and keeps the same URL, so
-Markdown already posted to a pull request shows the new version. With several
-files, each gets the slug suffixed by its index. A slug is unique per project.
+Resolve only what you actually fixed. Resolving something you skipped is how
+feedback gets silently dropped — reply explaining why instead, and leave it open.
+
+## Compression
+
+Images are converted to **WebP** before upload, which is where the speed comes
+from: a 1440x900 PNG screenshot goes from ~1 MB to well under 100 KB. The media
+keeps the name you gave it (`checkout.png`), because that name is its identity and
+must not move when Argos changes how it compresses.
+
+Argos leaves a file alone when converting would not help — a video, an
+already-efficient WebP or AVIF, an animated GIF, an image too large for the WebP
+encoder (over 16383px on a side, which a long full-page capture reaches), or bytes
+that came out no smaller. `--no-compress` uploads exactly what you have.
+
+One consequence worth knowing: converting drops the file's metadata, so a photo's
+EXIF — including GPS, if the camera recorded it — does not reach Argos. With
+`--no-compress`, or for a format that is left alone, it does.
 
 ## Visibility, and what it does not cover
 
 `--visibility` controls the **share page** — `team` requires an Argos session,
-`public` does not. It does **not** protect the file: media files are always
-reachable at an unguessable CDN URL, because GitHub fetches embedded images
-server-side with no session and could not render them otherwise.
+`public` does not. It defaults to the most private option the plan allows: `team`
+on Pro, and `public` on the free plan, which cannot do `team` at all.
+
+It does **not** protect the file: media files are always reachable at an
+unguessable CDN URL, because GitHub fetches embedded images server-side with no
+session and could not render them otherwise.
 
 So treat an uploaded file as "anyone with the link". If a screenshot must never be
 reachable by someone who obtains its URL, don't upload it — say so instead of
@@ -139,31 +203,31 @@ uploading it anyway.
 
 ## Authentication
 
-| Command                                   | Token                                                  |
-| ----------------------------------------- | ------------------------------------------------------ |
-| `media upload`, `get`, `list`, `feedback` | Project token (`ARGOS_TOKEN`) or personal access token |
-| `media delete`                            | Project administrator                                  |
-| `media comment …`                         | Personal access token with review access               |
-
 Media belongs to a **project**, so it inherits that project's access — including
 transferring with it. With a personal access token, pass `--project
 <owner/project>` (or set `ARGOS_PROJECT`); a project token already identifies its
 own project.
 
-Posting or resolving a comment is a write on the project's review surface, so it
-needs a personal access token. A project token can read feedback but not answer
-it.
+| Command                         | Token                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `media upload`, `update`        | Project token (`ARGOS_TOKEN`, or tokenless CI) or PAT with review access |
+| `media get`, `list`, `versions` | Project token or PAT with access to the project                          |
+| `media delete`                  | Project token or PAT with project admin                                  |
+| `media comment …`               | Personal access token (a comment has an author)                          |
+
+Every `media comment` command needs a personal access token, reading included: a
+project token can list the media a review is about but not the review itself.
 
 ## What it costs
 
 Uploads draw on the same screenshot allowance as visual tests — there is no
 separate quota to track. One image is 1 screenshot; one video is 25, because it
-costs more to store and serve. Uploading the same file twice is free: Argos
-recognizes the contents and skips the transfer.
+costs more to store and serve. Uploading the same file twice is free.
 
-Files are kept 30 days on the free plan and a year on Pro (`--retention <days>`
-to shorten it), then deleted. An expired link renders an "unavailable" page, so
-a pull request embed degrades visibly rather than into a broken image.
+Files are kept 30 days on the free plan and a year on Pro, then deleted, per
+version — the plan decides it, there is nothing to pass. An expired link renders
+an "unavailable" page, so a pull request embed degrades visibly rather than into a
+broken image.
 
 ## Limits worth knowing before you upload
 
@@ -171,12 +235,10 @@ a pull request embed degrades visibly rather than into a broken image.
   else is refused before the upload starts.
 - **Size** — 50 MB on the free plan, 500 MB on Pro. A long screen recording is
   the usual thing that trips this; trim it before uploading.
-- **Metadata is preserved** — Argos does not rewrite your file, so a photo's EXIF
-  (including GPS, if the camera recorded it) stays in the uploaded file. Strip it
-  before uploading if that matters.
 - **Video codecs** — Argos does not transcode. Most MP4/WebM plays fine, as does
   the H.264 that screen recorders produce; ProRes and some HEVC exports won't play
   inline and the viewer gets a download. Export to H.264 if you need playback.
+- **Comment size** — the managed pull request comment lists up to 20 media.
 - **No waiting** — a media is fully usable the moment the upload finishes. The
   poster frame is derived by the CDN on request, so a video's Markdown embed is
   correct immediately.
