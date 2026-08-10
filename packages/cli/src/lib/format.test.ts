@@ -15,6 +15,7 @@ import {
   formatSnapshotSummary,
   formatSnapshots,
   formatStats,
+  formatUploadedMediaList,
   formatValue,
 } from "./format";
 
@@ -453,6 +454,122 @@ describe("formatMedia / formatMediaList", () => {
     const output = formatMedia(afterAbandonedUpload);
     expect(output).toContain("Version: 3 (2 uploaded)");
     expect(output).not.toContain("of 2");
+  });
+});
+
+describe("formatUploadedMediaList", () => {
+  function uploaded(attributes: Partial<Media>): Media {
+    return {
+      id: "1",
+      name: "checkout.png",
+      state: null,
+      description: null,
+      stage: "published",
+      branch: null,
+      prNumber: 20,
+      url: "https://app.argos-ci.com/m/tok",
+      markdown: "[![checkout.png](https://files/abc.webp)](https://app/m/tok)",
+      version: 1,
+      versionCount: 1,
+      fileUrl: "https://files/abc.webp",
+      posterUrl: null,
+      contentType: "image/webp",
+      sizeBytes: 1024,
+      width: 800,
+      height: 600,
+      visibility: "team",
+      status: "ready",
+      expiresAt: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      ...attributes,
+    } as unknown as Media;
+  }
+
+  const before = uploaded({
+    id: "1",
+    state: "before",
+    url: "https://app/m/before",
+    markdown:
+      "[![checkout.png](https://files/before.webp)](https://app/m/before)",
+  });
+  const after = uploaded({
+    id: "2",
+    state: "after",
+    url: "https://app/m/after",
+    markdown:
+      "[![checkout.png](https://files/after.webp)](https://app/m/after)",
+  });
+
+  it("adds nothing for a single upload", () => {
+    // Its own `Markdown:` line already is the thing to paste; a one-row table
+    // says nothing more.
+    const output = formatUploadedMediaList([uploaded({})]);
+    expect(output).toBe(formatMediaList([uploaded({})]));
+    expect(output).not.toContain("| Name |");
+  });
+
+  it("puts a pair's two halves in one row, like the pull request comment", () => {
+    const output = formatUploadedMediaList([before, after]);
+
+    expect(output).toContain("Markdown for all of them:");
+    expect(output).toContain("| Name | Before | After |");
+    expect(output).toContain(
+      `| checkout.png | ${before.markdown} | ${after.markdown} |`,
+    );
+  });
+
+  it("keeps unpaired media to a single preview column", () => {
+    const output = formatUploadedMediaList([
+      uploaded({ id: "1", name: "a.png" }),
+      uploaded({ id: "2", name: "b.png" }),
+    ]);
+
+    expect(output).toContain("| Name | Preview |");
+    expect(output).not.toContain("| Before |");
+  });
+
+  it("does not let a solo media absorb a pair that shares its name", () => {
+    // Grouping is keyed on the name for a pair and on the id for a lone media,
+    // so a standalone `checkout.png` stays its own row.
+    const output = formatUploadedMediaList([
+      before,
+      after,
+      uploaded({ id: "3" }),
+    ]);
+
+    expect(
+      output.split("\n").filter((line) => line.startsWith("| checkout")).length,
+    ).toBe(2);
+  });
+
+  it("carries the pair's note into a Notes column", () => {
+    const output = formatUploadedMediaList([
+      before,
+      { ...after, description: "Spacing fix." } as Media,
+    ]);
+
+    expect(output).toContain("| Name | Before | After | Notes |");
+    expect(output).toContain("| Spacing fix. |");
+  });
+
+  it("escapes a pipe in a name so it cannot open a column", () => {
+    const output = formatUploadedMediaList([
+      uploaded({ id: "1", name: "a|b.png" }),
+      uploaded({ id: "2", name: "c.png" }),
+    ]);
+
+    expect(output).toContain("| a\\|b.png |");
+  });
+
+  it("turns a newline in a note into a break instead of a new row", () => {
+    // A raw newline ends the row outright and drops the rest of the note into
+    // the comment as top-level Markdown.
+    const output = formatUploadedMediaList([
+      before,
+      { ...after, description: "First.\nSecond." } as Media,
+    ]);
+
+    expect(output).toContain("| First.<br>Second. |");
   });
 });
 
