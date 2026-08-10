@@ -241,6 +241,8 @@ export interface paths {
          *
          *     When `upload` comes back `null`, Argos already holds this exact file and steps 2 and 3 are unnecessary.
          *
+         *     Pass `prNumber` when the pull request already exists, or `branch` when it does not. A media uploaded against a branch is **staged**: it has its share URL immediately, and the moment a pull request opens for that branch Argos attaches it and posts the comment — nothing has to come back and connect the two.
+         *
          *     The `argos media upload` CLI command does all of this in one step.
          */
         post: operations["createMedia"];
@@ -271,6 +273,38 @@ export interface paths {
         delete: operations["deleteMedia"];
         options?: never;
         head?: never;
+        /**
+         * Update a staged media
+         * @description Change a staged media's name, description or branch.
+         *
+         *     Staged media only. A media's name and branch are its identity — what decides whether the next upload of that name is a new version or a new media, and which pull request will publish it — and once it is published that identity is what the pull request comment is built from and what a reviewer's comments hang off. Editing it there would rewrite history rather than correct a staged media.
+         *
+         *     Omitted fields are left alone. `description` and `branch` accept `null` to clear them; `name` is required and has no cleared state. Clearing a staged media's branch leaves it attached to nothing, so no pull request will ever publish it.
+         */
+        patch: operations["updateMedia"];
+        trace?: never;
+    };
+    "/media/{mediaId}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a media's versions
+         * @description A media's most recent uploaded versions, newest first, up to 100.
+         *
+         *     A separate call because it is rarely needed: a media usually has one version, and the media itself already carries the newest one flattened onto it. Check `versionCount` first — at 1 there is nothing here you do not already have.
+         *
+         *     When you do need it, it is because a comment carries the `mediaVersionId` it was written against. A pin describes a spot on *those* bytes, so feedback written on an earlier upload has to be read against that upload — match the id here to get its file.
+         */
+        get: operations["listMediaVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
         patch?: never;
         trace?: never;
     };
@@ -285,7 +319,7 @@ export interface paths {
         put?: never;
         /**
          * Finalize a media upload
-         * @description Confirm that a media's bytes have been uploaded. Argos reads the object back, starts processing it (poster frame for videos, metadata stripping), bills it to the screenshot meter, and updates the managed pull request comment when one was requested.
+         * @description Confirm that a media version's bytes have been uploaded. Argos reads the object back to check the file is what it claims to be, records an image's dimensions, bills it to the screenshot meter, and updates the managed pull request comment. There is no processing step: the media is usable the moment this returns.
          */
         post: operations["finalizeMedia"];
         delete?: never;
@@ -880,30 +914,10 @@ export interface paths {
         /**
          * List a project's media
          * @description List the standalone images and videos uploaded to a project, most recent first.
+         *
+         *     `branch` and `prNumber` are what this is usually for: everything uploaded for the work in hand, whether or not a pull request exists yet. `branch` covers both — a media keeps its branch after publishing — so it stays a single query across the moment the pull request opens.
          */
         get: operations["listMedia"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{owner}/{project}/media/comments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List the feedback on a project's media
-         * @description Every comment left on a project's uploaded media, grouped by media — the whole review in one call.
-         *
-         *     This is the endpoint to use after a human has marked up screenshots and asked you to act on their feedback. Filter to a pull request with `prNumber` and to open threads with `resolved=false`, then read each comment's `anchor` to see which part of the image it points at.
-         */
-        get: operations["listMediaFeedback"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1990,17 +2004,36 @@ export interface components {
         Media: {
             /** @description Unique identifier of the media */
             id: string;
-            /** @description Original file name */
+            /** @description The media's name, and its identity within its pull request. Uploading the same name again adds a version. */
             name: string;
-            /** @description Stable per-team identifier. Re-uploading the same slug replaces the file in place, keeping this URL valid. */
-            slug: string | null;
+            state: ("before" | "after") | null;
+            /** @description Prose shown under the media in the pull request comment. */
+            description: string | null;
+            /**
+             * @description `staged` while the media is only attached to a branch, `published` once a pull request is attached and Argos lists it in that pull request's comment. A media attached to neither is `staged`.
+             * @enum {string}
+             */
+            stage: "staged" | "published";
+            /** @description Branch this media was uploaded for. Kept after publishing, as a record of where it came from. */
+            branch: string | null;
+            /** @description Pull request this media is published to, or `null` while it is staged. */
+            prNumber: number | null;
             /**
              * Format: uri
-             * @description Share page URL. This is the link to put in a pull request or a chat message.
+             * @description Share page URL. This is the link to put in a pull request or a chat message, and it keeps working across versions — it always shows the newest one.
              */
             url: string;
             /** @description Ready-to-paste Markdown. Images embed directly; videos embed their poster frame linked to the share page, because GitHub only renders inline players for media it hosts itself. */
             markdown: string;
+            /** @description Which version this response describes: 1 for a first upload, incrementing each time the same name is uploaded again. */
+            version: number;
+            /** @description How many uploaded versions this media has. Above 1, `GET /media/{mediaId}/versions` lists them — which is how a comment's `mediaVersionId` resolves to the file it was written against. */
+            versionCount: number;
+            /**
+             * Format: uri
+             * @description URL of the image or video itself, for an agent that wants to look at it.
+             */
+            fileUrl: string;
             /** @description Poster frame of a video, derived by the image CDN. Always `null` for images. */
             posterUrl: string | null;
             /** @description Content type of the media */
@@ -2021,7 +2054,7 @@ export interface components {
              * @enum {string}
              */
             status: "pending" | "ready";
-            /** @description When the media is deleted. Counted from the upload, not from the last view. */
+            /** @description When this version is deleted. Counted from its upload, not from the last view. */
             expiresAt: string | null;
             createdAt: string;
         };
@@ -2037,6 +2070,27 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** @description One uploaded version of a media */
+        MediaVersion: {
+            /** @description Unique identifier of this version — what a comment's `mediaVersionId` points at. */
+            id: string;
+            /** @description 1-based, and what the UI calls the version. Increments each time the same name is uploaded again. */
+            number: number;
+            /**
+             * Format: uri
+             * @description URL of the image or video as it was at this version.
+             */
+            fileUrl: string;
+            /** @description Poster frame of a video. Always `null` for images. */
+            posterUrl: string | null;
+            contentType: string;
+            sizeBytes: number;
+            width: number | null;
+            height: number | null;
+            /** @description When this version is deleted. Retention applies per version, so an old one ages out while the media and its share URL live on. */
+            expiresAt: string | null;
+            createdAt: string;
+        };
         /** @description A comment posted on a build or on a test. */
         Comment: {
             /** @description Public ID of the comment (e.g. `comment-xf23d`) — the one the app links to, and the one every endpoint taking a comment ID expects. */
@@ -2045,6 +2099,10 @@ export interface components {
             buildId: string | null;
             /** @description Test this comment is posted on, null when it is posted on a build. */
             testId: string | null;
+            /** @description Media this comment is posted on, null when it is posted on a build or a test. */
+            mediaId: string | null;
+            /** @description Version of the media the comment was written against. A pin describes a spot on the bytes its author was looking at, so feedback on an older upload has to be read against that upload — match this id against `GET /media/{mediaId}/versions` to get the right file. */
+            mediaVersionId: string | null;
             /** @description Root comment ID when this comment is a reply. */
             threadId: string | null;
             /** @description Rich-text JSON content of the comment. */
@@ -2205,29 +2263,6 @@ export interface components {
             id: string;
             user: components["schemas"]["User"];
             level: components["schemas"]["ProjectUserLevel"];
-        };
-        /** @description Comments left on one media */
-        MediaFeedback: {
-            /** @description The media the comments were left on */
-            media: {
-                id: string;
-                name: string;
-                /**
-                 * Format: uri
-                 * @description Share page URL
-                 */
-                url: string;
-                /**
-                 * Format: uri
-                 * @description URL of the image or video itself, for an agent that wants to look at it.
-                 */
-                fileUrl: string;
-                posterUrl: string | null;
-                width: number | null;
-                height: number | null;
-            };
-            /** @description The comments on this media, oldest first. A comment's `anchor` gives the normalized (x, y) it points at, so an agent can tell which part of the screenshot the feedback is about. */
-            comments: components["schemas"]["Comment"][];
         };
         /** @description Snapshot diff */
         SnapshotDiff: {
@@ -3720,22 +3755,20 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description File name, used for display and as the Markdown alt text.
+                     * @description File name, used for display and as the Markdown alt text. Also the media's identity: uploading the same name on the same pull request adds a version rather than creating a second media.
                      * @example before.png
                      * @example checkout-flow.mp4
                      */
                     name: string;
+                    state?: ("before" | "after") | null;
+                    /** @description Prose shown under the media in the managed pull request comment. */
+                    description?: string | null;
                     /** @description Content type of the media file */
                     contentType: string;
                     /** @description Size of the file in bytes. Checked against your plan's limit before the upload is signed. */
                     size: number;
-                    /** @description SHA-256 of the file contents, hex encoded. Uploading the same file twice is free: Argos recognizes the hash and skips the transfer. */
+                    /** @description SHA-256 of the file contents, hex encoded. Uploading the same file twice is free: Argos recognizes the hash and skips the transfer, and byte-identical bytes do not create a new version. */
                     hash: string;
-                    /**
-                     * @description Stable identifier, unique per team. Re-uploading the same slug replaces the file in place, so a Markdown embed already posted to a pull request never goes stale.
-                     * @example pr-1234-checkout-before
-                     */
-                    slug?: string | null;
                     visibility?: ("team" | "public") | null;
                     /** @description How long to keep the media, in days. Clamped to your plan's maximum. */
                     retentionDays?: number | null;
@@ -3744,10 +3777,9 @@ export interface operations {
                      * @example acme/web
                      */
                     project?: string | null;
-                    /** @description Pull request to attach the media to. With `comment`, Argos maintains a single comment on it listing every media uploaded, editing it in place rather than posting a new one each time. */
+                    /** @description Pull request this media belongs to. Argos maintains a single comment on it listing every media uploaded, editing it in place rather than posting a new one each time — attaching a media to a pull request and showing it there are the same act, not two. Also part of the media's identity: uploading the same name again on this pull request adds a version. */
                     prNumber?: number | null;
-                    /** @description Post (or update) the managed pull request comment. Requires `prNumber` and a project connected to GitHub. */
-                    comment?: boolean | null;
+                    branch?: string | null;
                 };
             };
         };
@@ -3898,6 +3930,156 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description File name, used for display and as the Markdown alt text. Also the media's identity: uploading the same name on the same pull request adds a version rather than creating a second media.
+                     * @example before.png
+                     * @example checkout-flow.mp4
+                     */
+                    name?: string;
+                    /** @description Prose shown under the media in the managed pull request comment. */
+                    description?: string | null;
+                    branch?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMediaVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The media's versions, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaVersion"][];
+                };
             };
             /** @description Invalid parameters */
             400: {
@@ -6679,6 +6861,12 @@ export interface operations {
                 perPage?: string;
                 /** @description Page number */
                 page?: string;
+                /** @description Only media uploaded for this branch, staged and published alike. */
+                branch?: string;
+                /** @description Only media published to this pull request. */
+                prNumber?: number;
+                /** @description Restrict to staged media (no pull request yet) or to published media. */
+                stage?: "staged" | "published";
                 /** @description Match media on their file name or slug. */
                 search?: string;
                 /** @description Restrict to images or to videos. */
@@ -6702,81 +6890,6 @@ export interface operations {
                     "application/json": {
                         pageInfo: components["schemas"]["PageInfo"];
                         results: components["schemas"]["Media"][];
-                    };
-                };
-            };
-            /** @description Invalid parameters */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    listMediaFeedback: {
-        parameters: {
-            query?: {
-                /** @description Only media attached to this pull request. Omit for every media in the project. */
-                prNumber?: string;
-                /** @description Filter by thread resolution. `false` is what you want when acting on feedback: it leaves out what has already been dealt with. */
-                resolved?: "true" | "false";
-            };
-            header?: never;
-            path: {
-                owner: string;
-                project: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Feedback grouped by media */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        results: components["schemas"]["MediaFeedback"][];
                     };
                 };
             };
