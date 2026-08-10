@@ -9,9 +9,10 @@ import { uploadMedia } from "./media";
 setupMockServer();
 
 const FIXTURES = join(__dirname, "../../../__fixtures__/screenshots");
-// Media-only fixtures live apart from the screenshots the discovery and upload
-// suites enumerate exhaustively, so adding one here does not break those.
-const MEDIA_FIXTURES = join(__dirname, "../../../__fixtures__/media");
+// Media-only fixtures live inside this package rather than in the repo's shared
+// `__fixtures__`: the CLI's e2e uploads that whole directory to Argos as a visual
+// test, so a fixture added there turns into a snapshot nobody wants to review.
+const MEDIA_FIXTURES = join(__dirname, "../__fixtures__");
 const IMAGE = join(FIXTURES, "penelope.jpg");
 const PNG = join(FIXTURES, "penelope.png");
 
