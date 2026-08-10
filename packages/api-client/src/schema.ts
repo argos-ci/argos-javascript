@@ -220,6 +220,254 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a media upload
+         * @description Register a standalone image or video and receive a signed target to upload it to.
+         *
+         *     Uploading takes three calls:
+         *
+         *     1. `POST /media` — declare the file and get back an `upload` target.
+         *     2. `POST` the file to `upload.url` as `multipart/form-data`, appending every entry of `upload.fields` **before** the `file` part.
+         *     3. `POST /media/{mediaId}/finalize` — confirm the bytes landed.
+         *
+         *     When `upload` comes back `null`, Argos already holds this exact file and steps 2 and 3 are unnecessary.
+         *
+         *     Pass `prNumber` when the pull request already exists, or `branch` when it does not. A media uploaded against a branch is **staged**: it has its share URL immediately, and the moment a pull request opens for that branch Argos attaches it and posts the comment — nothing has to come back and connect the two.
+         *
+         *     The `argos media upload` CLI command does all of this in one step.
+         */
+        post: operations["createMedia"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a media
+         * @description Retrieve a single media by its ID, including its share URL and ready-to-paste Markdown.
+         */
+        get: operations["getMedia"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a media
+         * @description Delete a media and the files behind it. Any share link or pull request embed pointing at it stops working immediately.
+         */
+        delete: operations["deleteMedia"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a staged media
+         * @description Change a staged media's name, description or branch.
+         *
+         *     Staged media only. A media's name and branch are its identity — what decides whether the next upload of that name is a new version or a new media, and which pull request will publish it — and once it is published that identity is what the pull request comment is built from and what a reviewer's comments hang off. Editing it there would rewrite history rather than correct a staged media.
+         *
+         *     Omitted fields are left alone. `description` and `branch` accept `null` to clear them; `name` is required and has no cleared state. Clearing a staged media's branch leaves it attached to nothing, so no pull request will ever publish it.
+         */
+        patch: operations["updateMedia"];
+        trace?: never;
+    };
+    "/media/{mediaId}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a media's versions
+         * @description A media's most recent uploaded versions, newest first, up to 100.
+         *
+         *     A separate call because it is rarely needed: a media usually has one version, and the media itself already carries the newest one flattened onto it. Check `versionCount` first — at 1 there is nothing here you do not already have.
+         *
+         *     When you do need it, it is because a comment carries the `mediaVersionId` it was written against. A pin describes a spot on *those* bytes, so feedback written on an earlier upload has to be read against that upload — match the id here to get its file.
+         */
+        get: operations["listMediaVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finalize a media upload
+         * @description Confirm that a media version's bytes have been uploaded. Argos reads the object back to check the file is what it claims to be, records an image's dimensions, bills it to the screenshot meter, and updates the managed pull request comment. There is no processing step: the media is usable the moment this returns.
+         */
+        post: operations["finalizeMedia"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the comments on a media
+         * @description List the comments on an uploaded media, oldest first. A comment may carry an `anchor` pinning it to a point on the image, which is how reviewers mark up a screenshot.
+         */
+        get: operations["listMediaComments"];
+        put?: never;
+        /**
+         * Post a comment (or reply) on a media
+         * @description Post a comment on an uploaded media. Start a new thread, or reply to an existing one with `threadId`. Pass an `anchor` to pin the comment to a point on the image — normalized coordinates, so it survives any scaling — which is how a reviewer marks up a screenshot.
+         */
+        post: operations["createMediaComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single comment on a media
+         * @description Retrieve a single comment on a media by its ID.
+         */
+        get: operations["getMediaComment"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a comment on a media
+         * @description Delete a comment on a media. Only the comment's author can delete it.
+         */
+        delete: operations["deleteMediaComment"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a comment on a media
+         * @description Update the body of a comment on a media. Only the comment's author can edit it.
+         */
+        patch: operations["updateMediaComment"];
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/reactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add an emoji reaction to a comment on a media
+         * @description Add an emoji reaction to a comment on a media, on behalf of the authenticated user.
+         */
+        post: operations["addMediaCommentReaction"];
+        /**
+         * Remove an emoji reaction from a comment on a media
+         * @description Remove an emoji reaction previously added by the authenticated user from a comment on a media.
+         */
+        delete: operations["removeMediaCommentReaction"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a media comment thread as resolved
+         * @description Mark a comment thread on a media as resolved.
+         */
+        post: operations["resolveMediaCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/unresolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopen a resolved media comment thread
+         * @description Reopen a previously resolved comment thread on a media.
+         */
+        post: operations["unresolveMediaCommentThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/comments/{commentId}/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subscribe to a media comment thread's notifications
+         * @description Subscribe the authenticated user to a comment thread on a media to receive notifications about new replies.
+         */
+        post: operations["subscribeMediaCommentThread"];
+        /**
+         * Unsubscribe from a media comment thread's notifications
+         * @description Unsubscribe the authenticated user from a media comment thread's notifications.
+         */
+        delete: operations["unsubscribeMediaCommentThread"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builds": {
         parameters: {
             query?: never;
@@ -650,6 +898,28 @@ export interface paths {
          * @description Move a project to another account, optionally renaming it. The token must be scoped to both accounts, and the acting user must administer the project as well as the account receiving it.
          */
         post: operations["transferProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's media
+         * @description List the standalone images and videos uploaded to a project, most recent first.
+         *
+         *     `branch` and `prNumber` are what this is usually for: everything uploaded for the work in hand, whether or not a pull request exists yet. `branch` covers both — a media keeps its branch after publishing — so it stays a single query across the moment the pull request opens.
+         */
+        get: operations["listMedia"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1294,6 +1564,10 @@ export interface components {
          * @enum {string}
          */
         TeamUserLevel: "owner" | "member" | "contributor";
+        /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+        CommentId: string;
+        /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+        ThreadCommentId: string;
         /** @description SHA1 hash */
         Sha1Hash: string;
         GitBranch: string;
@@ -1559,10 +1833,6 @@ export interface components {
          * @example WEB-xf23d
          */
         TestId: string;
-        /** @description The public ID of the comment (e.g. `comment-xf23d`) */
-        CommentId: string;
-        /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
-        ThreadCommentId: string;
         /** @description An account with its plan and current-period usage, to watch consumption against the plan. */
         AccountDetails: {
             id: string;
@@ -1729,6 +1999,147 @@ export interface components {
              * @description The team's new shared invite link. Anyone with it joins at the team's default role.
              */
             inviteLink: string;
+        };
+        /** @description A standalone image or video uploaded to Argos */
+        Media: {
+            /** @description Unique identifier of the media */
+            id: string;
+            /** @description The media's name, and its identity within its pull request. Uploading the same name again adds a version. */
+            name: string;
+            state: ("before" | "after") | null;
+            /** @description Prose shown under the media in the pull request comment. */
+            description: string | null;
+            /**
+             * @description `staged` while the media is only attached to a branch, `published` once a pull request is attached and Argos lists it in that pull request's comment. A media attached to neither is `staged`.
+             * @enum {string}
+             */
+            stage: "staged" | "published";
+            /** @description Branch this media was uploaded for. Kept after publishing, as a record of where it came from. */
+            branch: string | null;
+            /** @description Pull request this media is published to, or `null` while it is staged. */
+            prNumber: number | null;
+            /**
+             * Format: uri
+             * @description Share page URL. This is the link to put in a pull request or a chat message, and it keeps working across versions — it always shows the newest one.
+             */
+            url: string;
+            /** @description Ready-to-paste Markdown. Images embed directly; videos embed their poster frame linked to the share page, because GitHub only renders inline players for media it hosts itself. */
+            markdown: string;
+            /** @description Which version this response describes: 1 for a first upload, incrementing each time the same name is uploaded again. */
+            version: number;
+            /** @description How many uploaded versions this media has. Above 1, `GET /media/{mediaId}/versions` lists them — which is how a comment's `mediaVersionId` resolves to the file it was written against. */
+            versionCount: number;
+            /**
+             * Format: uri
+             * @description URL of the image or video itself, for an agent that wants to look at it.
+             */
+            fileUrl: string;
+            /** @description Poster frame of a video, derived by the image CDN. Always `null` for images. */
+            posterUrl: string | null;
+            /** @description Content type of the media */
+            contentType: string;
+            /** @description Size of the media, in bytes */
+            sizeBytes: number;
+            /** @description Width, in pixels */
+            width: number | null;
+            /** @description Height, in pixels */
+            height: number | null;
+            /**
+             * @description Who can open the media share page. `team` requires an Argos session with access to the owning account; `public` only requires the share URL.
+             * @enum {string}
+             */
+            visibility: "team" | "public";
+            /**
+             * @description `pending` until the bytes are uploaded, then `ready`. There is no processing step — Argos serves the bytes it was given.
+             * @enum {string}
+             */
+            status: "pending" | "ready";
+            /** @description When this version is deleted. Set from your plan's retention, counted from the upload rather than from the last view. */
+            expiresAt: string | null;
+            createdAt: string;
+        };
+        /** @description Signed upload target */
+        MediaUploadTarget: {
+            /**
+             * Format: uri
+             * @description URL to POST the file to, as `multipart/form-data`.
+             */
+            url: string;
+            /** @description Form fields that must be appended **before** the file part, in order, for the upload to be accepted. */
+            fields: {
+                [key: string]: string;
+            };
+        };
+        /** @description One uploaded version of a media */
+        MediaVersion: {
+            /** @description Unique identifier of this version — what a comment's `mediaVersionId` points at. */
+            id: string;
+            /** @description 1-based, and what the UI calls the version. Increments each time the same name is uploaded again. */
+            number: number;
+            /**
+             * Format: uri
+             * @description URL of the image or video as it was at this version.
+             */
+            fileUrl: string;
+            /** @description Poster frame of a video. Always `null` for images. */
+            posterUrl: string | null;
+            contentType: string;
+            sizeBytes: number;
+            width: number | null;
+            height: number | null;
+            /** @description When this version is deleted. Retention applies per version, so an old one ages out while the media and its share URL live on. */
+            expiresAt: string | null;
+            createdAt: string;
+        };
+        /** @description A comment posted on a build or on a test. */
+        Comment: {
+            /** @description Public ID of the comment (e.g. `comment-xf23d`) — the one the app links to, and the one every endpoint taking a comment ID expects. */
+            id: string;
+            /** @description Build this comment is posted on, null when it is posted on a test. */
+            buildId: string | null;
+            /** @description Test this comment is posted on, null when it is posted on a build. */
+            testId: string | null;
+            /** @description Media this comment is posted on, null when it is posted on a build or a test. */
+            mediaId: string | null;
+            /** @description Version of the media the comment was written against. A pin describes a spot on the bytes its author was looking at, so feedback on an older upload has to be read against that upload — match this id against `GET /media/{mediaId}/versions` to get the right file. */
+            mediaVersionId: string | null;
+            /** @description Root comment ID when this comment is a reply. */
+            threadId: string | null;
+            /** @description Rich-text JSON content of the comment. */
+            body: unknown;
+            /** @description Plain-text rendering of the comment content. */
+            text: string;
+            author: components["schemas"]["User"] | null;
+            /** @description Screenshot diff this comment is anchored to, if any. */
+            screenshotDiffId: string | null;
+            /** @description Where the comment points on its screenshot diff. Null means the whole diff. */
+            anchor: ({
+                /** @constant */
+                type: "point";
+                x: number;
+                y: number;
+            } | {
+                /** @constant */
+                type: "lines";
+                from: number;
+                to: number;
+            }) | null;
+            /** @description Whether the comment belongs to a pending (unsubmitted) review and is only visible to its author. */
+            pending: boolean;
+            /** @description Date the thread was resolved, null if not resolved. Only set on a root comment. */
+            resolvedAt: string | null;
+            /** @description Date the comment was last edited, null if never edited. */
+            editedAt: string | null;
+            /** @description Date the comment was posted. */
+            createdAt: string;
+            reactions: {
+                /** @description The emoji used for the reaction. */
+                emoji: string;
+                /** @description Number of users who reacted with this emoji. */
+                count: number;
+                /** @description The users who reacted with this emoji. */
+                users: components["schemas"]["User"][];
+            }[];
         };
         /** @description Build */
         Build: {
@@ -2160,52 +2571,6 @@ export interface components {
         NotificationSubscription: {
             /** @description Whether the authenticated user now receives notifications for this resource. */
             subscribed: boolean;
-        };
-        /** @description A comment posted on a build or on a test. */
-        Comment: {
-            /** @description Public ID of the comment (e.g. `comment-xf23d`) — the one the app links to, and the one every endpoint taking a comment ID expects. */
-            id: string;
-            /** @description Build this comment is posted on, null when it is posted on a test. */
-            buildId: string | null;
-            /** @description Test this comment is posted on, null when it is posted on a build. */
-            testId: string | null;
-            /** @description Root comment ID when this comment is a reply. */
-            threadId: string | null;
-            /** @description Rich-text JSON content of the comment. */
-            body: unknown;
-            /** @description Plain-text rendering of the comment content. */
-            text: string;
-            author: components["schemas"]["User"] | null;
-            /** @description Screenshot diff this comment is anchored to, if any. */
-            screenshotDiffId: string | null;
-            /** @description Where the comment points on its screenshot diff. Null means the whole diff. */
-            anchor: ({
-                /** @constant */
-                type: "point";
-                x: number;
-                y: number;
-            } | {
-                /** @constant */
-                type: "lines";
-                from: number;
-                to: number;
-            }) | null;
-            /** @description Whether the comment belongs to a pending (unsubmitted) review and is only visible to its author. */
-            pending: boolean;
-            /** @description Date the thread was resolved, null if not resolved. Only set on a root comment. */
-            resolvedAt: string | null;
-            /** @description Date the comment was last edited, null if never edited. */
-            editedAt: string | null;
-            /** @description Date the comment was posted. */
-            createdAt: string;
-            reactions: {
-                /** @description The emoji used for the reaction. */
-                emoji: string;
-                /** @description Number of users who reacted with this emoji. */
-                count: number;
-                /** @description The users who reacted with this emoji. */
-                users: components["schemas"]["User"][];
-            }[];
         };
         /** @description A test with its flakiness metrics over the requested period. Fetch the test itself for its history and the changes behind the score. */
         TestSummary: components["schemas"]["Test"];
@@ -3330,6 +3695,1264 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InviteLink"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description File name, used for display and as the Markdown alt text. Also the media's identity: uploading the same name on the same pull request adds a version rather than creating a second media.
+                     * @example before.png
+                     * @example checkout-flow.mp4
+                     */
+                    name: string;
+                    state?: ("before" | "after") | null;
+                    /** @description Prose shown under the media in the managed pull request comment. */
+                    description?: string | null;
+                    /** @description Content type of the media file */
+                    contentType: string;
+                    /** @description Size of the file in bytes. Checked against your plan's limit before the upload is signed. */
+                    size: number;
+                    /** @description SHA-256 of the file contents, hex encoded. Uploading the same file twice is free: Argos recognizes the hash and skips the transfer, and byte-identical bytes do not create a new version. */
+                    hash: string;
+                    visibility?: ("team" | "public") | null;
+                    /**
+                     * @description Project to upload to, as `owner/project`. Required with a personal access token; ignored with a project token, which already identifies its project.
+                     * @example acme/web
+                     */
+                    project?: string | null;
+                    /** @description Pull request this media belongs to. Argos maintains a single comment on it listing every media uploaded, editing it in place rather than posting a new one each time — attaching a media to a pull request and showing it there are the same act, not two. Also part of the media's identity: uploading the same name again on this pull request adds a version. */
+                    prNumber?: number | null;
+                    branch?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The registered media and where to upload it */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        media: components["schemas"]["Media"];
+                        /** @description Where to send the bytes, or `null` when Argos already holds this exact file — in which case the media is ready and nothing needs uploading. */
+                        upload: components["schemas"]["MediaUploadTarget"] | null;
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Media details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Media deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description File name, used for display and as the Markdown alt text. Also the media's identity: uploading the same name on the same pull request adds a version rather than creating a second media.
+                     * @example before.png
+                     * @example checkout-flow.mp4
+                     */
+                    name?: string;
+                    /** @description Prose shown under the media in the managed pull request comment. */
+                    description?: string | null;
+                    branch?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMediaVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The media's versions, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaVersion"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    finalizeMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The finalized media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMediaComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comments, oldest first. Replies carry a threadId pointing at their root comment. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
+                    };
+                    /** @description Public ID of the root comment to reply to (e.g. `comment-xf23d`). */
+                    threadId?: string;
+                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0–1) coordinates; lines is a 1-based inclusive range. */
+                    anchor?: {
+                        /** @constant */
+                        type: "point";
+                        x: number;
+                        y: number;
+                    } | {
+                        /** @constant */
+                        type: "lines";
+                        from: number;
+                        to: number;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Comment created successfully — returns the comment */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comment deleted successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateMediaComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Comment content. Either Markdown text or the JSON representation of a rich-text document. */
+                    body: string | {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Comment updated successfully — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    addMediaCommentReaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The emoji to react with. */
+                    emoji: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Reaction added — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeMediaCommentReaction: {
+        parameters: {
+            query: {
+                /** @description The emoji reaction to remove. */
+                emoji: string;
+            };
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description The public ID of the comment (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reaction removed — returns the comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resolveMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread resolved — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unresolveMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thread reopened — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    subscribeMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unsubscribeMediaCommentThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The media ID */
+                mediaId: string;
+                /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
+                commentId: components["schemas"]["ThreadCommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unsubscribed — returns the root comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
                 };
             };
             /** @description Invalid parameters */
@@ -5180,6 +6803,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMedia: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Only media uploaded for this branch, staged and published alike. */
+                branch?: string;
+                /** @description Only media published to this pull request. */
+                prNumber?: number;
+                /** @description Restrict to staged media (no pull request yet) or to published media. */
+                stage?: "staged" | "published";
+                /** @description Match media on their file name or slug. */
+                search?: string;
+                /** @description Restrict to images or to videos. */
+                type?: "image" | "video";
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["Media"][];
+                    };
                 };
             };
             /** @description Invalid parameters */

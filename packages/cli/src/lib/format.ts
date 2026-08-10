@@ -24,6 +24,8 @@ type ProjectContributor =
   ArgosAPISchema.components["schemas"]["ProjectContributor"];
 type ProjectDomain = ArgosAPISchema.components["schemas"]["ProjectDomain"];
 type IgnoredChange = ArgosAPISchema.components["schemas"]["IgnoredChange"];
+type Media = ArgosAPISchema.components["schemas"]["Media"];
+type MediaVersion = ArgosAPISchema.components["schemas"]["MediaVersion"];
 type TestSummary = ArgosAPISchema.components["schemas"]["TestSummary"];
 type BuildReviewers = ArgosAPISchema.components["schemas"]["BuildReviewers"];
 type NotificationSubscription =
@@ -357,6 +359,37 @@ function formatReactions(reactions: Comment["reactions"]): string | null {
   return reactions.map((r) => `${r.emoji} ${r.count}`).join(" ");
 }
 
+/**
+ * What a comment points at: the diff or the spot on the media, and the upload that
+ * spot describes.
+ *
+ * Shared by the single-comment and list renderings, because a pin a listing does
+ * not print is a review an agent cannot act on.
+ */
+function formatCommentTarget(comment: Comment): string[] {
+  const lines: string[] = [];
+  const anchor = formatAnchor(comment.anchor);
+
+  if (comment.screenshotDiffId) {
+    lines.push(
+      `Diff: ${comment.screenshotDiffId}${anchor ? ` (${anchor})` : ""}`,
+    );
+  } else if (anchor) {
+    // A comment on a media carries an anchor with no diff behind it: the point is
+    // on the media itself. Without this the pin would not show up at all.
+    lines.push(`Pinned: ${anchor}`);
+  }
+
+  if (comment.mediaVersionId) {
+    // The version the pin was placed on. It only matters once the media has been
+    // re-uploaded, but that is exactly when reading the pin against the newest
+    // file points at the wrong pixel — `argos media versions` resolves it.
+    lines.push(`Media version: ${comment.mediaVersionId}`);
+  }
+
+  return lines;
+}
+
 export function formatComment(comment: Comment): string {
   const lines = [
     `Comment #${comment.id}`,
@@ -365,12 +398,7 @@ export function formatComment(comment: Comment): string {
   if (comment.threadId) {
     lines.push(`Reply to: ${comment.threadId}`);
   }
-  if (comment.screenshotDiffId) {
-    const anchor = formatAnchor(comment.anchor);
-    lines.push(
-      `Diff: ${comment.screenshotDiffId}${anchor ? ` (${anchor})` : ""}`,
-    );
-  }
+  lines.push(...formatCommentTarget(comment));
   if (comment.pending) {
     lines.push("Pending: draft (only visible to you)");
   }
@@ -403,6 +431,11 @@ export function formatComments(comments: Comment[]): string {
       ].filter(Boolean);
       return [
         `#${comment.id} [${tags.join(", ")}] ${formatUser(comment.author)}`,
+        // Where it points, and on which upload. A pin is the whole content of a
+        // comment on a screenshot, so a listing that drops it says nothing about
+        // what has to change — and the version is what resolves the pin to the
+        // bytes its author was looking at.
+        ...formatCommentTarget(comment).map((line) => indent(line)),
         indent(comment.text),
         "",
       ];
@@ -639,6 +672,104 @@ export function formatAutomationRules(rules: AutomationRule[]): string {
       "",
     ]),
   ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+/** Format bytes the way a file listing does. */
+function formatMediaSize(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  const kb = bytes / 1024;
+  if (kb < 1024) {
+    return `${Math.round(kb)} KB`;
+  }
+  const mb = kb / 1024;
+  return mb < 10 ? `${mb.toFixed(1)} MB` : `${Math.round(mb)} MB`;
+}
+
+/** Content type, size, dimensions — the same middle line everywhere media prints. */
+function formatMediaDetails(media: Media | MediaVersion): string {
+  return [
+    media.contentType,
+    formatMediaSize(media.sizeBytes),
+    media.width && media.height ? `${media.width}x${media.height}` : null,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
+}
+
+/**
+ * Where a media stands: attached to a pull request and listed in its comment, or
+ * waiting on one to open for its branch.
+ */
+function formatMediaStage(media: Media): string {
+  if (media.stage === "published") {
+    return media.prNumber ? `published to PR #${media.prNumber}` : "published";
+  }
+  return media.branch ? `staged on ${media.branch}` : "staged";
+}
+
+/**
+ * Format one media.
+ *
+ * The Markdown embed comes last and on its own line: it is what a caller copies,
+ * and burying it between fields makes it harder to select.
+ */
+export function formatMedia(media: Media): string {
+  return [
+    media.state ? `${media.name} (${media.state})` : media.name,
+    `  ID: ${media.id}`,
+    `  ${formatMediaStage(media)}`,
+    `  ${formatMediaDetails(media)} · ${media.visibility} · ${media.status}`,
+    // Only worth a line once there is history: a first upload is version 1, and
+    // saying so on every line is noise. Not "x of y" — `version` counts every
+    // version created, `versionCount` only the ones whose bytes landed, so an
+    // abandoned upload in between makes the two disagree.
+    media.versionCount > 1
+      ? `  Version: ${media.version} (${media.versionCount} uploaded)`
+      : null,
+    media.description ? `  Description: ${media.description}` : null,
+    media.expiresAt ? `  Expires: ${media.expiresAt}` : null,
+    `  URL: ${media.url}`,
+    `  File: ${media.fileUrl}`,
+    `  Markdown: ${media.markdown}`,
+  ]
+    .filter((line): line is string => line !== null)
+    .join("\n");
+}
+
+export function formatMediaList(list: Media[]): string {
+  if (list.length === 0) {
+    return "No media found.";
+  }
+  return [`Media (${list.length})`, "", ...list.map(formatMedia)].join("\n");
+}
+
+/**
+ * Format a media's versions.
+ *
+ * The id leads each entry because that is what this listing is for: a comment
+ * records the `mediaVersionId` its author was looking at, and matching it here is
+ * how feedback written on an earlier upload gets read against the right file.
+ */
+export function formatMediaVersions(versions: MediaVersion[]): string {
+  if (versions.length === 0) {
+    return "No versions found.";
+  }
+  return [
+    `Versions (${versions.length})`,
+    "",
+    ...versions.flatMap((version) => [
+      `#${version.number} · ${formatMediaDetails(version)} · ${version.createdAt}`,
+      `  ID: ${version.id}`,
+      `  File: ${version.fileUrl}`,
+      version.expiresAt ? `  Expires: ${version.expiresAt}` : null,
+      "",
+    ]),
+  ]
+    .filter((line): line is string => line !== null)
     .slice(0, -1)
     .join("\n");
 }

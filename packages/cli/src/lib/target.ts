@@ -50,14 +50,32 @@ export type AccountTarget = {
 };
 
 /**
+ * Resolve the API token if there is one, preferring an explicit token
+ * (`--token` / `ARGOS_TOKEN`) over the one stored by `argos login`.
+ *
+ * Returns `undefined` rather than failing, for the commands that have another way
+ * in: `media upload` falls back to CI tokenless authentication, which needs to be
+ * reached with no token in hand.
+ */
+export async function resolveOptionalToken(options: {
+  token?: string | undefined;
+}): Promise<string | undefined> {
+  return (
+    options.token ||
+    process.env["ARGOS_TOKEN"] ||
+    (await getAccessToken()) ||
+    undefined
+  );
+}
+
+/**
  * Resolve the API token, preferring an explicit token (`--token` /
  * `ARGOS_TOKEN`) over the one stored by `argos login`.
  */
 export async function resolveToken(options: {
   token?: string | undefined;
 }): Promise<string> {
-  const token =
-    options.token || process.env["ARGOS_TOKEN"] || (await getAccessToken());
+  const token = await resolveOptionalToken(options);
   if (!token) {
     fail(
       "No Argos token found. Use --token, set ARGOS_TOKEN, or run `argos login`.",

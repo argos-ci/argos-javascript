@@ -55,6 +55,11 @@ export const testProjectPathOption = new Option(
   "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
 );
 
+export const mediaProjectPathOption = new Option(
+  "--project <owner/project>",
+  "Project the media belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+);
+
 export const managedProjectPathOption = new Option(
   "--project <owner/project>",
   "Project to act on, in owner/project format. Also ARGOS_PROJECT",
@@ -76,6 +81,15 @@ export function toLimit(value: string): number {
     fail(`--limit must be a positive integer, received "${value}".`);
   }
   return limit;
+}
+
+/** Parse a `--pr` value into a pull request number, or abort. */
+export function toPrNumber(value: string): number {
+  const prNumber = Number(value);
+  if (!Number.isInteger(prNumber) || prNumber < 1) {
+    fail(`--pr must be a positive integer, received "${value}".`);
+  }
+  return prNumber;
 }
 
 /** API values accepted by the `metricsPeriod` query parameter. */
