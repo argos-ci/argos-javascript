@@ -1,4 +1,4 @@
-import { copyFile, mkdtemp } from "node:fs/promises";
+import { copyFile, mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -9,6 +9,9 @@ import { uploadMedia } from "./media";
 setupMockServer();
 
 const FIXTURES = join(__dirname, "../../../__fixtures__/screenshots");
+// Media-only fixtures live apart from the screenshots the discovery and upload
+// suites enumerate exhaustively, so adding one here does not break those.
+const MEDIA_FIXTURES = join(__dirname, "../../../__fixtures__/media");
 const IMAGE = join(FIXTURES, "penelope.jpg");
 const PNG = join(FIXTURES, "penelope.png");
 
@@ -64,6 +67,50 @@ describe("#uploadMedia", () => {
     await uploadMedia({ ...baseParams, files: [PNG], compress: false });
 
     expect(createMediaRequests[0]?.contentType).toBe("image/png");
+  });
+
+  it("keeps an animated PNG whole rather than uploading one frame of it", async () => {
+    await uploadMedia({
+      ...baseParams,
+      files: [join(MEDIA_FIXTURES, "animated.png")],
+    });
+
+    // Converting reads the first frame only, so an animation would arrive as a
+    // still image of something the caller recorded because it moves.
+    expect(createMediaRequests[0]?.contentType).toBe("image/png");
+  });
+
+  it("uploads the original when the image cannot be converted", async () => {
+    // Compression is an optimization: a file Argos would have accepted as-is must
+    // not be turned into a failed upload because sharp declined to read it.
+    const [broken] = await stageFiles(["broken.png"]);
+    await writeFile(broken!, "this is not a PNG");
+
+    await uploadMedia({ ...baseParams, files: [broken!] });
+
+    expect(createMediaRequests[0]?.contentType).toBe("image/png");
+  });
+
+  it("leaves no temporary files behind", async () => {
+    const before = await readdir(tmpdir());
+
+    await uploadMedia({ ...baseParams, files: [PNG] });
+
+    const after = await readdir(tmpdir());
+    const added = after.filter(
+      (entry) => !before.includes(entry) && entry.startsWith("argos-media-"),
+    );
+    expect(added).toEqual([]);
+  });
+
+  it("refuses a batch with an unreadable file before uploading any of it", async () => {
+    await expect(
+      uploadMedia({ ...baseParams, files: [PNG, join(FIXTURES, "typo.png")] }),
+    ).rejects.toThrow(/Cannot read file: .*typo\.png/);
+
+    // The whole point: the readable file before it must not already be created,
+    // billed and finalized when the batch dies.
+    expect(createMediaRequests).toHaveLength(0);
   });
 
   it("lifts a before/after suffix off the file name, so a pair shares one", async () => {

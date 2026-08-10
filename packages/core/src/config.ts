@@ -22,7 +22,19 @@ const mustBeCommit = (value: any) => {
   }
 };
 
+/** Prefix of the OAuth access token `argos login` stores. */
+const OAUTH_ACCESS_TOKEN_PREFIX = "argos_oat_";
+
 const mustBeArgosToken = (value: any) => {
+  // An `argos login` token is that prefix plus 40 characters, so the 40-character
+  // rule below would reject the one token type a human is most likely to hold.
+  // Project and personal access tokens are both exactly 40.
+  if (
+    typeof value === "string" &&
+    value.startsWith(OAUTH_ACCESS_TOKEN_PREFIX)
+  ) {
+    return;
+  }
   if (value && value.length !== 40) {
     throw new Error("Invalid Argos repository token (must be 40 characters)");
   }
@@ -118,11 +130,15 @@ const schema = {
     env: "ARGOS_COMMIT",
     default: null,
     format: mustBeCommit,
+    // Null is a legitimate value for a caller that needs no git context — see
+    // `requireGitContext` in `readConfig`. A non-null value is still validated.
+    nullable: true,
   },
   branch: {
     env: "ARGOS_BRANCH",
     default: null,
     format: String,
+    nullable: true,
   },
   token: {
     env: "ARGOS_TOKEN",
@@ -440,7 +456,26 @@ function getDefaultConfig() {
   ) as Config;
 }
 
-export async function readConfig(options: Partial<Config> = {}) {
+/**
+ * Options that change how the configuration is read, as opposed to what is in it.
+ */
+export type ReadConfigOptions = {
+  /**
+   * Require a branch and a commit, which every build-shaped command needs to
+   * describe what it is reporting on.
+   *
+   * Set to `false` for a command that has nothing to do with a commit — uploading
+   * a standalone media, say. Without it those commands cannot run outside a git
+   * repository at all, and the error they fail with talks about branches.
+   * @default true
+   */
+  requireGitContext?: boolean;
+};
+
+export async function readConfig(
+  options: Partial<Config> = {},
+  { requireGitContext = true }: ReadConfigOptions = {},
+) {
   const config = createConfig();
 
   const ciEnv = await getCiEnvironment();
@@ -486,7 +521,7 @@ export async function readConfig(options: Partial<Config> = {}) {
       null,
   });
 
-  if (!config.get("branch") || !config.get("commit")) {
+  if (requireGitContext && (!config.get("branch") || !config.get("commit"))) {
     throw new Error(
       "Argos requires a branch and a commit to be set. If you are running in a non-git environment consider setting ARGOS_BRANCH and ARGOS_COMMIT environment variables.",
     );
@@ -497,27 +532,33 @@ export async function readConfig(options: Partial<Config> = {}) {
   return config.get();
 }
 
-export async function getConfigFromOptions({
-  parallel,
-  ...options
-}: Omit<Partial<Config>, "parallel"> & {
-  parallel?:
-    | {
-        /** Unique build ID for this parallel build */
-        nonce: string;
-        /** The number of parallel nodes being ran */
-        total: number;
-        /** The index of the parallel node */
-        index?: number;
-      }
-    | false
-    | undefined;
-}) {
-  return readConfig({
-    ...options,
-    parallel: parallel !== undefined ? Boolean(parallel) : undefined,
-    parallelNonce: parallel ? parallel.nonce : undefined,
-    parallelTotal: parallel ? parallel.total : undefined,
-    parallelIndex: parallel ? parallel.index : undefined,
-  });
+export async function getConfigFromOptions(
+  {
+    parallel,
+    ...options
+  }: Omit<Partial<Config>, "parallel"> & {
+    parallel?:
+      | {
+          /** Unique build ID for this parallel build */
+          nonce: string;
+          /** The number of parallel nodes being ran */
+          total: number;
+          /** The index of the parallel node */
+          index?: number;
+        }
+      | false
+      | undefined;
+  },
+  readOptions?: ReadConfigOptions,
+) {
+  return readConfig(
+    {
+      ...options,
+      parallel: parallel !== undefined ? Boolean(parallel) : undefined,
+      parallelNonce: parallel ? parallel.nonce : undefined,
+      parallelTotal: parallel ? parallel.total : undefined,
+      parallelIndex: parallel ? parallel.index : undefined,
+    },
+    readOptions,
+  );
 }

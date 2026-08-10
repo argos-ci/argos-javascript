@@ -4,7 +4,7 @@ import mime from "mime-types";
 import { createClient, throwAPIError } from "@argos-ci/api-client";
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { resolveArgosToken } from "./auth";
-import { DEFAULT_API_BASE_URL, getConfigFromOptions } from "./config";
+import { getConfigFromOptions } from "./config";
 import { debug } from "./debug";
 import { hashFile } from "./hashing";
 import { compressMediaToWebp, type MediaSource } from "./media-compress";
@@ -138,16 +138,19 @@ export async function uploadMedia(
     throw new Error("No files to upload");
   }
 
-  // Both are pure string work, and doing them for every file first means an
-  // unsupported type or a name collision fails before anything is transferred
-  // rather than half way through a batch.
+  // Every file is checked before any of them is transferred: an unsupported type,
+  // a name collision or a path that cannot be read must not surface half way
+  // through a batch, with the files before it already created and billed.
   const identities = params.files.map((filepath) =>
     resolveMediaIdentity(filepath, params.state),
   );
-  const contentTypes = params.files.map(getMediaContentType);
+  const contentTypes = params.files.map((filepath) =>
+    getMediaContentType(filepath),
+  );
   assertDistinctIdentities(params.files, identities);
+  await assertFilesAreReadable(params.files);
 
-  const { authToken, apiBaseUrl } = await resolveAuth(params);
+  const { authToken, apiBaseUrl, project } = await resolveAuth(params);
 
   const apiClient = createClient({ baseUrl: apiBaseUrl, authToken });
 
@@ -160,6 +163,7 @@ export async function uploadMedia(
       await uploadOne({
         apiClient,
         params,
+        project,
         source: { path: filepath, contentType: contentTypes[index]! },
         identity: identities[index]!,
       }),
@@ -172,19 +176,39 @@ export async function uploadMedia(
 async function uploadOne(args: {
   apiClient: ReturnType<typeof createClient>;
   params: UploadMediaParameters;
-  source: MediaSource;
+  project: string | null;
   identity: MediaIdentity;
+  source: MediaSource;
 }): Promise<Media> {
-  const { apiClient, params, identity } = args;
+  const { apiClient, params, project, identity } = args;
 
-  // The name stays the one the caller gave, extension included, even when the
-  // bytes were converted: it is the media's identity, so letting it follow the
-  // upload format would turn a re-run with compression turned off into a second
-  // media instead of a second version.
-  const source =
-    params.compress === false
-      ? args.source
-      : await compressMediaToWebp(args.source);
+  const compressed =
+    params.compress === false ? null : await compressMediaToWebp(args.source);
+
+  try {
+    return await registerAndUpload({
+      ...args,
+      apiClient,
+      params,
+      project,
+      identity,
+      source: compressed?.source ?? args.source,
+    });
+  } finally {
+    // The converted bytes live in a temporary file; nothing else deletes it, and
+    // a batch of screenshots would otherwise leave one per file behind.
+    compressed?.cleanup();
+  }
+}
+
+async function registerAndUpload(args: {
+  apiClient: ReturnType<typeof createClient>;
+  params: UploadMediaParameters;
+  project: string | null;
+  identity: MediaIdentity;
+  source: MediaSource;
+}): Promise<Media> {
+  const { apiClient, params, project, identity, source } = args;
 
   const [hash, stats] = await Promise.all([
     hashFile(source.path),
@@ -197,14 +221,14 @@ async function uploadOne(args: {
     body: {
       name: identity.name,
       state: identity.state,
-      description: params.description ?? null,
+      // `||`, not `??`: an empty description is a caller clearing it, not setting
+      // the media's prose to the empty string.
+      description: params.description || null,
       contentType: source.contentType,
       size: stats.size,
       hash,
       visibility: params.visibility ?? null,
-      // `ARGOS_PROJECT` is read here rather than through the build configuration,
-      // which this no longer goes through when a token is already in hand.
-      project: params.project || process.env["ARGOS_PROJECT"] || null,
+      project,
       prNumber: params.prNumber ?? null,
       branch: params.branch ?? null,
     },
@@ -244,37 +268,38 @@ async function uploadOne(args: {
 }
 
 /**
- * Resolve the token and API base URL to upload with.
+ * Resolve what it takes to talk to the API: the token, the API to send to, and
+ * the project to upload into.
  *
- * A token in hand is enough on its own, which is the point: uploading a
- * screenshot has nothing to do with a commit, and going through the build
- * configuration would refuse to run outside a git repository — exactly where an
- * agent holding a screenshot in a scratch directory is working.
+ * Only the three fields the configuration layer is being asked about are handed
+ * to it — never the caller's whole parameter bag. `branch` and `prNumber` mean
+ * something else there (the branch and pull request of a *build*), and a media's
+ * are sent to the CI tokenless exchange as the ref being authorized, so passing
+ * them through would authorize an upload against whatever branch it named rather
+ * than the one the job is running on.
  *
- * Without one, the only way left is CI tokenless authentication, which reads the
- * repository and run out of the full configuration. That path only exists inside
- * CI, where a branch and a commit are always there to be found.
+ * `requireGitContext: false` because uploading a screenshot has nothing to do
+ * with a commit: without it this cannot run outside a git repository at all, which
+ * is exactly where an agent holding a screenshot in a scratch directory is.
  */
 async function resolveAuth(params: UploadMediaParameters): Promise<{
   authToken: string;
   apiBaseUrl: string;
+  project: string | null;
 }> {
-  const token = params.token || process.env["ARGOS_TOKEN"];
+  const config = await getConfigFromOptions(
+    {
+      token: params.token,
+      apiBaseUrl: params.apiBaseUrl,
+      project: params.project,
+    },
+    { requireGitContext: false },
+  );
 
-  if (token) {
-    return {
-      authToken: token,
-      apiBaseUrl:
-        params.apiBaseUrl ||
-        process.env["ARGOS_API_BASE_URL"] ||
-        DEFAULT_API_BASE_URL,
-    };
-  }
-
-  const config = await getConfigFromOptions(params);
   return {
     authToken: await resolveArgosToken(config),
     apiBaseUrl: config.apiBaseUrl,
+    project: config.project ?? null,
   };
 }
 
@@ -338,10 +363,34 @@ function resolveMediaIdentity(
  *
  * Name and state are what a media is: uploading two files that agree on both
  * would silently make the second a new version of the first, and only one of them
- * would be visible afterwards. It takes an explicit `state` over a pair to get
- * here — `before.png after.png --state after` — which is a mistake worth naming
- * rather than absorbing.
+ * would be visible afterwards.
+ *
+ * The everyday way in takes no flags at all — `before/shot.png after/shot.png`,
+ * two captures of the same screen kept in separate directories, both of which
+ * upload as `shot.png` because the directory is not part of the name. An explicit
+ * `state` over a hyphenated pair (`nav-before.png nav-after.png --state after`)
+ * gets here too, by overwriting the label that told the two halves apart.
  */
+/**
+ * Refuse a batch containing a file that cannot be read.
+ *
+ * A typo or a glob that matched nothing has to fail here rather than when the
+ * loop reaches it: by then the files before it have been created, billed and
+ * finalized, there is nothing to resume, and the error a caller sees blames
+ * whatever step happened to touch the path first.
+ */
+async function assertFilesAreReadable(files: string[]): Promise<void> {
+  await Promise.all(
+    files.map(async (filepath) => {
+      try {
+        await stat(filepath);
+      } catch {
+        throw new Error(`Cannot read file: ${filepath}`);
+      }
+    }),
+  );
+}
+
 function assertDistinctIdentities(
   files: string[],
   identities: MediaIdentity[],
@@ -349,7 +398,9 @@ function assertDistinctIdentities(
   const seen = new Map<string, string>();
 
   for (const [index, identity] of identities.entries()) {
-    const key = `${identity.name} ${identity.state ?? ""}`;
+    // The separator is written as an escape rather than typed: a literal NUL
+    // byte in the source makes the whole file binary to grep and to GitHub.
+    const key = `${identity.name}\u0000${identity.state ?? ""}`;
     const previous = seen.get(key);
     const filepath = files[index]!;
 
