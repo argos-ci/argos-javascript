@@ -2054,7 +2054,7 @@ export interface components {
              * @enum {string}
              */
             status: "pending" | "ready";
-            /** @description When this version is deleted. Counted from its upload, not from the last view. */
+            /** @description When this version is deleted. Set from your plan's retention, counted from the upload rather than from the last view. */
             expiresAt: string | null;
             createdAt: string;
         };
@@ -3770,8 +3770,6 @@ export interface operations {
                     /** @description SHA-256 of the file contents, hex encoded. Uploading the same file twice is free: Argos recognizes the hash and skips the transfer, and byte-identical bytes do not create a new version. */
                     hash: string;
                     visibility?: ("team" | "public") | null;
-                    /** @description How long to keep the media, in days. Clamped to your plan's maximum. */
-                    retentionDays?: number | null;
                     /**
                      * @description Project to upload to, as `owner/project`. Required with a personal access token; ignored with a project token, which already identifies its project.
                      * @example acme/web
