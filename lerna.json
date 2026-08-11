@@ -3,6 +3,9 @@
   "command": {
     "version": {
       "allowBranch": "main"
+    },
+    "publish": {
+      "concurrency": 1
     }
   },
   "version": "independent",
