@@ -13,7 +13,11 @@ export const OAUTH_CLIENT_ID = "argos-cli";
 
 /**
  * Scopes requested by `argos login`, covering the CLI's user actions (identity,
- * projects, reviews, comments). Build upload keeps using a project token.
+ * projects, reviews, comments, media). Build upload keeps using a project token.
+ *
+ * Every scope a CLI command needs has to be listed here: the consent screen
+ * only offers what the client asks for, so a missing entry is not something the
+ * user can grant — it leaves the command permanently answering 403.
  */
 export const OAUTH_SCOPES = [
   "profile",
@@ -22,6 +26,8 @@ export const OAUTH_SCOPES = [
   "reviews:write",
   "comments:read",
   "comments:write",
+  "media:read",
+  "media:write",
 ] as const;
 
 /** Refresh a bit early so a token never expires mid-request. */
