@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.4.5](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.4.4...%40argos-ci%2Fplaywright%407.4.5) (2026-08-11)
+
+**Note:** Version bump only for package @argos-ci/playwright
+
+
+
+
+
 ## [7.4.4](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.4.3...%40argos-ci%2Fplaywright%407.4.4) (2026-08-08)
 
 **Note:** Version bump only for package @argos-ci/playwright

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.8.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.7.0...%40argos-ci%2Fcli%406.8.0) (2026-08-11)
+
+### Bug Fixes
+
+* **cli:** request media scopes at login ([#363](https://github.com/argos-ci/argos-javascript/issues/363)) ([09576db](https://github.com/argos-ci/argos-javascript/commit/09576db30a57b8de41cf6a611a9653cd0da89507))
+
+### Features
+
+* support media uploads ([4c8577c](https://github.com/argos-ci/argos-javascript/commit/4c8577c08ff1d9681c5b951dc73665cc8b7955c8))
+
+
 # [6.7.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.6.1...%40argos-ci%2Fcli%406.7.0) (2026-08-08)
 
 ### Features

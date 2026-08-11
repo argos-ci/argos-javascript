@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.8.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.7.3...%40argos-ci%2Fcore%406.8.0) (2026-08-11)
+
+### Features
+
+* support media uploads ([4c8577c](https://github.com/argos-ci/argos-javascript/commit/4c8577c08ff1d9681c5b951dc73665cc8b7955c8))
+
+
 ## [6.7.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.7.2...%40argos-ci%2Fcore%406.7.3) (2026-08-08)
 
 **Note:** Version bump only for package @argos-ci/core

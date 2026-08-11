@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.29.0...%40argos-ci%2Fapi-client%400.30.0) (2026-08-11)
+
+### Features
+
+* support media uploads ([4c8577c](https://github.com/argos-ci/argos-javascript/commit/4c8577c08ff1d9681c5b951dc73665cc8b7955c8))
+
+
 # [0.29.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.28.0...%40argos-ci%2Fapi-client%400.29.0) (2026-08-08)
 
 ### Features
