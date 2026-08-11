@@ -11,6 +11,11 @@ on:
         options:
           - normal
           - canary
+      debug:
+        description: "Verbose publish logs (needed to see Sigstore HTTP status codes)"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -46,10 +51,17 @@ jobs:
 
       - name: Publish
         run: |
+          # Lerna reports a failed publish as just the Sigstore error code and
+          # logs the underlying HTTP response at `silly` only, so a Fulcio or
+          # Rekor failure is undiagnosable without this.
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            set -- --loglevel silly
+          fi
+
           if [ "${{ github.event.inputs.release_type }}" = "canary" ]; then
-            npm run release-canary -- --yes
+            npm run release-canary -- --yes "$@"
           else
-            npm run release -- --yes
+            npm run release -- --yes "$@"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
