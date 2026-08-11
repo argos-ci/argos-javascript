@@ -22,6 +22,9 @@ env:
 
 jobs:
   release:
+    # Publish gives each HTTP call five minutes and retries twice, so a hung
+    # Sigstore or registry could otherwise stall the job for hours.
+    timeout-minutes: 30
     runs-on: ubuntu-latest
 
     steps:
@@ -52,3 +55,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
+          # Budget for a single HTTP call during publish, Sigstore's included.
+          # Lerna passes no timeout, so Sigstore falls back to 5s and abandons
+          # slow Rekor writes; the retry then hits a 409 and fails the publish.
+          # 300000 is npm's own `fetch-timeout` default.
+          NPM_CONFIG_TIMEOUT: "300000"
