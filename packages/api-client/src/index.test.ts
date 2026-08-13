@@ -1,6 +1,53 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { APIError } from "./fetch";
-import { formatAPIError, throwAPIError } from "./index";
+import {
+  createClient,
+  formatAPIError,
+  throwAPIError,
+  type UserAgentOption,
+} from "./index";
+
+describe("createClient", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  /**
+   * Stub the global fetch (what `apiFetch` ultimately calls) and return the
+   * `User-Agent` of the request it received.
+   */
+  async function getSentUserAgent(
+    userAgent: UserAgentOption,
+  ): Promise<string | null> {
+    const fetchMock = vi.fn<(request: Request) => Promise<Response>>(
+      async () => new Response("{}", { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const client = createClient({
+      baseUrl: "https://api.argos-ci.test/v2/",
+      userAgent,
+    });
+    await client.GET("/me");
+    const request = fetchMock.mock.calls[0]?.[0];
+    return request?.headers.get("user-agent") ?? null;
+  }
+
+  it("sends a static User-Agent", async () => {
+    await expect(getSentUserAgent("argos-cli/6.7.0")).resolves.toBe(
+      "argos-cli/6.7.0",
+    );
+  });
+
+  it("resolves a User-Agent supplied as an async function", async () => {
+    await expect(
+      getSentUserAgent(async () => "argos-cli/6.7.0 agent/claude"),
+    ).resolves.toBe("argos-cli/6.7.0 agent/claude");
+  });
+
+  it("leaves the header alone when the resolver has no value yet", async () => {
+    await expect(getSentUserAgent(() => undefined)).resolves.toBeNull();
+  });
+});
 
 describe("formatAPIError", () => {
   it("formats a structured API error", () => {

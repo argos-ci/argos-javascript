@@ -110,6 +110,9 @@ importers:
       '@argos-ci/core':
         specifier: workspace:*
         version: link:../core
+      '@vercel/detect-agent':
+        specifier: ^1.2.5
+        version: 1.2.5
       commander:
         specifier: ^15.0.0
         version: 15.0.0
@@ -3040,6 +3043,10 @@ packages:
     resolution: {integrity: sha512-nAB74NfSNKknqQ1RrYj6uz8FcXEomu/MATJZxh/x+BArzN2U3JbOYC0APYzUIGhVY3m5hRxA8VPNdPBoG8txlA==}
     cpu: [x64]
     os: [win32]
+
+  '@vercel/detect-agent@1.2.5':
+    resolution: {integrity: sha512-0krENrjuitlW8s6TJu0MlqCevyCU7K7JK63jZAf7xZ6n17tx+vUEwzHT3sTxawtwZxaW21hu+oFUpoOrm49FsQ==}
+    engines: {node: '>=14'}
 
   '@vercel/repository-dispatch@0.1.0':
     resolution: {integrity: sha512-NP8DDQnO6bglStIL++lXmv5N+3SPNPjVIXOP3X/zykB4ZHgqegGc68/R8LqvmBDCBWCgpBSuJyf4brtXJET98w==}
@@ -10451,6 +10458,8 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
+
+  '@vercel/detect-agent@1.2.5': {}
 
   '@vercel/repository-dispatch@0.1.0':
     dependencies:

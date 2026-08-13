@@ -20,11 +20,16 @@ import { testCommand } from "./commands/test";
 import { accountCommand } from "./commands/account";
 import { projectCommand } from "./commands/project";
 import { automationCommand } from "./commands/automation";
+import { initUserAgent } from "./lib/user-agent";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const rawPkg = await readFile(resolve(__dirname, "..", "package.json"), "utf8");
 const pkg = JSON.parse(rawPkg);
+
+// Detect the coding agent driving the CLI, if any, before any command runs, so
+// every API request identifies it.
+await initUserAgent(pkg.version);
 
 program
   .name(pkg.name)
