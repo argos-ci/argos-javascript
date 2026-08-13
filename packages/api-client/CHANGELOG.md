@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.30.0...%40argos-ci%2Fapi-client%400.31.0) (2026-08-13)
+
+### Features
+
+* **cli:** identify the coding agent driving the CLI ([#367](https://github.com/argos-ci/argos-javascript/issues/367)) ([01d10cd](https://github.com/argos-ci/argos-javascript/commit/01d10cd41a6448521f1274cff12a67b50695967f))
+
+
 # [0.30.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.29.0...%40argos-ci%2Fapi-client%400.30.0) (2026-08-11)
 
 ### Features
