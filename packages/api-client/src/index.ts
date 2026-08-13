@@ -9,19 +9,47 @@ export { APIError } from "./fetch";
 export type ArgosAPIClient = ReturnType<typeof createClient>;
 
 /**
+ * A `User-Agent` value, or a resolver for it. The resolver may be async and is
+ * called per request, so a caller that only learns its identity asynchronously
+ * (the CLI detecting the coding agent driving it) does not have to await that
+ * before it can build a client.
+ */
+export type UserAgentOption =
+  string | (() => string | undefined | Promise<string | undefined>);
+
+/**
+ * Wrap {@link apiFetch} so every request carries a `User-Agent`.
+ *
+ * The header is set on the request openapi-fetch just built for this call — no
+ * one else observes it — and `apiFetch` copies the headers before retrying, so
+ * every attempt keeps the value.
+ */
+function createUserAgentFetch(userAgent: UserAgentOption): typeof apiFetch {
+  return async (input, options) => {
+    const value =
+      typeof userAgent === "function" ? await userAgent() : userAgent;
+    if (value) {
+      input.headers.set("user-agent", value);
+    }
+    return apiFetch(input, options);
+  };
+}
+
+/**
  * Create Argos API client.
  */
 export function createClient(options?: {
   baseUrl?: string;
   authToken?: string;
+  userAgent?: UserAgentOption;
 }) {
-  const { baseUrl, authToken } = options || {};
+  const { baseUrl, authToken, userAgent } = options || {};
   return createFetchClient<paths>({
     baseUrl: baseUrl || "https://api.argos-ci.com/v2/",
     headers: {
       Authorization: authToken ? `Bearer ${authToken}` : undefined,
     },
-    fetch: apiFetch,
+    fetch: userAgent ? createUserAgentFetch(userAgent) : apiFetch,
   });
 }
 

@@ -5,6 +5,8 @@ import {
   type ArgosAPIClient,
 } from "@argos-ci/api-client";
 
+import { getUserAgent } from "./user-agent";
+
 /** Optional override for the API base URL (used in tests and dev). */
 export function getApiBaseUrl(): string | undefined {
   return process.env["ARGOS_API_BASE_URL"];
@@ -12,7 +14,13 @@ export function getApiBaseUrl(): string | undefined {
 
 /** Create an Argos API client authenticated with the given token. */
 export function createApiClient(authToken?: string): ArgosAPIClient {
-  return createClient({ authToken, baseUrl: getApiBaseUrl() });
+  return createClient({
+    authToken,
+    baseUrl: getApiBaseUrl(),
+    // Read per request rather than captured here: agent detection is async and
+    // resolves at startup, while clients are built synchronously all over.
+    userAgent: getUserAgent,
+  });
 }
 
 /**
