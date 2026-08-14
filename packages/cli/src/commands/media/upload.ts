@@ -61,7 +61,7 @@ export function registerMediaUpload(media: Command) {
     .addOption(
       new Option(
         "--visibility <visibility>",
-        "Who can open the share page. Defaults to the most private option your plan allows",
+        "Who can open the share page. Defaults to your project's visibility in Argos: public for a public project, team for a private one",
       ).choices(["team", "public"]),
     )
     .addOption(

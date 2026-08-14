@@ -106,7 +106,11 @@ export interface UploadMediaParameters {
 
   /**
    * Who can open the share page. `team` requires an Argos session; `public` only
-   * requires the URL. Defaults to the most private option the plan allows.
+   * requires the URL.
+   *
+   * Leave it out — the usual case — and the media takes the visibility of its
+   * project in Argos: `public` for a public project, `team` for a private one.
+   * `team` requires a paid plan.
    */
   visibility?: MediaVisibility;
 

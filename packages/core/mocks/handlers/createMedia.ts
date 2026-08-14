@@ -36,6 +36,9 @@ function buildMedia(body: CreateMediaRequestBody, status: string) {
     sizeBytes: body.size,
     width: null,
     height: null,
+    // The real server infers this from the project when the caller sends
+    // nothing; there is no project here, so the mock stands in with the private
+    // answer. Tests that care about the choice assert on `createMediaRequests`.
     visibility: body.visibility ?? "team",
     status,
     expiresAt: null,
