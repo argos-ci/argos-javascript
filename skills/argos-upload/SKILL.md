@@ -198,8 +198,14 @@ EXIF — including GPS, if the camera recorded it — does not reach Argos. With
 ## Visibility, and what it does not cover
 
 `--visibility` controls the **share page** — `team` requires an Argos session,
-`public` does not. It defaults to the most private option the plan allows: `team`
-on Pro, and `public` on the free plan, which cannot do `team` at all.
+`public` does not. It defaults to the **project's** visibility in Argos: `public`
+for a public project, `team` for a private one. So the usual upload needs no flag
+at all. `team` is Pro-only; on the free plan every share page is public, and asking
+for `team` is rejected rather than silently downgraded.
+
+Re-uploading does not revisit this. A media keeps the visibility it was created
+with unless a later upload passes `--visibility` explicitly, so a screenshot
+deliberately kept team-only stays that way.
 
 It does **not** protect the file: media files are always reachable at an
 unguessable CDN URL, because GitHub fetches embedded images server-side with no
