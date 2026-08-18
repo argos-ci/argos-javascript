@@ -88,6 +88,14 @@ export type ScreenshotMetadata = {
     /** @description The version of the Argos SDK */
     version: string;
   };
+  /** @description How the screenshot was captured within its test */
+  capture?: {
+    /**
+     * @description The 0-based position of the screenshot within its test,
+     * following capture order
+     */
+    index: number;
+  } | null;
   // Metadata used to pass informations later removed from metadata.
   transient?: {
     /** Threshold configured for this screenshot. */

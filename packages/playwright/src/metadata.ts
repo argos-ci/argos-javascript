@@ -29,6 +29,12 @@ export type MetadataConfig = {
   test?: ScreenshotMetadata["test"];
   story?: ScreenshotMetadata["story"];
   viewport?: ScreenshotMetadata["viewport"];
+  /**
+   * Position of the screenshot within its test. Injected by SDKs that drive
+   * Playwright without a Playwright test (Vitest), where the counter has to be
+   * kept on the side that owns the test context.
+   */
+  captureIndex?: number | null;
 };
 
 /**

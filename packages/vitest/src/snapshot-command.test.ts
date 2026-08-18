@@ -29,6 +29,7 @@ describe("createArgosSnapshotCommand", () => {
       "serialized",
       { root: "/abs/screenshots" },
       undefined,
+      undefined,
     );
   });
 
@@ -43,6 +44,7 @@ describe("createArgosSnapshotCommand", () => {
       "user",
       "serialized",
       { root: "/other", extension: ".json", tag: "a" },
+      undefined,
       undefined,
     );
   });
@@ -61,6 +63,19 @@ describe("createArgosSnapshotCommand", () => {
       "serialized",
       { root: "/abs/screenshots" },
       test,
+      undefined,
+    );
+  });
+
+  it("forwards the capture index to the writer", async () => {
+    const command = createArgosSnapshotCommand({ root: "/abs/screenshots" });
+    await command(ctx, "user", "serialized", undefined, undefined, 2);
+    expect(writeSnapshotFile).toHaveBeenCalledWith(
+      "user",
+      "serialized",
+      { root: "/abs/screenshots" },
+      undefined,
+      2,
     );
   });
 });

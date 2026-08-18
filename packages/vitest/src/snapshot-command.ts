@@ -17,6 +17,7 @@ export type ArgosSnapshotCommandArgs = [
   content: string,
   options?: SerializableSnapshotOptions,
   test?: TestMetadata,
+  captureIndex?: number | null,
 ];
 
 /**
@@ -33,6 +34,7 @@ export const createArgosSnapshotCommand = (
     content,
     options,
     test,
+    captureIndex,
   ): Promise<ArgosAttachment[]> => {
     if (!name) {
       throw new Error("The `name` argument is required.");
@@ -41,6 +43,6 @@ export const createArgosSnapshotCommand = (
       root: pluginOptions.root,
       ...options,
     };
-    return writeSnapshotFile(name, content, merged, test);
+    return writeSnapshotFile(name, content, merged, test, captureIndex);
   };
 };

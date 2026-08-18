@@ -22,6 +22,7 @@ export type ArgosScreenshotCommandArgs = [
   name: string,
   options?: VitestScreenshotOptions,
   test?: TestMetadata,
+  captureIndex?: number | null,
 ];
 
 /**
@@ -35,7 +36,7 @@ export type ArgosScreenshotCommandArgs = [
 export const createArgosScreenshotCommand = (
   pluginOptions: ArgosVitestPluginOptions = {},
 ): BrowserCommand<ArgosScreenshotCommandArgs> => {
-  return async (ctx, name, options, test) => {
+  return async (ctx, name, options, test, captureIndex) => {
     if (!name) {
       throw new Error("The `name` argument is required.");
     }
@@ -60,6 +61,8 @@ export const createArgosScreenshotCommand = (
           // (Playwright's own `testInfo` is absent here). It resolves
           // `location.file` relative to the git repository.
           test,
+          // Counted on the test side, for the same reason.
+          captureIndex,
         });
       };
 

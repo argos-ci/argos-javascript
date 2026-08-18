@@ -12,7 +12,11 @@ import {
   type StabilizationContext,
   type ViewportSize,
 } from "@argos-ci/browser";
-import type { ScreenshotMetadata } from "@argos-ci/util";
+import {
+  getTestRunKey,
+  nextCaptureIndex,
+  type ScreenshotMetadata,
+} from "@argos-ci/util";
 import { dirname, resolve } from "node:path";
 import { mkdir } from "node:fs/promises";
 import type { ArgosAttachment } from "./attachment";
@@ -95,6 +99,29 @@ export async function getTestInfo() {
   } catch {
     return null;
   }
+}
+
+/**
+ * Take the next capture index for the running test, or `null` when the
+ * screenshot isn't taken from a test — there is no sequence to record then.
+ */
+export function takeCaptureIndex(testInfo: TestInfo | null): number | null {
+  // Another SDK drives Playwright and owns the test context (Vitest): it
+  // counts on its side and hands us the result.
+  const injected = getMetadataOverrides()?.captureIndex;
+  if (injected != null) {
+    return injected;
+  }
+  if (!testInfo) {
+    return null;
+  }
+  return nextCaptureIndex(
+    getTestRunKey({
+      id: testInfo.testId,
+      retry: testInfo.retry,
+      repeat: testInfo.repeatEachIndex,
+    }),
+  );
 }
 
 /**
@@ -249,11 +276,21 @@ export async function getPathAndMetadata(args: {
   extension: string;
   root: string;
   useArgosReporter: boolean;
+  /** Position of the screenshot in its test, see {@link takeCaptureIndex}. */
+  captureIndex?: number | null;
 }): Promise<{
   metadata: ScreenshotMetadataWithTransient;
   path: string;
 }> {
-  const { handler, testInfo, names, extension, root, useArgosReporter } = args;
+  const {
+    handler,
+    testInfo,
+    names,
+    extension,
+    root,
+    useArgosReporter,
+    captureIndex,
+  } = args;
   const overrides = getMetadataOverrides();
 
   const path =
@@ -304,6 +341,10 @@ export async function getPathAndMetadata(args: {
 
   if (viewport) {
     metadata.viewport = viewport;
+  }
+
+  if (captureIndex != null) {
+    metadata.capture = { index: captureIndex };
   }
 
   metadata.transient = {};
