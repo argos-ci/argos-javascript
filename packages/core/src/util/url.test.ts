@@ -38,6 +38,19 @@ describe("getRepositoryNameFromURL", () => {
     ).toBe("team/repository");
   });
 
+  it("parses Cursor Origin clone URLs, including the legacy /git/ path", () => {
+    expect(
+      getRepositoryNameFromURL(
+        "https://origin.cursor.com/argos-ci/first-repo.git",
+      ),
+    ).toBe("argos-ci/first-repo");
+    expect(
+      getRepositoryNameFromURL(
+        "https://origin.cursor.com/git/argos-ci/first-repo.git",
+      ),
+    ).toBe("argos-ci/first-repo");
+  });
+
   it("parses valid HTTPS URLs without .git extension", () => {
     expect(getRepositoryNameFromURL("https://github.com/owner/repo")).toBe(
       "owner/repo",
