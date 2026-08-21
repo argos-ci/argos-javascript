@@ -2,6 +2,9 @@ import pRetry from "p-retry";
 import { debug } from "./debug";
 
 const DEFAULT_TIMEOUT = 30_000;
+const DEFAULT_RETRY_AFTER_MS = 60_000;
+const MAX_RETRY_AFTER_MS = 300_000;
+const MAX_RETRY_JITTER_MS = 5_000;
 
 export class APIError extends Error {
   /**
@@ -34,6 +37,30 @@ interface APIFetchOptions {
   minTimeout?: number;
   retries?: number;
   timeout?: number;
+}
+
+function getRetryAfterMs(response: Response) {
+  const header = response.headers.get("retry-after");
+  const seconds = header === null ? Number.NaN : Number(header);
+  const retryAfterMs = Number.isFinite(seconds)
+    ? Math.max(seconds, 0) * 1_000
+    : DEFAULT_RETRY_AFTER_MS;
+  return Math.min(retryAfterMs, MAX_RETRY_AFTER_MS);
+}
+
+function waitForRetry(ms: number, signal: AbortSignal) {
+  signal.throwIfAborted();
+  return new Promise<void>((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timeout);
+      reject(signal.reason);
+    };
+    const timeout = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 async function createRequestFactory(request: Request, timeout: number) {
@@ -73,10 +100,21 @@ export async function apiFetch(input: Request, options: APIFetchOptions = {}) {
     input,
     options.timeout ?? DEFAULT_TIMEOUT,
   );
+  const retries = options.retries ?? 3;
 
   return pRetry(
     async (attemptNumber) => {
       const response = await fetchImpl(createRequest(attemptNumber - 1));
+      if (response.status === 429 && attemptNumber <= retries) {
+        const retryDelayMs =
+          getRetryAfterMs(response) + Math.random() * MAX_RETRY_JITTER_MS;
+        debug(
+          `API request rate limited, waiting ${Math.ceil(retryDelayMs / 1_000)}s before retry`,
+        );
+        await response.body?.cancel();
+        await waitForRetry(retryDelayMs, input.signal);
+        throw new APIError("Too Many Requests (429)", { status: 429 });
+      }
       if (response.status >= 500) {
         throw new APIError(`Internal Server Error (${response.status})`);
       }
@@ -84,7 +122,7 @@ export async function apiFetch(input: Request, options: APIFetchOptions = {}) {
     },
     {
       minTimeout: options.minTimeout,
-      retries: options.retries ?? 3,
+      retries,
       shouldRetry: () => !input.signal.aborted,
       onFailedAttempt: (context) => {
         debug("API request failed", context.error.message);
