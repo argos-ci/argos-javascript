@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { APIError, apiFetch } from "./fetch";
 
+function rateLimitResponse(retryAfter: string | null = "0") {
+  return new Response("rate limited", {
+    status: 429,
+    headers: retryAfter === null ? undefined : { "retry-after": retryAfter },
+  });
+}
+
 describe("apiFetch", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -54,6 +61,107 @@ describe("apiFetch", () => {
     );
 
     expect(response.status).toBe(400);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries rate limits after Retry-After plus jitter", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(rateLimitResponse("2"))
+      .mockResolvedValueOnce(new Response("{}", { status: 200 }));
+
+    const responsePromise = apiFetch(
+      new Request("https://api.argos-ci.test/builds"),
+      {
+        fetch: fetchMock as unknown as typeof fetch,
+        minTimeout: 0,
+      },
+    );
+
+    await vi.advanceTimersByTimeAsync(2_499);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1);
+    const response = await responsePromise;
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ["missing", null, 60_000],
+    ["invalid", "later", 60_000],
+    ["too large", "600", 300_000],
+  ])(
+    "bounds the retry delay when Retry-After is %s",
+    async (_case, retryAfter, expectedDelay) => {
+      vi.useFakeTimers();
+      vi.spyOn(Math, "random").mockReturnValue(0);
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(rateLimitResponse(retryAfter))
+        .mockResolvedValueOnce(new Response("{}", { status: 200 }));
+
+      const responsePromise = apiFetch(
+        new Request("https://api.argos-ci.test/builds"),
+        {
+          fetch: fetchMock as unknown as typeof fetch,
+          minTimeout: 0,
+        },
+      );
+
+      await vi.advanceTimersByTimeAsync(expectedDelay - 1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(1);
+      await expect(responsePromise).resolves.toMatchObject({ status: 200 });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it("returns the final rate limit response after retries are exhausted", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const fetchMock = vi.fn(async () => rateLimitResponse());
+
+    const responsePromise = apiFetch(
+      new Request("https://api.argos-ci.test/builds"),
+      {
+        fetch: fetchMock as unknown as typeof fetch,
+        minTimeout: 0,
+        retries: 2,
+      },
+    );
+
+    await vi.runAllTimersAsync();
+    const response = await responsePromise;
+    expect(response.status).toBe(429);
+    await expect(response.text()).resolves.toBe("rate limited");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("preserves caller cancellation during a rate limit delay", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const controller = new AbortController();
+    const reason = new Error("cancelled by caller");
+    const fetchMock = vi.fn(async () => rateLimitResponse("60"));
+
+    const promise = apiFetch(
+      new Request("https://api.argos-ci.test/builds", {
+        signal: controller.signal,
+      }),
+      {
+        fetch: fetchMock as unknown as typeof fetch,
+        minTimeout: 0,
+      },
+    );
+
+    await vi.advanceTimersByTimeAsync(0);
+    controller.abort(reason);
+
+    await expect(promise).rejects.toBe(reason);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
