@@ -111,8 +111,10 @@ export const PARENT_COMMITS_LIMIT = 300;
 
 export interface ResolveBaselineParams {
   /**
-   * Compute the merge base commit between the build branch and its base branch,
-   * or `null` when none can be found.
+   * Compute the commit of the base branch the build content is derived from —
+   * the merge base of the build branch and its base branch, or a closer commit
+   * when the CI service builds the branch merged into its base branch. Returns
+   * `null` when no such commit can be found.
    */
   getMergeBase: () => Promise<string | null>;
 
@@ -144,8 +146,9 @@ export interface BaselineResolution {
  * Resolve the baseline for a build that has no remote content access (no Git
  * provider connected).
  *
- * 1. Find the merge base — the closest common ancestor of the build branch and
- *    its base branch. This is always the starting point.
+ * 1. Find the base commit the build content is derived from — usually the merge
+ *    base, the closest common ancestor of the build branch and its base branch.
+ *    This is always the starting point.
  * 2. From the merge base, ask the API to pick the closest commit (the merge base
  *    itself or one of its ancestors) that has an eligible baseline build, and use
  *    it as the reference commit.

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   branch,
+  getCommitParents,
   getMergeBaseCommitSha,
   getRepositoryURL,
   head,
@@ -267,5 +268,108 @@ describe("#getMergeBaseCommitSha (lock contention)", () => {
     } finally {
       clearTimeout(timer);
     }
+  });
+});
+
+describe("#getCommitParents", () => {
+  let cwd: string;
+  let root: string;
+  let repoDir: string;
+  let bareDir: string;
+  let rootCommitSha: string;
+  let mainSha: string;
+  let featureSha: string;
+  let mergeSha: string;
+
+  beforeEach(() => {
+    cwd = process.cwd();
+    root = mkdtempSync(join(tmpdir(), "argos-git-parents-test-"));
+    repoDir = join(root, "repo");
+
+    bareDir = join(root, "origin.git");
+    execFileSync("git", ["init", "--bare", bareDir]);
+    // Allow fetching a commit by SHA, as GitHub does.
+    execFileSync("git", [
+      "-C",
+      bareDir,
+      "config",
+      "uploadpack.allowAnySHA1InWant",
+      "true",
+    ]);
+    execFileSync("git", ["init", repoDir]);
+    const git = (...args: string[]) =>
+      execFileSync("git", ["-C", repoDir, ...args])
+        .toString()
+        .trim();
+    git("remote", "add", "origin", bareDir);
+    git("config", "user.email", "test@argos-ci.com");
+    git("config", "user.name", "Argos Test");
+
+    git("commit", "--allow-empty", "-m", "root");
+    git("branch", "-M", "main");
+    rootCommitSha = git("rev-parse", "HEAD");
+    git("checkout", "-b", "feature");
+    git("commit", "--allow-empty", "-m", "feature 1");
+    featureSha = git("rev-parse", "HEAD");
+    git("checkout", "main");
+    git("commit", "--allow-empty", "-m", "main 1");
+    mainSha = git("rev-parse", "HEAD");
+    git("merge", "--no-ff", "-m", "merge feature", featureSha);
+    mergeSha = git("rev-parse", "HEAD");
+    git("push", "origin", "main");
+
+    process.chdir(repoDir);
+  });
+
+  afterEach(() => {
+    process.chdir(cwd);
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("returns the parents of a merge commit, first parent first", async () => {
+    await expect(getCommitParents(mergeSha)).resolves.toEqual([
+      mainSha,
+      featureSha,
+    ]);
+  });
+
+  it("returns an empty array for a root commit", async () => {
+    await expect(getCommitParents(rootCommitSha)).resolves.toEqual([]);
+  });
+
+  it("returns null for an unknown commit", async () => {
+    await expect(getCommitParents("f".repeat(40))).resolves.toBe(null);
+  });
+
+  it("deepens a shallow history to read the parents", async () => {
+    // The state of a CI checkout: a shallow clone where git hides the parents
+    // of the commits at the boundary of the history.
+    const shallowDir = join(root, "shallow");
+    execFileSync("git", [
+      "clone",
+      "--depth=1",
+      `file://${bareDir}`,
+      shallowDir,
+    ]);
+    process.chdir(shallowDir);
+
+    // The parents are not available locally…
+    const raw = execFileSync("git", [
+      "rev-list",
+      "--parents",
+      "-n",
+      "1",
+      mergeSha,
+      "--",
+    ])
+      .toString()
+      .trim();
+    expect(raw).toBe(mergeSha);
+
+    // … but they are fetched.
+    await expect(getCommitParents(mergeSha)).resolves.toEqual([
+      mainSha,
+      featureSha,
+    ]);
   });
 });

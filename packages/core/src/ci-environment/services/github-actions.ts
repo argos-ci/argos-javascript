@@ -1,6 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import type { Service, Context } from "../types";
-import { getMergeBaseCommitSha, listAncestorCommits } from "../git";
+import {
+  getCommitParents,
+  getMergeBaseCommitSha as getGitMergeBaseCommitSha,
+  head as getHeadSha,
+  listAncestorCommits,
+} from "../git";
 import type * as webhooks from "@octokit/webhooks";
 import type { RepositoryDispatchContext } from "@vercel/repository-dispatch/context";
 import {
@@ -290,6 +295,85 @@ async function getPullRequest(args: {
   }
 
   return getPullRequestFromPayload(payload);
+}
+
+/**
+ * Get the commit of the base branch that GitHub merged into the pull request to
+ * run its checks.
+ *
+ * On a `pull_request` event, GitHub checks out a "test-merge" commit
+ * (`refs/pull/<n>/merge`): the pull request head merged into the tip of the base
+ * branch. The screenshots of such a build then contain the base branch changes
+ * up to that tip, so that tip — the first parent of the test-merge commit — is
+ * the commit to compare the build against. Comparing against the merge base
+ * instead reports every visual change merged into the base branch since the pull
+ * request branch was created as a change of the pull request.
+ *
+ * Returns `null` when the build does not run on a test-merge commit, in which
+ * case the merge base is used: another event, a workflow that checked out
+ * something else (e.g. the pull request head itself), a base branch overridden
+ * to another branch, or a commit whose parents can't be read.
+ */
+async function getTestMergeBaseCommitSha(
+  input: { base: string },
+  ctx: Context,
+): Promise<string | null> {
+  if (ctx.env.GITHUB_EVENT_NAME !== "pull_request") {
+    return null;
+  }
+
+  const payload = readEventPayload(ctx);
+  const pullRequest = payload ? getPullRequestFromPayload(payload) : null;
+  if (!pullRequest) {
+    return null;
+  }
+
+  // The base used to find the baseline is not the branch the test-merge commit
+  // was created from, so its tip tells nothing about the build content.
+  if (input.base !== pullRequest.base.ref) {
+    debug(
+      `Base "${input.base}" is not the pull request base branch "${pullRequest.base.ref}", ignoring the test-merge commit`,
+    );
+    return null;
+  }
+
+  // The screenshots are produced from the commit checked out, so the build must
+  // run on it for its parents to tell what the screenshots contain.
+  const sha = ctx.env.GITHUB_SHA;
+  if (!sha || getHeadSha() !== sha) {
+    debug(
+      "Not running on the checked out commit, ignoring the test-merge commit",
+    );
+    return null;
+  }
+
+  const parents = await getCommitParents(sha);
+
+  // A test-merge commit merges the pull request head (second parent) into the
+  // tip of the base branch (first parent).
+  if (parents?.length !== 2 || parents[1] !== pullRequest.head.sha) {
+    debug(`${sha} is not a test-merge commit of #${pullRequest.number}`);
+    return null;
+  }
+
+  return parents[0] ?? null;
+}
+
+/**
+ * Get the commit to compare the build against: the base commit merged into the
+ * test-merge commit when the build runs on one, else the merge base of the
+ * branch and its base branch.
+ */
+async function getMergeBaseCommitSha(
+  input: { base: string; head: string },
+  ctx: Context,
+): Promise<string | null> {
+  const testMergeBase = await getTestMergeBaseCommitSha(input, ctx);
+  if (testMergeBase) {
+    debug("Found base commit from the test-merge commit", testMergeBase);
+    return testMergeBase;
+  }
+  return getGitMergeBaseCommitSha(input);
 }
 
 const service: Service = {

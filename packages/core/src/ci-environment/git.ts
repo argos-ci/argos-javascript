@@ -352,3 +352,54 @@ export async function listAncestorCommits(input: {
     return [];
   }
 }
+
+/**
+ * Read the parent commits of a commit, ordered as recorded in the commit — the
+ * first parent first. Returns `null` when the commit is unknown, and an empty
+ * array when it has no parent.
+ *
+ * The history is deepened with a shallow fetch when the parents are not
+ * available locally: in the shallow clones typically used in CI, git hides the
+ * parents of the commits at the boundary of the history.
+ */
+export async function getCommitParents(sha: string): Promise<string[] | null> {
+  const localParents = readCommitParents(sha);
+  if (localParents?.length) {
+    return localParents;
+  }
+
+  // Fetch the commit and its parents, so the parents stop being hidden by the
+  // boundary of a shallow history.
+  try {
+    await runGitFetch(["--depth=2", "origin", sha]);
+  } catch (error) {
+    debug(
+      `Failed to deepen history for ${sha}, using local history`,
+      getGitErrorOutput(error),
+    );
+    return localParents;
+  }
+
+  return readCommitParents(sha);
+}
+
+/**
+ * Read the parent commits of a commit from the local history. Returns `null`
+ * when the commit is unknown, and an empty array when it has no parent — a root
+ * commit, or a commit at the boundary of a shallow history, where git hides the
+ * parents.
+ */
+function readCommitParents(sha: string): string[] | null {
+  try {
+    const raw = execFileSync(
+      "git",
+      ["rev-list", "--parents", "-n", "1", sha, "--"],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    );
+    const [, ...parents] = raw.toString().trim().split(" ");
+    return parents;
+  } catch (error) {
+    debug(`Failed to read the parents of ${sha}`, getGitErrorOutput(error));
+    return null;
+  }
+}
