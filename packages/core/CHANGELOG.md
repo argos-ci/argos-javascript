@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.8.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.1...%40argos-ci%2Fcore%406.8.2) (2026-08-26)
+
+### Bug Fixes
+
+* **core:** baseline PR builds against the commit GitHub merged in ([#371](https://github.com/argos-ci/argos-javascript/issues/371)) ([c128da4](https://github.com/argos-ci/argos-javascript/commit/c128da467e9090e987af9d53cb061ef3e2c9f617))
+* **core:** read Buildkite builds without a SHA or a pull request ([7ad1571](https://github.com/argos-ci/argos-javascript/commit/7ad1571f386ba5fec910817b1a80ec2450534683))
+
+
 ## [6.8.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.0...%40argos-ci%2Fcore%406.8.1) (2026-08-13)
 
 **Note:** Version bump only for package @argos-ci/core
