@@ -344,29 +344,31 @@ describe("#getCommitParents", () => {
   it("deepens a shallow history to read the parents", async () => {
     // The state of a CI checkout: a shallow clone where git hides the parents
     // of the commits at the boundary of the history.
+    // "--depth" implies "--single-branch", so the branch is named explicitly:
+    // it would otherwise be read from the remote HEAD, which points to another
+    // branch when git defaults to "master" for new repositories.
     const shallowDir = join(root, "shallow");
     execFileSync("git", [
       "clone",
       "--depth=1",
+      "--branch",
+      "main",
       `file://${bareDir}`,
       shallowDir,
     ]);
+    const shallowGit = (...args: string[]) =>
+      execFileSync("git", ["-C", shallowDir, ...args])
+        .toString()
+        .trim();
     process.chdir(shallowDir);
 
-    // The parents are not available locally…
-    const raw = execFileSync("git", [
-      "rev-list",
-      "--parents",
-      "-n",
-      "1",
+    // The commit is there, but its parents are not…
+    expect(shallowGit("rev-parse", "HEAD")).toBe(mergeSha);
+    expect(shallowGit("rev-list", "--parents", "-n", "1", mergeSha, "--")).toBe(
       mergeSha,
-      "--",
-    ])
-      .toString()
-      .trim();
-    expect(raw).toBe(mergeSha);
+    );
 
-    // … but they are fetched.
+    // … until they are fetched.
     await expect(getCommitParents(mergeSha)).resolves.toEqual([
       mainSha,
       featureSha,
