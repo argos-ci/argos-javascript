@@ -71,6 +71,7 @@ export async function writeSnapshotFile(
   content: string,
   options: SerializableSnapshotOptions = {},
   test?: TestMetadata,
+  captureIndex?: number | null,
 ): Promise<ArgosAttachment[]> {
   if (!name) {
     throw new Error("The `name` argument is required.");
@@ -100,6 +101,7 @@ export async function writeSnapshotFile(
     sdk: { name: "@argos-ci/vitest", version: sdkVersion },
     ...(tags ? { tags } : {}),
     ...(resolvedTest ? { test: resolvedTest } : {}),
+    ...(captureIndex != null ? { capture: { index: captureIndex } } : {}),
   };
 
   await createDirectory(dirname(snapshotPath));

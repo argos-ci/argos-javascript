@@ -1,4 +1,8 @@
-import type { ScreenshotMetadata } from "@argos-ci/util";
+import {
+  getTestRunKey,
+  nextCaptureIndex,
+  type ScreenshotMetadata,
+} from "@argos-ci/util";
 import {
   getCurrentTest,
   type CurrentSuite,
@@ -85,4 +89,26 @@ export async function getTestMetadata(): Promise<TestMetadata> {
     return null;
   }
   return buildTestMetadata(task);
+}
+
+/**
+ * Take the next capture index for the current Vitest test, or `null` outside a
+ * test. Screenshots and snapshots share the counter, so a test that mixes both
+ * still numbers them in the order it produced them.
+ *
+ * Runs on the test side, where the test context is available; the number then
+ * crosses the RPC boundary to the Node command.
+ */
+export async function takeCaptureIndex(): Promise<number | null> {
+  const task = await getCurrentTest();
+  if (!task) {
+    return null;
+  }
+  return nextCaptureIndex(
+    getTestRunKey({
+      id: task.id,
+      retry: task.result?.retryCount ?? undefined,
+      repeat: task.result?.repeatCount ?? undefined,
+    }),
+  );
 }

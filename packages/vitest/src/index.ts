@@ -1,6 +1,10 @@
 import type { ArgosAttachment } from "@argos-ci/playwright";
 import { resolveAutoName } from "./auto-name";
-import { getTestMetadata, type TestMetadata } from "./metadata";
+import {
+  getTestMetadata,
+  takeCaptureIndex,
+  type TestMetadata,
+} from "./metadata";
 import type {
   SerializableSnapshotOptions,
   VitestScreenshotOptions,
@@ -28,12 +32,14 @@ declare module "vitest/browser" {
       name: string,
       options?: VitestScreenshotOptions,
       test?: TestMetadata,
+      captureIndex?: number | null,
     ) => Promise<ArgosAttachment[]>;
     argosSnapshot: (
       name: string,
       content: string,
       options?: SerializableSnapshotOptions,
       test?: TestMetadata,
+      captureIndex?: number | null,
     ) => Promise<ArgosAttachment[]>;
   }
 }
@@ -88,11 +94,12 @@ export async function argosScreenshot(
     return [];
   }
 
-  const [resolvedName, test] = await Promise.all([
+  const [resolvedName, test, captureIndex] = await Promise.all([
     resolveAutoName(name, { reservedLength: SCREENSHOT_NAME_RESERVED }),
     // Gather the test metadata here (browser side), where the Vitest test
     // context is available; it crosses the RPC boundary to the Node command.
     getTestMetadata(),
+    takeCaptureIndex(),
   ]);
 
   // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
@@ -100,7 +107,12 @@ export async function argosScreenshot(
   const { server } = await import("vitest/browser");
   // Pass a defined `options` so the trailing `test` argument is never preceded
   // by an `undefined` hole (which the browser/node RPC would drop).
-  return server.commands.argosScreenshot(resolvedName, options ?? {}, test);
+  return server.commands.argosScreenshot(
+    resolvedName,
+    options ?? {},
+    test,
+    captureIndex,
+  );
 }
 
 /**
@@ -151,7 +163,7 @@ export async function argosSnapshot(
   const extension = rawExtension.startsWith(".")
     ? rawExtension
     : `.${rawExtension}`;
-  const [resolvedName, test] = await Promise.all([
+  const [resolvedName, test, captureIndex] = await Promise.all([
     resolveAutoName(options.name, {
       reservedLength:
         ".snapshot".length + extension.length + METADATA_SUFFIX.length,
@@ -159,6 +171,7 @@ export async function argosSnapshot(
     // Gather the test metadata here (browser or Node), where the Vitest test
     // context is available.
     getTestMetadata(),
+    takeCaptureIndex(),
   ]);
 
   // Serialize on the test side (browser or Node), so values that only exist
@@ -183,12 +196,19 @@ export async function argosSnapshot(
       serialized,
       serializableOptions,
       test,
+      captureIndex,
     );
   }
 
   // Node: write directly to disk.
   const { writeSnapshotFile } = await import("./snapshot-file");
-  return writeSnapshotFile(resolvedName, serialized, serializableOptions, test);
+  return writeSnapshotFile(
+    resolvedName,
+    serialized,
+    serializableOptions,
+    test,
+    captureIndex,
+  );
 }
 
 /**

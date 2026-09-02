@@ -37,6 +37,7 @@ import {
   prepare,
   screenshotToSnapshotPath,
   setViewportSize,
+  takeCaptureIndex,
   waitForReadiness,
 } from "./util";
 import { writeFile } from "node:fs/promises";
@@ -199,6 +200,10 @@ export async function argosScreenshot(
 
   const testInfo = await getTestInfo();
 
+  // One index per call, not per file: the viewport variants below are the same
+  // step of the journey seen at several widths, so they share it.
+  const captureIndex = takeCaptureIndex(testInfo);
+
   const useArgosReporter = checkIsUsingArgosReporter(testInfo);
 
   await prepare({ handler, useArgosReporter, root });
@@ -227,6 +232,7 @@ export async function argosScreenshot(
       names,
       testInfo,
       useArgosReporter,
+      captureIndex,
     });
 
     if (options.tag) {
