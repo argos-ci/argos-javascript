@@ -20,13 +20,13 @@ describe("#getMergeBaseCommitSha", () => {
   /** Test-merge commit: `feature` merged into the tip of `main`. */
   let mergeSha: string;
 
-  function writeEventPayload(input: { baseRef: string }) {
+  function writeEventPayload(input: { baseRef: string; headSha?: string }) {
     writeFileSync(
       eventPath,
       JSON.stringify({
         pull_request: {
           number: 1,
-          head: { ref: "feature", sha: featureSha },
+          head: { ref: "feature", sha: input.headSha ?? featureSha },
           base: { ref: input.baseRef },
         },
       }),
@@ -134,6 +134,53 @@ describe("#getMergeBaseCommitSha", () => {
     const sha = await service.getMergeBaseCommitSha(
       { base: "main", head: "feature" },
       createContext({ GITHUB_EVENT_PATH: join(root, "missing.json") }),
+    );
+    expect(sha).toBe(forkSha);
+  });
+
+  it("returns the base commit when the payload head is stale", async () => {
+    // A push landing between the event and the merge ref being recomputed
+    // leaves "pull_request.head.sha" behind the test-merge commit that is
+    // actually checked out. GITHUB_REF still names the merge ref, so the build
+    // must be baselined against the commit GitHub merged in.
+    writeEventPayload({ baseRef: "main", headSha: forkSha });
+    const sha = await service.getMergeBaseCommitSha(
+      { base: "main", head: "feature" },
+      createContext({ GITHUB_REF: "refs/pull/1/merge" }),
+    );
+    expect(sha).toBe(mainSha);
+  });
+
+  it("falls back to the merge base on a stale payload without the merge ref", async () => {
+    // Without GITHUB_REF naming the merge ref, the payload is the only way to
+    // tell GitHub's test merge apart from a merge the author made.
+    writeEventPayload({ baseRef: "main", headSha: forkSha });
+    const sha = await service.getMergeBaseCommitSha(
+      { base: "main", head: "feature" },
+      createContext({}),
+    );
+    expect(sha).toBe(forkSha);
+  });
+
+  it("ignores the merge ref of another pull request", async () => {
+    writeEventPayload({ baseRef: "main", headSha: forkSha });
+    const sha = await service.getMergeBaseCommitSha(
+      { base: "main", head: "feature" },
+      createContext({ GITHUB_REF: "refs/pull/2/merge" }),
+    );
+    expect(sha).toBe(forkSha);
+  });
+
+  it("falls back to the merge base when the head is not a merge commit", async () => {
+    // The merge ref alone must not be trusted when the checkout is not a merge:
+    // a single-parent commit has no base branch tip to read.
+    execFileSync("git", ["-C", repoDir, "checkout", "--detach", featureSha]);
+    const sha = await service.getMergeBaseCommitSha(
+      { base: "main", head: "feature" },
+      createContext({
+        GITHUB_SHA: featureSha,
+        GITHUB_REF: "refs/pull/1/merge",
+      }),
     );
     expect(sha).toBe(forkSha);
   });
