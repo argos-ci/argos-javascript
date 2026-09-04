@@ -351,7 +351,30 @@ async function getTestMergeBaseCommitSha(
 
   // A test-merge commit merges the pull request head (second parent) into the
   // tip of the base branch (first parent).
-  if (parents?.length !== 2 || parents[1] !== pullRequest.head.sha) {
+  if (parents?.length !== 2) {
+    debug(`${sha} is not a merge commit, ignoring the test-merge commit`);
+    return null;
+  }
+
+  // `GITHUB_REF` is set by the runner from the ref the run was triggered on, so
+  // on a `pull_request` event it names the merge ref itself. Together with the
+  // check above that the build runs on `GITHUB_SHA`, it identifies the test
+  // merge without reading the payload.
+  //
+  // The payload can lag behind the merge ref: when a push lands between the
+  // event and the merge ref being recomputed, `pull_request.head.sha` still
+  // carries the previous head while the checkout is the newer test-merge
+  // commit. Comparing the second parent against that stale head then rejects a
+  // genuine test-merge build, and the fallback baselines it against the fork
+  // point — reporting every change merged into the base branch since as a
+  // change of the pull request.
+  if (ctx.env.GITHUB_REF === `refs/pull/${pullRequest.number}/merge`) {
+    return parents[0] ?? null;
+  }
+
+  // Without the merge ref, the payload is the only way to tell GitHub's test
+  // merge apart from a merge the author made.
+  if (parents[1] !== pullRequest.head.sha) {
     debug(`${sha} is not a test-merge commit of #${pullRequest.number}`);
     return null;
   }
