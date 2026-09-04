@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.4.7...%40argos-ci%2Fvitest%400.5.0) (2026-09-04)
+
+### Bug Fixes
+
+* declare captureIndex on the Vitest browser commands ([d7e8669](https://github.com/argos-ci/argos-javascript/commit/d7e86699532fb15f1d6d6173567902217bdac2ef))
+
+### Features
+
+* record the capture order of screenshots ([47127b0](https://github.com/argos-ci/argos-javascript/commit/47127b059426956de250ebc2cf49aaeccb836542))
+
+
 ## [0.4.7](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.4.6...%40argos-ci%2Fvitest%400.4.7) (2026-08-26)
 
 **Note:** Version bump only for package @argos-ci/vitest

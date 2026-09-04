@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.8.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.2...%40argos-ci%2Fcore%406.8.3) (2026-09-04)
+
+### Bug Fixes
+
+* **core:** identify the test merge from the merge ref, not the payload ([#372](https://github.com/argos-ci/argos-javascript/issues/372)) ([a34cf2e](https://github.com/argos-ci/argos-javascript/commit/a34cf2e65e544f31b0ce203bdce0ca4dd13c2dc7))
+
+
 ## [6.8.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.1...%40argos-ci%2Fcore%406.8.2) (2026-08-26)
 
 ### Bug Fixes

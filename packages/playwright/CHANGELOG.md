@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.5.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.4.7...%40argos-ci%2Fplaywright%407.5.0) (2026-09-04)
+
+### Features
+
+* record the capture order of screenshots ([47127b0](https://github.com/argos-ci/argos-javascript/commit/47127b059426956de250ebc2cf49aaeccb836542))
+
+
 ## [7.4.7](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.4.6...%40argos-ci%2Fplaywright%407.4.7) (2026-08-26)
 
 **Note:** Version bump only for package @argos-ci/playwright

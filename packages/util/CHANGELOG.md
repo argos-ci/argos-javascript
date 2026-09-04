@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Futil%404.1.0...%40argos-ci%2Futil%404.2.0) (2026-09-04)
+
+### Features
+
+* record the capture order of screenshots ([47127b0](https://github.com/argos-ci/argos-javascript/commit/47127b059426956de250ebc2cf49aaeccb836542))
+
+
 # [4.1.0](https://github.com/argos-ci/argos-javascript/compare/@argos-ci/util@4.0.4...@argos-ci/util@4.1.0) (2026-07-25)
 
 
