@@ -19,7 +19,12 @@ import {
 
 const TESTER_ID = "argos-tester-scale-fixture";
 const BACKUP_KEY = "argosBckTransform";
-const ARGS = { testerId: TESTER_ID, backupKey: BACKUP_KEY };
+const HOLD_KEY = "argosScaleHold";
+const ARGS = {
+  testerId: TESTER_ID,
+  backupKey: BACKUP_KEY,
+  holdKey: HOLD_KEY,
+};
 
 function mountTester(style: string): HTMLElement {
   const tester = document.createElement("div");
@@ -97,4 +102,40 @@ test("unscales a tester scaled from a stylesheet", () => {
 test("does nothing when the tester is missing", () => {
   expect(() => resetTesterScaleInPage(ARGS)).not.toThrow();
   expect(() => restoreTesterScaleInPage(ARGS)).not.toThrow();
+});
+
+test("holds the tester unscaled until the last nested capture is done", () => {
+  // A story calling `argosScreenshot` from its play function runs one capture
+  // inside the automatic one, over the same tester. The scale may only come
+  // back once both are finished, or the outer screenshot is captured shrunk.
+  const tester = mountTester(
+    "width: 1280px; height: 800px; transform: scale(0.8); transform-origin: left top;",
+  );
+
+  resetTesterScaleInPage(ARGS);
+  resetTesterScaleInPage(ARGS);
+
+  expect(tester.style.transform).toBe("scale(1)");
+
+  restoreTesterScaleInPage(ARGS);
+
+  // Still held by the outer capture, whose screenshot has not been taken yet.
+  expect(tester.style.transform).toBe("scale(1)");
+
+  restoreTesterScaleInPage(ARGS);
+
+  expect(tester.style.transform).toBe("scale(0.8)");
+  expect(tester.dataset[BACKUP_KEY]).toBeUndefined();
+  expect(tester.dataset[HOLD_KEY]).toBeUndefined();
+});
+
+test("an unbalanced restore cannot strand the tester unscaled", () => {
+  const tester = mountTester("transform: scale(0.5);");
+
+  resetTesterScaleInPage(ARGS);
+  restoreTesterScaleInPage(ARGS);
+  restoreTesterScaleInPage(ARGS);
+
+  expect(tester.style.transform).toBe("scale(0.5)");
+  expect(tester.dataset[HOLD_KEY]).toBeUndefined();
 });

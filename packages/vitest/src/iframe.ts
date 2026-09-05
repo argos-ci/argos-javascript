@@ -22,6 +22,18 @@ export const VITEST_TESTER_ID = "vitest-tester";
 const TRANSFORM_BACKUP_KEY = "argosBckTransform";
 
 /**
+ * Dataset key counting the screenshots currently holding the tester unscaled.
+ *
+ * Captures nest: a story calling `argosScreenshot` from its play function runs
+ * one inside the automatic screenshot taken after the test. Both share this one
+ * element, so without a count the inner restore would hand the scale back while
+ * the outer capture is still to come — and the outer screenshot would come out
+ * shrunk. Only the first reset saves and overrides the transform, and only the
+ * last restore puts it back.
+ */
+const SCALE_HOLD_KEY = "argosScaleHold";
+
+/**
  * Attribute holding the iframe's inline size from before Argos resized it, as
  * JSON.
  *
@@ -54,12 +66,14 @@ export async function resetTesterScale(
   await ctx.page.evaluate(resetTesterScaleInPage, {
     testerId: VITEST_TESTER_ID,
     backupKey: TRANSFORM_BACKUP_KEY,
+    holdKey: SCALE_HOLD_KEY,
   });
 
   return async () => {
     await ctx.page.evaluate(restoreTesterScaleInPage, {
       testerId: VITEST_TESTER_ID,
       backupKey: TRANSFORM_BACKUP_KEY,
+      holdKey: SCALE_HOLD_KEY,
     });
   };
 }
@@ -74,11 +88,21 @@ export async function resetTesterScale(
 export function resetTesterScaleInPage(args: {
   testerId: string;
   backupKey: string;
+  holdKey: string;
 }): void {
-  const { testerId, backupKey } = args;
+  const { testerId, backupKey, holdKey } = args;
   const tester = document.getElementById(testerId);
 
   if (!(tester instanceof HTMLElement)) {
+    return;
+  }
+
+  const held = Number(tester.dataset[holdKey] ?? "0");
+  tester.dataset[holdKey] = String(held + 1);
+
+  // An enclosing capture already holds the tester unscaled, and owns the saved
+  // transform.
+  if (held > 0) {
     return;
   }
 
@@ -109,13 +133,24 @@ export function resetTesterScaleInPage(args: {
 export function restoreTesterScaleInPage(args: {
   testerId: string;
   backupKey: string;
+  holdKey: string;
 }): void {
-  const { testerId, backupKey } = args;
+  const { testerId, backupKey, holdKey } = args;
   const tester = document.getElementById(testerId);
 
   if (!(tester instanceof HTMLElement)) {
     return;
   }
+
+  const held = Math.max(0, Number(tester.dataset[holdKey] ?? "0") - 1);
+
+  // Another capture is still running; it needs the tester unscaled.
+  if (held > 0) {
+    tester.dataset[holdKey] = String(held);
+    return;
+  }
+
+  delete tester.dataset[holdKey];
 
   const backup = tester.dataset[backupKey];
 
