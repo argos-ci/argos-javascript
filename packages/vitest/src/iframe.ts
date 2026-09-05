@@ -7,10 +7,31 @@ import type { ViewportSize } from "@argos-ci/browser";
 export const VITEST_IFRAME_SELECTOR = 'iframe[data-vitest="true"]';
 
 /**
- * ID of the Vitest "tester" element that wraps the iframe with a `scale(...)`
- * transform.
+ * ID of the Vitest "tester" element wrapping the iframe.
  */
 export const VITEST_TESTER_ID = "vitest-tester";
+
+/**
+ * Dataset key holding the tester's inline `transform` from before Argos reset
+ * it.
+ *
+ * The presence of the key — not the value it holds — is what marks the
+ * transform as backed up: the original inline `transform` is usually an empty
+ * string, which is indistinguishable from "nothing was saved yet".
+ */
+const TRANSFORM_BACKUP_KEY = "argosBckTransform";
+
+/**
+ * Dataset key counting the screenshots currently holding the tester unscaled.
+ *
+ * Captures nest: a story calling `argosScreenshot` from its play function runs
+ * one inside the automatic screenshot taken after the test. Both share this one
+ * element, so without a count the inner restore would hand the scale back while
+ * the outer capture is still to come — and the outer screenshot would come out
+ * shrunk. Only the first reset saves and overrides the transform, and only the
+ * last restore puts it back.
+ */
+const SCALE_HOLD_KEY = "argosScaleHold";
 
 /**
  * Attribute holding the iframe's inline size from before Argos resized it, as
@@ -23,41 +44,124 @@ export const VITEST_TESTER_ID = "vitest-tester";
 const SIZE_BACKUP_ATTRIBUTE = "data-argos-size-backup";
 
 /**
- * Remove the scale from the Vitest `#vitest-tester` element before taking a
- * screenshot to avoid ending up with small screenshots.
- * @returns A function to restore the scale after the screenshot.
+ * Undo the scale Vitest applies to the `#vitest-tester` element, so the
+ * screenshot is captured at full size instead of shrunk.
+ *
+ * Only some Vitest versions scale the tester. Up to Vitest 4 a viewport larger
+ * than the browser window is emulated by sizing the tester to the requested
+ * viewport and shrinking it with a CSS `transform: scale(...)`. From Vitest 5
+ * the real browser viewport is resized instead, so the tester carries no
+ * transform and there is nothing to undo — which is why an unscaled tester is
+ * a no-op rather than an error.
+ *
+ * Detection reads the *computed* transform, so a scale set from a stylesheet
+ * counts too, while the override goes on the inline style, which is the only
+ * layer guaranteed to win.
+ *
+ * @returns A function restoring the transform after the screenshot.
  */
 export async function resetTesterScale(
   ctx: BrowserCommandContext,
 ): Promise<() => Promise<void>> {
-  await ctx.page.evaluate((testerId) => {
-    const tester = document.getElementById(testerId);
-
-    if (!(tester instanceof HTMLElement)) {
-      return;
-    }
-
-    const scale = tester.getAttribute("data-scale");
-
-    if (!scale) {
-      throw new Error("Vitest iframe data-scale attribute not found");
-    }
-
-    tester.dataset.bckTransform = tester.style.transform;
-    tester.style.transform = `scale(1)`;
-  }, VITEST_TESTER_ID);
+  await ctx.page.evaluate(resetTesterScaleInPage, {
+    testerId: VITEST_TESTER_ID,
+    backupKey: TRANSFORM_BACKUP_KEY,
+    holdKey: SCALE_HOLD_KEY,
+  });
 
   return async () => {
-    await ctx.page.evaluate((testerId) => {
-      const tester = document.getElementById(testerId);
-
-      if (!(tester instanceof HTMLElement)) {
-        return;
-      }
-
-      tester.style.transform = tester.dataset.bckTransform ?? "";
-    }, VITEST_TESTER_ID);
+    await ctx.page.evaluate(restoreTesterScaleInPage, {
+      testerId: VITEST_TESTER_ID,
+      backupKey: TRANSFORM_BACKUP_KEY,
+      holdKey: SCALE_HOLD_KEY,
+    });
   };
+}
+
+/**
+ * Body of {@link resetTesterScale}, running in the page.
+ *
+ * Exported for tests only, and self-contained on purpose: it is serialized to
+ * the browser by `page.evaluate`, so it can reference nothing but its argument
+ * and page globals.
+ */
+export function resetTesterScaleInPage(args: {
+  testerId: string;
+  backupKey: string;
+  holdKey: string;
+}): void {
+  const { testerId, backupKey, holdKey } = args;
+  const tester = document.getElementById(testerId);
+
+  if (!(tester instanceof HTMLElement)) {
+    return;
+  }
+
+  const held = Number(tester.dataset[holdKey] ?? "0");
+  tester.dataset[holdKey] = String(held + 1);
+
+  // An enclosing capture already holds the tester unscaled, and owns the saved
+  // transform.
+  if (held > 0) {
+    return;
+  }
+
+  const { transform } = getComputedStyle(tester);
+
+  if (!transform || transform === "none") {
+    return;
+  }
+
+  // `a` and `d` are the horizontal and vertical scale factors; both at 1 means
+  // the transform does not resize the tester, whatever else it does.
+  const matrix = new DOMMatrixReadOnly(transform);
+
+  if (matrix.a === 1 && matrix.d === 1) {
+    return;
+  }
+
+  tester.dataset[backupKey] = tester.style.transform;
+  tester.style.transform = "scale(1)";
+}
+
+/**
+ * Body of the function {@link resetTesterScale} returns, running in the page.
+ *
+ * Exported for tests only, and self-contained for the same reason as
+ * {@link resetTesterScaleInPage}.
+ */
+export function restoreTesterScaleInPage(args: {
+  testerId: string;
+  backupKey: string;
+  holdKey: string;
+}): void {
+  const { testerId, backupKey, holdKey } = args;
+  const tester = document.getElementById(testerId);
+
+  if (!(tester instanceof HTMLElement)) {
+    return;
+  }
+
+  const held = Math.max(0, Number(tester.dataset[holdKey] ?? "0") - 1);
+
+  // Another capture is still running; it needs the tester unscaled.
+  if (held > 0) {
+    tester.dataset[holdKey] = String(held);
+    return;
+  }
+
+  delete tester.dataset[holdKey];
+
+  const backup = tester.dataset[backupKey];
+
+  // Nothing was reset — leave the tester alone rather than clearing a
+  // transform this never touched.
+  if (backup === undefined) {
+    return;
+  }
+
+  tester.style.transform = backup;
+  delete tester.dataset[backupKey];
 }
 
 /**

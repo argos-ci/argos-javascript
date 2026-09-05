@@ -35,6 +35,12 @@ export default defineConfig({
             headless: true,
             provider: playwright(),
             instances: [{ browser: "chromium" }],
+            // Storybook's Vitest addon carries its own default of 1200x900 and
+            // applies it through an API that no longer takes effect on Vitest
+            // 5, which would silently drop these stories to Vitest's own
+            // 414x896 default and reshoot every baseline. Pinning it keeps the
+            // two majors producing identical screenshots.
+            viewport: { width: 1200, height: 900 },
           },
           setupFiles: [".storybook/vitest.setup.ts"],
         },
