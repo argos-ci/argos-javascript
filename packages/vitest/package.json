@@ -64,9 +64,9 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@vitest/browser": "^4.1.10",
-    "@vitest/browser-playwright": "^4.1.10",
-    "@vitest/pretty-format": "^4.1.10",
+    "@vitest/browser": "^5.0.0",
+    "@vitest/browser-playwright": "^5.0.0",
+    "@vitest/pretty-format": "^5.0.0",
     "playwright": "^1.62.1",
     "vitest": "catalog:"
   },
@@ -77,6 +77,7 @@
     "install-playwright": "playwright install chromium --with-deps",
     "build-e2e": "pnpm run install-playwright",
     "e2e": "cross-env BUILD_NAME=\"argos-vitest-e2e-node-$NODE_VERSION-$OS\" UPLOAD_TO_ARGOS=true pnpm run test-e2e",
+    "e2e-compat": "cross-env BUILD_NAME=\"argos-vitest4-e2e-node-$NODE_VERSION-$OS\" UPLOAD_TO_ARGOS=true pnpm run test-e2e",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=./.gitignore --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."

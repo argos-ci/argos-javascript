@@ -297,3 +297,70 @@ jobs:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
           OS: ${{ matrix.os }}
+
+  # `@argos-ci/vitest` supports Vitest 4 and 5. The workspace is pinned to 5, so
+  # these two jobs put 4 back and re-run the same suites against it. They upload
+  # under their own build names — a build name owns one baseline, and the two
+  # majors are separate baselines even when the pixels agree.
+  e2e-vitest-compat:
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [lts/*]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Downgrade to Vitest 4
+        run: >-
+          pnpm --filter=@argos-ci/vitest up "vitest@^4" "@vitest/browser@^4"
+          "@vitest/browser-playwright@^4" "@vitest/pretty-format@^4"
+
+      - name: Run integration tests
+        run: pnpm exec -- turbo run e2e-compat --filter=@argos-ci/vitest
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
+
+  e2e-storybook-vitest-compat:
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [lts/*]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Downgrade to Vitest 4
+        run: >-
+          pnpm --filter=@argos-ci/storybook up "vitest@^4" "@vitest/browser@^4"
+          "@vitest/browser-playwright@^4" "@vitest/coverage-v8@^4"
+          "@vitest/ui@^4"
+
+      - name: Run integration tests
+        run: pnpm exec -- turbo run e2e-compat --filter=@argos-ci/storybook
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
