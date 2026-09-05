@@ -1,6 +1,7 @@
 import { readConfig, upload, type UploadParameters } from "@argos-ci/core";
-import type { Vitest } from "vitest/node";
-import type { Reporter } from "vitest/reporters";
+// `Reporter` also lives in `vitest/reporters`, but that entry point is gone in
+// Vitest 5; `vitest/node` re-exports it in both 4 and 5.
+import type { Reporter, Vitest } from "vitest/node";
 import type { ArgosReporterConfig } from "./options";
 
 export type { ArgosReporterConfig };

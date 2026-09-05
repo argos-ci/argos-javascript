@@ -36,13 +36,25 @@ export interface CurrentTask extends CurrentSuite {
 }
 
 /**
+ * Entry point exposing `getCurrentTest` before Vitest 4.1, and removed
+ * altogether in Vitest 5.
+ *
+ * Held in a variable rather than written inline at the import: Vite's
+ * dependency pre-bundler resolves a literal specifier eagerly, and on Vitest 5
+ * that fails the whole optimize step over an export that no longer exists —
+ * even though the branch importing it cannot run there.
+ */
+const LEGACY_SUITE_ENTRY = "vitest/suite";
+
+/**
  * Get the current Vitest test task, or `undefined` when not inside a test.
  *
  * Vitest >= 4.1 exposes `TestRunner.getCurrentTest()` from the `vitest` entry
- * point; the `vitest/suite` export is deprecated. We prefer the new API and
- * fall back to `vitest/suite` for older 4.x. Both are imported dynamically so
- * importing `@argos-ci/vitest` in a non-Vitest environment does not pull Vitest
- * in — only call this once you know Vitest is available.
+ * point; the `vitest/suite` export is deprecated there and gone in Vitest 5. We
+ * prefer the new API and fall back to `vitest/suite` for older 4.x. Both are
+ * imported dynamically so importing `@argos-ci/vitest` in a non-Vitest
+ * environment does not pull Vitest in — only call this once you know Vitest is
+ * available.
  */
 export async function getCurrentTest(): Promise<CurrentTask | undefined> {
   const vitest = (await import("vitest")) as {
@@ -52,7 +64,7 @@ export async function getCurrentTest(): Promise<CurrentTask | undefined> {
   if (runner?.getCurrentTest) {
     return runner.getCurrentTest();
   }
-  const suite = (await import("vitest/suite")) as {
+  const suite = (await import(/* @vite-ignore */ LEGACY_SUITE_ENTRY)) as {
     getCurrentTest: () => CurrentTask | undefined;
   };
   return suite.getCurrentTest();
