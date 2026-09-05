@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.5.0...%40argos-ci%2Fvitest%400.6.0) (2026-09-05)
+
+### Features
+
+* **vitest:** support Vitest 5 alongside Vitest 4 ([#373](https://github.com/argos-ci/argos-javascript/issues/373)) ([971234f](https://github.com/argos-ci/argos-javascript/commit/971234f8d7835d5b892a8cba774b88b03be96b2d))
+
+
 # [0.5.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.4.7...%40argos-ci%2Fvitest%400.5.0) (2026-09-04)
 
 ### Bug Fixes

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.3.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.2.8...%40argos-ci%2Fstorybook%406.3.0) (2026-09-05)
+
+### Features
+
+* **vitest:** support Vitest 5 alongside Vitest 4 ([#373](https://github.com/argos-ci/argos-javascript/issues/373)) ([971234f](https://github.com/argos-ci/argos-javascript/commit/971234f8d7835d5b892a8cba774b88b03be96b2d))
+
+
 ## [6.2.8](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.2.7...%40argos-ci%2Fstorybook%406.2.8) (2026-09-04)
 
 **Note:** Version bump only for package @argos-ci/storybook
