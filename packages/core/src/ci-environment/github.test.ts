@@ -1,8 +1,18 @@
-import { describe, it, expect, beforeAll, afterEach, afterAll } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  beforeEach,
+  afterEach,
+  afterAll,
+  vi,
+} from "vitest";
 import { setupServer } from "msw/node";
 import { http, HttpResponse } from "msw";
 import type { Context } from "./types";
 import {
+  getMergeBaseCommitShaFromAPI,
   getPullRequestFromHeadSha,
   getPullRequestFromPrNumber,
   getPRNumberFromMergeGroupBranch,
@@ -176,6 +186,125 @@ describe("getPRNumberFromMergeGroupBranch", () => {
     const result = getPRNumberFromMergeGroupBranch(
       "gh-readonly-queue/master/invalid",
     );
+    expect(result).toBeNull();
+  });
+});
+
+describe("getMergeBaseCommitShaFromAPI", () => {
+  /** URLs the compare handler was asked for, newest last. */
+  let requested: string[];
+
+  function createContext(env: Record<string, string> = {}): Context {
+    return {
+      env: {
+        GITHUB_REPOSITORY: "owner/repo",
+        GITHUB_TOKEN: "token123",
+        ...env,
+      },
+    };
+  }
+
+  beforeEach(() => {
+    requested = [];
+    for (const origin of [
+      "https://api.github.com",
+      "https://github.acme.com/api/v3",
+    ]) {
+      server.use(
+        http.get(`${origin}/repos/:owner/:repo/compare/*`, ({ request }) => {
+          requested.push(request.url);
+          if (request.url.includes("unknown-ref")) {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            merge_base_commit: { sha: "base-branch-tip" },
+          });
+        }),
+      );
+    }
+  });
+
+  it("returns the merge base GitHub computed", async () => {
+    const result = await getMergeBaseCommitShaFromAPI(createContext(), {
+      base: "main",
+      head: "head-sha",
+    });
+
+    expect(result).toBe("base-branch-tip");
+    expect(requested[0]).toBe(
+      "https://api.github.com/repos/owner/repo/compare/main...head-sha",
+    );
+  });
+
+  it("keeps slashes in a ref as path separators and encodes the rest", async () => {
+    await getMergeBaseCommitShaFromAPI(createContext(), {
+      base: "release/2.0 rc",
+      head: "head-sha",
+    });
+
+    expect(requested[0]).toContain("/compare/release/2.0%20rc...head-sha");
+  });
+
+  it("uses GITHUB_API_URL so it works on GitHub Enterprise", async () => {
+    const result = await getMergeBaseCommitShaFromAPI(
+      createContext({ GITHUB_API_URL: "https://github.acme.com/api/v3" }),
+      { base: "main", head: "head-sha" },
+    );
+
+    expect(result).toBe("base-branch-tip");
+    expect(requested[0]).toBe(
+      "https://github.acme.com/api/v3/repos/owner/repo/compare/main...head-sha",
+    );
+  });
+
+  it("returns null without a token, and says nothing about it", async () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    try {
+      const result = await getMergeBaseCommitShaFromAPI(
+        { env: { GITHUB_REPOSITORY: "owner/repo" } },
+        { base: "main", head: "head-sha" },
+      );
+
+      expect(result).toBeNull();
+      expect(requested).toEqual([]);
+      // git answers this next, so a build that works must not be told off.
+      expect(log).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it("returns null without a repository", async () => {
+    const result = await getMergeBaseCommitShaFromAPI(
+      { env: { GITHUB_TOKEN: "token123" } },
+      { base: "main", head: "head-sha" },
+    );
+
+    expect(result).toBeNull();
+    expect(requested).toEqual([]);
+  });
+
+  it("returns null on a non-OK response rather than failing the build", async () => {
+    const result = await getMergeBaseCommitShaFromAPI(createContext(), {
+      base: "unknown-ref",
+      head: "head-sha",
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("returns null when the API cannot be reached", async () => {
+    server.use(
+      http.get("https://api.github.com/repos/:owner/:repo/compare/*", () =>
+        HttpResponse.error(),
+      ),
+    );
+
+    const result = await getMergeBaseCommitShaFromAPI(createContext(), {
+      base: "main",
+      head: "head-sha",
+    });
+
     expect(result).toBeNull();
   });
 });

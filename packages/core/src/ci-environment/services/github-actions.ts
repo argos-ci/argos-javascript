@@ -10,6 +10,7 @@ import type * as webhooks from "@octokit/webhooks";
 import type { RepositoryDispatchContext } from "@vercel/repository-dispatch/context";
 import {
   getGitHubRepository,
+  getMergeBaseCommitShaFromAPI,
   getPRNumberFromMergeGroupBranch,
   getPullRequestFromHeadSha,
   getPullRequestFromPrNumber,
@@ -394,6 +395,49 @@ async function getTestMergeBaseCommitSha(
 }
 
 /**
+ * Resolve the base commit, preferring GitHub's own answer over anything the
+ * local repository can be asked.
+ */
+async function resolveMergeBaseCommitSha(
+  input: { base: string; head: string; headSha: string | null },
+  ctx: Context,
+): Promise<string | null> {
+  // Ask GitHub first. It answers from the real commit graph, so none of the
+  // shapes the local repository can take — a shallow clone, a graft hiding the
+  // parents, a merge ref recomputed since the run started — can get the answer
+  // wrong. Asked about the commit checked out rather than about GITHUB_SHA,
+  // which is what makes one query right for both shapes of pull request build:
+  // for a test-merge commit it answers with the base branch tip merged in, and
+  // for the pull request head with the fork point.
+  if (input.headSha) {
+    const apiMergeBase = await getMergeBaseCommitShaFromAPI(ctx, {
+      base: input.base,
+      head: input.headSha,
+    });
+    if (apiMergeBase) {
+      return apiMergeBase;
+    }
+  }
+
+  const testMergeBase = await getTestMergeBaseCommitSha(input, ctx);
+  if (testMergeBase) {
+    debug("Found base commit from the test-merge commit", testMergeBase);
+    return testMergeBase;
+  }
+  return getGitMergeBaseCommitSha(input);
+}
+
+/**
+ * Cache of the resolved base commit, keyed by everything the answer depends on.
+ *
+ * `upload()` runs once per build name, and every run resolves the same base
+ * commit from the same repository and the same commit. Without this, a project
+ * with a build name per browser pays for the query — and for the fetches behind
+ * the git fallback — once per name.
+ */
+const mergeBaseCache = new Map<string, Promise<string | null>>();
+
+/**
  * Get the commit to compare the build against: the base commit merged into the
  * test-merge commit when the build runs on one, else the merge base of the
  * branch and its base branch.
@@ -402,12 +446,20 @@ async function getMergeBaseCommitSha(
   input: { base: string; head: string },
   ctx: Context,
 ): Promise<string | null> {
-  const testMergeBase = await getTestMergeBaseCommitSha(input, ctx);
-  if (testMergeBase) {
-    debug("Found base commit from the test-merge commit", testMergeBase);
-    return testMergeBase;
+  const headSha = getHeadSha();
+  const key = JSON.stringify([
+    getGitHubRepository(ctx),
+    input.base,
+    input.head,
+    headSha,
+  ]);
+  const cached = mergeBaseCache.get(key);
+  if (cached) {
+    return cached;
   }
-  return getGitMergeBaseCommitSha(input);
+  const promise = resolveMergeBaseCommitSha({ ...input, headSha }, ctx);
+  mergeBaseCache.set(key, promise);
+  return promise;
 }
 
 const service: Service = {

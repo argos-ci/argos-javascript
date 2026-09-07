@@ -2,7 +2,17 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+import { setupServer } from "msw/node";
+import { http, HttpResponse } from "msw";
 import type { Context } from "../types";
 import service from "./github-actions";
 
@@ -90,6 +100,79 @@ describe("#getMergeBaseCommitSha", () => {
   afterEach(() => {
     process.chdir(cwd);
     rmSync(root, { recursive: true, force: true });
+  });
+
+  describe("with a GitHub token", () => {
+    const server = setupServer();
+    beforeAll(() => server.listen());
+    afterEach(() => server.resetHandlers());
+    afterAll(() => server.close());
+
+    function createTokenContext(env: Record<string, string> = {}): Context {
+      return createContext({
+        GITHUB_REPOSITORY: "argos-ci/argos",
+        GITHUB_TOKEN: "token123",
+        ...env,
+      });
+    }
+
+    it("prefers the merge base GitHub computed", async () => {
+      server.use(
+        http.get("https://api.github.com/repos/:owner/:repo/compare/*", () =>
+          HttpResponse.json({ merge_base_commit: { sha: "from-the-api" } }),
+        ),
+      );
+
+      const sha = await service.getMergeBaseCommitSha(
+        { base: "main", head: "feature" },
+        createTokenContext(),
+      );
+
+      // Not mainSha, which is what reading the test-merge commit's parents
+      // locally would give: GitHub answers from the real commit graph, so the
+      // shape of the local clone cannot get it wrong.
+      expect(sha).toBe("from-the-api");
+    });
+
+    it("asks about the commit checked out, not about GITHUB_SHA", async () => {
+      const asked: string[] = [];
+      server.use(
+        http.get(
+          "https://api.github.com/repos/:owner/:repo/compare/*",
+          ({ request }) => {
+            asked.push(request.url);
+            return HttpResponse.json({
+              merge_base_commit: { sha: "from-the-api" },
+            });
+          },
+        ),
+      );
+
+      // GITHUB_SHA lags behind the checkout, the way it does once GitHub has
+      // recomputed the merge ref. The query has to follow the checkout.
+      await service.getMergeBaseCommitSha(
+        { base: "main", head: "feature" },
+        createTokenContext({ GITHUB_SHA: featureSha }),
+      );
+
+      expect(asked[0]).toContain(`/compare/main...${mergeSha}`);
+      expect(asked[0]).not.toContain(featureSha);
+    });
+
+    it("falls back to git when the API does not answer", async () => {
+      server.use(
+        http.get("https://api.github.com/repos/:owner/:repo/compare/*", () =>
+          HttpResponse.error(),
+        ),
+      );
+
+      const sha = await service.getMergeBaseCommitSha(
+        { base: "main", head: "feature" },
+        createTokenContext(),
+      );
+
+      expect(sha).toBe(mainSha);
+    });
   });
 
   it("returns the base commit merged into the test-merge commit", async () => {

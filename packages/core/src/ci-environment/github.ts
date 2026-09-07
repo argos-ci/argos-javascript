@@ -31,6 +31,30 @@ function assertGitHubRepository(ctx: Context): string {
 }
 
 /**
+ * Build the URL of an API endpoint. The runner sets `GITHUB_API_URL`, which
+ * points at the appliance on GitHub Enterprise and at the public API elsewhere.
+ *
+ * Joined by hand rather than through the `URL` base argument, which would drop
+ * the path an Enterprise appliance is mounted under: an absolute path replaces
+ * it outright.
+ */
+function buildGitHubAPIURL({ env }: Context, path: string): URL {
+  const base = (env.GITHUB_API_URL || "https://api.github.com").replace(
+    /\/+$/,
+    "",
+  );
+  return new URL(`${base}${path}`);
+}
+
+/**
+ * Read the GitHub token from the environment, without telling the user off for
+ * not having set one.
+ */
+function readGitHubToken({ env }: Context): string | null {
+  return env.GITHUB_TOKEN || null;
+}
+
+/**
  * Get a GitHub token from environment variables.
  */
 function getGitHubToken({ env }: Context): string | null {
@@ -65,8 +89,18 @@ DISABLE_GITHUB_TOKEN_WARNING: true
 async function fetchGitHubAPI(
   ctx: Context,
   url: URL | string,
+  options?: {
+    /**
+     * Tell the user how to set a token when there is none. Left off by callers
+     * that fall back to something else, so a working build stays quiet.
+     */
+    notifyWithoutToken?: boolean;
+  },
 ): Promise<Response | null> {
-  const githubToken = getGitHubToken(ctx);
+  const githubToken =
+    options?.notifyWithoutToken === false
+      ? readGitHubToken(ctx)
+      : getGitHubToken(ctx);
   if (!githubToken) {
     return null;
   }
@@ -81,8 +115,6 @@ async function fetchGitHubAPI(
   return response;
 }
 
-const GITHUB_API_BASE_URL = "https://api.github.com";
-
 /**
  * Get a pull request from a head sha.
  * Fetch the last 30 pull requests sorted by updated date
@@ -95,7 +127,7 @@ export async function getPullRequestFromHeadSha(
 ): Promise<GitHubPullRequest | null> {
   debug(`Fetching pull request details from head sha: ${sha}`);
   const githubRepository = assertGitHubRepository(ctx);
-  const url = new URL(`/repos/${githubRepository}/pulls`, GITHUB_API_BASE_URL);
+  const url = buildGitHubAPIURL(ctx, `/repos/${githubRepository}/pulls`);
   url.search = new URLSearchParams({
     state: "open",
     sort: "updated",
@@ -136,10 +168,7 @@ export async function getPullRequestFromPrNumber(
   const githubRepository = assertGitHubRepository(ctx);
   const response = await fetchGitHubAPI(
     ctx,
-    new URL(
-      `/repos/${githubRepository}/pulls/${prNumber}`,
-      GITHUB_API_BASE_URL,
-    ),
+    buildGitHubAPIURL(ctx, `/repos/${githubRepository}/pulls/${prNumber}`),
   );
   if (!response) {
     return null;
@@ -170,4 +199,72 @@ export function getPRNumberFromMergeGroupBranch(branch: string) {
     return prNumber;
   }
   return null;
+}
+
+/**
+ * Get the commit of `base` the given commit is derived from, as GitHub computes
+ * it — the same `compare` endpoint the server queries for projects that granted
+ * it content access.
+ *
+ * Keyed on the commit that is actually checked out, which makes it right for
+ * either shape of pull request build without having to tell them apart: for a
+ * test-merge commit it returns the base branch tip merged in (even once the base
+ * branch has moved past it), and for the pull request head it returns the fork
+ * point, which is the commit those screenshots are derived from.
+ *
+ * Returns `null` when there is no token, the refs are unknown, or the API is
+ * unreachable — every caller has git to fall back on.
+ */
+export async function getMergeBaseCommitShaFromAPI(
+  ctx: Context,
+  input: { base: string; head: string },
+): Promise<string | null> {
+  const githubRepository = getGitHubRepository(ctx);
+  if (!githubRepository) {
+    return null;
+  }
+
+  // Refs can contain slashes, which are path separators here, so the segments
+  // are encoded rather than the ref as a whole.
+  const encodeRef = (ref: string) =>
+    ref.split("/").map(encodeURIComponent).join("/");
+  const basehead = `${encodeRef(input.base)}...${encodeRef(input.head)}`;
+
+  debug(`Fetching the merge base of ${basehead} from the GitHub API`);
+
+  const response = await (async () => {
+    try {
+      return await fetchGitHubAPI(
+        ctx,
+        buildGitHubAPIURL(
+          ctx,
+          `/repos/${githubRepository}/compare/${basehead}`,
+        ),
+        { notifyWithoutToken: false },
+      );
+    } catch (error) {
+      debug("Failed to reach the GitHub API", error);
+      return null;
+    }
+  })();
+
+  if (!response) {
+    debug("No GitHub token, falling back to git to find the merge base");
+    return null;
+  }
+
+  if (!response.ok) {
+    // Not fatal: a missing ref, a token without access to the repository, or a
+    // rate limit all leave git as the way to answer.
+    debug(
+      `Non-OK response (status: ${response.status}) while comparing ${basehead}`,
+    );
+    return null;
+  }
+
+  const result: { merge_base_commit?: { sha?: string } } =
+    await response.json();
+  const sha = result.merge_base_commit?.sha ?? null;
+  debug("Merge base from the GitHub API", sha);
+  return sha;
 }
