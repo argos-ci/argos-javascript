@@ -268,3 +268,92 @@ export async function getMergeBaseCommitShaFromAPI(
   debug("Merge base from the GitHub API", sha);
   return sha;
 }
+
+/**
+ * Commits returned per request. The maximum the endpoint accepts.
+ */
+const COMMITS_PER_PAGE = 100;
+
+/**
+ * Most commits fetched for one ancestor listing, so a search that finds nothing
+ * cannot spend the hourly request budget. Deep enough to cover the window the
+ * server searches several times over.
+ */
+const MAX_LISTED_COMMITS = 1000;
+
+/**
+ * List the ancestors of a commit as GitHub records them, closest first, up to
+ * `limit` commits. The commit itself is excluded.
+ *
+ * The same endpoint the server walks for projects that granted it content
+ * access. Asking GitHub rather than the local repository matters because the
+ * answer has to be *complete*: a commit missing from this list is a baseline
+ * that cannot be chosen, and a shallow clone is under no obligation to hold the
+ * whole base branch.
+ *
+ * Returns `null` — rather than an empty list — when there is no token, the
+ * commit is unknown, or the API is unreachable, so a caller can tell "no
+ * ancestors" apart from "ask something else".
+ */
+export async function listAncestorCommitsFromAPI(
+  ctx: Context,
+  input: { sha: string; limit: number },
+): Promise<string[] | null> {
+  const githubRepository = getGitHubRepository(ctx);
+  if (!githubRepository) {
+    return null;
+  }
+
+  // One extra, since the commit itself comes back first and is dropped.
+  const wanted = Math.min(input.limit + 1, MAX_LISTED_COMMITS);
+  const commits: string[] = [];
+
+  for (let page = 1; commits.length < wanted; page++) {
+    const url = buildGitHubAPIURL(ctx, `/repos/${githubRepository}/commits`);
+    url.search = new URLSearchParams({
+      sha: input.sha,
+      per_page: String(Math.min(COMMITS_PER_PAGE, wanted - commits.length)),
+      page: String(page),
+    }).toString();
+
+    const response = await (async () => {
+      try {
+        return await fetchGitHubAPI(ctx, url, { notifyWithoutToken: false });
+      } catch (error) {
+        debug("Failed to reach the GitHub API", error);
+        return null;
+      }
+    })();
+
+    if (!response) {
+      debug("No GitHub token, falling back to git to list the ancestors");
+      return null;
+    }
+
+    if (!response.ok) {
+      debug(
+        `Non-OK response (status: ${response.status}) while listing the ancestors of ${input.sha}`,
+      );
+      // Pages already read are a correct prefix, so they are worth keeping —
+      // but only once we have something to hand back.
+      return commits.length > 0 ? commits.slice(1) : null;
+    }
+
+    const result: { sha?: string }[] = await response.json();
+    for (const commit of result) {
+      if (commit.sha) {
+        commits.push(commit.sha);
+      }
+    }
+
+    // A short page is the last one.
+    if (result.length < COMMITS_PER_PAGE) {
+      break;
+    }
+  }
+
+  debug(
+    `Listed ${commits.length} commit(s) from the GitHub API for ${input.sha}`,
+  );
+  return commits.slice(1);
+}

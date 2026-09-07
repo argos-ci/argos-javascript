@@ -13,6 +13,7 @@ import { http, HttpResponse } from "msw";
 import type { Context } from "./types";
 import {
   getMergeBaseCommitShaFromAPI,
+  listAncestorCommitsFromAPI,
   getPullRequestFromHeadSha,
   getPullRequestFromPrNumber,
   getPRNumberFromMergeGroupBranch,
@@ -306,5 +307,153 @@ describe("getMergeBaseCommitShaFromAPI", () => {
     });
 
     expect(result).toBeNull();
+  });
+});
+
+describe("listAncestorCommitsFromAPI", () => {
+  /** Pages the commits handler was asked for, in order. */
+  let pages: {
+    sha: string | null;
+    perPage: string | null;
+    page: string | null;
+  }[];
+
+  function createContext(env: Record<string, string> = {}): Context {
+    return {
+      env: {
+        GITHUB_REPOSITORY: "owner/repo",
+        GITHUB_TOKEN: "token123",
+        ...env,
+      },
+    };
+  }
+
+  /** Serve `total` commits named c0..c(total-1), paginated like GitHub. */
+  function serveCommits(total: number) {
+    server.use(
+      http.get(
+        "https://api.github.com/repos/:owner/:repo/commits",
+        ({ request }) => {
+          const url = new URL(request.url);
+          pages.push({
+            sha: url.searchParams.get("sha"),
+            perPage: url.searchParams.get("per_page"),
+            page: url.searchParams.get("page"),
+          });
+          const perPage = Number(url.searchParams.get("per_page"));
+          const page = Number(url.searchParams.get("page"));
+          const start = (page - 1) * 100;
+          const slice = Array.from(
+            { length: Math.max(0, Math.min(perPage, total - start)) },
+            (_, i) => ({ sha: `c${start + i}` }),
+          );
+          return HttpResponse.json(slice);
+        },
+      ),
+    );
+  }
+
+  beforeEach(() => {
+    pages = [];
+  });
+
+  it("drops the commit itself and returns its ancestors closest first", async () => {
+    serveCommits(10);
+
+    const result = await listAncestorCommitsFromAPI(createContext(), {
+      sha: "c0",
+      limit: 5,
+    });
+
+    // c0 is the commit asked about, so the ancestors start at c1.
+    expect(result).toEqual(["c1", "c2", "c3", "c4", "c5"]);
+    expect(pages[0]?.sha).toBe("c0");
+  });
+
+  it("pages until it has the requested number of commits", async () => {
+    serveCommits(500);
+
+    const result = await listAncestorCommitsFromAPI(createContext(), {
+      sha: "c0",
+      limit: 249,
+    });
+
+    expect(result).toHaveLength(249);
+    // 250 commits wanted including the one asked about: 100, 100, then 50.
+    expect(pages.map((p) => p.perPage)).toEqual(["100", "100", "50"]);
+    expect(pages.map((p) => p.page)).toEqual(["1", "2", "3"]);
+  });
+
+  it("stops when the history is shorter than asked for", async () => {
+    serveCommits(30);
+
+    const result = await listAncestorCommitsFromAPI(createContext(), {
+      sha: "c0",
+      limit: 299,
+    });
+
+    expect(result).toHaveLength(29);
+    // One short page is enough to know there is no more.
+    expect(pages).toHaveLength(1);
+  });
+
+  it("caps how much it will fetch so a fruitless search cannot burn the budget", async () => {
+    serveCommits(100_000);
+
+    const result = await listAncestorCommitsFromAPI(createContext(), {
+      sha: "c0",
+      limit: 5000,
+    });
+
+    expect(result).toHaveLength(999);
+    expect(pages).toHaveLength(10);
+  });
+
+  it("returns null without a token so the caller falls back to git", async () => {
+    const result = await listAncestorCommitsFromAPI(
+      { env: { GITHUB_REPOSITORY: "owner/repo" } },
+      { sha: "c0", limit: 5 },
+    );
+
+    expect(result).toBeNull();
+    expect(pages).toEqual([]);
+  });
+
+  it("returns null when the API cannot be reached", async () => {
+    server.use(
+      http.get("https://api.github.com/repos/:owner/:repo/commits", () =>
+        HttpResponse.error(),
+      ),
+    );
+
+    const result = await listAncestorCommitsFromAPI(createContext(), {
+      sha: "c0",
+      limit: 5,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the pages it already read when a later one fails", async () => {
+    let call = 0;
+    server.use(
+      http.get("https://api.github.com/repos/:owner/:repo/commits", () => {
+        call++;
+        if (call > 1) {
+          return new HttpResponse(null, { status: 502 });
+        }
+        return HttpResponse.json(
+          Array.from({ length: 100 }, (_, i) => ({ sha: `c${i}` })),
+        );
+      }),
+    );
+
+    const result = await listAncestorCommitsFromAPI(createContext(), {
+      sha: "c0",
+      limit: 249,
+    });
+
+    // A correct prefix beats nothing: these are real ancestors, in order.
+    expect(result).toEqual(Array.from({ length: 99 }, (_, i) => `c${i + 1}`));
   });
 });

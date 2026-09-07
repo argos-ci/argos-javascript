@@ -4,7 +4,7 @@ import {
   getCommitParents,
   getMergeBaseCommitSha as getGitMergeBaseCommitSha,
   head as getHeadSha,
-  listAncestorCommits,
+  listAncestorCommits as listGitAncestorCommits,
 } from "../git";
 import type * as webhooks from "@octokit/webhooks";
 import type { RepositoryDispatchContext } from "@vercel/repository-dispatch/context";
@@ -12,6 +12,7 @@ import {
   getGitHubRepository,
   getMergeBaseCommitShaFromAPI,
   getPRNumberFromMergeGroupBranch,
+  listAncestorCommitsFromAPI,
   getPullRequestFromHeadSha,
   getPullRequestFromPrNumber,
   type GitHubPullRequest,
@@ -459,6 +460,47 @@ async function getMergeBaseCommitSha(
   }
   const promise = resolveMergeBaseCommitSha({ ...input, headSha }, ctx);
   mergeBaseCache.set(key, promise);
+  return promise;
+}
+
+/**
+ * Cache of ancestor listings, keyed by everything the answer depends on.
+ *
+ * `upload()` runs once per build name and asks for the same listing every time.
+ */
+const ancestorsCache = new Map<string, Promise<string[]>>();
+
+/**
+ * List the ancestors of a commit, closest first, preferring GitHub's answer.
+ *
+ * Completeness is what matters here: the server picks the baseline by walking
+ * this list in order, so a commit missing from it is a baseline that cannot be
+ * chosen — and the shallow clones CI uses hold whatever history the fetch
+ * happened to bring. Falls back to git, which is where this used to come from.
+ */
+async function listAncestorCommits(
+  input: { sha: string; limit: number },
+  ctx: Context,
+): Promise<string[]> {
+  const key = JSON.stringify([
+    getGitHubRepository(ctx),
+    input.sha,
+    input.limit,
+  ]);
+  const cached = ancestorsCache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  const promise = (async () => {
+    const fromAPI = await listAncestorCommitsFromAPI(ctx, input);
+    if (fromAPI) {
+      return fromAPI;
+    }
+    return listGitAncestorCommits(input);
+  })();
+
+  ancestorsCache.set(key, promise);
   return promise;
 }
 
