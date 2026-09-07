@@ -347,11 +347,22 @@ async function getTestMergeBaseCommitSha(
     return null;
   }
 
-  const parents = await getCommitParents(sha);
+  const mergeRef = `refs/pull/${pullRequest.number}/merge`;
+  const parents = getCommitParents(sha);
+
+  // Reported apart from the shape check below: a commit we could not read says
+  // nothing about whether it is a test merge, and blaming its shape sends
+  // anyone reading the debug output after the wrong thing.
+  if (!parents) {
+    debug(
+      `Could not read the parents of ${sha}, ignoring the test-merge commit`,
+    );
+    return null;
+  }
 
   // A test-merge commit merges the pull request head (second parent) into the
   // tip of the base branch (first parent).
-  if (parents?.length !== 2) {
+  if (parents.length !== 2) {
     debug(`${sha} is not a merge commit, ignoring the test-merge commit`);
     return null;
   }
@@ -368,7 +379,7 @@ async function getTestMergeBaseCommitSha(
   // genuine test-merge build, and the fallback baselines it against the fork
   // point — reporting every change merged into the base branch since as a
   // change of the pull request.
-  if (ctx.env.GITHUB_REF === `refs/pull/${pullRequest.number}/merge`) {
+  if (ctx.env.GITHUB_REF === mergeRef) {
     return parents[0] ?? null;
   }
 

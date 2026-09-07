@@ -326,28 +326,24 @@ describe("#getCommitParents", () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it("returns the parents of a merge commit, first parent first", async () => {
-    await expect(getCommitParents(mergeSha)).resolves.toEqual([
-      mainSha,
-      featureSha,
-    ]);
+  it("returns the parents of a merge commit, first parent first", () => {
+    expect(getCommitParents(mergeSha)).toEqual([mainSha, featureSha]);
   });
 
-  it("returns an empty array for a root commit", async () => {
-    await expect(getCommitParents(rootCommitSha)).resolves.toEqual([]);
+  it("returns an empty array for a root commit", () => {
+    expect(getCommitParents(rootCommitSha)).toEqual([]);
   });
 
-  it("returns null for an unknown commit", async () => {
-    await expect(getCommitParents("f".repeat(40))).resolves.toBe(null);
+  it("returns null for an unknown commit", () => {
+    expect(getCommitParents("f".repeat(40))).toBe(null);
   });
 
-  it("deepens a shallow history to read the parents", async () => {
-    // The state of a CI checkout: a shallow clone where git hides the parents
-    // of the commits at the boundary of the history.
-    // "--depth" implies "--single-branch", so the branch is named explicitly:
-    // it would otherwise be read from the remote HEAD, which points to another
-    // branch when git defaults to "master" for new repositories.
-    const shallowDir = join(root, "shallow");
+  it("reads the parents on a shallow clone without reaching the remote", async () => {
+    // What CI has: a shallow checkout, where git grafts the boundary commit to
+    // look parentless. The parent SHAs are in the commit object either way, so
+    // no fetch is needed - and none may be relied on, since the remote can stop
+    // advertising a commit GitHub generated for the pull request.
+    const shallowDir = join(root, "shallow-offline");
     execFileSync("git", [
       "clone",
       "--depth=1",
@@ -360,18 +356,14 @@ describe("#getCommitParents", () => {
       execFileSync("git", ["-C", shallowDir, ...args])
         .toString()
         .trim();
+    // Nothing to fetch from: the answer has to come from the local object.
+    shallowGit("remote", "set-url", "origin", join(root, "does-not-exist.git"));
     process.chdir(shallowDir);
 
-    // The commit is there, but its parents are not…
-    expect(shallowGit("rev-parse", "HEAD")).toBe(mergeSha);
     expect(shallowGit("rev-list", "--parents", "-n", "1", mergeSha, "--")).toBe(
       mergeSha,
     );
 
-    // … until they are fetched.
-    await expect(getCommitParents(mergeSha)).resolves.toEqual([
-      mainSha,
-      featureSha,
-    ]);
+    expect(getCommitParents(mergeSha)).toEqual([mainSha, featureSha]);
   });
 });

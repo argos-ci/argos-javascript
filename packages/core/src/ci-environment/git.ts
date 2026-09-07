@@ -354,52 +354,44 @@ export async function listAncestorCommits(input: {
 }
 
 /**
- * Read the parent commits of a commit, ordered as recorded in the commit — the
- * first parent first. Returns `null` when the commit is unknown, and an empty
- * array when it has no parent.
+ * Read the parent commits recorded in a commit object, the first parent first.
+ * Returns `null` when the object cannot be read — it is not in the repository,
+ * or git refused to print it — and an empty array for a root commit.
  *
- * The history is deepened with a shallow fetch when the parents are not
- * available locally: in the shallow clones typically used in CI, git hides the
- * parents of the commits at the boundary of the history.
+ * Read from the object rather than with `git rev-list --parents`, which honours
+ * the shallow graft: on the shallow clones CI uses it reports every commit at
+ * the boundary of the history as having no parent, which is most of what we ask
+ * about. The object carries the parent SHAs whatever the graft says, so this
+ * answers locally, and without the remote having to still advertise the commit:
+ * GitHub stops advertising a test-merge commit as soon as it recomputes
+ * `refs/pull/<n>/merge`, and fetching it then fails with "not our ref".
+ *
+ * Only the SHAs are recovered this way. The parent *objects* can be absent, so
+ * a caller that goes on to walk from one has to be able to fetch it — see
+ * {@link listAncestorCommits}, which deepens the history before listing.
  */
-export async function getCommitParents(sha: string): Promise<string[] | null> {
-  const localParents = readCommitParents(sha);
-  if (localParents?.length) {
-    return localParents;
-  }
-
-  // Fetch the commit and its parents, so the parents stop being hidden by the
-  // boundary of a shallow history.
+export function getCommitParents(sha: string): string[] | null {
   try {
-    await runGitFetch(["--depth=2", "origin", sha]);
+    const raw = execFileSync("git", ["cat-file", "commit", sha], {
+      stdio: ["ignore", "pipe", "pipe"],
+      // The whole object is printed, message included, where a bounded
+      // `rev-list --parents` used to be enough. A generated commit message can
+      // outgrow the 1MB default, and the overflow is reported as a failure to
+      // read the commit at all.
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    // The header runs up to the first blank line, and holds one "parent <sha>"
+    // line per parent, in order.
+    const [header = ""] = raw.toString().split("\n\n", 1);
+    return header
+      .split("\n")
+      .filter((line) => line.startsWith("parent "))
+      .map((line) => line.slice("parent ".length).trim());
   } catch (error) {
     debug(
-      `Failed to deepen history for ${sha}, using local history`,
+      `Failed to read the commit object of ${sha}`,
       getGitErrorOutput(error),
     );
-    return localParents;
-  }
-
-  return readCommitParents(sha);
-}
-
-/**
- * Read the parent commits of a commit from the local history. Returns `null`
- * when the commit is unknown, and an empty array when it has no parent — a root
- * commit, or a commit at the boundary of a shallow history, where git hides the
- * parents.
- */
-function readCommitParents(sha: string): string[] | null {
-  try {
-    const raw = execFileSync(
-      "git",
-      ["rev-list", "--parents", "-n", "1", sha, "--"],
-      { stdio: ["ignore", "pipe", "pipe"] },
-    );
-    const [, ...parents] = raw.toString().trim().split(" ");
-    return parents;
-  } catch (error) {
-    debug(`Failed to read the parents of ${sha}`, getGitErrorOutput(error));
     return null;
   }
 }
