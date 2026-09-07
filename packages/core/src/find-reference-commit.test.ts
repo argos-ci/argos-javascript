@@ -159,11 +159,12 @@ describe("#resolveBaseline", () => {
     expect(findBaseline).not.toHaveBeenCalled();
   });
 
-  it("uses the baseline commit and sends no parent commits when one is found", async () => {
-    const ancestors = Array.from({ length: 200 }, (_, i) => `anc-${i}`);
+  it("hands the server the merge base and its ancestors when a baseline is reachable", async () => {
+    const ancestors = Array.from({ length: 500 }, (_, i) => `anc-${i}`);
     const getMergeBase = vi.fn(async () => "merge-base");
     const listCommits = createMergeBaseListCommits(ancestors);
-    const findBaseline = vi.fn(async () => createBaseline("anc-3"));
+    // The closest commit that happens to have a completed build right now.
+    const findBaseline = vi.fn(async () => createBaseline("anc-42"));
 
     const result = await resolveBaseline({
       getMergeBase,
@@ -171,7 +172,16 @@ describe("#resolveBaseline", () => {
       findBaseline,
     });
 
-    expect(result).toEqual({ referenceCommit: "anc-3", parentCommits: null });
+    // The merge base, not "anc-42". Naming a commit here would freeze the
+    // baseline to the builds that are complete at this instant, and the server
+    // stops at the reference commit as soon as it has a bucket for it.
+    expect(result.referenceCommit).toBe("merge-base");
+    expect(result.parentCommits).toEqual(
+      ["merge-base", ...ancestors].slice(0, PARENT_COMMITS_LIMIT),
+    );
+    // A single request: the window the server searches on its own.
+    expect(findBaseline).toHaveBeenCalledTimes(1);
+    expect(findBaseline).toHaveBeenCalledWith(result.parentCommits);
   });
 
   it("offers the merge base itself as the first baseline candidate", async () => {
@@ -188,15 +198,35 @@ describe("#resolveBaseline", () => {
       findBaseline,
     });
 
-    expect(result).toEqual({
-      referenceCommit: "merge-base",
-      parentCommits: null,
-    });
+    expect(result.referenceCommit).toBe("merge-base");
     // The merge base is the first candidate sent to the API.
     expect(findBaseline.mock.calls[0]?.[0]?.[0]).toBe("merge-base");
   });
 
-  it("falls back to the merge base with parent commits when no baseline is found", async () => {
+  it("names the commit itself when the baseline is out of the server's reach", async () => {
+    const ancestors = Array.from({ length: 1000 }, (_, i) => `anc-${i}`);
+    const getMergeBase = vi.fn(async () => "merge-base");
+    const listCommits = createMergeBaseListCommits(ancestors);
+    const findBaseline = vi
+      .fn<(commits: string[]) => Promise<Build | null>>()
+      // Nothing within the window the server searches…
+      .mockResolvedValueOnce(null)
+      // … but there is one further back, which the server cannot walk to.
+      .mockResolvedValueOnce(createBaseline("anc-700"));
+
+    const result = await resolveBaseline({
+      getMergeBase,
+      listCommits,
+      findBaseline,
+    });
+
+    expect(result.referenceCommit).toBe("anc-700");
+    expect(result.parentCommits).toEqual(
+      ["anc-700", ...ancestors].slice(0, PARENT_COMMITS_LIMIT),
+    );
+  });
+
+  it("keeps the merge base when no baseline exists anywhere", async () => {
     const ancestors = Array.from({ length: 500 }, (_, i) => `anc-${i}`);
     const getMergeBase = vi.fn(async () => "merge-base");
     const listCommits = createMergeBaseListCommits(ancestors);
@@ -214,5 +244,20 @@ describe("#resolveBaseline", () => {
       ["merge-base", ...ancestors].slice(0, PARENT_COMMITS_LIMIT),
     );
     expect(result.parentCommits).toHaveLength(PARENT_COMMITS_LIMIT);
+  });
+
+  it("never lists a shallower history than it has already fetched", async () => {
+    const ancestors = Array.from({ length: 1000 }, (_, i) => `anc-${i}`);
+    const getMergeBase = vi.fn(async () => "merge-base");
+    const listCommits = createMergeBaseListCommits(ancestors);
+    const findBaseline = vi.fn(async () => null);
+
+    await resolveBaseline({ getMergeBase, listCommits, findBaseline });
+
+    const limits = listCommits.mock.calls.map(([, limit]) => limit);
+    // Each listing deepens the shallow clone with a fetch, so a smaller limit
+    // afterwards would shorten the history back and hide commits we have.
+    expect(limits[0]).toBe(PARENT_COMMITS_LIMIT);
+    expect(limits).toEqual([...limits].sort((a, b) => a - b));
   });
 });

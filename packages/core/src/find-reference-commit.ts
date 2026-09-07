@@ -50,6 +50,13 @@ export interface FindReferenceCommitParams {
    * when none is found.
    */
   findBaseline: (commits: string[]) => Promise<Build | null>;
+
+  /**
+   * Number of leading commits the caller has already inspected. Batches at or
+   * below that size are skipped, so the search never asks for a shallower
+   * history than the caller already fetched.
+   */
+  inspectedCount?: number;
 }
 
 /**
@@ -65,9 +72,15 @@ export interface FindReferenceCommitParams {
 export async function findReferenceCommit(
   params: FindReferenceCommitParams,
 ): Promise<string | null> {
-  let inspectedCount = 0;
+  let inspectedCount = params.inspectedCount ?? 0;
 
   for (const limit of getCumulativeBatchSizes()) {
+    // Already covered by the caller or by a previous batch. Asking anyway would
+    // re-fetch the history at a shallower depth than it already has.
+    if (limit <= inspectedCount) {
+      continue;
+    }
+
     const commits = await params.listCommits(limit);
 
     // Only send the commits not already inspected in previous batches. Earlier
@@ -75,7 +88,10 @@ export async function findReferenceCommit(
     // each batch the closest commit still wins overall.
     const batch = commits.slice(inspectedCount);
 
-    // No new commits became available: the history is exhausted.
+    // The listing stopped growing, so the history is exhausted. This is the only
+    // reliable signal: a listing shorter than `limit` is normal on the shallow
+    // clones CI uses, where git stops at the boundary of the fetched history and
+    // a deeper fetch does bring more commits.
     if (batch.length === 0) {
       break;
     }
@@ -88,12 +104,6 @@ export async function findReferenceCommit(
     }
 
     inspectedCount = commits.length;
-
-    // Fewer commits than requested: the history is exhausted, so asking for more
-    // would return the same list.
-    if (commits.length < limit) {
-      break;
-    }
   }
 
   debug("No eligible baseline found among ancestor commits");
@@ -101,11 +111,9 @@ export async function findReferenceCommit(
 }
 
 /**
- * Number of commits (the merge base plus its ancestors) sent as `parentCommits`
- * when no baseline build is found yet. The baseline build may still be
- * processing on the server; sending these lets the server resolve the baseline
- * once it completes, when it processes this build. The server treats the first
- * commit as the reference commit and searches the rest.
+ * Number of commits (the reference commit plus its ancestors) sent as
+ * `parentCommits`, which is the window the server searches on its own. The
+ * server treats the first commit as the reference commit and searches the rest.
  */
 export const PARENT_COMMITS_LIMIT = 300;
 
@@ -137,7 +145,8 @@ export interface BaselineResolution {
   referenceCommit: string | null;
   /**
    * Commits sent to the server so it can resolve the baseline itself — the
-   * reference commit followed by its ancestors — or `null` when not needed.
+   * reference commit followed by its ancestors — or `null` when there is no
+   * reference commit.
    */
   parentCommits: string[] | null;
 }
@@ -149,12 +158,21 @@ export interface BaselineResolution {
  * 1. Find the base commit the build content is derived from — usually the merge
  *    base, the closest common ancestor of the build branch and its base branch.
  *    This is always the starting point.
- * 2. From the merge base, ask the API to pick the closest commit (the merge base
- *    itself or one of its ancestors) that has an eligible baseline build, and use
- *    it as the reference commit.
- * 3. If none is found, the baseline build may still be processing on the server.
- *    Fall back to the merge base as the reference commit and send its parent
- *    commits so the server can resolve the baseline once that build completes.
+ * 2. Send it as the reference commit, followed by the ancestors the server
+ *    searches on its own, and let the server pick the baseline when it
+ *    processes the build.
+ * 3. Only when no baseline is reachable from the merge base do we search deeper
+ *    and name a commit ourselves, because past {@link PARENT_COMMITS_LIMIT} the
+ *    server cannot walk back that far.
+ *
+ * Step 2 is deliberately not "resolve the baseline here and send that commit".
+ * `findBaseline` only sees builds that are already complete, so on a busy base
+ * branch the closest ones are routinely still running when this executes and
+ * the search walks straight past them. A commit named here is also final: the
+ * server stops at the reference commit as soon as it has a bucket, and for a
+ * project without remote content access there is no ancestor list to fall back
+ * on. Handing over the chain instead keeps the decision where the freshest
+ * information is.
  */
 export async function resolveBaseline(
   params: ResolveBaselineParams,
@@ -166,23 +184,38 @@ export async function resolveBaseline(
   }
   debug("Found merge base", mergeBase);
 
-  const referenceCommit = await findReferenceCommit({
-    listCommits: (limit) => params.listCommits(mergeBase, limit),
-    findBaseline: params.findBaseline,
-  });
-
-  if (referenceCommit) {
-    debug("Found reference commit from baseline", referenceCommit);
-    return { referenceCommit, parentCommits: null };
-  }
-
-  // No eligible baseline build yet — it may still be processing. Fall back to
-  // the merge base and let the server resolve the baseline from the parent
-  // commits once that build completes.
   const parentCommits = await params.listCommits(
     mergeBase,
     PARENT_COMMITS_LIMIT,
   );
-  debug("No baseline found, using merge base with parent commits", mergeBase);
-  return { referenceCommit: mergeBase, parentCommits };
+
+  // Whether a baseline exists within the server's reach — not which one, that
+  // is the server's call.
+  const reachable = await params.findBaseline(parentCommits);
+  if (reachable) {
+    debug("Baseline reachable from the merge base", mergeBase);
+    return { referenceCommit: mergeBase, parentCommits };
+  }
+
+  const referenceCommit = await findReferenceCommit({
+    listCommits: (limit) => params.listCommits(mergeBase, limit),
+    findBaseline: params.findBaseline,
+    inspectedCount: parentCommits.length,
+  });
+
+  // Nothing anywhere in the history. Keep the merge base so the build is still
+  // compared against whatever lands on it later.
+  if (!referenceCommit) {
+    debug("No baseline found, using merge base with parent commits", mergeBase);
+    return { referenceCommit: mergeBase, parentCommits };
+  }
+
+  debug("Baseline out of the server's reach, using", referenceCommit);
+  return {
+    referenceCommit,
+    parentCommits: await params.listCommits(
+      referenceCommit,
+      PARENT_COMMITS_LIMIT,
+    ),
+  };
 }
