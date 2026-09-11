@@ -35,33 +35,58 @@ describe.skip("#getRepositoryURL", () => {
   });
 });
 
-describe("#getMergeBaseCommitSha (command injection)", () => {
+describe("injection through the branch or commit of the CI environment", () => {
   let cwd: string;
+  let root: string;
   let repoDir: string;
   let markerFile: string;
+  /** SHA of the tip of `main`, pushed to origin. */
+  let mainSha: string;
+  let warn: ReturnType<typeof vi.spyOn>;
+
+  const git = (...args: string[]) =>
+    execFileSync("git", ["-C", repoDir, ...args])
+      .toString()
+      .trim();
 
   beforeEach(() => {
     cwd = process.cwd();
-    const root = mkdtempSync(join(tmpdir(), "argos-git-test-"));
+    root = mkdtempSync(join(tmpdir(), "argos-git-injection-test-"));
     repoDir = join(root, "repo");
     markerFile = join(root, "pwned");
 
     // A bare repo acts as the "origin" remote so that git fetch has a
-    // reachable target.
+    // reachable target. A local path goes through git's file transport, which
+    // runs `--upload-pack` through a shell like the ssh transport does.
     const bareDir = join(root, "origin.git");
     execFileSync("git", ["init", "--bare", bareDir]);
     execFileSync("git", ["init", repoDir]);
-    const git = (...args: string[]) =>
-      execFileSync("git", ["-C", repoDir, ...args]);
     git("remote", "add", "origin", bareDir);
+    git("config", "user.email", "test@argos-ci.com");
+    git("config", "user.name", "Argos Test");
+    git("commit", "--allow-empty", "-m", "initial");
+    git("branch", "-M", "main");
+    git("push", "origin", "main");
+    mainSha = git("rev-parse", "HEAD");
 
+    warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     process.chdir(repoDir);
   });
 
   afterEach(() => {
     process.chdir(cwd);
-    rmSync(join(repoDir, ".."), { recursive: true, force: true });
+    warn.mockRestore();
+    rmSync(root, { recursive: true, force: true });
   });
+
+  /**
+   * Mirrors the GHSA-v58q-fvq4-9vh4 PoC: a ref name starting with a dash is
+   * accepted by `git check-ref-format` and can be pushed, but once in a
+   * positional argument git parses it as an option. `--upload-pack` makes git
+   * run the given program through a shell on ssh:// and file:// origins.
+   */
+  const getOptionInjection = () =>
+    `--upload-pack=touch\${IFS}${markerFile};true`;
 
   it("does not execute shell metacharacters in the branch name", async () => {
     // Mirrors the GHSA-4x45-gxvp-6283 PoC: a ref containing $() command
@@ -78,6 +103,52 @@ describe("#getMergeBaseCommitSha (command injection)", () => {
     }
 
     expect(existsSync(markerFile)).toBe(false);
+  });
+
+  it("does not let a branch name starting with a dash inject a git option", async () => {
+    const malicious = getOptionInjection();
+
+    const sha = await getMergeBaseCommitSha({ base: "main", head: malicious });
+
+    expect(existsSync(markerFile)).toBe(false);
+    // The ref exists neither on origin nor locally.
+    expect(sha).toBe(null);
+  });
+
+  it("does not let a reference commit starting with a dash inject a git option", async () => {
+    const malicious = getOptionInjection();
+
+    const ancestors = await listAncestorCommits({ sha: malicious, limit: 10 });
+
+    expect(existsSync(markerFile)).toBe(false);
+    expect(ancestors).toEqual([]);
+  });
+
+  it("does not let a commit starting with a dash inject a git option", async () => {
+    const malicious = getOptionInjection();
+
+    const parents = await getCommitParents(malicious);
+
+    expect(existsSync(markerFile)).toBe(false);
+    expect(parents).toBe(null);
+  });
+
+  it("fetches a branch whose name starts with a dash as a ref", async () => {
+    // `git branch` refuses such a name but `git push` accepts it as a refspec
+    // destination, so it can reach the CI environment. It is only on origin:
+    // the local history has no ref to fall back to.
+    git("checkout", "-q", "-b", "tmp");
+    git("commit", "--allow-empty", "-m", "dashed commit");
+    const dashedSha = git("rev-parse", "HEAD");
+    git("push", "origin", "tmp:refs/heads/-dashed");
+    git("checkout", "-q", "main");
+    git("branch", "-D", "tmp");
+
+    const sha = await getMergeBaseCommitSha({ base: "main", head: "-dashed" });
+
+    expect(sha).toBe(mainSha);
+    expect(git("rev-parse", "--verify", "argos/-dashed")).toBe(dashedSha);
+    expect(warn).not.toHaveBeenCalled();
   });
 });
 
