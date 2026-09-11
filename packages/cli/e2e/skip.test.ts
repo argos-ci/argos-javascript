@@ -4,7 +4,7 @@ import { getRequiredEnv, run } from "./utils";
 
 getRequiredEnv("ARGOS_TOKEN");
 
-test("skip returns a build URL", { timeout: 20_000 }, () => {
+test("skip returns a build URL", () => {
   const buildName = `argos-cli-e2e-skipped-node-${process.env.NODE_VERSION}-${process.env.OS}`;
   const skipResult = run(["skip", "--build-name", buildName]);
 

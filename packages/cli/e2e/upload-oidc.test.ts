@@ -5,7 +5,7 @@ import { run } from "./utils";
 // No ARGOS_TOKEN — authentication is handled via GitHub Actions OIDC.
 test(
   "upload returns a full build URL using OIDC authentication",
-  { tags: ["oidc"], timeout: 20_000 },
+  { tags: ["oidc"] },
   () => {
     const buildName = `argos-cli-e2e-oidc-node-${process.env.NODE_VERSION}-${process.env.OS}`;
     const uploadResult = run([
