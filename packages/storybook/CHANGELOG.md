@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.3.0...%40argos-ci%2Fstorybook%406.3.1) (2026-09-11)
+
+**Note:** Version bump only for package @argos-ci/storybook
+
+
+
+
+
 # [6.3.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.2.8...%40argos-ci%2Fstorybook%406.3.0) (2026-09-05)
 
 ### Features

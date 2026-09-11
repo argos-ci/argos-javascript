@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.8.4](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.3...%40argos-ci%2Fcore%406.8.4) (2026-09-11)
+
+### Bug Fixes
+
+* **core:** prevent git option injection via CI branch names (GHSA-v58q-fvq4-9vh4) ([#378](https://github.com/argos-ci/argos-javascript/issues/378)) ([67f24a9](https://github.com/argos-ci/argos-javascript/commit/67f24a907f6779db6916ee8b3c52cbdd97fe586f))
+
+
 ## [6.8.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.2...%40argos-ci%2Fcore%406.8.3) (2026-09-04)
 
 ### Bug Fixes
