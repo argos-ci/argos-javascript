@@ -2,6 +2,19 @@ import type { ViewportSize } from "playwright";
 
 export type StorybookGlobals = Record<string, any>;
 
+/**
+ * Value of the Storybook `viewport` global.
+ *
+ * Storybook 9+ stores it as `{ value, isRotated }`. Argos modes and older
+ * Storybook versions use the bare viewport name; a number is used as a width.
+ */
+export type StorybookViewportGlobal =
+  | string
+  | number
+  | { value?: string | number | null; isRotated?: boolean }
+  | null
+  | undefined;
+
 export type FitToContent = {
   /**
    * Padding around the content in pixels.
@@ -33,40 +46,77 @@ export interface ArgosStorybookParameters {
 
 export type StoryParameters = Record<string, any>;
 
+type ViewportDefinitions = Record<
+  string,
+  { styles?: { width?: string; height?: string } | null } | undefined
+>;
+
+/**
+ * Get the viewports defined in the Storybook `viewport` parameter.
+ * Storybook 9+ lists them under `options`, older versions under `viewports`.
+ */
+function getViewportDefinitions(
+  parameters: StoryParameters,
+): ViewportDefinitions | null {
+  const viewport = parameters?.viewport;
+  if (!viewport || typeof viewport !== "object") {
+    return null;
+  }
+  const definitions = viewport.options ?? viewport.viewports;
+  return definitions && typeof definitions === "object" ? definitions : null;
+}
+
 /**
  * Get the default viewport size from the Storybook parameters.
+ *
+ * `viewport.defaultViewport` (and `defaultOrientation`) were replaced by the
+ * `viewport` global in Storybook 9 and removed in Storybook 10. The global is
+ * resolved with `getViewport`; this only covers the legacy parameter.
  */
 export function getDefaultViewport(
   parameters: StoryParameters,
 ): ViewportSize | null {
   const defaultViewport = parameters?.viewport?.defaultViewport;
   if (defaultViewport) {
-    return getViewport(parameters, defaultViewport);
+    return getViewport(parameters, {
+      value: defaultViewport,
+      isRotated: parameters.viewport.defaultOrientation === "landscape",
+    });
   }
   return null;
 }
 
 /**
- * Get the viewport size from the Storybook parameters.
+ * Get the viewport size matching a `viewport` global.
  */
 export function getViewport(
   parameters: StoryParameters,
-  viewportName: string,
+  viewport: StorybookViewportGlobal,
 ): ViewportSize | null {
-  if (typeof viewportName === "number") {
-    return { width: viewportName, height: 720 };
+  const { value, isRotated } =
+    viewport && typeof viewport === "object"
+      ? {
+          value: viewport.value ?? null,
+          isRotated: Boolean(viewport.isRotated),
+        }
+      : { value: viewport ?? null, isRotated: false };
+
+  if (typeof value === "number") {
+    return { width: value, height: 720 };
   }
-  const viewports = parameters?.viewport?.viewports;
-  if (viewports && viewportName in viewports) {
-    if ("styles" in viewports[viewportName] && viewports[viewportName].styles) {
-      const width = parseInt(viewports[viewportName].styles.width, 10);
-      const height = parseInt(viewports[viewportName].styles.height, 10);
-      if (!isNaN(width) && !isNaN(height)) {
-        return { width, height };
-      }
-    }
+  if (!value) {
+    return null;
   }
-  return null;
+  const styles = getViewportDefinitions(parameters)?.[value]?.styles;
+  if (!styles) {
+    return null;
+  }
+  const width = parseInt(String(styles.width), 10);
+  const height = parseInt(String(styles.height), 10);
+  if (isNaN(width) || isNaN(height)) {
+    return null;
+  }
+  return isRotated ? { width: height, height: width } : { width, height };
 }
 
 /**
