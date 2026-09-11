@@ -5,6 +5,16 @@ import { debug, isDebugEnabled } from "../debug";
 
 const execFileAsync = promisify(execFile);
 
+// The branches and commits passed to git come from the CI environment, where
+// anyone opening a pull request names a branch. Two rules keep them from being
+// interpreted as anything but a ref:
+// - git is spawned without a shell (`execFile`), so shell metacharacters are
+//   never evaluated (GHSA-4x45-gxvp-6283);
+// - they are always passed after `--end-of-options` (git 2.24+), as git parses
+//   any argument starting with a dash as an option: a branch named
+//   `--upload-pack=<command>` would otherwise make git run `<command>` on
+//   ssh:// and file:// origins (GHSA-v58q-fvq4-9vh4).
+
 /**
  * Check if the current directory is a git repository.
  */
@@ -68,7 +78,12 @@ export function getRepositoryURL() {
  */
 function gitMergeBase(input: { base: string; head: string }) {
   try {
-    return execFileSync("git", ["merge-base", input.head, input.base])
+    return execFileSync("git", [
+      "merge-base",
+      "--end-of-options",
+      input.head,
+      input.base,
+    ])
       .toString()
       .trim();
   } catch (error) {
@@ -111,39 +126,45 @@ function checkIsGitLockError(error: unknown): boolean {
 }
 
 /**
- * Run `git fetch` with the given arguments.
+ * Run `git fetch` from origin with the given options and refs (or refspecs).
  *
  * Retries on lock contention (`.git/shallow.lock` "File exists") with an
  * exponential backoff, since this is usually a transient conflict with another
  * git process and resolves once that process releases the lock.
  */
-function runGitFetch(args: string[]) {
-  return pRetry(() => execFileAsync("git", ["fetch", ...args]), {
-    retries: 3,
-    minTimeout: 500,
-    shouldRetry: ({ error }) => checkIsGitLockError(error),
-    onFailedAttempt: ({ error, retriesLeft, retryDelay }) => {
-      if (checkIsGitLockError(error) && retriesLeft > 0) {
-        debug(
-          `git fetch failed on lock contention, retrying in ${retryDelay}ms (${retriesLeft} left)`,
-        );
-      }
+function runGitFetch(input: { options: string[]; refs: string[] }) {
+  return pRetry(
+    () =>
+      execFileAsync("git", [
+        "fetch",
+        ...input.options,
+        "--end-of-options",
+        "origin",
+        ...input.refs,
+      ]),
+    {
+      retries: 3,
+      minTimeout: 500,
+      shouldRetry: ({ error }) => checkIsGitLockError(error),
+      onFailedAttempt: ({ error, retriesLeft, retryDelay }) => {
+        if (checkIsGitLockError(error) && retriesLeft > 0) {
+          debug(
+            `git fetch failed on lock contention, retrying in ${retryDelay}ms (${retriesLeft} left)`,
+          );
+        }
+      },
     },
-  });
+  );
 }
 
 /**
  * Run git fetch with a specific ref and depth.
  */
 async function gitFetch(input: { ref: string; depth: number; target: string }) {
-  await runGitFetch([
-    "--force",
-    "--update-head-ok",
-    "--depth",
-    String(input.depth),
-    "origin",
-    `${input.ref}:${input.target}`,
-  ]);
+  await runGitFetch({
+    options: ["--force", "--update-head-ok", "--depth", String(input.depth)],
+    refs: [`${input.ref}:${input.target}`],
+  });
 }
 
 /**
@@ -180,6 +201,7 @@ function checkLocalRefExists(ref: string): boolean {
       "rev-parse",
       "--verify",
       "--quiet",
+      "--end-of-options",
       `${ref}^{commit}`,
     ]);
     return true;
@@ -316,7 +338,7 @@ function listShas(path: string, maxCount?: number): string[] {
   if (maxCount) {
     args.push(`--max-count=${maxCount}`);
   }
-  args.push(path);
+  args.push("--end-of-options", path);
   const raw = execFileSync("git", args);
   const shas = raw.toString().trim().split("\n");
   return shas;
@@ -338,7 +360,7 @@ export async function listAncestorCommits(input: {
   // Fetch one extra commit since the commit itself is excluded from the result.
   const depth = input.limit + 1;
   try {
-    await runGitFetch([`--depth=${depth}`, "origin", input.sha]);
+    await runGitFetch({ options: [`--depth=${depth}`], refs: [input.sha] });
   } catch (error) {
     debug(
       `Failed to deepen history for ${input.sha}, using local history`,
@@ -371,7 +393,7 @@ export async function getCommitParents(sha: string): Promise<string[] | null> {
   // Fetch the commit and its parents, so the parents stop being hidden by the
   // boundary of a shallow history.
   try {
-    await runGitFetch(["--depth=2", "origin", sha]);
+    await runGitFetch({ options: ["--depth=2"], refs: [sha] });
   } catch (error) {
     debug(
       `Failed to deepen history for ${sha}, using local history`,
@@ -393,7 +415,7 @@ function readCommitParents(sha: string): string[] | null {
   try {
     const raw = execFileSync(
       "git",
-      ["rev-list", "--parents", "-n", "1", sha, "--"],
+      ["rev-list", "--parents", "-n", "1", "--end-of-options", sha, "--"],
       { stdio: ["ignore", "pipe", "pipe"] },
     );
     const [, ...parents] = raw.toString().trim().split(" ");
