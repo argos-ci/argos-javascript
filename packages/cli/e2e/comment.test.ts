@@ -100,5 +100,5 @@ describe("argos comment", () => {
       runAs(["comment", "delete", buildUrl, id]).stdout,
     );
     expect(deleted.id).toBe(id);
-  }, 30000);
+  });
 });

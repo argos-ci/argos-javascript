@@ -8,7 +8,7 @@ import { run } from "./utils";
 // eslint-disable-next-line vitest/no-disabled-tests
 test.skip(
   "upload returns a full build URL using tokenless authentication",
-  { tags: ["tokenless"], timeout: 20_000 },
+  { tags: ["tokenless"] },
   () => {
     const buildName = `argos-cli-e2e-tokenless-node-${process.env.NODE_VERSION}-${process.env.OS}`;
     const uploadResult = run([

@@ -6,8 +6,9 @@ getRequiredEnv("ARGOS_TOKEN");
 
 // This test uploads the full __fixtures__ directory, which includes a 10MB PNG
 // stress fixture. That file is sharp-optimized, hashed, and uploaded to S3 over
-// a real network connection, so a generous timeout is required to avoid flakes.
-test("upload returns a full build URL", { timeout: 30_000 }, () => {
+// a real network connection. It relies on the generous e2e timeout configured
+// in vitest.config.ts.
+test("upload returns a full build URL", () => {
   const buildName = `argos-cli-e2e-node-${process.env.NODE_VERSION}-${process.env.OS}`;
   const uploadResult = run([
     "upload",
