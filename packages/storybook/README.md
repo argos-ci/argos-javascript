@@ -59,6 +59,10 @@ export const Example: Story = {
 
 > Using the [Storybook Test Runner](https://storybook.js.org/docs/writing-tests/integrations/test-runner) instead? Import `argosScreenshot` from `@argos-ci/storybook/test-runner` and call it from the `postVisit` hook. See the [Test Runner quickstart](https://argos-ci.com/docs/quickstart/storybook-quickstart/storybook-test-runner-quickstart).
 
+## Compatibility
+
+`@argos-ci/storybook` supports Storybook 8 through 11, including the 11 pre-releases. Screenshots can be taken with the [Vitest addon](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon) (Storybook 9 or later, Vitest 4 or 5) or with the [Storybook Test Runner](https://storybook.js.org/docs/writing-tests/integrations/test-runner) (Storybook 8 or later).
+
 ## Links
 
 - [Official SDK Docs](https://argos-ci.com/docs/reference/storybook)

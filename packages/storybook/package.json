@@ -55,6 +55,9 @@
     "@argos-ci/util": "workspace:*",
     "@argos-ci/vitest": "workspace:*"
   },
+  "peerDependencies": {
+    "storybook": "^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0-0"
+  },
   "devDependencies": {
     "@argos-ci/cli": "workspace:*",
     "@argos-ci/util": "workspace:*",
@@ -63,7 +66,7 @@
     "@storybook/addon-themes": "^10.5.5",
     "@storybook/addon-vitest": "^10.5.5",
     "@storybook/react-vite": "^10.5.5",
-    "@storybook/test-runner": "^0.24.4",
+    "@storybook/test-runner": "^0.24.5",
     "@types/node": "catalog:",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -72,7 +75,7 @@
     "@vitest/coverage-v8": "^5.0.0",
     "@vitest/ui": "^5.0.0",
     "http-server": "^14.1.1",
-    "playwright": "^1.62.1",
+    "playwright": "^1.63.0",
     "prop-types": "^15.8.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -98,6 +101,7 @@
     "e2e-runner": "pnpm dlx concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm run serve-storybook\" \"pnpm run wait-storybook && pnpm run test-e2e-runner\"",
     "e2e-vitest": "cross-env BUILD_NAME=\"argos-storybook-vitest-e2e-node-$NODE_VERSION-$OS\" UPLOAD_TO_ARGOS=true pnpm run test-e2e-vitest",
     "e2e-compat": "cross-env BUILD_NAME=\"argos-storybook-vitest4-e2e-node-$NODE_VERSION-$OS\" UPLOAD_TO_ARGOS=true pnpm run test-e2e-vitest",
+    "e2e-next": "cross-env BUILD_NAME=\"argos-storybook-next-e2e-node-$NODE_VERSION-$OS\" UPLOAD_TO_ARGOS=true pnpm run test-e2e-vitest",
     "e2e": "pnpm run e2e-runner && rm -rf ./screenshots && pnpm run e2e-vitest",
     "check-types": "tsc",
     "check-format": "prettier --check --ignore-unknown --ignore-path=./.gitignore --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",

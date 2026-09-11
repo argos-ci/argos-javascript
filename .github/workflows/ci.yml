@@ -364,3 +364,46 @@ jobs:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
           NODE_VERSION: ${{ matrix.node-version }}
           OS: ${{ matrix.os }}
+
+  # `@argos-ci/storybook` supports Storybook 8 through 11. The workspace is
+  # pinned to 10, so this job moves the package to the newest 11 pre-release and
+  # re-runs the Vitest suite against it, under its own build name. The Test
+  # Runner suite is left out for now: Storybook 11's config loader registers a
+  # Node module hook (`module.register()`), which Jest refuses, so
+  # `@storybook/test-runner` cannot load its config on 11 yet.
+  e2e-storybook-next:
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [lts/*]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup deps
+        uses: ./.github/actions/setup-deps
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Upgrade to the Storybook 11 pre-release
+        run: >-
+          pnpm --filter=@argos-ci/storybook up
+          "storybook@>=11.0.0-0 <12.0.0-0"
+          "@storybook/react-vite@>=11.0.0-0 <12.0.0-0"
+          "@storybook/addon-docs@>=11.0.0-0 <12.0.0-0"
+          "@storybook/addon-links@>=11.0.0-0 <12.0.0-0"
+          "@storybook/addon-themes@>=11.0.0-0 <12.0.0-0"
+          "@storybook/addon-vitest@>=11.0.0-0 <12.0.0-0"
+          "storybook-addon-pseudo-states@>=11.0.0-0 <12.0.0-0"
+
+      - name: Run integration tests
+        run: pnpm exec -- turbo run e2e-next --filter=@argos-ci/storybook
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+          NODE_VERSION: ${{ matrix.node-version }}
+          OS: ${{ matrix.os }}
