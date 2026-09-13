@@ -58,8 +58,7 @@ export interface DeployParameters {
  * Deploy a static site (e.g. Storybook) to Argos.
  */
 export async function deploy(params: DeployParameters) {
-  const { token: _token, ...debugParams } = params;
-  debug("Starting deploy with params", debugParams);
+  debug("Starting deploy with params", params);
 
   // Read config
   const config = await getConfigFromOptions(params);

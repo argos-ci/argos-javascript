@@ -135,8 +135,7 @@ export interface UploadMediaParameters {
 export async function uploadMedia(
   params: UploadMediaParameters,
 ): Promise<Media[]> {
-  const { token: _token, ...debugParams } = params;
-  debug("Starting media upload with params", debugParams);
+  debug("Starting media upload with params", params);
 
   if (params.files.length === 0) {
     throw new Error("No files to upload");

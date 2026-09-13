@@ -8,6 +8,7 @@ import gitlab from "./services/gitlab";
 import git from "./services/git";
 import type { CiEnvironment, Context } from "./types";
 import { debug } from "../debug";
+import { redactEnv } from "../redact";
 
 export type { CiEnvironment };
 
@@ -73,7 +74,7 @@ export function listAncestorCommits(input: {
 export async function getCiEnvironment(): Promise<CiEnvironment | null> {
   const context = createContext();
 
-  debug("Detecting CI environment", context);
+  debug("Detecting CI environment", { env: redactEnv(context.env) });
   const service = getCiService(context);
 
   // Service matched
