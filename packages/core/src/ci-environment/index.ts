@@ -73,7 +73,7 @@ export function listAncestorCommits(input: {
 export async function getCiEnvironment(): Promise<CiEnvironment | null> {
   const context = createContext();
 
-  debug("Detecting CI environment", context);
+  debug("Detecting CI environment");
   const service = getCiService(context);
 
   // Service matched
@@ -89,5 +89,6 @@ export async function getCiEnvironment(): Promise<CiEnvironment | null> {
     return ciEnvironment;
   }
 
+  debug("No CI service matched");
   return null;
 }

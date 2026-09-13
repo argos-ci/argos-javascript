@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import createDebug from "debug";
 import { join } from "node:path";
 import { upload } from "./upload";
 import { server, setupMockServer } from "../mocks/server";
@@ -291,5 +292,31 @@ describe("#upload", () => {
       expect(receivedMergeQueue).toBe(true);
       expect(receivedMergeQueuePrNumbers).toEqual([12, 34]);
     })();
+  });
+
+  it("never prints the token in debug output (GHSA-28pg-v3hp-9g7f)", async () => {
+    const token = "92d832e0d22ab113c8979d73a87a11130eaa24a9";
+    const write = vi.spyOn(process.stderr, "write").mockReturnValue(true);
+    createDebug.enable("@argos-ci/core");
+
+    let output: string;
+    try {
+      await upload({
+        branch: "main",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token,
+      });
+      output = write.mock.calls.map(([chunk]) => String(chunk)).join("");
+    } finally {
+      createDebug.disable();
+      write.mockRestore();
+    }
+
+    expect(output).not.toContain(token);
+    // Masked once, where the token is resolved, so the user can still tell
+    // which one was used.
+    expect(output).toContain("Authenticated with ARGOS_TOKEN (92d832…)");
   });
 });
