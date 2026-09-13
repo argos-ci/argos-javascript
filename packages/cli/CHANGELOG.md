@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.9.4](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.9.3...%40argos-ci%2Fcli%406.9.4) (2026-09-13)
+
+### Bug Fixes
+
+* **cli:** strip terminal escapes from OAuth error text (GHSA-q9j4-4h4j-mv5m) ([#382](https://github.com/argos-ci/argos-javascript/issues/382)) ([3e83d45](https://github.com/argos-ci/argos-javascript/commit/3e83d453711d1660e2a776d751de5431523ec716))
+
+
 ## [6.9.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.9.2...%40argos-ci%2Fcli%406.9.3) (2026-09-11)
 
 **Note:** Version bump only for package @argos-ci/cli

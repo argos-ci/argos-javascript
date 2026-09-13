@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.8.5](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.4...%40argos-ci%2Fcore%406.8.5) (2026-09-13)
+
+### Bug Fixes
+
+* **core:** stop leaking secrets into debug output (GHSA-28pg-v3hp-9g7f) ([#383](https://github.com/argos-ci/argos-javascript/issues/383)) ([cd59273](https://github.com/argos-ci/argos-javascript/commit/cd59273fe325be6c686e38aad3aad7b2e2adffe6))
+
+
 ## [6.8.4](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.3...%40argos-ci%2Fcore%406.8.4) (2026-09-11)
 
 ### Bug Fixes
