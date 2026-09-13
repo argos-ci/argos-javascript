@@ -1,26 +1,32 @@
 import createDebug from "debug";
 
-import { redactSecrets } from "./redact";
-
 const KEY = "@argos-ci/core";
 
-const logger = createDebug(KEY);
+export const debug = createDebug(KEY);
 
 /**
- * Log a line under `DEBUG=@argos-ci/core`.
- *
- * Arguments are redacted on the way in: this output is pasted into public
- * issues and written to CI logs, so a credential reaching it is a published
- * credential (GHSA-28pg-v3hp-9g7f). Callers pass whole objects — parameters,
- * the resolved config, an API response — and must not have to remember which
- * of their fields is a secret.
+ * Leading characters of a token kept in the debug output: enough to tell two
+ * tokens apart, far too few to use.
  */
-export const debug = (message: unknown, ...args: unknown[]): void => {
-  if (!logger.enabled) {
-    return;
+const TOKEN_PREVIEW_LENGTH = 6;
+
+/**
+ * Show which token is in play without publishing it.
+ *
+ * Debug output is the documented way to report an upload problem: it gets
+ * pasted into public issues and written to CI logs, which are world-readable on
+ * public repositories, so a token printed in full is a published token
+ * (GHSA-28pg-v3hp-9g7f). The first few characters answer "is that the token I
+ * think it is?" and are useless to anyone else.
+ */
+export function maskToken(
+  token: string | null | undefined,
+): string | null | undefined {
+  if (!token) {
+    return token;
   }
-  logger(redactSecrets(message), ...args.map((arg) => redactSecrets(arg)));
-};
+  return `${token.slice(0, TOKEN_PREVIEW_LENGTH)}…`;
+}
 
 export const isDebugEnabled = createDebug.enabled(KEY);
 

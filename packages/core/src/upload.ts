@@ -188,7 +188,8 @@ export async function upload(params: UploadParameters): Promise<{
   build: ArgosAPISchema.components["schemas"]["Build"];
   screenshots: Screenshot[];
 }> {
-  debug("Starting upload with params", params);
+  const { token: _paramsToken, ...debugParams } = params;
+  debug("Starting upload with params", debugParams);
 
   // Read config
   const [config, argosSdk] = await Promise.all([
@@ -213,7 +214,8 @@ export async function upload(params: UploadParameters): Promise<{
     (config.previewBaseUrl ? { baseUrl: config.previewBaseUrl } : undefined);
 
   const globs = params.files ?? ["**/*.{png,jpg,jpeg}"];
-  debug("Using config and files", config, globs);
+  const { token: _configToken, ...debugConfig } = config;
+  debug("Using config and files", debugConfig, globs);
 
   // Collect snapshots
   const files = await discoverSnapshots(globs, {

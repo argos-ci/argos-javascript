@@ -7,7 +7,7 @@ import {
   exchangeGitHubActionsTokenlessToken,
 } from "./github-actions-tokenless";
 import type { Config } from "./config";
-import { debug } from "./debug";
+import { debug, maskToken } from "./debug";
 
 /**
  * Resolve the Argos authentication token.
@@ -15,7 +15,10 @@ import { debug } from "./debug";
  */
 export async function resolveArgosToken(config: Config): Promise<string> {
   if (config.token) {
-    debug("Authenticated with ARGOS_TOKEN.");
+    // Masked, and logged here only: this is the one place that knows which
+    // token the command ends up using, whether it came from the parameters or
+    // from the environment.
+    debug(`Authenticated with ARGOS_TOKEN (${maskToken(config.token)}).`);
     return config.token;
   }
 
