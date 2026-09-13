@@ -1,5 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 
+import { sanitizeTerminalText } from "./terminal";
+
 /**
  * OAuth 2.1 client configuration and helpers for the `argos login` flow
  * (Authorization Code + PKCE with a loopback redirect, RFC 8252).
@@ -121,8 +123,13 @@ async function postToken(
     .json()
     .catch(() => null)) as TokenEndpointResponse | null;
   if (!response.ok || !data?.access_token) {
+    // The description is written by the authorization server and printed to the
+    // terminal by the caller, so it is sanitized here rather than at the print
+    // site — an `Error` message carrying escape sequences would spoof output
+    // anywhere it surfaces.
     const message =
-      data?.error_description ?? data?.error ?? `HTTP ${response.status}`;
+      sanitizeTerminalText(data?.error_description ?? data?.error) ||
+      `HTTP ${response.status}`;
     throw new OAuthTokenError(message, data?.error);
   }
   // A response without a refresh token would be persisted as a token set with

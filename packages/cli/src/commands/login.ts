@@ -10,6 +10,7 @@ import {
   generatePkce,
   getAppBaseUrl,
 } from "../lib/oauth";
+import { sanitizeTerminalText } from "../lib/terminal";
 
 const LOGIN_CLI_SUCCESS_ROUTE = `/auth/cli/success`;
 
@@ -40,7 +41,11 @@ const successColor = (text: string) => color(text, 32, process.stdout.isTTY);
 const warningColor = (text: string) => color(text, 33, process.stderr.isTTY);
 const errorColor = (text: string) => color(text, 31, process.stderr.isTTY);
 
-function startCallbackServer(): Promise<{
+/**
+ * Listen on an ephemeral loopback port for the OAuth redirect, and resolve with
+ * the authorization code it carries.
+ */
+export function startCallbackServer(): Promise<{
   port: number;
   waitForCallback: () => Promise<CallbackResult>;
 }> {
@@ -78,7 +83,12 @@ function startCallbackServer(): Promise<{
       const state = url.searchParams.get("state");
 
       if (callbackError) {
-        const message = callbackErrorDescription ?? callbackError;
+        // Both values are chosen by the authorization server — whatever
+        // `ARGOS_APP_BASE_URL` points at — and end up on the user's terminal,
+        // so they are stripped of anything it would act on rather than display.
+        const message =
+          sanitizeTerminalText(callbackErrorDescription ?? callbackError) ||
+          "Authorization failed";
         res.writeHead(400, {
           "Content-Type": "text/html; charset=utf-8",
           Connection: "close",
