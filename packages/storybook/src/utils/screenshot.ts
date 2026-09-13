@@ -290,10 +290,11 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
 
   await runStory({ handler, globals, storyId: context.story.id });
 
-  // Get the viewport from globals set on the mode.
-  const viewportFromGlobals = globals.viewport
-    ? getViewport(context.story.parameters, globals.viewport)
-    : null;
+  // Get the viewport from the globals (set by the Argos mode or the story).
+  const viewportFromGlobals = getViewport(
+    context.story.parameters,
+    globals.viewport,
+  );
 
   const viewport =
     viewportFromGlobals ??

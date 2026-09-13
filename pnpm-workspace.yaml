@@ -6,6 +6,7 @@ catalog:
   vitest: ^5.0.0
 
 allowBuilds:
+  '@parcel/watcher': false
   '@swc/core': true
   chromedriver: true
   cypress: true
