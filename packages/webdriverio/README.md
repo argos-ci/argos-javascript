@@ -7,7 +7,7 @@
   </a>
 </p>
 
-<p align="center"><strong>The open source visual testing platform for AI-native engineering teams.</strong></p>
+<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
 
 # Official Argos WebdriverIO integration
 
