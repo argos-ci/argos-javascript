@@ -8,7 +8,6 @@ import gitlab from "./services/gitlab";
 import git from "./services/git";
 import type { CiEnvironment, Context } from "./types";
 import { debug } from "../debug";
-import { redactEnv } from "../redact";
 
 export type { CiEnvironment };
 
@@ -74,7 +73,7 @@ export function listAncestorCommits(input: {
 export async function getCiEnvironment(): Promise<CiEnvironment | null> {
   const context = createContext();
 
-  debug("Detecting CI environment", { env: redactEnv(context.env) });
+  debug("Detecting CI environment");
   const service = getCiService(context);
 
   // Service matched
@@ -90,5 +89,6 @@ export async function getCiEnvironment(): Promise<CiEnvironment | null> {
     return ciEnvironment;
   }
 
+  debug("No CI service matched");
   return null;
 }

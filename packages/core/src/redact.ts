@@ -19,37 +19,8 @@ const REDACTED = "[redacted]";
 const SECRET_KEY_REGEX =
   /token|secret|password|passwd|credential|api[-_]?key|authorization|cookie|signature/i;
 
-/**
- * Environment variables whose value the debug log keeps: the ones CI detection
- * and the configuration actually read. Every other variable — a project's own
- * secrets included — is reported by name only, which is all that "why wasn't my
- * CI detected?" needs.
- */
-const CI_ENV_PREFIXES = [
-  "ACTIONS_",
-  "ARGOS_",
-  "BITRISE",
-  "BUILDKITE",
-  "CIRCLE",
-  "CI_",
-  "GITHUB_",
-  "GITLAB_",
-  "HEROKU_",
-  "TRAVIS",
-];
-
-/** CI variables that are not covered by a prefix. */
-const CI_ENV_NAMES = ["CI", "DISABLE_GITHUB_TOKEN_WARNING"];
-
 function isSecretKey(key: string): boolean {
   return SECRET_KEY_REGEX.test(key);
-}
-
-function isCiVariable(name: string): boolean {
-  return (
-    CI_ENV_NAMES.includes(name) ||
-    CI_ENV_PREFIXES.some((prefix) => name.startsWith(prefix))
-  );
 }
 
 function isPlainObject(value: object): boolean {
@@ -69,23 +40,34 @@ function redactValue(value: unknown, seen: Map<object, unknown>): unknown {
     return copied;
   }
 
-  if (Array.isArray(value)) {
-    const copy: unknown[] = [];
-    seen.set(value, copy);
-    for (const item of value) {
-      copy.push(redactValue(item, seen));
-    }
-    return copy;
-  }
-
-  if (!isPlainObject(value)) {
+  const isArray = Array.isArray(value);
+  if (!isArray && !isPlainObject(value)) {
     return value;
   }
 
-  const copy: Record<string, unknown> = {};
+  const copy: unknown[] | Record<string, unknown> = isArray ? [] : {};
   seen.set(value, copy);
-  for (const [key, item] of Object.entries(value)) {
-    copy[key] = isSecretKey(key) && item ? REDACTED : redactValue(item, seen);
+
+  // Walked through its property descriptors rather than by reading it: turning
+  // the debug flag on must not run a caller's getter, let alone throw inside
+  // one and take the upload down with it. An accessor is copied as it is and
+  // stays uncalled — `util.inspect` renders it as `[Getter]`, which is what the
+  // debug output showed before anything was redacted at all.
+  for (const [key, descriptor] of Object.entries(
+    Object.getOwnPropertyDescriptors(value),
+  )) {
+    if (!descriptor.enumerable) {
+      continue;
+    }
+    if (!("value" in descriptor)) {
+      Object.defineProperty(copy, key, descriptor);
+      continue;
+    }
+    const item: unknown = descriptor.value;
+    Object.defineProperty(copy, key, {
+      ...descriptor,
+      value: isSecretKey(key) && item ? REDACTED : redactValue(item, seen),
+    });
   }
   return copy;
 }
@@ -93,29 +75,12 @@ function redactValue(value: unknown, seen: Map<object, unknown>): unknown {
 /**
  * Copy `value` with every credential-looking property replaced.
  *
- * Only plain objects and arrays are walked: anything else — an `Error`, a
- * `Buffer`, a class instance — is passed through untouched so the debug output
+ * Only plain objects and arrays are walked, and only through their property
+ * descriptors, so no getter is ever called. Anything else — an `Error`, a
+ * `Buffer`, a class instance — is passed through untouched, so the debug output
  * keeps rendering it as it always did. An empty value is kept as it is too: a
  * `token: null` says the token was never resolved, which is worth seeing.
  */
 export function redactSecrets(value: unknown): unknown {
   return redactValue(value, new Map());
-}
-
-/**
- * The environment as the debug log may show it: CI variables keep their value,
- * every other one is reduced to its name.
- */
-export function redactEnv(
-  env: Record<string, string | undefined>,
-): Record<string, string> {
-  const redacted: Record<string, string> = {};
-  for (const [name, value] of Object.entries(env)) {
-    if (value === undefined) {
-      continue;
-    }
-    redacted[name] =
-      isCiVariable(name) && !isSecretKey(name) ? value : REDACTED;
-  }
-  return redacted;
 }

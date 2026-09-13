@@ -1,5 +1,6 @@
+import { inspect } from "node:util";
 import { describe, expect, it } from "vitest";
-import { redactEnv, redactSecrets } from "./redact";
+import { redactSecrets } from "./redact";
 
 describe("redactSecrets", () => {
   it("redacts a credential wherever it sits", () => {
@@ -55,6 +56,35 @@ describe("redactSecrets", () => {
     expect(redactSecrets(undefined)).toBeUndefined();
   });
 
+  it("never calls a getter it walks", () => {
+    let called = false;
+    const params = {
+      commit: "0".repeat(40),
+      get token() {
+        called = true;
+        return "a".repeat(40);
+      },
+    };
+
+    const redacted = redactSecrets(params);
+
+    expect(called).toBe(false);
+    // Rendered as `[Getter]`, the way the debug output always showed it.
+    expect(inspect(redacted)).toContain("[Getter]");
+    expect(inspect(redacted)).not.toContain("a".repeat(40));
+  });
+
+  it("survives a getter that throws", () => {
+    const params = {
+      commit: "0".repeat(40),
+      get metadata(): unknown {
+        throw new Error("boom");
+      },
+    };
+
+    expect(() => redactSecrets(params)).not.toThrow();
+  });
+
   it("copies a cycle rather than walking it forever", () => {
     const node: Record<string, unknown> = { token: "a".repeat(40) };
     node.self = node;
@@ -63,54 +93,5 @@ describe("redactSecrets", () => {
 
     expect(redacted.token).toBe("[redacted]");
     expect(redacted.self).toBe(redacted);
-  });
-});
-
-describe("redactEnv", () => {
-  it("keeps the variables CI detection reads", () => {
-    expect(
-      redactEnv({
-        CI: "true",
-        GITHUB_ACTIONS: "true",
-        GITHUB_REPOSITORY: "argos-ci/argos-javascript",
-        GITHUB_SHA: "0".repeat(40),
-        ARGOS_BRANCH: "main",
-      }),
-    ).toEqual({
-      CI: "true",
-      GITHUB_ACTIONS: "true",
-      GITHUB_REPOSITORY: "argos-ci/argos-javascript",
-      GITHUB_SHA: "0".repeat(40),
-      ARGOS_BRANCH: "main",
-    });
-  });
-
-  it("redacts the credentials among them (GHSA-28pg-v3hp-9g7f)", () => {
-    expect(
-      redactEnv({
-        ARGOS_TOKEN: "a".repeat(40),
-        GITHUB_TOKEN: "ghp_canary",
-        ACTIONS_ID_TOKEN_REQUEST_TOKEN: "oidc-request-token",
-      }),
-    ).toEqual({
-      ARGOS_TOKEN: "[redacted]",
-      GITHUB_TOKEN: "[redacted]",
-      ACTIONS_ID_TOKEN_REQUEST_TOKEN: "[redacted]",
-    });
-  });
-
-  it("reduces a variable it does not know to its name", () => {
-    expect(redactEnv({ MY_APP_CANARY: "s3cret", HOME: "/home/argos" })).toEqual(
-      {
-        MY_APP_CANARY: "[redacted]",
-        HOME: "[redacted]",
-      },
-    );
-  });
-
-  it("leaves out the variables that are not set", () => {
-    expect(redactEnv({ CI: "true", ARGOS_BRANCH: undefined })).toEqual({
-      CI: "true",
-    });
   });
 });

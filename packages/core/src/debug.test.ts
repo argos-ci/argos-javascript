@@ -31,6 +31,22 @@ describe("debug", () => {
     expect(output).toContain("0".repeat(40));
   });
 
+  it("does not run a getter of the object it logs", () => {
+    let called = false;
+    const output = captureDebugOutput(() => {
+      debug("Starting upload with params", {
+        commit: "0".repeat(40),
+        get token() {
+          called = true;
+          throw new Error("boom");
+        },
+      });
+    });
+
+    expect(called).toBe(false);
+    expect(output).toContain("[Getter]");
+  });
+
   it("writes nothing when the namespace is disabled", () => {
     const write = vi.spyOn(process.stderr, "write").mockReturnValue(true);
     try {
