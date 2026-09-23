@@ -1,4 +1,4 @@
-import { test, expect, type BrowserContext } from "@playwright/test";
+import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 import { stat } from "node:fs/promises";
 import { argosScreenshot } from "./dist/index.mjs";
@@ -449,6 +449,104 @@ test.describe("#argosScreenshot", () => {
       // The GIF is left untouched (still an animated GIF).
       const src = await page.locator("#gif").getAttribute("src");
       expect(src).toMatch(/^data:image\/gif/);
+
+      await page.evaluate(() => (window as any).__ARGOS__.afterEach());
+    });
+  });
+
+  test.describe("with `pauseSvgAnimations`", () => {
+    /**
+     * For each animated square of the fixture: whether the clock of its
+     * nearest `<svg>` is paused, where that clock stands, and the square's `x`.
+     */
+    function readAnimations(page: Page) {
+      return page.evaluate(() => {
+        const read = (id: string) => {
+          const rect = document.getElementById(id) as unknown as SVGRectElement;
+          const svg = rect.ownerSVGElement!;
+          return {
+            paused: svg.animationsPaused(),
+            time: svg.getCurrentTime(),
+            x: rect.x.animVal.value,
+          };
+        };
+        return {
+          endless: read("endless"),
+          nestedEndless: read("nested-endless"),
+          finite: read("finite"),
+        };
+      });
+    }
+
+    test.beforeEach(async ({ page }) => {
+      await page.goto(fixture("svg-animation.html"));
+      // Let the loops move off their first frame, and the finite one end.
+      await page.waitForFunction(() => {
+        const x = (id: string) =>
+          (document.getElementById(id) as unknown as SVGRectElement).x.animVal
+            .value;
+        return (
+          x("endless") > 0 && x("nested-endless") > 0 && x("finite") === 160
+        );
+      });
+    });
+
+    test("pauses endless SVG animations on their first frame", async ({
+      page,
+    }) => {
+      await argosScreenshot(page, "with-svg-animation", { fullPage: false });
+
+      const timeBefore = await page.evaluate(() => {
+        const rect = document.getElementById(
+          "endless",
+        ) as unknown as SVGRectElement;
+        const time = rect.ownerSVGElement!.getCurrentTime();
+        (window as any).__ARGOS__.beforeEach({});
+        return time;
+      });
+
+      // Both loops are held on their first frame, the nested one included.
+      const paused = await readAnimations(page);
+      expect(paused.endless).toEqual({ paused: true, time: 0, x: 0 });
+      expect(paused.nestedEndless).toEqual({ paused: true, time: 0, x: 0 });
+
+      // Cleanup hands the clocks back where they were, running.
+      await page.evaluate(() => (window as any).__ARGOS__.afterEach());
+      const restored = await readAnimations(page);
+      expect(restored.endless.paused).toBe(false);
+      expect(restored.nestedEndless.paused).toBe(false);
+      // `getCurrentTime()` returns a single-precision float, so the round trip
+      // can land a microsecond early.
+      expect(restored.endless.time).toBeGreaterThan(timeBefore - 0.001);
+    });
+
+    test("leaves SVG animations that end alone", async ({ page }) => {
+      await argosScreenshot(page, "with-finite-svg-animation", {
+        fullPage: false,
+      });
+
+      await page.evaluate(() => (window as any).__ARGOS__.beforeEach({}));
+
+      // Still on its last value, on a clock nobody paused.
+      const { finite } = await readAnimations(page);
+      expect(finite).toMatchObject({ paused: false, x: 160 });
+
+      await page.evaluate(() => (window as any).__ARGOS__.afterEach());
+    });
+
+    test("does not pause SVG animations when disabled", async ({ page }) => {
+      await argosScreenshot(page, "with-svg-animation-disabled", {
+        fullPage: false,
+      });
+
+      await page.evaluate(() =>
+        (window as any).__ARGOS__.beforeEach({
+          options: { pauseSvgAnimations: false },
+        }),
+      );
+
+      const { endless } = await readAnimations(page);
+      expect(endless.paused).toBe(false);
 
       await page.evaluate(() => (window as any).__ARGOS__.afterEach());
     });

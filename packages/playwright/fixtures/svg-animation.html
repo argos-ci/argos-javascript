@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SVG animation page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <main>
+      <h1>SVG animation page</h1>
+      <!-- A square that jumps 40px to the right every 100ms, forever. -->
+      <svg width="200" height="40">
+        <rect id="endless" width="40" height="40" fill="red">
+          <animate
+            attributeName="x"
+            values="0;40;80;120;160"
+            dur="0.5s"
+            calcMode="discrete"
+            repeatCount="indefinite"
+          />
+        </rect>
+      </svg>
+
+      <!-- The same loop inside a nested <svg>: Chromium runs it on the nested
+           <svg>'s own clock rather than the outer one's. -->
+      <svg width="200" height="40">
+        <svg>
+          <rect id="nested-endless" width="40" height="40" fill="blue">
+            <animate
+              attributeName="x"
+              values="0;40;80;120;160"
+              dur="0.5s"
+              calcMode="discrete"
+              repeatCount="indefinite"
+            />
+          </rect>
+        </svg>
+      </svg>
+
+      <!-- Runs once and freezes on its last value. -->
+      <svg width="200" height="40">
+        <rect id="finite" width="40" height="40" fill="green">
+          <animate
+            attributeName="x"
+            from="0"
+            to="160"
+            dur="0.1s"
+            fill="freeze"
+          />
+        </rect>
+      </svg>
+    </main>
+  </body>
+</html>
