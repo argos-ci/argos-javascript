@@ -52,6 +52,6 @@
   "dependencies": {
     "debug": "^4.4.3",
     "openapi-fetch": "^0.17.0",
-    "p-retry": "^8.0.0"
+    "p-retry": "^8.0.1"
   }
 }
