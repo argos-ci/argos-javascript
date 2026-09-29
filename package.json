@@ -5,6 +5,7 @@
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@eslint/js": "^10.0.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "@vitest/eslint-plugin": "^1.6.27",
     "cross-env": "^10.1.0",
     "eslint": "^10.11.0",
@@ -14,7 +15,7 @@
     "tsdown": "^0.23.0",
     "turbo": "^2.11.5",
     "typedoc": "^0.28.20",
-    "typescript": "^7.0.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.70.1"
   },
   "scripts": {
