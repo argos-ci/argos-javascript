@@ -5167,6 +5167,8 @@ export interface operations {
                     branch: components["schemas"]["GitBranch"];
                     /** @description The pull request number */
                     prNumber?: number | null;
+                    /** @description The head commit of the pull request. When `commit` is a merge commit built for the pull request, such as the test-merge commit GitHub Actions checks out, the deployment status is reported on this commit, where the pull request shows it. */
+                    prHeadCommit?: components["schemas"]["Sha1Hash"] | null;
                     /**
                      * @description The deployment environment. When omitted, it is inferred from `branch`: branches matching the configured production-branch glob are treated as `production`; all others default to `preview`.
                      * @enum {string}
