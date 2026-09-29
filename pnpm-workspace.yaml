@@ -3,7 +3,7 @@ packages:
 
 catalog:
   '@types/node': ^22.20.1
-  vitest: ^5.0.0
+  vitest: ^5.0.2
 
 allowBuilds:
   '@parcel/watcher': false
@@ -27,8 +27,21 @@ overrides:
   serialize-javascript: ^7.0.3
   tar: ^7.5.16
   tmp: ^0.2.7
+  # TypeScript 7 has no JS API yet, so every `typescript` import gets the 6.0
+  # wrapper, like the root's own dependency. Without this, optional peers in
+  # packages resolve to plain typescript@6, whose `tsc` pnpm can link into a
+  # package and shadow the root's TypeScript 7 one.
+  typescript: npm:@typescript/typescript6@^6.0.2
   undici: ^8.5.0
   vite: ^7.3.5
+  # Jest 30.5 throws on `module.register()`, which Storybook calls to load
+  # `.storybook/test-runner.ts`, so every test-runner suite fails at setup.
+  # Jest 30.4 packages pin each other exactly, so this holds the whole tree.
+  # Drop once https://github.com/storybookjs/storybook/issues/36116 is fixed.
+  '@storybook/test-runner>jest': 30.4.2
+  '@storybook/test-runner>jest-circus': 30.4.2
+  '@storybook/test-runner>jest-runner': 30.4.2
+  '@storybook/test-runner>jest-environment-node': 30.4.1
 
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:

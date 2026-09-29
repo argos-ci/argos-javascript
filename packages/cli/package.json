@@ -38,7 +38,7 @@
     "@argos-ci/core": "workspace:*",
     "@vercel/detect-agent": "^1.2.5",
     "commander": "^15.0.0",
-    "open": "^11.0.0",
+    "open": "^11.0.4",
     "ora": "^9.4.1"
   },
   "devDependencies": {
