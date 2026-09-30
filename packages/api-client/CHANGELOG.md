@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.31.0...%40argos-ci%2Fapi-client%400.31.1) (2026-09-30)
+
+### Bug Fixes
+
+* **core:** report pull request deployments on the head commit ([#386](https://github.com/argos-ci/argos-javascript/issues/386)) ([536eea3](https://github.com/argos-ci/argos-javascript/commit/536eea3235e0719fdd02040f3756205bdb6bd0cf))
+
+
 # [0.31.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.30.0...%40argos-ci%2Fapi-client%400.31.0) (2026-08-13)
 
 ### Features

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.19](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fgitlab%400.7.18...%40argos-ci%2Fgitlab%400.7.19) (2026-09-30)
+
+**Note:** Version bump only for package @argos-ci/gitlab
+
+
+
+
+
 ## [0.7.18](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fgitlab%400.7.17...%40argos-ci%2Fgitlab%400.7.18) (2026-08-13)
 
 **Note:** Version bump only for package @argos-ci/gitlab
