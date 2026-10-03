@@ -86,7 +86,55 @@ describe("createArgosScreenshotCommand", () => {
       name: "@argos-ci/vitest",
       version: "0.0.0-test",
     });
-    expect(metadata.playwrightLibraries).toContain("vitest");
+    expect(metadata.playwrightLibraries).toEqual(["vitest"]);
+    expect(metadata.story).toBeUndefined();
+  });
+
+  it("reports a screenshot of a portable story as a Storybook one", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx } = createCtx();
+    const story = {
+      id: "components-button--primary",
+      tags: ["dev"],
+      play: false,
+    };
+
+    await command(ctx, "shot", {}, null, 0, {
+      source: "portable-stories",
+      story,
+    });
+
+    const metadata = setMetadataConfig.mock.calls.at(-1)![0];
+    expect(metadata.sdk.name).toBe("@argos-ci/vitest");
+    expect(metadata.playwrightLibraries).toEqual(["storybook", "vitest"]);
+    expect(metadata.story).toEqual(story);
+  });
+
+  it("reports a story run by @storybook/addon-vitest as such", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx } = createCtx();
+
+    await command(ctx, "shot", {}, null, 0, {
+      source: "addon-vitest",
+      story: { id: "components-button--primary", tags: [], play: false },
+    });
+
+    const metadata = setMetadataConfig.mock.calls.at(-1)![0];
+    expect(metadata.playwrightLibraries[0]).toBe("@storybook/addon-vitest");
+  });
+
+  it("reports a story without a stable id as Storybook, without story metadata", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx } = createCtx();
+
+    await command(ctx, "shot", {}, null, 0, {
+      source: "portable-stories",
+      story: null,
+    });
+
+    const metadata = setMetadataConfig.mock.calls.at(-1)![0];
+    expect(metadata.playwrightLibraries[0]).toBe("storybook");
+    expect(metadata.story).toBeUndefined();
   });
 
   it("waits for stabilization before sizing the iframe to the content", async () => {

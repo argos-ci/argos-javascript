@@ -45,6 +45,7 @@
       "import": "./dist/internal.mjs",
       "default": "./dist/internal.mjs"
     },
+    "./internal/storybook-setup-file": "./dist/storybook-setup-file.mjs",
     "./package.json": "./package.json"
   },
   "engines": {

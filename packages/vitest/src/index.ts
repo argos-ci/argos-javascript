@@ -1,6 +1,7 @@
 import type { ArgosAttachment } from "@argos-ci/playwright";
 import { resolveAutoName } from "./auto-name";
 import {
+  getStorybookMetadata,
   getTestMetadata,
   takeCaptureIndex,
   type TestMetadata,
@@ -11,6 +12,7 @@ import type {
   VitestSnapshotOptions,
 } from "./options";
 import { serializeSnapshot } from "./serialize";
+import type { StorybookContext } from "./storybook";
 
 export type { VitestScreenshotOptions, VitestSnapshotOptions };
 
@@ -33,6 +35,7 @@ declare module "vitest/browser" {
       options?: VitestScreenshotOptions,
       test?: TestMetadata,
       captureIndex?: number | null,
+      storybook?: StorybookContext | null,
     ) => Promise<ArgosAttachment[]>;
     argosSnapshot: (
       name: string,
@@ -94,12 +97,14 @@ export async function argosScreenshot(
     return [];
   }
 
-  const [resolvedName, test, captureIndex] = await Promise.all([
+  const [resolvedName, test, captureIndex, storybook] = await Promise.all([
     resolveAutoName(name, { reservedLength: SCREENSHOT_NAME_RESERVED }),
     // Gather the test metadata here (browser side), where the Vitest test
     // context is available; it crosses the RPC boundary to the Node command.
     getTestMetadata(),
     takeCaptureIndex(),
+    // Same for the story the test renders, if any.
+    getStorybookMetadata(),
   ]);
 
   // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
@@ -112,6 +117,7 @@ export async function argosScreenshot(
     options ?? {},
     test,
     captureIndex,
+    storybook,
   );
 }
 
