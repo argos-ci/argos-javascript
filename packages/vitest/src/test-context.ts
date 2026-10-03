@@ -37,6 +37,10 @@ export interface CurrentTask extends CurrentSuite {
       }>
     | undefined;
   result?: { retryCount?: number; repeatCount?: number } | undefined;
+  /** Custom metadata of the task, shared by every hook of the test. */
+  meta?: Record<string, unknown> | undefined;
+  /** The context the test function receives. */
+  context?: Record<string, unknown> | undefined;
 }
 
 /**
@@ -65,7 +69,8 @@ function getCurrentTestFromWorkerState(): CurrentTask | undefined {
 }
 
 /**
- * Get the current Vitest test task, or `undefined` when not inside a test.
+ * Load Vitest's synchronous accessor to the current test task, for code that
+ * cannot await, like a Storybook decorator.
  *
  * Vitest >= 4.1 exposes `TestRunner.getCurrentTest()` from the `vitest` entry
  * point; on Vitest 4.0, we read the worker state instead (see
@@ -73,13 +78,24 @@ function getCurrentTestFromWorkerState(): CurrentTask | undefined {
  * importing `@argos-ci/vitest` in a non-Vitest environment does not pull Vitest
  * in — only call this once you know Vitest is available.
  */
-export async function getCurrentTest(): Promise<CurrentTask | undefined> {
+export async function loadGetCurrentTest(): Promise<
+  () => CurrentTask | undefined
+> {
   const vitest = (await import("vitest")) as {
     TestRunner?: { getCurrentTest?: () => CurrentTask | undefined };
   };
   const runner = vitest.TestRunner;
   if (runner?.getCurrentTest) {
-    return runner.getCurrentTest();
+    return () => runner.getCurrentTest!();
   }
-  return getCurrentTestFromWorkerState();
+  return getCurrentTestFromWorkerState;
+}
+
+/**
+ * Get the current Vitest test task, or `undefined` when not inside a test.
+ * See {@link loadGetCurrentTest} for the Vitest versions supported.
+ */
+export async function getCurrentTest(): Promise<CurrentTask | undefined> {
+  const getCurrentTest = await loadGetCurrentTest();
+  return getCurrentTest();
 }

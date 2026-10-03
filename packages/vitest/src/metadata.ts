@@ -3,6 +3,7 @@ import {
   nextCaptureIndex,
   type ScreenshotMetadata,
 } from "@argos-ci/util";
+import { getStorybookContext, type StorybookContext } from "./storybook";
 import {
   getCurrentTest,
   type CurrentSuite,
@@ -101,6 +102,20 @@ export async function getTestMetadata(): Promise<TestMetadata> {
     return null;
   }
   return buildTestMetadata(task);
+}
+
+/**
+ * Get the Storybook context of the current Vitest test, or `null` when it does
+ * not render a story (or runs outside a test).
+ *
+ * Runs on the test side, where the test context is available.
+ */
+export async function getStorybookMetadata(): Promise<StorybookContext | null> {
+  const task = await getCurrentTest();
+  if (!task) {
+    return null;
+  }
+  return getStorybookContext(task);
 }
 
 /**
