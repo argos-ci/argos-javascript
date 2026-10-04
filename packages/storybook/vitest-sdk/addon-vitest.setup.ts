@@ -5,6 +5,10 @@ import { readMetadata } from "./metadata";
 // `@storybook/addon-vitest` turns each story into a test: screenshot it with
 // `@argos-ci/vitest`, which must report it as a Storybook screenshot.
 afterEach(async ({ task }) => {
+  // A story the addon skips (by tag) never rendered: nothing to check.
+  if (task.result?.state === "skip") {
+    return;
+  }
   const { storyId } = task.meta as { storyId?: string };
   expect(storyId).toMatch(/^example-header--/);
 

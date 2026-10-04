@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BrowserCommandContext } from "vitest/node";
 
-const { argosScreenshot, setMetadataConfig } = vi.hoisted(() => ({
-  argosScreenshot: vi.fn(),
-  setMetadataConfig: vi.fn(),
-}));
+const { argosScreenshot, setMetadataConfig, resolveStorybookLibrary } =
+  vi.hoisted(() => ({
+    argosScreenshot: vi.fn(),
+    setMetadataConfig: vi.fn(),
+    resolveStorybookLibrary: vi.fn(),
+  }));
 
 vi.mock("@argos-ci/playwright", () => ({
   argosScreenshot,
@@ -13,7 +15,10 @@ vi.mock("@argos-ci/playwright", () => ({
 
 vi.mock("./version", () => ({
   getArgosVitestVersion: vi.fn().mockResolvedValue("0.0.0-test"),
+  resolveStorybookLibrary,
 }));
+
+const TEST_PATH = "/project/src/Button.test.tsx";
 
 import { createArgosScreenshotCommand } from "./command";
 
@@ -23,6 +28,7 @@ function createCtx() {
   const ctx = {
     page: { evaluate },
     frame: vi.fn().mockResolvedValue(frame),
+    testPath: TEST_PATH,
   } as unknown as BrowserCommandContext;
   return { ctx, evaluate, frame };
 }
@@ -38,6 +44,7 @@ describe("createArgosScreenshotCommand", () => {
       },
     ]);
     setMetadataConfig.mockReset();
+    resolveStorybookLibrary.mockReset().mockResolvedValue(null);
   });
 
   it("throws when the name is missing", async () => {
@@ -90,40 +97,44 @@ describe("createArgosScreenshotCommand", () => {
     expect(metadata.story).toBeUndefined();
   });
 
-  it("reports a screenshot of a portable story as a Storybook one", async () => {
+  it("reports a screenshot of a story with the Storybook library resolved from the test file", async () => {
     const command = createArgosScreenshotCommand();
     const { ctx } = createCtx();
-    const story = {
-      id: "components-button--primary",
-      tags: ["dev"],
-      play: false,
+    const storybookLibrary = { name: "storybook", version: "10.6.1" };
+    resolveStorybookLibrary.mockResolvedValue(storybookLibrary);
+    const storybook = {
+      source: "portable-stories" as const,
+      story: { id: "components-button--primary", tags: ["dev"], play: false },
     };
 
-    await command(ctx, "shot", {}, null, 0, {
-      source: "portable-stories",
-      story,
-    });
+    await command(ctx, "shot", {}, null, 0, storybook);
 
+    expect(resolveStorybookLibrary).toHaveBeenCalledWith(storybook, TEST_PATH);
     const metadata = setMetadataConfig.mock.calls.at(-1)![0];
     expect(metadata.sdk.name).toBe("@argos-ci/vitest");
-    expect(metadata.playwrightLibraries).toEqual(["storybook", "vitest"]);
-    expect(metadata.story).toEqual(story);
-  });
-
-  it("reports a story run by @storybook/addon-vitest as such", async () => {
-    const command = createArgosScreenshotCommand();
-    const { ctx } = createCtx();
-
-    await command(ctx, "shot", {}, null, 0, {
-      source: "addon-vitest",
-      story: { id: "components-button--primary", tags: [], play: false },
-    });
-
-    const metadata = setMetadataConfig.mock.calls.at(-1)![0];
-    expect(metadata.playwrightLibraries[0]).toBe("@storybook/addon-vitest");
+    expect(metadata.automationLibrary).toEqual(storybookLibrary);
+    expect(metadata.story).toEqual(storybook.story);
   });
 
   it("reports a story without a stable id as Storybook, without story metadata", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx } = createCtx();
+    resolveStorybookLibrary.mockResolvedValue({
+      name: "storybook",
+      version: "10.6.1",
+    });
+
+    await command(ctx, "shot", {}, null, 0, {
+      source: "portable-stories",
+      story: null,
+    });
+
+    const metadata = setMetadataConfig.mock.calls.at(-1)![0];
+    expect(metadata.automationLibrary?.name).toBe("storybook");
+    expect(metadata.story).toBeUndefined();
+  });
+
+  it("falls back to Vitest when Storybook cannot be resolved", async () => {
     const command = createArgosScreenshotCommand();
     const { ctx } = createCtx();
 
@@ -133,8 +144,8 @@ describe("createArgosScreenshotCommand", () => {
     });
 
     const metadata = setMetadataConfig.mock.calls.at(-1)![0];
-    expect(metadata.playwrightLibraries[0]).toBe("storybook");
-    expect(metadata.story).toBeUndefined();
+    expect(metadata.automationLibrary).toBeUndefined();
+    expect(metadata.playwrightLibraries).toEqual(["vitest"]);
   });
 
   it("waits for stabilization before sizing the iframe to the content", async () => {

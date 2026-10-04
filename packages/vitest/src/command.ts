@@ -13,7 +13,7 @@ import { resetTesterScale, setIframeViewportSize } from "./iframe";
 import type { TestMetadata } from "./metadata";
 import { screenshotFrame } from "./screenshot";
 import type { StorybookContext } from "./storybook";
-import { getArgosVitestVersion } from "./version";
+import { getArgosVitestVersion, resolveStorybookLibrary } from "./version";
 
 /**
  * Arguments of the `argosScreenshot` browser command.
@@ -26,26 +26,6 @@ export type ArgosScreenshotCommandArgs = [
   captureIndex?: number | null,
   storybook?: StorybookContext | null,
 ];
-
-/**
- * Packages to report as the automation library, the first one installed wins.
- *
- * Vitest (not the underlying `@vitest/browser-playwright` provider), so
- * screenshots match the `vitest` automation library used by `argosSnapshot`.
- * A screenshot of a story reports Storybook instead, the way
- * `@argos-ci/storybook` does: it is what tells Storybook screenshots apart.
- * Vitest stays as a fallback should Storybook not resolve from here.
- */
-function getAutomationLibraries(storybook: StorybookContext | null): string[] {
-  switch (storybook?.source) {
-    case "addon-vitest":
-      return ["@storybook/addon-vitest", "storybook", "vitest"];
-    case "portable-stories":
-      return ["storybook", "vitest"];
-    default:
-      return ["vitest"];
-  }
-}
 
 /**
  * Create the `argosScreenshot` browser command used to capture Argos
@@ -70,11 +50,21 @@ export const createArgosScreenshotCommand = (
 
     const restore = await resetTesterScale(ctx);
     try {
-      const version = await getArgosVitestVersion();
+      const [version, storybookLibrary] = await Promise.all([
+        getArgosVitestVersion(),
+        // A screenshot of a story reports Storybook, the way
+        // `@argos-ci/storybook` does: it is what tells Storybook screenshots
+        // apart. Resolved from the test file, where the user installs it.
+        storybook ? resolveStorybookLibrary(storybook, ctx.testPath) : null,
+      ]);
       const setMetadata = (viewport?: ViewportSize) => {
         DO_NOT_USE_setMetadataConfig({
           sdk: { name: "@argos-ci/vitest", version },
-          playwrightLibraries: getAutomationLibraries(storybook ?? null),
+          // Report Vitest as the automation library (not the underlying
+          // `@vitest/browser-playwright` provider), so screenshots match the
+          // `vitest` automation library used by `argosSnapshot`.
+          playwrightLibraries: ["vitest"],
+          automationLibrary: storybookLibrary ?? undefined,
           story: storybook?.story ?? undefined,
           viewport,
           // Injected so the Playwright SDK attaches the Vitest test metadata

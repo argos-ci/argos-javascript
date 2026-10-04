@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -75,6 +75,47 @@ describe("writeSnapshotFile", () => {
       await readFile(metadataAttachment.path, "utf-8"),
     );
     expect(metadata.tags).toEqual(["a", "b"]);
+  });
+
+  it("reports a snapshot of a story as a Storybook one", async () => {
+    // The temporary directory doubles as the user project, with Storybook
+    // installed next to the test file.
+    const storybookDir = join(root, "node_modules", "storybook");
+    await mkdir(storybookDir, { recursive: true });
+    await writeFile(
+      join(storybookDir, "package.json"),
+      JSON.stringify({ name: "storybook", version: "10.6.1" }),
+    );
+    const story = {
+      id: "components-button--primary",
+      tags: ["dev"],
+      play: false,
+    };
+
+    const attachments = await writeSnapshotFile(
+      "story",
+      "x",
+      { root },
+      {
+        title: "Primary",
+        titlePath: ["Button.test.tsx", "Primary"],
+        location: { file: join(root, "Button.test.tsx"), line: 1, column: 1 },
+      },
+      0,
+      { source: "portable-stories", story },
+    );
+
+    const metadataAttachment = attachments.find((a) =>
+      a.path.endsWith(".argos.json"),
+    )!;
+    const metadata = JSON.parse(
+      await readFile(metadataAttachment.path, "utf-8"),
+    );
+    expect(metadata.automationLibrary).toEqual({
+      name: "storybook",
+      version: "10.6.1",
+    });
+    expect(metadata.story).toEqual(story);
   });
 
   it("sanitizes the name and creates nested directories", async () => {
