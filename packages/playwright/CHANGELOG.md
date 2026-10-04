@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.7.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.7.0...%40argos-ci%2Fplaywright%407.7.1) (2026-10-04)
+
+### Bug Fixes
+
+* **vitest:** harden the detection of Storybook stories ([38c9bd4](https://github.com/argos-ci/argos-javascript/commit/38c9bd4b048282dd63c5e230f4af7d99257e7611))
+
+
 # [7.7.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.6.0...%40argos-ci%2Fplaywright%407.7.0) (2026-09-30)
 
 ### Features

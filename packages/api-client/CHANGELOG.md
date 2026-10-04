@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.31.1...%40argos-ci%2Fapi-client%400.31.2) (2026-10-04)
+
+### Bug Fixes
+
+* **api-client:** retry rate-limited requests after Retry-After ([#388](https://github.com/argos-ci/argos-javascript/issues/388)) ([f5af9f4](https://github.com/argos-ci/argos-javascript/commit/f5af9f4bad9738b71735d9e3ddec4b6dc4b01465))
+
+
 ## [0.31.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.31.0...%40argos-ci%2Fapi-client%400.31.1) (2026-09-30)
 
 ### Bug Fixes

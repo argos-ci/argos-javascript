@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.2.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Futil%404.2.1...%40argos-ci%2Futil%404.2.2) (2026-10-04)
+
+### Bug Fixes
+
+* **vitest:** harden the detection of Storybook stories ([38c9bd4](https://github.com/argos-ci/argos-javascript/commit/38c9bd4b048282dd63c5e230f4af7d99257e7611))
+
+
 ## [4.2.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Futil%404.2.0...%40argos-ci%2Futil%404.2.1) (2026-09-30)
 
 **Note:** Version bump only for package @argos-ci/util

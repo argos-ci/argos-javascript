@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.7.1...%40argos-ci%2Fvitest%400.8.0) (2026-10-04)
+
+### Bug Fixes
+
+* **vitest:** harden the detection of Storybook stories ([38c9bd4](https://github.com/argos-ci/argos-javascript/commit/38c9bd4b048282dd63c5e230f4af7d99257e7611))
+* **vitest:** make argosScreenshot and auto-naming work on Vitest 4.0 ([#390](https://github.com/argos-ci/argos-javascript/issues/390)) ([ad112ad](https://github.com/argos-ci/argos-javascript/commit/ad112ad4d3200da38d7efd7ac88cbe8fafc91aaa))
+* **vitest:** report object retry options as a retry count ([#391](https://github.com/argos-ci/argos-javascript/issues/391)) ([921c141](https://github.com/argos-ci/argos-javascript/commit/921c141b3688cf87a75a73db53a8897d0413e4d7))
+
+### Features
+
+* **vitest:** report screenshots of Storybook stories as Storybook ([6d2f477](https://github.com/argos-ci/argos-javascript/commit/6d2f477b724471bd1a5c3e199a3af81593e94447))
+
+
 ## [0.7.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.7.0...%40argos-ci%2Fvitest%400.7.1) (2026-09-30)
 
 **Note:** Version bump only for package @argos-ci/vitest
