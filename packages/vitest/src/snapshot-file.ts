@@ -12,7 +12,12 @@ import {
 import type { ArgosAttachment } from "@argos-ci/playwright";
 import type { TestMetadata } from "./metadata";
 import type { SerializableSnapshotOptions } from "./options";
-import { getArgosVitestVersion, getVitestVersion } from "./version";
+import type { StorybookContext } from "./storybook";
+import {
+  getArgosVitestVersion,
+  getVitestVersion,
+  resolveStorybookLibrary,
+} from "./version";
 
 /**
  * Resolve a `test` metadata's `location.file` relative to the git repository,
@@ -72,6 +77,7 @@ export async function writeSnapshotFile(
   options: SerializableSnapshotOptions = {},
   test?: TestMetadata,
   captureIndex?: number | null,
+  storybook?: StorybookContext | null,
 ): Promise<ArgosAttachment[]> {
   if (!name) {
     throw new Error("The `name` argument is required.");
@@ -82,11 +88,17 @@ export async function writeSnapshotFile(
   const filename = `${getScreenshotName(name)}${SNAPSHOT_INFIX}${extension}`;
   const snapshotPath = resolve(root, filename);
 
-  const [vitestVersion, sdkVersion, resolvedTest] = await Promise.all([
-    getVitestVersion(),
-    getArgosVitestVersion(),
-    resolveTestLocation(test),
-  ]);
+  const [storybookLibrary, vitestVersion, sdkVersion, resolvedTest] =
+    await Promise.all([
+      // Resolved from the test file (still absolute here), where the user
+      // installs Storybook.
+      storybook
+        ? resolveStorybookLibrary(storybook, test?.location?.file)
+        : null,
+      getVitestVersion(),
+      getArgosVitestVersion(),
+      resolveTestLocation(test),
+    ]);
 
   const tags = options.tag
     ? Array.isArray(options.tag)
@@ -95,10 +107,15 @@ export async function writeSnapshotFile(
     : undefined;
 
   const metadata: ScreenshotMetadata = {
-    // `argosSnapshot` does not rely on a browser, so Vitest itself is the
-    // automation library that produced the snapshot.
-    automationLibrary: { name: "vitest", version: vitestVersion },
+    // A snapshot of a story reports Storybook, like its screenshots.
+    // Otherwise, `argosSnapshot` does not rely on a browser, so Vitest itself
+    // is the automation library that produced the snapshot.
+    automationLibrary: storybookLibrary ?? {
+      name: "vitest",
+      version: vitestVersion,
+    },
     sdk: { name: "@argos-ci/vitest", version: sdkVersion },
+    ...(storybook?.story ? { story: storybook.story } : {}),
     ...(tags ? { tags } : {}),
     ...(resolvedTest ? { test: resolvedTest } : {}),
     ...(captureIndex != null ? { capture: { index: captureIndex } } : {}),

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getTestMetadata } from "./metadata";
+import { getCaptureMetadata } from "./metadata";
 
 describe("outer", () => {
   it("builds test metadata from the current test", async () => {
-    const test = await getTestMetadata();
+    const { test } = await getCaptureMetadata();
     expect(test).toBeTruthy();
     expect(test?.id).toBeTruthy();
     // The leaf title and the full title path (file + describes + title).
@@ -21,7 +21,7 @@ describe("outer", () => {
     "reports the configured retries and current retry",
     { retry: 3 },
     async () => {
-      const test = await getTestMetadata();
+      const { test } = await getCaptureMetadata();
       expect(test?.retries).toBe(3);
       expect(test?.retry).toBe(0);
     },
@@ -32,7 +32,7 @@ describe("outer", () => {
     "reports the retry count of an object retry option",
     { retry: { count: 2, delay: 0 } },
     async () => {
-      const test = await getTestMetadata();
+      const { test } = await getCaptureMetadata();
       expect(test?.retries).toBe(2);
       expect(test?.retry).toBe(0);
     },
@@ -42,7 +42,7 @@ describe("outer", () => {
     "reports 0 retries for an object retry option without a count",
     { retry: { delay: 0 } },
     async () => {
-      const test = await getTestMetadata();
+      const { test } = await getCaptureMetadata();
       expect(test?.retries).toBe(0);
     },
   );

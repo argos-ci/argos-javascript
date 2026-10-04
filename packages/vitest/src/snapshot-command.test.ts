@@ -30,6 +30,7 @@ describe("createArgosSnapshotCommand", () => {
       { root: "/abs/screenshots" },
       undefined,
       undefined,
+      undefined,
     );
   });
 
@@ -44,6 +45,7 @@ describe("createArgosSnapshotCommand", () => {
       "user",
       "serialized",
       { root: "/other", extension: ".json", tag: "a" },
+      undefined,
       undefined,
       undefined,
     );
@@ -64,6 +66,7 @@ describe("createArgosSnapshotCommand", () => {
       { root: "/abs/screenshots" },
       test,
       undefined,
+      undefined,
     );
   });
 
@@ -76,6 +79,21 @@ describe("createArgosSnapshotCommand", () => {
       { root: "/abs/screenshots" },
       undefined,
       2,
+      undefined,
+    );
+  });
+
+  it("forwards the Storybook context to the writer", async () => {
+    const command = createArgosSnapshotCommand({ root: "/abs/screenshots" });
+    const storybook = { source: "portable-stories" as const, story: null };
+    await command(ctx, "user", "serialized", undefined, null, 0, storybook);
+    expect(writeSnapshotFile).toHaveBeenCalledWith(
+      "user",
+      "serialized",
+      { root: "/abs/screenshots" },
+      null,
+      0,
+      storybook,
     );
   });
 });

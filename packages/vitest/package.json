@@ -45,6 +45,11 @@
       "import": "./dist/internal.mjs",
       "default": "./dist/internal.mjs"
     },
+    "./storybook": {
+      "types": "./dist/storybook-annotations.d.mts",
+      "import": "./dist/storybook-annotations.mjs",
+      "default": "./dist/storybook-annotations.mjs"
+    },
     "./internal/storybook-setup-file": "./dist/storybook-setup-file.mjs",
     "./package.json": "./package.json"
   },

@@ -90,52 +90,33 @@ export function buildTestMetadata(
 }
 
 /**
- * Get the Argos `test` metadata for the current Vitest test, or `null` when not
- * running inside a test.
+ * What a capture records about the current Vitest test, read from a single
+ * lookup of the test: its `test` metadata, its position among the test's
+ * captures, and the story it renders. All `null` outside a test.
  *
  * Runs on the test side (browser or Node) where the test context is available;
- * the resulting plain object crosses the browser/Node RPC boundary unchanged.
+ * the resulting plain objects cross the browser/Node RPC boundary unchanged.
  */
-export async function getTestMetadata(): Promise<TestMetadata> {
+export async function getCaptureMetadata(): Promise<{
+  test: TestMetadata;
+  captureIndex: number | null;
+  storybook: StorybookContext | null;
+}> {
   const task = await getCurrentTest();
   if (!task) {
-    return null;
+    return { test: null, captureIndex: null, storybook: null };
   }
-  return buildTestMetadata(task);
-}
-
-/**
- * Get the Storybook context of the current Vitest test, or `null` when it does
- * not render a story (or runs outside a test).
- *
- * Runs on the test side, where the test context is available.
- */
-export async function getStorybookMetadata(): Promise<StorybookContext | null> {
-  const task = await getCurrentTest();
-  if (!task) {
-    return null;
-  }
-  return getStorybookContext(task);
-}
-
-/**
- * Take the next capture index for the current Vitest test, or `null` outside a
- * test. Screenshots and snapshots share the counter, so a test that mixes both
- * still numbers them in the order it produced them.
- *
- * Runs on the test side, where the test context is available; the number then
- * crosses the RPC boundary to the Node command.
- */
-export async function takeCaptureIndex(): Promise<number | null> {
-  const task = await getCurrentTest();
-  if (!task) {
-    return null;
-  }
-  return nextCaptureIndex(
-    getTestRunKey({
-      id: task.id,
-      retry: task.result?.retryCount ?? undefined,
-      repeat: task.result?.repeatCount ?? undefined,
-    }),
-  );
+  return {
+    test: buildTestMetadata(task),
+    // Screenshots and snapshots share the counter, so a test that mixes both
+    // still numbers them in the order it produced them.
+    captureIndex: nextCaptureIndex(
+      getTestRunKey({
+        id: task.id,
+        retry: task.result?.retryCount ?? undefined,
+        repeat: task.result?.repeatCount ?? undefined,
+      }),
+    ),
+    storybook: getStorybookContext(task),
+  };
 }

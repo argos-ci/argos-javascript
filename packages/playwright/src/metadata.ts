@@ -25,6 +25,12 @@ function tryResolve(pkg: string) {
 export type MetadataConfig = {
   sdk: ScreenshotMetadata["sdk"];
   playwrightLibraries: string[];
+  /**
+   * Automation library resolved by the SDK itself, which wins over
+   * `playwrightLibraries`: for packages this one cannot resolve from its own
+   * install location, like a user's Storybook under strict package managers.
+   */
+  automationLibrary?: ScreenshotMetadata["automationLibrary"];
   url?: string;
   test?: ScreenshotMetadata["test"];
   story?: ScreenshotMetadata["story"];
@@ -70,6 +76,9 @@ async function getAutomationLibraryMetadata(): Promise<
   ScreenshotMetadata["automationLibrary"]
 > {
   const metadataConfig = metadataConfigStorage.getStore();
+  if (metadataConfig?.automationLibrary) {
+    return metadataConfig.automationLibrary;
+  }
   const libraries =
     metadataConfig?.playwrightLibraries ?? DEFAULT_PLAYWRIGHT_LIBRARIES;
   for (const name of libraries) {

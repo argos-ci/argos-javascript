@@ -6,6 +6,7 @@ import type {
   SerializableSnapshotOptions,
 } from "./options";
 import { writeSnapshotFile } from "./snapshot-file";
+import type { StorybookContext } from "./storybook";
 
 /**
  * Arguments of the `argosSnapshot` browser command.
@@ -18,6 +19,7 @@ export type ArgosSnapshotCommandArgs = [
   options?: SerializableSnapshotOptions,
   test?: TestMetadata,
   captureIndex?: number | null,
+  storybook?: StorybookContext | null,
 ];
 
 /**
@@ -35,6 +37,7 @@ export const createArgosSnapshotCommand = (
     options,
     test,
     captureIndex,
+    storybook,
   ): Promise<ArgosAttachment[]> => {
     if (!name) {
       throw new Error("The `name` argument is required.");
@@ -43,6 +46,13 @@ export const createArgosSnapshotCommand = (
       root: pluginOptions.root,
       ...options,
     };
-    return writeSnapshotFile(name, content, merged, test, captureIndex);
+    return writeSnapshotFile(
+      name,
+      content,
+      merged,
+      test,
+      captureIndex,
+      storybook,
+    );
   };
 };

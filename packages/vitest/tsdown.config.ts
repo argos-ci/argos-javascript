@@ -36,6 +36,14 @@ export default defineConfig([
     },
   },
   {
+    entry: ["src/storybook-annotations.ts"],
+    dts: true,
+    format: ["esm"],
+    deps: {
+      neverBundle: [/^@argos-ci\//, /^vitest/],
+    },
+  },
+  {
     entry: ["src/storybook-setup-file.ts"],
     format: ["esm"],
     deps: {

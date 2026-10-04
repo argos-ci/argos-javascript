@@ -1,5 +1,6 @@
 import type { Plugin } from "vitest/config";
-import { dirname, resolve } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createArgosScreenshotCommand } from "./command";
 import { createArgosSnapshotCommand } from "./snapshot-command";
@@ -21,6 +22,27 @@ export type {
 } from "./options";
 
 const cwd = process.cwd();
+
+/**
+ * Whether Storybook is installed for a Vitest project: resolvable from its
+ * root, or from one of its setup files (where `setProjectAnnotations()` usually
+ * is, possibly in a package of its own).
+ */
+function checkHasStorybook(config: {
+  root: string;
+  setupFiles: string[];
+}): boolean {
+  return [join(config.root, "package.json"), ...config.setupFiles].some(
+    (from) => {
+      try {
+        createRequire(from).resolve("storybook/package.json");
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  );
+}
 
 /**
  * Vitest plugin that registers the `argosScreenshot` browser command and,
@@ -60,8 +82,11 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
     configureVitest({ vitest, project }) {
       // Ahead of the user's setup files, which may set Storybook's project
       // annotations: it records the story each test renders, so screenshots of
-      // stories are reported as Storybook ones.
-      project.config.setupFiles.unshift(storybookSetupFile);
+      // stories are reported as Storybook ones. Only where Storybook is
+      // installed, it would load in every test file for nothing otherwise.
+      if (checkHasStorybook(project.config)) {
+        project.config.setupFiles.unshift(storybookSetupFile);
+      }
 
       if (uploadToArgos) {
         vitest.config.reporters.push(
@@ -74,6 +99,7 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
         optimizeDeps: {
           include: [
             "@argos-ci/vitest",
+            "@argos-ci/vitest/storybook",
             "@argos-ci/vitest/internal/storybook-setup-file",
           ],
         },

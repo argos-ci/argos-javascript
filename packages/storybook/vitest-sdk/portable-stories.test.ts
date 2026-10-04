@@ -3,7 +3,14 @@ import { composeStories, composeStory } from "@storybook/react-vite";
 import { createElement } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { beforeEach, expect, test } from "vitest";
+import {
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  onTestFinished,
+  test,
+} from "vitest";
 import * as HeaderStories from "../stories/Header.stories";
 import * as PageStories from "../stories/Page.stories";
 import { readMetadata } from "./metadata";
@@ -40,12 +47,12 @@ test("reports a story rendered as a component", async () => {
   const root = createRoot(
     document.body.appendChild(document.createElement("div")),
   );
+  onTestFinished(() => root.unmount());
   flushSync(() => root.render(createElement(LoggedOut)));
 
   const metadata = await readMetadata(
     await argosScreenshot("portable-stories/header-logged-out"),
   );
-  root.unmount();
   expect(metadata.automationLibrary.name).toBe("storybook");
   expect(metadata.story?.id).toBe("example-header--logged-out");
 });
@@ -78,13 +85,20 @@ test("leaves out the id of a story Storybook could not name", async () => {
   expect(metadata.story).toBeUndefined();
 });
 
-test("does not report a screenshot without story as a Storybook one", async () => {
-  // Taken after the tests above: none of their stories leaks into it.
-  document.body.innerHTML = "<p>Not a story</p>";
+describe("a screenshot without story", () => {
+  // A story rendered outside the test, whatever order the tests run in: it
+  // must not leak into the test's screenshots.
+  beforeAll(async () => {
+    await LoggedIn.run();
+  });
 
-  const metadata = await readMetadata(
-    await argosScreenshot("portable-stories/not-a-story"),
-  );
-  expect(metadata.automationLibrary.name).toBe("vitest");
-  expect(metadata.story).toBeUndefined();
+  test("is not reported as a Storybook one", async () => {
+    document.body.innerHTML = "<p>Not a story</p>";
+
+    const metadata = await readMetadata(
+      await argosScreenshot("portable-stories/not-a-story"),
+    );
+    expect(metadata.automationLibrary.name).toBe("vitest");
+    expect(metadata.story).toBeUndefined();
+  });
 });
