@@ -1,3 +1,4 @@
+import { getTitlePath } from "./metadata";
 import { getCurrentTest } from "./test-context";
 
 /**
@@ -73,11 +74,14 @@ export async function resolveAutoName(
   const count = (counters.get(test) ?? 0) + 1;
   counters.set(test, count);
 
+  // Vitest sets `fullName` from 4.0.14 on; before that, its own `getFullName()`
+  // joined the title path.
+  const testFullName = test.fullName ?? getTitlePath(test).join(" > ");
   const file = test.file?.name;
   const fullName =
-    file && !test.fullName.startsWith(file)
-      ? `${file} > ${test.fullName}`
-      : test.fullName;
+    file && !testFullName.startsWith(file)
+      ? `${file} > ${testFullName}`
+      : testFullName;
 
   // Reserve room for the trailing counter and the caller's suffix, then keep
   // the whole name within the filesystem limit. The counter always survives

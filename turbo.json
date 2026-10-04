@@ -71,6 +71,7 @@
         "ARGOS_BUILD_NUMBER",
         "NODE_VERSION",
         "OS",
+        "VITEST_VERSION",
         "GITHUB_*"
       ],
       "dependsOn": ["build-e2e"],

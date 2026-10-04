@@ -16,7 +16,7 @@ export type TestMetadata = ScreenshotMetadata["test"];
  * Build the title path of a task (`[file, ...describes, title]`), replicating
  * Vitest's own `getNames` helper so it matches the framework's conventions.
  */
-function getTitlePath(task: CurrentTask): string[] {
+export function getTitlePath(task: CurrentTask): string[] {
   const names = [task.name];
   let current: CurrentSuite = task;
   while (current.suite) {

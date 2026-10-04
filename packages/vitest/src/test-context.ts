@@ -14,7 +14,8 @@ export interface CurrentSuite {
 export interface CurrentTask extends CurrentSuite {
   id: string;
   name: string;
-  fullName: string;
+  /** Path of the file, describe blocks and title (Vitest >= 4.0.14). */
+  fullName?: string | undefined;
   file: { name: string; filepath: string };
   /** Tags declared on the test (Vitest >= 4). */
   tags?: string[] | undefined;
@@ -36,25 +37,38 @@ export interface CurrentTask extends CurrentSuite {
 }
 
 /**
- * Entry point exposing `getCurrentTest` before Vitest 4.1, and removed
- * altogether in Vitest 5.
- *
- * Held in a variable rather than written inline at the import: Vite's
- * dependency pre-bundler resolves a literal specifier eagerly, and on Vitest 5
- * that fails the whole optimize step over an export that no longer exists —
- * even though the branch importing it cannot run there.
+ * Global where Vitest keeps the state of the worker running the tests, in Node
+ * and in the browser alike. Vitest internal: only read on 4.0, a release line
+ * that no longer changes.
  */
-const LEGACY_SUITE_ENTRY = "vitest/suite";
+const WORKER_STATE_GLOBAL = "__vitest_worker__";
+
+/**
+ * Get the running test from Vitest's worker state, for Vitest 4.0.
+ *
+ * Vitest 4.0 exports `getCurrentTest()` only from `vitest/suite`, which this
+ * package cannot import: written inline, the specifier fails Vite's dependency
+ * optimizer on Vitest 5, where that export is gone; hidden from Vite, it
+ * reaches the browser unresolved. The test runner also keeps the running task
+ * on the worker state, and Vitest 4.0's own browser commands
+ * (`page.screenshot()`) read it from there. The task is the test while it runs,
+ * hooks included, and its suite or file otherwise.
+ */
+function getCurrentTestFromWorkerState(): CurrentTask | undefined {
+  const state = (globalThis as Record<string, unknown>)[WORKER_STATE_GLOBAL] as
+    { current?: CurrentTask & { type?: string } } | undefined;
+  const task = state?.current;
+  return task?.type === "test" ? task : undefined;
+}
 
 /**
  * Get the current Vitest test task, or `undefined` when not inside a test.
  *
  * Vitest >= 4.1 exposes `TestRunner.getCurrentTest()` from the `vitest` entry
- * point; the `vitest/suite` export is deprecated there and gone in Vitest 5. We
- * prefer the new API and fall back to `vitest/suite` for older 4.x. Both are
- * imported dynamically so importing `@argos-ci/vitest` in a non-Vitest
- * environment does not pull Vitest in — only call this once you know Vitest is
- * available.
+ * point; on Vitest 4.0, we read the worker state instead (see
+ * {@link getCurrentTestFromWorkerState}). `vitest` is imported dynamically so
+ * importing `@argos-ci/vitest` in a non-Vitest environment does not pull Vitest
+ * in — only call this once you know Vitest is available.
  */
 export async function getCurrentTest(): Promise<CurrentTask | undefined> {
   const vitest = (await import("vitest")) as {
@@ -64,8 +78,5 @@ export async function getCurrentTest(): Promise<CurrentTask | undefined> {
   if (runner?.getCurrentTest) {
     return runner.getCurrentTest();
   }
-  const suite = (await import(/* @vite-ignore */ LEGACY_SUITE_ENTRY)) as {
-    getCurrentTest: () => CurrentTask | undefined;
-  };
-  return suite.getCurrentTest();
+  return getCurrentTestFromWorkerState();
 }
