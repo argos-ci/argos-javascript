@@ -34,6 +34,18 @@ export function getTitlePath(task: CurrentTask): string[] {
 }
 
 /**
+ * Get the configured maximum number of retries of a task. Since Vitest 4.1 the
+ * `retry` option can be an object, which the task keeps as is, while the
+ * metadata expects a number: take its `count`, defaulting to 0 like Vitest.
+ */
+function getRetries(task: CurrentTask): number | undefined {
+  if (typeof task.retry === "object") {
+    return task.retry.count ?? 0;
+  }
+  return task.retry;
+}
+
+/**
  * Build the Argos `test` metadata from a Vitest test task, mirroring the
  * Playwright SDK.
  *
@@ -51,7 +63,7 @@ export function buildTestMetadata(
     tags: task.tags && task.tags.length > 0 ? task.tags : undefined,
     // `retry`/`repeats` on the task are the configured maximums; the current
     // counts live on the result.
-    retries: task.retry ?? undefined,
+    retries: getRetries(task),
     retry: task.result?.retryCount ?? undefined,
     repeat: task.result?.repeatCount ?? task.repeats ?? undefined,
     location: {

@@ -26,4 +26,24 @@ describe("outer", () => {
       expect(test?.retry).toBe(0);
     },
   );
+
+  // Since Vitest 4.1, `retry` can be an object; the task keeps it as is.
+  it(
+    "reports the retry count of an object retry option",
+    { retry: { count: 2, delay: 0 } },
+    async () => {
+      const test = await getTestMetadata();
+      expect(test?.retries).toBe(2);
+      expect(test?.retry).toBe(0);
+    },
+  );
+
+  it(
+    "reports 0 retries for an object retry option without a count",
+    { retry: { delay: 0 } },
+    async () => {
+      const test = await getTestMetadata();
+      expect(test?.retries).toBe(0);
+    },
+  );
 });
