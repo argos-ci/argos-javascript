@@ -18,8 +18,11 @@ export interface CurrentTask extends CurrentSuite {
   file: { name: string; filepath: string };
   /** Tags declared on the test (Vitest >= 4). */
   tags?: string[] | undefined;
-  /** Configured maximum number of retries. */
-  retry?: number | undefined;
+  /**
+   * Configured maximum number of retries, or an object holding it in `count`
+   * (Vitest >= 4.1, which also allows `delay` and `condition` there).
+   */
+  retry?: number | { count?: number } | undefined;
   /** Configured number of repeats. */
   repeats?: number | undefined;
   /** Source location, only present when `includeTaskLocation` is enabled. */
