@@ -14,9 +14,14 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
+    "argos",
+    "argos-ci",
     "browser",
     "utilities",
-    "argos"
+    "visual-testing",
+    "screenshot-testing",
+    "screenshot-stabilization",
+    "flaky-tests"
   ],
   "publishConfig": {
     "access": "public"

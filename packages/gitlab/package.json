@@ -14,12 +14,14 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
-    "gitlab",
     "argos",
+    "argos-ci",
+    "gitlab",
+    "gitlab-ci",
+    "merge-request",
     "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "visual-testing",
+    "visual-regression-testing"
   ],
   "publishConfig": {
     "access": "public"

@@ -14,13 +14,16 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
+    "argos",
+    "argos-ci",
     "cypress",
     "cypress-plugin",
-    "argos",
     "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "e2e-testing",
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing"
   ],
   "publishConfig": {
     "access": "public"

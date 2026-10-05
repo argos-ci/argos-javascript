@@ -14,9 +14,13 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
+    "argos",
+    "argos-ci",
     "api",
+    "api-client",
     "openapi",
-    "argos"
+    "rest-api",
+    "visual-testing"
   ],
   "publishConfig": {
     "access": "public"

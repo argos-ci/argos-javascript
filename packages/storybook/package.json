@@ -11,15 +11,20 @@
   },
   "homepage": "https://argos-ci.com/docs/reference/storybook",
   "keywords": [
+    "argos",
+    "argos-ci",
     "storybook",
     "storybook-addon",
+    "storybook-vitest",
+    "storybook-test-runner",
+    "vitest",
     "screenshot",
-    "capture",
     "testing",
-    "visual testing",
-    "argos",
-    "regression",
-    "visual regression"
+    "component-testing",
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing"
   ],
   "publishConfig": {
     "access": "public"

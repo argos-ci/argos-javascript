@@ -27,13 +27,16 @@
   },
   "license": "MIT",
   "keywords": [
+    "argos",
+    "argos-ci",
     "sdk",
     "node",
-    "argos",
     "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing",
+    "continuous-integration"
   ],
   "publishConfig": {
     "access": "public"

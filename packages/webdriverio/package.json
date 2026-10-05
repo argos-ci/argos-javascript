@@ -14,13 +14,18 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
+    "argos",
+    "argos-ci",
     "webdriverio",
     "webdriverio-plugin",
-    "argos",
+    "wdio",
+    "wdio-plugin",
     "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "e2e-testing",
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing"
   ],
   "publishConfig": {
     "access": "public"
