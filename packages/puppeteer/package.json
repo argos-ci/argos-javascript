@@ -14,12 +14,15 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
-    "puppeteer",
     "argos",
+    "argos-ci",
+    "puppeteer",
     "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "e2e-testing",
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing"
   ],
   "publishConfig": {
     "access": "public"

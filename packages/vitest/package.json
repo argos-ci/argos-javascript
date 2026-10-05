@@ -14,16 +14,19 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
+    "argos",
+    "argos-ci",
     "vitest",
     "vitest-plugin",
     "vitest-browser",
     "screenshot",
-    "capture",
     "testing",
-    "visual testing",
-    "argos",
-    "regression",
-    "visual regression"
+    "component-testing",
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing",
+    "snapshot-testing"
   ],
   "publishConfig": {
     "access": "public"

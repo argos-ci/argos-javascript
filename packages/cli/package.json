@@ -23,12 +23,17 @@
   },
   "license": "MIT",
   "keywords": [
-    "cli",
     "argos",
+    "argos-ci",
+    "cli",
     "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing",
+    "snapshot-testing",
+    "continuous-integration",
+    "ci"
   ],
   "publishConfig": {
     "access": "public"

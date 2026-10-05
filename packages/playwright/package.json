@@ -14,15 +14,20 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
+    "argos",
+    "argos-ci",
     "playwright",
     "playwright-reporter",
-    "reporter",
     "playwright-plugin",
-    "argos",
+    "reporter",
     "testing",
-    "visual testing",
-    "regression",
-    "visual regression"
+    "e2e-testing",
+    "visual-testing",
+    "visual-regression",
+    "visual-regression-testing",
+    "screenshot-testing",
+    "snapshot-testing",
+    "aria-snapshot"
   ],
   "publishConfig": {
     "access": "public"

@@ -14,8 +14,9 @@
     "url": "https://github.com/argos-ci/argos-javascript/issues"
   },
   "keywords": [
-    "utilities",
-    "argos"
+    "argos",
+    "argos-ci",
+    "utilities"
   ],
   "publishConfig": {
     "access": "public"
