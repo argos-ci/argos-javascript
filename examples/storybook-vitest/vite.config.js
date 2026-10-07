@@ -20,8 +20,8 @@ export default defineConfig({
         // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
         storybookTest({
           configDir: path.join(dirname, '.storybook')
-        })
-      
+        }),
+
         // The plugin will capture screenshots of your stories and upload them to Argos.
         // See options at: https://argos-ci.com/docs/reference/storybook
         argosVitestPlugin({
@@ -31,7 +31,7 @@ export default defineConfig({
           // Set your Argos token (required if not using GitHub Actions).
           token: "<YOUR-ARGOS-TOKEN>",
         })
-    ],
+      ],
       test: {
         name: 'storybook',
         browser: {
