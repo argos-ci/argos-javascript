@@ -57,7 +57,6 @@ export default defineConfig({
         test: {
           name: "storybook",
           browser: getBrowserConfig(),
-          setupFiles: [".storybook/vitest.setup.ts"],
         },
       },
       {
@@ -69,7 +68,7 @@ export default defineConfig({
           name: "vitest-sdk-portable-stories",
           include: ["vitest-sdk/**/*.test.ts"],
           browser: getBrowserConfig(),
-          setupFiles: [".storybook/vitest.setup.ts"],
+          setupFiles: ["vitest-sdk/portable-stories.setup.ts"],
         },
       },
       {
