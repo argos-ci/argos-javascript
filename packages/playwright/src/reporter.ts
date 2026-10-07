@@ -91,9 +91,11 @@ const RECOMMENDED_CHROMIUM_ARGS = [
  */
 function checkLaunchOptions(config: FullConfig) {
   for (const project of config.projects) {
-    // These flags only apply to Chromium. The browser defaults to Chromium
-    // when `browserName` is not set.
-    const browserName = project.use.browserName ?? "chromium";
+    // These flags only apply to Chromium. Resolve the browser like Playwright
+    // does: `browserName`, then `defaultBrowserType` (set by device presets
+    // such as `devices["Desktop Firefox"]`), then Chromium.
+    const browserName =
+      project.use.browserName ?? project.use.defaultBrowserType ?? "chromium";
     if (browserName !== "chromium") {
       continue;
     }
