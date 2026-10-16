@@ -1,4 +1,4 @@
-import { CliError } from "./cli-error";
+import { fail } from "./cli-error";
 import { sanitizeTerminalText } from "./terminal";
 import { getUserAgent } from "./user-agent";
 
@@ -14,7 +14,6 @@ import { getUserAgent } from "./user-agent";
  * `initialize` handshake or session to carry between calls.
  */
 
-/** Root of the published Argos documentation. */
 export const DOCS_URL = "https://argos-ci.com/docs";
 
 const MCP_ENDPOINT = `${DOCS_URL}/~gitbook/mcp`;
@@ -56,6 +55,19 @@ type JsonRpcResponse = {
 const RESULT_REGEX =
   /^Title: ([^\n]*)\nLink: ([^\n]*)(?:\nContent: ([\s\S]*))?/;
 
+/**
+ * The link as a normalized `https:` URL, or `null` when it is not one. The URL
+ * serializer percent-encodes control and non-ASCII characters, so the result
+ * is safe to print as-is and to hand to `curl`.
+ */
+function toHttpsUrl(link: string | undefined): string | null {
+  if (!link || !URL.canParse(link)) {
+    return null;
+  }
+  const url = new URL(link);
+  return url.protocol === "https:" ? url.href : null;
+}
+
 /** Parse the tool's text blocks into results, skipping any it can't read. */
 export function parseDocsSearchContent(
   content: ToolContent[],
@@ -68,7 +80,7 @@ export function parseDocsSearchContent(
     }
     const match = RESULT_REGEX.exec(block.text);
     const title = match?.[1]?.trim();
-    const url = match?.[2]?.trim();
+    const url = toHttpsUrl(match?.[2]);
     if (!title || !url || results.has(url)) {
       continue;
     }
@@ -82,7 +94,7 @@ export function parseDocsSearchContent(
  * server-sent event stream, each JSON-RPC message on one `data:` line, but may
  * answer with plain JSON, which the protocol allows too.
  */
-export function parseMcpResponse(
+function parseMcpResponse(
   body: string,
   contentType: string | null,
 ): JsonRpcResponse {
@@ -98,7 +110,7 @@ export function parseMcpResponse(
       return message;
     }
   }
-  throw new CliError("The documentation search returned no response.");
+  fail("The documentation search returned no response.");
 }
 
 /** Search the Argos documentation, best match first. */
@@ -123,13 +135,11 @@ export async function searchDocs(
     signal: AbortSignal.timeout(TIMEOUT_MS),
   }).catch((error: unknown) => {
     const reason = error instanceof Error ? error.message : String(error);
-    throw new CliError(`Could not reach ${DOCS_URL}: ${reason}`);
+    fail(`Could not reach ${DOCS_URL}: ${reason}`);
   });
 
   if (!response.ok) {
-    throw new CliError(
-      `The documentation search failed with HTTP ${response.status}.`,
-    );
+    fail(`The documentation search failed with HTTP ${response.status}.`);
   }
 
   const message = parseMcpResponse(
@@ -141,7 +151,7 @@ export async function searchDocs(
     const reason = message.error
       ? message.error.message
       : content.map((block) => block.text ?? "").join(" ");
-    throw new CliError(
+    fail(
       `The documentation search failed: ${sanitizeTerminalText(reason) || "unknown error"}`,
     );
   }

@@ -78,13 +78,16 @@ export const limitOption = new Option(
  * Parse a `--limit` value into a positive integer, or abort. Pass `max` when
  * the source caps how many items it can return.
  */
-export function toLimit(value: string, options?: { max?: number }): number {
+export function toLimit(
+  value: string,
+  { max = Infinity }: { max?: number } = {},
+): number {
   const limit = Number(value);
   if (!Number.isInteger(limit) || limit < 1) {
     fail(`--limit must be a positive integer, received "${value}".`);
   }
-  if (options?.max !== undefined && limit > options.max) {
-    fail(`--limit must be at most ${options.max}, received "${value}".`);
+  if (limit > max) {
+    fail(`--limit must be at most ${max}, received "${value}".`);
   }
   return limit;
 }

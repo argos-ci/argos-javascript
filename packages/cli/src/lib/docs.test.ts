@@ -1,14 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CliError } from "./cli-error";
-import { parseDocsSearchContent, parseMcpResponse, searchDocs } from "./docs";
+import { parseDocsSearchContent, searchDocs } from "./docs";
 
 /** A search hit as the GitBook `searchDocumentation` tool renders it. */
 function hit(title: string, url: string, content?: string) {
   return {
     type: "text",
-    text: [`Title: ${title}`, `Link: ${url}`]
-      .concat(content === undefined ? [] : [`Content: ${content}`])
-      .join("\n"),
+    text: `Title: ${title}\nLink: ${url}${content === undefined ? "" : `\nContent: ${content}`}`,
   };
 }
 
@@ -18,7 +16,7 @@ function sse(message: unknown) {
 }
 
 function mockFetch(response: Response) {
-  const fetchMock = vi.fn(async () => response);
+  const fetchMock = vi.fn<typeof fetch>(async () => response);
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
@@ -75,6 +73,16 @@ describe("parseDocsSearchContent", () => {
     ]);
   });
 
+  it("normalizes links, and skips one that is not an https URL", () => {
+    expect(
+      parseDocsSearchContent([
+        hit("Insecure", "http://argos-ci.com/docs/cli"),
+        hit("Not a URL", "argos-ci.com/docs"),
+        hit("CLI", "https://argos-ci.com/docs/cli guide\u001B[2K"),
+      ]).map((result) => result.url),
+    ).toEqual(["https://argos-ci.com/docs/cli%20guide%1B[2K"]);
+  });
+
   it("skips blocks it cannot read", () => {
     expect(
       parseDocsSearchContent([
@@ -83,26 +91,6 @@ describe("parseDocsSearchContent", () => {
         hit("CLI", "https://argos-ci.com/docs/cli"),
       ]),
     ).toHaveLength(1);
-  });
-});
-
-describe("parseMcpResponse", () => {
-  it("reads the response out of an event stream", () => {
-    const message = { jsonrpc: "2.0", id: 1, result: { content: [] } };
-    expect(parseMcpResponse(sse(message), "text/event-stream")).toEqual(
-      message,
-    );
-  });
-
-  it("reads a plain JSON response", () => {
-    const message = { jsonrpc: "2.0", id: 1, result: { content: [] } };
-    expect(
-      parseMcpResponse(JSON.stringify(message), "application/json"),
-    ).toEqual(message);
-  });
-
-  it("fails when the stream carries no response", () => {
-    expect(() => parseMcpResponse("", "text/event-stream")).toThrow(CliError);
   });
 });
 
@@ -118,13 +106,10 @@ describe("searchDocs", () => {
       { title: "CLI", url: "https://argos-ci.com/docs/cli", excerpt: null },
     ]);
 
-    const [url, init] = fetchMock.mock.calls[0] as unknown as [
-      string,
-      RequestInit,
-    ];
+    const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe("https://argos-ci.com/docs/~gitbook/mcp");
-    expect(init.method).toBe("POST");
-    expect(JSON.parse(init.body as string)).toMatchObject({
+    expect(init?.method).toBe("POST");
+    expect(JSON.parse(init?.body as string)).toMatchObject({
       method: "tools/call",
       params: {
         name: "searchDocumentation",
@@ -144,6 +129,25 @@ describe("searchDocs", () => {
     });
     const results = await searchDocs("page", { limit: 2 });
     expect(results.map((result) => result.title)).toEqual(["Page 1", "Page 2"]);
+  });
+
+  it("reads a plain JSON response", async () => {
+    mockFetch(
+      Response.json({
+        id: 1,
+        result: { content: [hit("CLI", "https://argos-ci.com/docs/cli")] },
+      }),
+    );
+    await expect(searchDocs("cli", { limit: 5 })).resolves.toHaveLength(1);
+  });
+
+  it("fails when the stream carries no response", async () => {
+    mockFetch(
+      new Response("", { headers: { "content-type": "text/event-stream" } }),
+    );
+    await expect(searchDocs("anything", { limit: 5 })).rejects.toThrow(
+      CliError,
+    );
   });
 
   it("fails on an HTTP error", async () => {
@@ -176,9 +180,7 @@ describe("searchDocs", () => {
   it("fails cleanly when the docs cannot be reached", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => {
-        throw new TypeError("fetch failed");
-      }),
+      vi.fn().mockRejectedValue(new TypeError("fetch failed")),
     );
     await expect(searchDocs("anything", { limit: 5 })).rejects.toThrow(
       "Could not reach https://argos-ci.com/docs: fetch failed",
