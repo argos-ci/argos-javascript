@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.7.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.7.1...%40argos-ci%2Fplaywright%407.7.2) (2026-10-16)
+
+### Bug Fixes
+
+* **playwright:** stop warning about Chromium args on Firefox and WebKit device presets ([24650e3](https://github.com/argos-ci/argos-javascript/commit/24650e3c08c6685ce593f346744b2e63cd08bbe9))
+
+
 ## [7.7.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.7.0...%40argos-ci%2Fplaywright%407.7.1) (2026-10-04)
 
 ### Bug Fixes

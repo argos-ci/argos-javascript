@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fwebdriverio%400.8.11...%40argos-ci%2Fwebdriverio%400.9.0) (2026-10-16)
+
+### Features
+
+* **webdriverio:** support WebdriverIO v10 ([a570882](https://github.com/argos-ci/argos-javascript/commit/a5708821250c6ed37ce9fe32959dbb26fd5d6d97))
+
+
 ## [0.8.11](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fwebdriverio%400.8.10...%40argos-ci%2Fwebdriverio%400.8.11) (2026-10-04)
 
 **Note:** Version bump only for package @argos-ci/webdriverio

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.10.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.9.6...%40argos-ci%2Fcli%406.10.0) (2026-10-16)
+
+### Features
+
+* **cli:** add `docs search` command ([42e234a](https://github.com/argos-ci/argos-javascript/commit/42e234ab916b6136edfddbb5b93b8e7c42c27da3))
+
+
 ## [6.9.6](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.9.5...%40argos-ci%2Fcli%406.9.6) (2026-10-04)
 
 **Note:** Version bump only for package @argos-ci/cli

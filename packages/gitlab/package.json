@@ -1,7 +1,7 @@
 {
   "name": "@argos-ci/gitlab",
   "description": "GitLab utilities for visual testing with Argos.",
-  "version": "0.7.20",
+  "version": "0.7.21",
   "author": "Smooth Code",
   "license": "MIT",
   "repository": {
