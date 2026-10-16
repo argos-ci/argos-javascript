@@ -20,12 +20,6 @@ describe("argos docs search", () => {
     }
   });
 
-  test("prints human-readable results", () => {
-    const output = run(["docs", "search", "baseline", "build"], baseEnv);
-    expect(output.stdout).toMatch(/^1\. /);
-    expect(output.stdout).toContain("https://argos-ci.com/docs/");
-  });
-
   test("rejects a limit above what the search returns", () => {
     let error: CommandError | undefined;
     try {

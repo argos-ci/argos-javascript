@@ -779,8 +779,9 @@ export function formatMediaVersions(versions: MediaVersion[]): string {
 
 /**
  * Format documentation search results, best match first. Titles and excerpts
- * come from the docs host, so they are sanitized before reaching the terminal;
- * the excerpt is also cut down to a single line.
+ * come from the docs host, so they are sanitized before reaching the terminal,
+ * which also cuts the excerpt down to a single line. URLs were normalized when
+ * the results were parsed.
  */
 export function formatDocsSearchResults(
   results: DocsSearchResult[],
@@ -792,8 +793,8 @@ export function formatDocsSearchResults(
   return results
     .flatMap((result, index) => [
       `${index + 1}. ${sanitizeTerminalText(result.title)}`,
-      indent(sanitizeTerminalText(result.url)),
-      result.excerpt ? indent(sanitizeTerminalText(result.excerpt)) : null,
+      `  ${result.url}`,
+      result.excerpt ? `  ${sanitizeTerminalText(result.excerpt)}` : null,
       "",
     ])
     .filter((line): line is string => line !== null)
