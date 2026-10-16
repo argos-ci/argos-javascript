@@ -20,6 +20,7 @@ import { testCommand } from "./commands/test";
 import { accountCommand } from "./commands/account";
 import { projectCommand } from "./commands/project";
 import { automationCommand } from "./commands/automation";
+import { docsCommand } from "./commands/docs";
 import { initUserAgent } from "./lib/user-agent";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -56,6 +57,7 @@ testCommand(program);
 accountCommand(program);
 projectCommand(program);
 automationCommand(program);
+docsCommand(program);
 
 if (!process.argv.slice(2).length) {
   program.outputHelp();

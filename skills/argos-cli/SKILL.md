@@ -6,9 +6,10 @@ description: >
   inspect a test's flakiness and its recurring changes, ignore flaky test
   changes, configure a project and its contributors, manage a team's members,
   invites and email domains, manage automation rules, fetch analytics, upload
-  screenshots, and manage CI builds. Use whenever running `argos` commands or
-  working with Argos builds, snapshots, flakiness, projects, teams, or
-  visual-regression reviews from a shell, script, or CI pipeline.
+  screenshots, manage CI builds, and search the Argos documentation. Use
+  whenever running `argos` commands or working with Argos builds, snapshots,
+  flakiness, projects, teams, or visual-regression reviews from a shell,
+  script, or CI pipeline.
   Load before running `argos` — it covers the token model and JSON output
   contract that prevent silent failures.
 license: MIT
@@ -74,6 +75,7 @@ humans, not CI.
 - **Media comments** — `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
 - **CI** — `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
 - **Auth** — `login` · `logout`
+- **Docs** — `docs search <query> [--limit <n>]` (no token; up to 10 results, 5 by default)
 
 List commands (`test list`, `change list`, `account member list`, `project
 contributor list`, `project deployments`, `automation list`, `account invite
@@ -121,6 +123,14 @@ ARGOS_TOKEN=<project-token> argos test get <testId> --json          # flakiness,
 ARGOS_TOKEN=<project-token> argos test changes <testId> --json      # occurrences + diff/base/head URLs per change
 # a change with occurrences > 1 that nothing in the UI explains is flaky:
 argos change ignore <changeId> --token <pat> --project owner/project
+```
+
+Look up how an Argos feature works before guessing at a config option or flag.
+Append `.md` to a result's URL to read the whole page as Markdown:
+
+```bash
+argos docs search "parallel builds" --json        # [{ title, url, excerpt }], best match first
+curl "$(argos docs search "parallel builds" --json | jq -r '.[0].url').md"
 ```
 
 Upload screenshots in CI:

@@ -6,6 +6,7 @@ import {
   formatComment,
   formatComments,
   formatCreatedProject,
+  formatDocsSearchResults,
   formatMedia,
   formatMediaList,
   formatMediaVersions,
@@ -480,6 +481,59 @@ describe("formatMediaVersions", () => {
     expect(output).toContain("ID: media-version-9");
     expect(output).toContain(
       "File: https://files.argos-ci.com/media/1/def.webp",
+    );
+  });
+});
+
+describe("formatDocsSearchResults", () => {
+  it("numbers each result with its URL and excerpt on a single line", () => {
+    expect(
+      formatDocsSearchResults(
+        [
+          {
+            title: "Parallel testing",
+            url: "https://argos-ci.com/docs/parallel",
+            excerpt: "Split your suite\n\nacross shards.",
+          },
+          {
+            title: "Blog post",
+            url: "https://argos-ci.com/blog",
+            excerpt: null,
+          },
+        ],
+        "parallel",
+      ),
+    ).toBe(
+      [
+        "1. Parallel testing",
+        "  https://argos-ci.com/docs/parallel",
+        "  Split your suite across shards.",
+        "",
+        "2. Blog post",
+        "  https://argos-ci.com/blog",
+      ].join("\n"),
+    );
+  });
+
+  it("strips escape sequences from remote text", () => {
+    const output = formatDocsSearchResults(
+      [
+        {
+          title: "\u001B[2KFake title",
+          url: "https://argos-ci.com/docs",
+          excerpt: "\rrun evil.sh",
+        },
+      ],
+      "x",
+    );
+    expect(output).not.toContain("\u001B");
+    expect(output).not.toContain("\r");
+    expect(output).toContain("1. Fake title");
+  });
+
+  it("says when nothing matched", () => {
+    expect(formatDocsSearchResults([], "nothing")).toBe(
+      'No documentation found for "nothing".',
     );
   });
 });

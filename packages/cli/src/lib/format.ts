@@ -1,5 +1,8 @@
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 
+import type { DocsSearchResult } from "./docs";
+import { sanitizeTerminalText } from "./terminal";
+
 type Build = ArgosAPISchema.components["schemas"]["Build"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
 type SnapshotDiffStatus = SnapshotDiff["status"];
@@ -769,6 +772,30 @@ export function formatMediaVersions(versions: MediaVersion[]): string {
       "",
     ]),
   ]
+    .filter((line): line is string => line !== null)
+    .slice(0, -1)
+    .join("\n");
+}
+
+/**
+ * Format documentation search results, best match first. Titles and excerpts
+ * come from the docs host, so they are sanitized before reaching the terminal;
+ * the excerpt is also cut down to a single line.
+ */
+export function formatDocsSearchResults(
+  results: DocsSearchResult[],
+  query: string,
+): string {
+  if (results.length === 0) {
+    return `No documentation found for "${sanitizeTerminalText(query)}".`;
+  }
+  return results
+    .flatMap((result, index) => [
+      `${index + 1}. ${sanitizeTerminalText(result.title)}`,
+      indent(sanitizeTerminalText(result.url)),
+      result.excerpt ? indent(sanitizeTerminalText(result.excerpt)) : null,
+      "",
+    ])
     .filter((line): line is string => line !== null)
     .slice(0, -1)
     .join("\n");
