@@ -74,11 +74,17 @@ export const limitOption = new Option(
   "Maximum number of items to fetch, following pagination as needed",
 ).default(String(DEFAULT_LIMIT));
 
-/** Parse a `--limit` value into a positive integer, or abort. */
-export function toLimit(value: string): number {
+/**
+ * Parse a `--limit` value into a positive integer, or abort. Pass `max` when
+ * the source caps how many items it can return.
+ */
+export function toLimit(value: string, options?: { max?: number }): number {
   const limit = Number(value);
   if (!Number.isInteger(limit) || limit < 1) {
     fail(`--limit must be a positive integer, received "${value}".`);
+  }
+  if (options?.max !== undefined && limit > options.max) {
+    fail(`--limit must be at most ${options.max}, received "${value}".`);
   }
   return limit;
 }

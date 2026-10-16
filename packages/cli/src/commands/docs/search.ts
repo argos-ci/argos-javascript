@@ -3,11 +3,14 @@ import { fail } from "../../lib/cli-error";
 import { DOCS_URL, MAX_DOCS_SEARCH_RESULTS, searchDocs } from "../../lib/docs";
 import { formatDocsSearchResults } from "../../lib/format";
 import { handleCliError, output } from "../../lib/run";
-import { jsonOption, toLimit, type JsonOption } from "../../options";
+import {
+  jsonOption,
+  toLimit,
+  type JsonOption,
+  type LimitOption,
+} from "../../options";
 
-const DEFAULT_LIMIT = 5;
-
-type DocsSearchOptions = JsonOption & { limit: string };
+const DEFAULT_DOCS_LIMIT = 5;
 
 export function registerDocsSearch(docs: Command) {
   docs
@@ -18,7 +21,7 @@ export function registerDocsSearch(docs: Command) {
       new Option(
         "--limit <number>",
         `Maximum number of results, up to ${MAX_DOCS_SEARCH_RESULTS}`,
-      ).default(String(DEFAULT_LIMIT)),
+      ).default(String(DEFAULT_DOCS_LIMIT)),
     )
     .addOption(jsonOption)
     .addHelpText(
@@ -32,18 +35,15 @@ export function registerDocsSearch(docs: Command) {
         '  curl -H "Accept: text/markdown" "$url"',
       ].join("\n"),
     )
-    .action(async (words: string[], options: DocsSearchOptions) => {
+    .action(async (words: string[], options: JsonOption & LimitOption) => {
       try {
         const query = words.join(" ").trim();
         if (!query) {
           fail("A search query is required.");
         }
-        const limit = toLimit(options.limit);
-        if (limit > MAX_DOCS_SEARCH_RESULTS) {
-          fail(
-            `--limit must be at most ${MAX_DOCS_SEARCH_RESULTS}, received "${options.limit}".`,
-          );
-        }
+        const limit = toLimit(options.limit, {
+          max: MAX_DOCS_SEARCH_RESULTS,
+        });
         const results = await searchDocs(query, { limit });
         output(results, options, (data) =>
           formatDocsSearchResults(data, query),

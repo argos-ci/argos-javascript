@@ -38,7 +38,6 @@ export type DocsSearchResult = {
 type ToolContent = { type: string; text?: string };
 
 type JsonRpcResponse = {
-  id?: unknown;
   result?: { content?: ToolContent[]; isError?: boolean };
   error?: { message?: unknown };
 };
@@ -61,8 +60,8 @@ const RESULT_REGEX =
 export function parseDocsSearchContent(
   content: ToolContent[],
 ): DocsSearchResult[] {
-  const results: DocsSearchResult[] = [];
-  const seen = new Set<string>();
+  // Keyed by URL: several passages of one page would list the page twice.
+  const results = new Map<string, DocsSearchResult>();
   for (const block of content) {
     if (block.type !== "text" || !block.text) {
       continue;
@@ -70,23 +69,18 @@ export function parseDocsSearchContent(
     const match = RESULT_REGEX.exec(block.text);
     const title = match?.[1]?.trim();
     const url = match?.[2]?.trim();
-    if (!title || !url) {
+    if (!title || !url || results.has(url)) {
       continue;
     }
-    // Several passages of one page would list the page twice.
-    if (seen.has(url)) {
-      continue;
-    }
-    seen.add(url);
-    results.push({ title, url, excerpt: match?.[3]?.trim() || null });
+    results.set(url, { title, url, excerpt: match?.[3]?.trim() || null });
   }
-  return results;
+  return [...results.values()];
 }
 
 /**
  * Read the JSON-RPC response out of the body. The endpoint answers with a
- * server-sent event stream — one `message` event per JSON-RPC message — but
- * may answer with plain JSON, which the protocol allows too.
+ * server-sent event stream, each JSON-RPC message on one `data:` line, but may
+ * answer with plain JSON, which the protocol allows too.
  */
 export function parseMcpResponse(
   body: string,
@@ -95,17 +89,11 @@ export function parseMcpResponse(
   if (!contentType?.includes("text/event-stream")) {
     return JSON.parse(body) as JsonRpcResponse;
   }
-  // An event's data can span several `data:` lines, joined by newlines.
-  for (const event of body.split(/\r?\n\r?\n/)) {
-    const data = event
-      .split(/\r?\n/)
-      .filter((line) => line.startsWith("data:"))
-      .map((line) => line.slice("data:".length).replace(/^ /, ""))
-      .join("\n");
-    if (!data) {
+  for (const line of body.split("\n")) {
+    if (!line.startsWith("data:")) {
       continue;
     }
-    const message = JSON.parse(data) as JsonRpcResponse;
+    const message = JSON.parse(line.slice("data:".length)) as JsonRpcResponse;
     if ("result" in message || "error" in message) {
       return message;
     }
@@ -119,27 +107,24 @@ export async function searchDocs(
   options: { limit: number },
 ): Promise<DocsSearchResult[]> {
   const userAgent = getUserAgent();
-  let response: Response;
-  try {
-    response = await fetch(MCP_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json, text/event-stream",
-        ...(userAgent ? { "User-Agent": userAgent } : {}),
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "tools/call",
-        params: { name: "searchDocumentation", arguments: { query } },
-      }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-  } catch (error) {
+  const response = await fetch(MCP_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+      ...(userAgent ? { "User-Agent": userAgent } : {}),
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name: "searchDocumentation", arguments: { query } },
+    }),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  }).catch((error: unknown) => {
     const reason = error instanceof Error ? error.message : String(error);
     throw new CliError(`Could not reach ${DOCS_URL}: ${reason}`);
-  }
+  });
 
   if (!response.ok) {
     throw new CliError(
@@ -151,16 +136,13 @@ export async function searchDocs(
     await response.text(),
     response.headers.get("content-type"),
   );
-  if (message.error) {
-    throw new CliError(
-      `The documentation search failed: ${sanitizeTerminalText(message.error.message) || "unknown error"}`,
-    );
-  }
   const content = message.result?.content ?? [];
-  if (message.result?.isError) {
-    const text = content.map((block) => block.text ?? "").join(" ");
+  if (message.error || message.result?.isError) {
+    const reason = message.error
+      ? message.error.message
+      : content.map((block) => block.text ?? "").join(" ");
     throw new CliError(
-      `The documentation search failed: ${sanitizeTerminalText(text) || "unknown error"}`,
+      `The documentation search failed: ${sanitizeTerminalText(reason) || "unknown error"}`,
     );
   }
   return parseDocsSearchContent(content).slice(0, options.limit);
