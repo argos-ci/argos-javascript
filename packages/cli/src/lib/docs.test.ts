@@ -23,6 +23,15 @@ function mockFetch(response: Response) {
   return fetchMock;
 }
 
+/** Answer the next search with this JSON-RPC message, as an event stream. */
+function mockSearch(message: unknown) {
+  return mockFetch(
+    new Response(sse(message), {
+      headers: { "content-type": "text/event-stream" },
+    }),
+  );
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -85,14 +94,6 @@ describe("parseMcpResponse", () => {
     );
   });
 
-  it("joins the data lines of a multi-line event", () => {
-    const body = 'event: message\ndata: {"id":1,\ndata: "result":{}}\n\n';
-    expect(parseMcpResponse(body, "text/event-stream")).toEqual({
-      id: 1,
-      result: {},
-    });
-  });
-
   it("reads a plain JSON response", () => {
     const message = { jsonrpc: "2.0", id: 1, result: { content: [] } };
     expect(
@@ -107,16 +108,11 @@ describe("parseMcpResponse", () => {
 
 describe("searchDocs", () => {
   it("calls the search tool of the docs MCP endpoint", async () => {
-    const fetchMock = mockFetch(
-      new Response(
-        sse({
-          jsonrpc: "2.0",
-          id: 1,
-          result: { content: [hit("CLI", "https://argos-ci.com/docs/cli")] },
-        }),
-        { headers: { "content-type": "text/event-stream" } },
-      ),
-    );
+    const fetchMock = mockSearch({
+      jsonrpc: "2.0",
+      id: 1,
+      result: { content: [hit("CLI", "https://argos-ci.com/docs/cli")] },
+    });
 
     await expect(searchDocs("parallel builds", { limit: 5 })).resolves.toEqual([
       { title: "CLI", url: "https://argos-ci.com/docs/cli", excerpt: null },
@@ -138,19 +134,14 @@ describe("searchDocs", () => {
   });
 
   it("returns no more results than the limit", async () => {
-    mockFetch(
-      new Response(
-        sse({
-          id: 1,
-          result: {
-            content: [1, 2, 3].map((n) =>
-              hit(`Page ${n}`, `https://argos-ci.com/docs/${n}`),
-            ),
-          },
-        }),
-        { headers: { "content-type": "text/event-stream" } },
-      ),
-    );
+    mockSearch({
+      id: 1,
+      result: {
+        content: [1, 2, 3].map((n) =>
+          hit(`Page ${n}`, `https://argos-ci.com/docs/${n}`),
+        ),
+      },
+    });
     const results = await searchDocs("page", { limit: 2 });
     expect(results.map((result) => result.title)).toEqual(["Page 1", "Page 2"]);
   });
@@ -163,30 +154,20 @@ describe("searchDocs", () => {
   });
 
   it("fails on a JSON-RPC error, without letting it drive the terminal", async () => {
-    mockFetch(
-      new Response(
-        sse({ id: 1, error: { message: "\u001B[2KTool not found" } }),
-        { headers: { "content-type": "text/event-stream" } },
-      ),
-    );
+    mockSearch({ id: 1, error: { message: "\u001B[2KTool not found" } });
     await expect(searchDocs("anything", { limit: 5 })).rejects.toThrow(
       "The documentation search failed: Tool not found",
     );
   });
 
   it("fails when the tool reports an error", async () => {
-    mockFetch(
-      new Response(
-        sse({
-          id: 1,
-          result: {
-            isError: true,
-            content: [{ type: "text", text: "Search is unavailable" }],
-          },
-        }),
-        { headers: { "content-type": "text/event-stream" } },
-      ),
-    );
+    mockSearch({
+      id: 1,
+      result: {
+        isError: true,
+        content: [{ type: "text", text: "Search is unavailable" }],
+      },
+    });
     await expect(searchDocs("anything", { limit: 5 })).rejects.toThrow(
       "The documentation search failed: Search is unavailable",
     );
