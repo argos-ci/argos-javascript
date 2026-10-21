@@ -60,6 +60,7 @@
     "@wdio/spec-reporter": "^10.0.0",
     "@wdio/types": "^10.0.0",
     "tsx": "^4.23.15",
+    "vitest": "catalog:",
     "webdriverio": "^10.0.0"
   },
   "scripts": {
@@ -68,6 +69,7 @@
     "argos-upload": "pnpm exec argos upload screenshots --build-name \"argos-webdriverio-e2e-node-$NODE_VERSION-$OS\"",
     "e2e": "pnpm run test-e2e && pnpm run argos-upload",
     "check-types": "tsc",
+    "test": "vitest run src",
     "check-format": "prettier --check --ignore-unknown --ignore-path=../../.gitignore --ignore-path=../../.prettierignore .",
     "lint": "eslint ."
   }

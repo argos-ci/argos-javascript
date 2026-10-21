@@ -191,6 +191,20 @@ async function setup(
 }
 
 /**
+ * Check if the session drives a native mobile app, where no script can run.
+ */
+async function checkIsNativeContext(browser: WebdriverIO.Browser) {
+  if (!browser.isMobile) {
+    return false;
+  }
+  // `isNativeContext` is only available from WebdriverIO 9.
+  if (typeof browser.isNativeContext === "boolean") {
+    return browser.isNativeContext;
+  }
+  return (await browser.getContext()) === "NATIVE_APP";
+}
+
+/**
  * Get the areas covered by the elements to mask, in pixels of the screenshot.
  * The screenshot only captures the viewport.
  */
@@ -250,13 +264,30 @@ export async function argosScreenshot(
     throw new Error("The `name` argument is required.");
   }
 
-  const teardown = await setup(browser, options);
+  const selectorMasks = mask.filter((area) => typeof area === "string");
+
+  // A native app has no page to run the Argos script in: capture it as is.
+  const isNativeContext = await checkIsNativeContext(browser);
+  if (
+    isNativeContext &&
+    (options.hide ||
+      options.remove ||
+      options.argosCSS ||
+      selectorMasks.length > 0)
+  ) {
+    throw new Error(
+      "The `hide`, `remove` and `argosCSS` options and selectors in `mask` are not supported in a native app context.",
+    );
+  }
+  const teardown = isNativeContext ? null : await setup(browser, options);
 
   // Measured once the elements are hidden or removed, as the layout may change.
-  const maskedElementsAreas = await getMaskedElementsAreas(browser, [
-    BLACKOUT_SELECTOR,
-    ...mask.filter((area) => typeof area === "string"),
-  ]);
+  const maskedElementsAreas = isNativeContext
+    ? []
+    : await getMaskedElementsAreas(browser, [
+        BLACKOUT_SELECTOR,
+        ...selectorMasks,
+      ]);
   const areas = [
     ...mask.filter((area) => typeof area !== "string"),
     ...maskedElementsAreas,
@@ -266,14 +297,14 @@ export async function argosScreenshot(
   const imageBuffer = await browser.saveScreenshot(screenshotPath);
 
   if (areas.length === 0) {
-    await teardown();
+    await teardown?.();
     return imageBuffer;
   }
 
   // Restore the page while masking the screenshot.
   const [maskedBuffer] = await Promise.all([
     maskScreenshot(imageBuffer, areas, maskColor),
-    teardown(),
+    teardown?.(),
   ]);
   await writeFile(screenshotPath, maskedBuffer);
   return maskedBuffer;

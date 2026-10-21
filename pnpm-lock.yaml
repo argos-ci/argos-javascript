@@ -460,6 +460,9 @@ importers:
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.2(@types/node@26.6.3)(@vitest/browser-playwright@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(msw@2.15.0(@types/node@26.6.3))(vite@7.3.6(@types/node@26.6.3)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.0))
       webdriverio:
         specifier: ^10.0.0
         version: 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@8.1.1)(yauzl@3.4.0)
