@@ -203,6 +203,7 @@ Cypress.Commands.add(
       tag,
       baseName,
       blackout,
+      onAfterScreenshot,
       ...cypressOptions
     } = options;
 
@@ -239,8 +240,9 @@ Cypress.Commands.add(
 
       cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
         blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
-        onAfterScreenshot: (_$el, props) => {
+        onAfterScreenshot: ($el, props) => {
           ref.props = props;
+          onAfterScreenshot?.($el, props);
         },
         ...cypressOptions,
       });
