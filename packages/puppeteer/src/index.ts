@@ -286,6 +286,14 @@ async function applyHelpers(
 }
 
 /**
+ * Mask in the page the elements matched by a selector or the element of a
+ * handle.
+ */
+function maskInPage(elements: Element | Element[], color: string) {
+  ((window as any).__ARGOS__ as ArgosGlobal).mask([elements].flat(), color);
+}
+
+/**
  * Cover the `data-visual-test="blackout"` helper and the `mask` option with
  * boxes until `afterEach` runs, since Puppeteer has no native mask.
  */
@@ -299,17 +307,8 @@ async function applyMask(
   await Promise.all(
     ['[data-visual-test="blackout"]', ...mask].map((target) =>
       typeof target === "string"
-        ? page.$$eval(
-            target,
-            (elements, color) =>
-              ((window as any).__ARGOS__ as ArgosGlobal).mask(elements, color),
-            maskColor,
-          )
-        : target.evaluate(
-            (element, color) =>
-              ((window as any).__ARGOS__ as ArgosGlobal).mask([element], color),
-            maskColor,
-          ),
+        ? page.$$eval(target, maskInPage, maskColor)
+        : target.evaluate(maskInPage, maskColor),
     ),
   );
 }

@@ -1,4 +1,5 @@
 import type { Plugin } from "..";
+import { unmaskElements } from "../../mask";
 import { injectGlobalStyles } from "../util";
 
 const HELPER_ATTRIBUTE = "data-visual-test";
@@ -79,6 +80,10 @@ export const plugin = {
     return injectGlobalStyles(styles, "argos-helpers");
   },
   beforeEach() {
-    return restoreHelpers;
+    // Undo the helpers and masks applied by the SDK for this screenshot.
+    return () => {
+      restoreHelpers();
+      unmaskElements();
+    };
   },
 } satisfies Plugin;

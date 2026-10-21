@@ -92,9 +92,12 @@ function updateBoxes(overlay: MaskOverlay) {
 }
 
 /**
- * Cover elements with a box of the given color.
+ * Cover elements with a box of the given color, like the
+ * `data-visual-test="blackout"` helper does, until `afterEach` runs.
+ * Call it once the page is stable, right before taking the screenshot, for
+ * SDKs whose automation library has no native mask.
  */
-export function maskElements(elements: Iterable<Element>, color: string) {
+export function maskElements(elements: Element[], color: string) {
   overlay ??= createOverlay();
   for (const element of elements) {
     const box = document.createElement("div");
