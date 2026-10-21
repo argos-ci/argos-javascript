@@ -79,6 +79,22 @@ export type ArgosScreenshotOptions = Omit<
   remove?: (string | ElementHandle)[];
 
   /**
+   * Elements to cover with a box when the screenshot is taken, as
+   * `ElementHandle`s or string selectors, like with the
+   * `data-visual-test="blackout"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { mask: ["#map", ".ad"] })
+   */
+  mask?: (string | ElementHandle)[];
+
+  /**
+   * Color of the box covering the masked elements, in CSS color format.
+   * @default "#FF00FF"
+   */
+  maskColor?: string;
+
+  /**
    * Disable hover effects by moving the mouse to the top-left corner of the page.
    * @default true
    */
@@ -270,6 +286,35 @@ async function applyHelpers(
 }
 
 /**
+ * Cover the `data-visual-test="blackout"` helper and the `mask` option with
+ * boxes until `afterEach` runs, since Puppeteer has no native mask.
+ */
+async function applyMask(
+  page: Page,
+  {
+    mask = [],
+    maskColor = "#FF00FF",
+  }: Pick<ArgosScreenshotOptions, "mask" | "maskColor">,
+) {
+  await Promise.all(
+    ['[data-visual-test="blackout"]', ...mask].map((target) =>
+      typeof target === "string"
+        ? page.$$eval(
+            target,
+            (elements, color) =>
+              ((window as any).__ARGOS__ as ArgosGlobal).mask(elements, color),
+            maskColor,
+          )
+        : target.evaluate(
+            (element, color) =>
+              ((window as any).__ARGOS__ as ArgosGlobal).mask([element], color),
+            maskColor,
+          ),
+    ),
+  );
+}
+
+/**
  * Wait for the UI to be ready before taking the screenshot.
  */
 async function waitForReadiness(page: Page, options: ArgosScreenshotOptions) {
@@ -327,6 +372,8 @@ export async function argosScreenshot(
     baseName,
     hide,
     remove,
+    mask,
+    maskColor,
     ...puppeteerOptions
   } = options;
 
@@ -419,6 +466,8 @@ export async function argosScreenshot(
     await applyHelpers(page, { hide, remove });
     const afterEach = await beforeEach(page, options);
     await waitForReadiness(page, options);
+    // Measured once the page is stable, so the boxes match the elements.
+    await applyMask(page, { mask, maskColor });
 
     const [screenshotPath, metadata] = await Promise.all([
       getScreenshotPath(name),
