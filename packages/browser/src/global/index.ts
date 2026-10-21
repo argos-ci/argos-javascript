@@ -5,6 +5,7 @@ import {
   beforeEach,
   afterEach,
   applyHelper,
+  mask,
   waitFor,
   getWaitFailureExplanations,
 } from "./stabilization";
@@ -15,6 +16,7 @@ const ArgosGlobal = {
   beforeEach,
   afterEach,
   applyHelper,
+  mask,
   waitFor,
   getWaitFailureExplanations,
   getColorScheme: () => getColorScheme(),
