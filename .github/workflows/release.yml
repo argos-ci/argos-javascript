@@ -11,6 +11,7 @@ on:
         options:
           - normal
           - canary
+          - from-package
       debug:
         description: "Verbose publish logs (needed to see Sigstore HTTP status codes)"
         required: false
@@ -59,6 +60,8 @@ jobs:
 
           if [ "${{ github.event.inputs.release_type }}" = "canary" ]; then
             npm run release-canary -- --yes "$@"
+          elif [ "${{ github.event.inputs.release_type }}" = "from-package" ]; then
+            npm run release-from-package -- --yes "$@"
           else
             npm run release -- --yes "$@"
           fi

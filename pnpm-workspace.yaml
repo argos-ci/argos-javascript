@@ -46,3 +46,12 @@ overrides:
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - "@argos-ci/*"
+
+patchedDependencies:
+  # Provenance publishing (lerna -> libnpmpublish -> sigstore). When a Rekor
+  # write commits but the 5s client timeout fires first, sigstore retries and
+  # Rekor answers 409 "an equivalent entry already exists". sigstore hardcodes
+  # `fetchOnConflict: false`, so that 409 kills the publish mid-release. The
+  # patch turns it on: on a 409, fetch the entry we already wrote and carry on.
+  # Drop once https://github.com/sigstore/sigstore-js/issues/1708 is fixed.
+  sigstore@4.1.1: patches/sigstore@4.1.1.patch
