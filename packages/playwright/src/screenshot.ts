@@ -100,13 +100,6 @@ export type ArgosScreenshotOptions = {
   remove?: (string | Locator)[];
 
   /**
-   * Elements to mask with a box when the screenshot is taken, like with the
-   * `data-visual-test="blackout"` helper.
-   * @see https://playwright.dev/docs/api/class-page#page-screenshot-option-mask
-   */
-  mask?: Locator[];
-
-  /**
    * Disable hover effects by moving the mouse to the top-left corner of the document.
    * @default true
    */
@@ -289,8 +282,8 @@ export async function argosScreenshot(
     });
 
     await waitForReadiness(handler, context);
-    const afterEach = await beforeEach(handler, context);
     await applyHelpers(handler, { hide, remove });
+    const afterEach = await beforeEach(handler, context);
     await waitForReadiness(handler, context);
 
     const [snapshotPath] = await Promise.all([
@@ -338,6 +331,7 @@ export async function argosScreenshot(
         fullPage,
         animations: "disabled",
         ...playwrightOptions,
+        // Extend the `blackout` helper mask, don't replace it.
         mask: [handler.locator('[data-visual-test="blackout"]'), ...mask],
       }),
       writeMetadata(screenshotPath, metadata),
