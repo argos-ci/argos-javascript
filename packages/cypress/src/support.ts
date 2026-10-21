@@ -1,7 +1,6 @@
 import "cypress-wait-until";
 import {
   type ArgosGlobal,
-  type ArgosHelper,
   resolveViewport,
   type StabilizationContext,
   type StabilizationPluginOptions,
@@ -181,22 +180,24 @@ function beforeEach(options: ArgosScreenshotOptions) {
  * Apply the `hide` and `remove` options until `afterEach` runs, as if the
  * matched elements had the `data-visual-test` helper attribute.
  */
-function applyHelpers(options: ArgosScreenshotOptions) {
-  const helpers: [ArgosHelper, string[] | undefined][] = [
-    ["transparent", options.hide],
-    // Applied last, so an element both hidden and removed is removed.
-    ["removed", options.remove],
-  ];
+function applyHelpers({
+  hide = [],
+  remove = [],
+}: Pick<ArgosScreenshotOptions, "hide" | "remove">) {
+  if (hide.length === 0 && remove.length === 0) {
+    return;
+  }
 
   cy.window({ log: false }).then((window) => {
-    for (const [helper, selectors] of helpers) {
-      for (const selector of selectors ?? []) {
-        ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
-          Cypress.$(selector, window.document).toArray(),
-          helper,
-        );
-      }
-    }
+    const argos = (window as any).__ARGOS__ as ArgosGlobal;
+    const select = (selector: string) =>
+      Cypress.$(selector, window.document).toArray();
+    hide.forEach((selector) =>
+      argos.applyHelper(select(selector), "transparent"),
+    );
+    remove.forEach((selector) =>
+      argos.applyHelper(select(selector), "removed"),
+    );
   });
 }
 
@@ -248,8 +249,8 @@ Cypress.Commands.add(
       baseName,
       blackout,
       onAfterScreenshot,
-      hide: _hide,
-      remove: _remove,
+      hide,
+      remove,
       ...cypressOptions
     } = options;
 
@@ -279,8 +280,8 @@ Cypress.Commands.add(
 
     function stabilizeAndScreenshot(name: string, baseNames: string[] | null) {
       waitForReadiness(options);
+      applyHelpers({ hide, remove });
       const afterEach = beforeEach(options);
-      applyHelpers(options);
       waitForReadiness(options);
 
       const ref: any = {};

@@ -4,10 +4,12 @@ import { injectGlobalStyles } from "../util";
 const HELPER_ATTRIBUTE = "data-visual-test";
 
 /**
- * Argos helpers that can be applied to elements from the SDKs, as if the
- * element had the matching `data-visual-test` attribute.
+ * Argos helpers that can be applied to elements from the SDKs, from the
+ * weakest to the strongest.
  */
-export type ArgosHelper = "transparent" | "removed";
+const HELPERS = ["transparent", "removed"] as const;
+
+export type ArgosHelper = (typeof HELPERS)[number];
 
 /**
  * Original `data-visual-test` value of the elements a helper was applied to,
@@ -16,13 +18,19 @@ export type ArgosHelper = "transparent" | "removed";
 const originalHelpers = new Map<Element, string | null>();
 
 /**
- * Apply an Argos helper to elements.
- * When an element receives several helpers, the last one wins.
+ * Apply an Argos helper to elements, as if they had the matching
+ * `data-visual-test` attribute, until `afterEach` runs.
+ * An element receiving several helpers keeps the strongest one.
  */
-export function applyHelper(elements: Iterable<Element>, helper: ArgosHelper) {
+export function applyHelper(elements: Element[], helper: ArgosHelper) {
   for (const element of elements) {
     if (!originalHelpers.has(element)) {
       originalHelpers.set(element, element.getAttribute(HELPER_ATTRIBUTE));
+    } else if (
+      HELPERS.indexOf(element.getAttribute(HELPER_ATTRIBUTE) as ArgosHelper) >
+      HELPERS.indexOf(helper)
+    ) {
+      continue;
     }
     element.setAttribute(HELPER_ATTRIBUTE, helper);
   }
@@ -69,5 +77,8 @@ export const plugin = {
     `;
 
     return injectGlobalStyles(styles, "argos-helpers");
+  },
+  beforeEach() {
+    return restoreHelpers;
   },
 } satisfies Plugin;

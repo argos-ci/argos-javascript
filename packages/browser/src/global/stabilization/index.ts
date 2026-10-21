@@ -1,12 +1,7 @@
 import type { ViewportOption } from "../../viewport";
 import { corePlugins, plugins, type PluginName } from "./plugins";
-import {
-  applyHelper as applyHelperToElements,
-  restoreHelpers,
-  type ArgosHelper,
-} from "./plugins/argosHelpers";
 
-export type { ArgosHelper };
+export { applyHelper, type ArgosHelper } from "./plugins/argosHelpers";
 
 type Cleanup = () => void;
 
@@ -182,16 +177,6 @@ export function afterEach() {
     cleanup();
   });
   beforeEachCleanups.clear();
-}
-
-/**
- * Apply an Argos helper to elements, as if they had the matching
- * `data-visual-test` attribute, until `afterEach` runs.
- * Lets the SDKs hide elements matched by their own selectors and locators.
- */
-export function applyHelper(elements: Element[], helper: ArgosHelper) {
-  applyHelperToElements(elements, helper);
-  beforeEachCleanups.add(restoreHelpers);
 }
 
 /**

@@ -428,27 +428,23 @@ export async function applyHelpers(
     remove?: (string | Locator)[];
   },
 ) {
-  const helpers: [ArgosHelper, (string | Locator)[] | undefined][] = [
-    ["transparent", options.hide],
-    // Applied last, so an element both hidden and removed is removed.
-    ["removed", options.remove],
-  ];
-  for (const [helper, targets] of helpers) {
-    await Promise.all(
-      (targets ?? []).map((target) => {
-        const locator =
-          typeof target === "string" ? handler.locator(target) : target;
-        return locator.evaluateAll(
-          (elements, helper) =>
-            ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
-              elements,
-              helper,
-            ),
-          helper,
-        );
-      }),
-    );
-  }
+  const apply = (targets: (string | Locator)[] = [], helper: ArgosHelper) =>
+    targets.map((target) => {
+      const locator =
+        typeof target === "string" ? handler.locator(target) : target;
+      return locator.evaluateAll(
+        (elements, helper) =>
+          ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
+            elements,
+            helper,
+          ),
+        helper,
+      );
+    });
+  await Promise.all([
+    ...apply(options.hide, "transparent"),
+    ...apply(options.remove, "removed"),
+  ]);
 }
 
 /**

@@ -236,39 +236,37 @@ async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
 }
 
 /**
+ * Apply an Argos helper in the page, to the elements matched by a selector or
+ * to the element of a handle.
+ */
+function applyHelperInPage(elements: Element | Element[], helper: ArgosHelper) {
+  ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
+    [elements].flat(),
+    helper,
+  );
+}
+
+/**
  * Apply the `hide` and `remove` options until `afterEach` runs, as if the
  * matched elements had the `data-visual-test` helper attribute.
  */
-async function applyHelpers(page: Page, options: ArgosScreenshotOptions) {
-  const helpers: [ArgosHelper, (string | ElementHandle)[] | undefined][] = [
-    ["transparent", options.hide],
-    // Applied last, so an element both hidden and removed is removed.
-    ["removed", options.remove],
-  ];
-  for (const [helper, targets] of helpers) {
-    await Promise.all(
-      (targets ?? []).map((target) =>
-        typeof target === "string"
-          ? page.$$eval(
-              target,
-              (elements, helper) =>
-                ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
-                  elements,
-                  helper,
-                ),
-              helper,
-            )
-          : target.evaluate(
-              (element, helper) =>
-                ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
-                  [element],
-                  helper,
-                ),
-              helper,
-            ),
-      ),
+async function applyHelpers(
+  page: Page,
+  options: Pick<ArgosScreenshotOptions, "hide" | "remove">,
+) {
+  const apply = (
+    targets: (string | ElementHandle)[] = [],
+    helper: ArgosHelper,
+  ) =>
+    targets.map((target) =>
+      typeof target === "string"
+        ? page.$$eval(target, applyHelperInPage, helper)
+        : target.evaluate(applyHelperInPage, helper),
     );
-  }
+  await Promise.all([
+    ...apply(options.hide, "transparent"),
+    ...apply(options.remove, "removed"),
+  ]);
 }
 
 /**
@@ -327,8 +325,8 @@ export async function argosScreenshot(
     viewports,
     argosCSS: _argosCSS,
     baseName,
-    hide: _hide,
-    remove: _remove,
+    hide,
+    remove,
     ...puppeteerOptions
   } = options;
 
@@ -418,8 +416,8 @@ export async function argosScreenshot(
     baseNames: string[] | null,
   ) {
     await waitForReadiness(page, options);
+    await applyHelpers(page, { hide, remove });
     const afterEach = await beforeEach(page, options);
-    await applyHelpers(page, options);
     await waitForReadiness(page, options);
 
     const [screenshotPath, metadata] = await Promise.all([
