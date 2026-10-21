@@ -1,4 +1,10 @@
-import { mkdtempSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, test } from "vitest";
@@ -181,5 +187,120 @@ describe("argos build snapshots", () => {
     ]);
     expect(error.status).not.toBe(0);
     expect(error.stderr).toContain("Allowed choices are 24h, 3d, 7d, 30d, 90d");
+  });
+});
+
+/** A fresh directory path to download into, not created yet. */
+function downloadDirectory(): string {
+  return join(mkdtempSync(join(tmpdir(), "argos-cli-e2e-download-")), "out");
+}
+
+describe("argos build list", () => {
+  test("fails when token is missing", () => {
+    const error = expectRunToFail(["build", "list"], { ARGOS_TOKEN: "" });
+
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain("No Argos token found");
+  });
+
+  test("lists the most recent builds first, up to --limit", () => {
+    const builds = JSON.parse(
+      run(["build", "list", "--limit", "3", "--json"], baseEnv).stdout,
+    );
+    const numbers = builds.map((build: { number: number }) => build.number);
+
+    expect(numbers.length).toBeGreaterThan(0);
+    expect(numbers.length).toBeLessThanOrEqual(3);
+    expect(numbers).toEqual([...numbers].sort((a, b) => b - a));
+  });
+
+  test("filters builds by branch", () => {
+    const builds = JSON.parse(
+      run(
+        ["build", "list", "--branch", "main", "--limit", "5", "--json"],
+        baseEnv,
+      ).stdout,
+    );
+
+    expect(builds.length).toBeGreaterThan(0);
+    expect(
+      builds.every(
+        (build: { head: { branch: string } }) => build.head.branch === "main",
+      ),
+    ).toBe(true);
+  });
+
+  test("prints human-readable build data", () => {
+    const { stdout } = run(["build", "list", "--limit", "1"], baseEnv);
+
+    expect(stdout).toContain("Builds (1)");
+    expect(stdout).toContain("URL: ");
+  });
+});
+
+describe("argos build download", () => {
+  test("downloads the screenshots of a build, laid out by name", () => {
+    // The `upload` e2e test uploads `__fixtures__` on every run, main included.
+    const builds = JSON.parse(
+      run(
+        [
+          "build",
+          "list",
+          "--branch",
+          "main",
+          "--search",
+          "argos-cli-e2e-node",
+          "--limit",
+          "10",
+          "--json",
+        ],
+        baseEnv,
+      ).stdout,
+    );
+    const source = builds.find(
+      (build: { status: string }) =>
+        build.status !== "pending" && build.status !== "progress",
+    );
+    const directory = downloadDirectory();
+    const download = JSON.parse(
+      run(
+        [
+          "build",
+          "download",
+          String(source.number),
+          "--output",
+          directory,
+          "--json",
+        ],
+        baseEnv,
+      ).stdout,
+    );
+
+    expect(download.build.number).toBe(source.number);
+    expect(download.files.length).toBeGreaterThan(0);
+    for (const file of download.files) {
+      expect(statSync(file.path).size).toBeGreaterThan(0);
+    }
+    expect(download.files.map((file: { path: string }) => file.path)).toContain(
+      join(directory, "screenshots", "penelope.png"),
+    );
+  });
+
+  test("refuses a directory that is not empty", () => {
+    const directory = downloadDirectory();
+    mkdirSync(directory);
+    writeFileSync(join(directory, "keep.txt"), "");
+
+    const error = expectRunToFail([
+      "build",
+      "download",
+      buildNumber,
+      "--output",
+      directory,
+    ]);
+
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain(`${directory} is not empty`);
+    expect(existsSync(join(directory, "keep.txt"))).toBe(true);
   });
 });
