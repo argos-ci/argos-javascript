@@ -202,6 +202,7 @@ Cypress.Commands.add(
       argosCSS: _argosCSS,
       tag,
       baseName,
+      blackout,
       ...cypressOptions
     } = options;
 
@@ -237,9 +238,7 @@ Cypress.Commands.add(
       const ref: any = {};
 
       cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
-        blackout: ['[data-visual-test="blackout"]'].concat(
-          options.blackout || [],
-        ),
+        blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
         onAfterScreenshot: (_$el, props) => {
           ref.props = props;
         },
