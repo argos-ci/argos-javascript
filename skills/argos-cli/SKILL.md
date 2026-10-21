@@ -1,8 +1,9 @@
 ---
 name: argos-cli
 description: >
-  Operate Argos visual testing from the terminal with the `argos` CLI — inspect
-  builds and snapshot diffs, submit reviews, request reviewers, post comments,
+  Operate Argos visual testing from the terminal with the `argos` CLI — list
+  and inspect builds and snapshot diffs, download a build's screenshots or a
+  project's latest baseline, submit reviews, request reviewers, post comments,
   inspect a test's flakiness and its recurring changes, ignore flaky test
   changes, configure a project and its contributors, manage a team's members,
   invites and email domains, manage automation rules, fetch analytics, upload
@@ -50,9 +51,12 @@ Two token types — pick by command:
 
 | Commands                                                                                                                                                                                                                                                                                                         | Token                       | Resolution order                            |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------- |
-| `build get`, `build snapshots`, `test list`, `test get`, `test changes`, `change list`, `project get`, `project deployments`, `project domain get`, `media get`, `media list`, `media versions`, `media update`, `media delete`                                                                                  | Project token               | `--token` › `ARGOS_TOKEN`                   |
+| `build list`, `build get`, `build snapshots`, `build download`, `baseline download`, `test list`, `test get`, `test changes`, `change list`, `project get`, `project deployments`, `project domain get`, `media get`, `media list`, `media versions`, `media update`, `media delete`                             | Project token               | `--token` › `ARGOS_TOKEN`                   |
 | `review *`, `comment *`, `test comment *`, `media comment *`, `test subscribe` / `unsubscribe`, `build subscribe` / `unsubscribe`, `change ignore` / `unignore`, `account *`, `project update`, `project transfer`, `project contributor *`, `project domain set`, `automation *`, `analytics`, `create-project` | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
 | `upload`, `finalize`, `skip`, `deploy`, `media upload`                                                                                                                                                                                                                                                           | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
+
+`baseline download` takes only a project token: the baseline lookup it relies on
+rejects a PAT, including the one from `argos login`.
 
 Project tokens read build data but **cannot** review, comment, ignore changes, or
 administer a project or team — those need a PAT. If no suitable token is
@@ -62,7 +66,8 @@ humans, not CI.
 
 ## Commands
 
-- **Inspect** — `build get <ref>` · `build snapshots <ref> [--needs-review] [--metrics-period 24h|3d|7d|30d|90d]` · `build subscribe|unsubscribe <ref>`
+- **Inspect** — `build list [--branch <b>] [--commit <sha>] [--search <q>]` · `build get <ref>` · `build snapshots <ref> [--needs-review] [--metrics-period 24h|3d|7d|30d|90d]` · `build subscribe|unsubscribe <ref>`
+- **Export** — `build download <ref> [-o <dir>]` · `baseline download [-o <dir>] [--branch <b>] [--build-name <name>] [--mode ci|monitoring]`
 - **Review** — `review list <ref>` · `review create <ref> --event <approve|reject|comment> [--body <md>]` · `review dismiss <ref> <reviewId>` · `review reviewer list <ref>` · `review reviewer add|remove <ref> <userId...>`
 - **Comment** — `comment list <ref>` · `comment create <ref> --body <md> [--reply-to <id>] [--diff <id>] [--draft]` · `comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <ref> <id>` · `comment react|unreact <ref> <id> <emoji>`
 - **Flakiness** — `test list [--build-name <name>] [--search <q>]` · `test get <testId>` · `test changes <testId> [--ignored true|false] [--metrics-period …]` · `test subscribe|unsubscribe <testId>` · `change list` · `change ignore|unignore <changeId> --project owner/project`
@@ -77,9 +82,9 @@ humans, not CI.
 - **Auth** — `login` · `logout`
 - **Docs** — `docs search <query> [--limit <n>]` (no token; up to 10 results, 5 by default)
 
-List commands (`test list`, `change list`, `account member list`, `project
-contributor list`, `project deployments`, `automation list`, `account invite
-list`) follow pagination up to `--limit` (default 100).
+List commands (`build list`, `test list`, `change list`, `account member
+list`, `project contributor list`, `project deployments`, `automation list`,
+`account invite list`) follow pagination up to `--limit` (default 100).
 
 `build snapshots --json` enriches each diff with `test.metrics` (flakiness:
 `stability`, `consistency`, `flakiness`, all 0–1) and, on a change, `change`
@@ -123,6 +128,18 @@ ARGOS_TOKEN=<project-token> argos test get <testId> --json          # flakiness,
 ARGOS_TOKEN=<project-token> argos test changes <testId> --json      # occurrences + diff/base/head URLs per change
 # a change with occurrences > 1 that nothing in the UI explains is flaky:
 argos change ignore <changeId> --token <pat> --project owner/project
+```
+
+Export screenshots to a directory. Files are laid out by snapshot name
+(`chromium/home.png`), so screenshots uploaded from a directory come back under
+the same paths; a name without an image extension gets one. The directory must
+be empty or not exist yet. `baseline download` takes the newest build of the
+default branch (or `--branch`) that Argos can use as a baseline, for one
+`--build-name` (`default` unless given); failure screenshots are left out:
+
+```bash
+ARGOS_TOKEN=<project-token> argos build download <ref> -o ./screenshots --json   # { build, directory, files: [{ name, status, path, url }] }
+ARGOS_TOKEN=<project-token> argos baseline download -o ./baseline --build-name storybook
 ```
 
 Look up how an Argos feature works before guessing at a config option or flag.

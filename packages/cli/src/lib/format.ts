@@ -1,6 +1,7 @@
 import type { ArgosAPISchema } from "@argos-ci/api-client";
 
 import type { DocsSearchResult } from "./docs";
+import type { SnapshotDownload } from "./download";
 import { sanitizeTerminalText } from "./terminal";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
@@ -200,6 +201,46 @@ export function formatSnapshots(diffs: SnapshotDiff[], build: Build): string {
   ]
     .slice(0, -1)
     .join("\n");
+}
+
+export function formatBuilds(builds: Build[]): string {
+  if (builds.length === 0) {
+    return "No builds found.";
+  }
+  return [
+    `Builds (${builds.length})`,
+    "",
+    ...builds.flatMap((build) => [
+      `#${build.number} [${build.status}]`,
+      `  Branch: ${formatValue(build.head.branch)}`,
+      `  Commit: ${formatValue(build.head.sha)}`,
+      `  Snapshots: ${formatStats(build.stats)}`,
+      `  URL: ${build.url}`,
+      "",
+    ]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+/**
+ * Format the result of a download. `kind` names what was downloaded, e.g.
+ * `baseline snapshot`, and is pluralized as needed.
+ */
+export function formatSnapshotDownload(
+  download: SnapshotDownload,
+  kind = "snapshot",
+): string {
+  const { build, directory, files } = download;
+  if (files.length === 0) {
+    return `Build #${build.number} has no ${kind}s to download.`;
+  }
+  return [
+    `Downloaded ${files.length} ${kind}${files.length === 1 ? "" : "s"} of build #${build.number} to ${directory}`,
+    `Branch: ${formatValue(build.head.branch)}`,
+    `Commit: ${formatValue(build.head.sha)}`,
+    `URL: ${build.url}`,
+  ].join("\n");
 }
 
 /** When and where a change was captured, on one line. */
