@@ -1,6 +1,6 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { fileURLToPath } from "node:url";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { argosScreenshot } from "./dist/index.mjs";
 import { argosScreenshot as typedArgosScreenshot } from "./src";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -156,6 +156,100 @@ test.describe("#argosScreenshot", () => {
     test("takes a screenshot of an element", async ({ page }) => {
       await page.goto(fixture("element.html"));
       await argosScreenshot(page, "red-square", { element: ".red-square" });
+    });
+  });
+
+  test.describe("with `hide`, `remove` and `mask`", () => {
+    /**
+     * Read the color of some pixels of a PNG, decoded by the browser.
+     */
+    async function getPixels(
+      page: Page,
+      path: string,
+      points: { x: number; y: number }[],
+    ) {
+      const data = await readFile(path, "base64");
+      return page.evaluate(
+        async ({ data, points }) => {
+          const img = new Image();
+          img.src = `data:image/png;base64,${data}`;
+          await img.decode();
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          return points.map(({ x, y }) => {
+            const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
+            return { r, g, b };
+          });
+        },
+        { data, points },
+      );
+    }
+
+    const WHITE = { r: 255, g: 255, b: 255 };
+    const MASK = { r: 255, g: 0, b: 255 };
+    const BLACK = { r: 0, g: 0, b: 0 };
+
+    test.beforeEach(async ({ page }) => {
+      await page.goto(fixture("helpers.html"));
+    });
+
+    test("hides, removes and masks elements", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "helpers", {
+        fullPage: false,
+        hide: ["#hidden", ".does-not-exist"],
+        remove: [page.locator("#removed")],
+        mask: ["#masked", page.locator(".does-not-exist")],
+      });
+
+      // Each row is 50px high: `#removed` no longer takes space, so the rows
+      // below it move up.
+      const pixels = await getPixels(page, screenshot!.path, [
+        // `#hidden` keeps its space but is transparent.
+        { x: 10, y: 25 },
+        // `#masked`, masked by the `mask` option.
+        { x: 10, y: 75 },
+        // `#blackout`, still masked by its `data-visual-test` attribute.
+        { x: 10, y: 125 },
+        // `#last`.
+        { x: 10, y: 175 },
+      ]);
+      expect(pixels).toEqual([WHITE, MASK, MASK, BLACK]);
+
+      // The page is restored after the screenshot.
+      await expect(page.locator("#hidden")).not.toHaveAttribute(
+        "data-visual-test",
+      );
+      await expect(page.locator("#removed")).not.toHaveAttribute(
+        "data-visual-test",
+      );
+    });
+
+    test("restores the original helper attribute", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "helpers-restore", {
+        fullPage: false,
+        hide: ["#blackout", "#last"],
+        // Removing wins over hiding.
+        remove: ["#last"],
+      });
+
+      const pixels = await getPixels(page, screenshot!.path, [
+        // `#blackout` is hidden instead of masked.
+        { x: 10, y: 175 },
+        // `#last` is removed.
+        { x: 10, y: 225 },
+      ]);
+      expect(pixels).toEqual([WHITE, WHITE]);
+
+      await expect(page.locator("#blackout")).toHaveAttribute(
+        "data-visual-test",
+        "blackout",
+      );
+      await expect(page.locator("#last")).not.toHaveAttribute(
+        "data-visual-test",
+      );
     });
   });
 

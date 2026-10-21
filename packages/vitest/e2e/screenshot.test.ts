@@ -182,6 +182,42 @@ test("supports custom CSS and full page", async () => {
   expect(attachments.length).toBe(2);
 });
 
+test("hides, removes and masks elements", async () => {
+  mount(
+    `<div id="hidden" style="width:100px;height:50px;background:red"></div>` +
+      `<div id="removed" style="width:100px;height:50px;background:blue"></div>` +
+      `<div id="masked" style="width:100px;height:50px;background:lime"></div>` +
+      `<div id="last" style="width:100px;height:50px;background:black"></div>`,
+  );
+  const attachments = await argosScreenshot("helpers", {
+    argosCSS: "body { margin: 0; background: white; }",
+    hide: ["#hidden"],
+    remove: ["#removed"],
+    mask: ["#masked"],
+    maskColor: "#00ffff",
+  });
+  const screenshot = attachments.find((a) => a.path.endsWith("helpers.png"));
+  expect(screenshot).toBeDefined();
+  const image = await readPngImageData(screenshot!);
+  const getPixel = (x: number, y: number) => {
+    const index = (y * image.width + x) * 4;
+    return Array.from(image.data.slice(index, index + 3));
+  };
+  // `#hidden` keeps its space but is transparent.
+  expect(getPixel(10, 25)).toEqual([255, 255, 255]);
+  // `#removed` no longer takes space, so the rows below it move up.
+  expect(getPixel(10, 75)).toEqual([0, 255, 255]);
+  expect(getPixel(10, 125)).toEqual([0, 0, 0]);
+
+  // The page is restored after the screenshot.
+  expect(
+    document.getElementById("hidden")!.getAttribute("data-visual-test"),
+  ).toBeNull();
+  expect(
+    document.getElementById("removed")!.getAttribute("data-visual-test"),
+  ).toBeNull();
+});
+
 test("grows the iframe to capture content wider than the viewport", async () => {
   mount(
     `<div style="width:2000px;height:200px;background:linear-gradient(90deg,#22c55e,#3b82f6)"></div>`,

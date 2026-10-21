@@ -4,4 +4,5 @@ export type {
   PluginOptions as StabilizationPluginOptions,
   Context as StabilizationContext,
   WaitForBackgroundImagesOptions,
+  ArgosHelper,
 } from "./global/stabilization";

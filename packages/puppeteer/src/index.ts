@@ -6,6 +6,7 @@ import {
   type ViewportOption,
   resolveViewport,
   type ArgosGlobal,
+  type ArgosHelper,
   getGlobalScript,
   type ViewportSize,
   type StabilizationPluginOptions,
@@ -56,6 +57,42 @@ export type ArgosScreenshotOptions = Omit<
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
+  /**
+   * Elements to hide from the screenshot, as `ElementHandle`s or string selectors.
+   * Hidden elements keep their space in the layout, like with the
+   * `data-visual-test="transparent"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { hide: ["#clock", ".avatar"] })
+   */
+  hide?: (string | ElementHandle)[];
+
+  /**
+   * Elements to remove from the screenshot, as `ElementHandle`s or string selectors.
+   * Removed elements no longer take space in the layout, like with the
+   * `data-visual-test="removed"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { remove: [".cookie-banner"] })
+   */
+  remove?: (string | ElementHandle)[];
+
+  /**
+   * Elements to cover with a box when the screenshot is taken, as
+   * `ElementHandle`s or string selectors, like with the
+   * `data-visual-test="blackout"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { mask: ["#map", ".ad"] })
+   */
+  mask?: (string | ElementHandle)[];
+
+  /**
+   * Color of the box covering the masked elements, in CSS color format.
+   * @default "#FF00FF"
+   */
+  maskColor?: string;
 
   /**
    * Disable hover effects by moving the mouse to the top-left corner of the page.
@@ -215,6 +252,68 @@ async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
 }
 
 /**
+ * Apply an Argos helper in the page, to the elements matched by a selector or
+ * to the element of a handle.
+ */
+function applyHelperInPage(elements: Element | Element[], helper: ArgosHelper) {
+  ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
+    [elements].flat(),
+    helper,
+  );
+}
+
+/**
+ * Apply the `hide` and `remove` options until `afterEach` runs, as if the
+ * matched elements had the `data-visual-test` helper attribute.
+ */
+async function applyHelpers(
+  page: Page,
+  options: Pick<ArgosScreenshotOptions, "hide" | "remove">,
+) {
+  const apply = (
+    targets: (string | ElementHandle)[] = [],
+    helper: ArgosHelper,
+  ) =>
+    targets.map((target) =>
+      typeof target === "string"
+        ? page.$$eval(target, applyHelperInPage, helper)
+        : target.evaluate(applyHelperInPage, helper),
+    );
+  await Promise.all([
+    ...apply(options.hide, "transparent"),
+    ...apply(options.remove, "removed"),
+  ]);
+}
+
+/**
+ * Mask in the page the elements matched by a selector or the element of a
+ * handle.
+ */
+function maskInPage(elements: Element | Element[], color: string) {
+  ((window as any).__ARGOS__ as ArgosGlobal).mask([elements].flat(), color);
+}
+
+/**
+ * Cover the `data-visual-test="blackout"` helper and the `mask` option with
+ * boxes until `afterEach` runs, since Puppeteer has no native mask.
+ */
+async function applyMask(
+  page: Page,
+  {
+    mask = [],
+    maskColor = "#FF00FF",
+  }: Pick<ArgosScreenshotOptions, "mask" | "maskColor">,
+) {
+  await Promise.all(
+    ['[data-visual-test="blackout"]', ...mask].map((target) =>
+      typeof target === "string"
+        ? page.$$eval(target, maskInPage, maskColor)
+        : target.evaluate(maskInPage, maskColor),
+    ),
+  );
+}
+
+/**
  * Wait for the UI to be ready before taking the screenshot.
  */
 async function waitForReadiness(page: Page, options: ArgosScreenshotOptions) {
@@ -270,6 +369,10 @@ export async function argosScreenshot(
     viewports,
     argosCSS: _argosCSS,
     baseName,
+    hide,
+    remove,
+    mask,
+    maskColor,
     ...puppeteerOptions
   } = options;
 
@@ -359,8 +462,11 @@ export async function argosScreenshot(
     baseNames: string[] | null,
   ) {
     await waitForReadiness(page, options);
+    await applyHelpers(page, { hide, remove });
     const afterEach = await beforeEach(page, options);
     await waitForReadiness(page, options);
+    // Measured once the page is stable, so the boxes match the elements.
+    await applyMask(page, { mask, maskColor });
 
     const [screenshotPath, metadata] = await Promise.all([
       getScreenshotPath(name),

@@ -33,6 +33,26 @@ type ArgosScreenshotOptions = Partial<
   argosCSS?: string;
 
   /**
+   * Selectors of the elements to hide from the screenshot.
+   * Hidden elements keep their space in the layout, like with the
+   * `data-visual-test="transparent"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    cy.argosScreenshot("home", { hide: ["#clock", ".avatar"] })
+   */
+  hide?: string[];
+
+  /**
+   * Selectors of the elements to remove from the screenshot.
+   * Removed elements no longer take space in the layout, like with the
+   * `data-visual-test="removed"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    cy.argosScreenshot("home", { remove: [".cookie-banner"] })
+   */
+  remove?: string[];
+
+  /**
    * Sensitivity threshold between 0 and 1.
    * The higher the threshold, the less sensitive the diff will be.
    * @default 0.5
@@ -156,6 +176,31 @@ function beforeEach(options: ArgosScreenshotOptions) {
   };
 }
 
+/**
+ * Apply the `hide` and `remove` options until `afterEach` runs, as if the
+ * matched elements had the `data-visual-test` helper attribute.
+ */
+function applyHelpers({
+  hide = [],
+  remove = [],
+}: Pick<ArgosScreenshotOptions, "hide" | "remove">) {
+  if (hide.length === 0 && remove.length === 0) {
+    return;
+  }
+
+  cy.window({ log: false }).then((window) => {
+    const argos = (window as any).__ARGOS__ as ArgosGlobal;
+    const select = (selector: string) =>
+      Cypress.$(selector, window.document).toArray();
+    hide.forEach((selector) =>
+      argos.applyHelper(select(selector), "transparent"),
+    );
+    remove.forEach((selector) =>
+      argos.applyHelper(select(selector), "removed"),
+    );
+  });
+}
+
 function getRetries(value: unknown) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return 0;
@@ -202,6 +247,10 @@ Cypress.Commands.add(
       argosCSS: _argosCSS,
       tag,
       baseName,
+      blackout,
+      onAfterScreenshot,
+      hide,
+      remove,
       ...cypressOptions
     } = options;
 
@@ -231,17 +280,17 @@ Cypress.Commands.add(
 
     function stabilizeAndScreenshot(name: string, baseNames: string[] | null) {
       waitForReadiness(options);
+      applyHelpers({ hide, remove });
       const afterEach = beforeEach(options);
       waitForReadiness(options);
 
       const ref: any = {};
 
       cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
-        blackout: ['[data-visual-test="blackout"]'].concat(
-          options.blackout || [],
-        ),
-        onAfterScreenshot: (_$el, props) => {
+        blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
+        onAfterScreenshot: ($el, props) => {
           ref.props = props;
+          onAfterScreenshot?.($el, props);
         },
         ...cypressOptions,
       });

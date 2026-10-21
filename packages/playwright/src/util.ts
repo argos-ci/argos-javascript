@@ -1,4 +1,10 @@
-import type { ElementHandle, Frame, Page, TestInfo } from "@playwright/test";
+import type {
+  ElementHandle,
+  Frame,
+  Locator,
+  Page,
+  TestInfo,
+} from "@playwright/test";
 import type { TestCase, TestResult } from "@playwright/test/reporter";
 import { createRequire } from "node:module";
 import {
@@ -9,6 +15,7 @@ import {
 import {
   getGlobalScript,
   type ArgosGlobal,
+  type ArgosHelper,
   type StabilizationContext,
   type ViewportSize,
 } from "@argos-ci/browser";
@@ -428,6 +435,41 @@ export async function beforeEach(
       ((window as any).__ARGOS__ as ArgosGlobal).afterEach(),
     );
   };
+}
+
+/**
+ * Get the `Locator` of a string selector, or the `Locator` itself.
+ */
+export function toLocator(handler: Page | Frame, target: string | Locator) {
+  return typeof target === "string" ? handler.locator(target) : target;
+}
+
+/**
+ * Apply the `hide` and `remove` options until `afterEach` runs, as if the
+ * matched elements had the `data-visual-test` helper attribute.
+ */
+export async function applyHelpers(
+  handler: Page | Frame,
+  options: {
+    hide?: (string | Locator)[];
+    remove?: (string | Locator)[];
+  },
+) {
+  const apply = (targets: (string | Locator)[] = [], helper: ArgosHelper) =>
+    targets.map((target) =>
+      toLocator(handler, target).evaluateAll(
+        (elements, helper) =>
+          ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
+            elements,
+            helper,
+          ),
+        helper,
+      ),
+    );
+  await Promise.all([
+    ...apply(options.hide, "transparent"),
+    ...apply(options.remove, "removed"),
+  ]);
 }
 
 /**

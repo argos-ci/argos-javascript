@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mask page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        margin: 0;
+        background: white;
+      }
+      #top {
+        height: 100px;
+        background: red;
+      }
+      #spacer {
+        height: 2000px;
+      }
+      #container {
+        padding: 20px;
+        background: blue;
+      }
+      #masked {
+        height: 50px;
+        background: lime;
+      }
+      #bottom {
+        height: 200px;
+      }
+      #in-dialog {
+        width: 100px;
+        height: 100px;
+        background: lime;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="top"></div>
+    <div id="spacer"></div>
+    <div id="container">
+      <div id="masked" data-visual-test="blackout"></div>
+    </div>
+    <div id="bottom"></div>
+    <dialog id="dialog">
+      <div id="in-dialog" data-visual-test="blackout"></div>
+    </dialog>
+  </body>
+</html>

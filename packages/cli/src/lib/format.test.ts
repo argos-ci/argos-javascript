@@ -2,6 +2,7 @@ import type { ArgosAPISchema } from "@argos-ci/api-client";
 import { describe, expect, it } from "vitest";
 import {
   formatBuild,
+  formatBuilds,
   formatChange,
   formatComment,
   formatComments,
@@ -13,6 +14,7 @@ import {
   formatProject,
   formatReview,
   formatReviews,
+  formatSnapshotDownload,
   formatSnapshotSummary,
   formatSnapshots,
   formatStats,
@@ -163,6 +165,63 @@ describe("formatBuild", () => {
     expect(output).toContain("Branch: feature");
     expect(output).toContain("Base branch: main");
     expect(output).toContain("URL: https://app.argos-ci.com/o/p/builds/42");
+  });
+});
+
+describe("formatBuilds", () => {
+  it("reports an empty list", () => {
+    expect(formatBuilds([])).toBe("No builds found.");
+  });
+
+  it("lists each build with its status, branch, commit and URL", () => {
+    const output = formatBuilds([build, { ...build, number: 41 }]);
+    expect(output).toContain("Builds (2)");
+    expect(output).toContain("#42 [changes-detected]");
+    expect(output).toContain("#41 [changes-detected]");
+    expect(output).toContain("  Branch: feature");
+    expect(output).toContain("  Commit: abc123");
+    expect(output).toContain("  Snapshots: total 10, changed 2");
+    expect(output).toContain("  URL: https://app.argos-ci.com/o/p/builds/42");
+  });
+});
+
+describe("formatSnapshotDownload", () => {
+  const file = {
+    name: "home.png",
+    url: "https://files.argos-ci.com/home.png",
+    contentType: "image/png",
+    status: "unchanged" as const,
+    path: "/tmp/out/home.png",
+  };
+
+  it("says where the files went and which build they come from", () => {
+    const output = formatSnapshotDownload({
+      build,
+      directory: "/tmp/out",
+      files: [file, { ...file, name: "about.png" }],
+    });
+    expect(output).toContain("Downloaded 2 snapshots of build #42 to /tmp/out");
+    expect(output).toContain("Branch: feature");
+    expect(output).toContain("Commit: abc123");
+    expect(output).toContain("URL: https://app.argos-ci.com/o/p/builds/42");
+  });
+
+  it("names what was downloaded, singular or plural", () => {
+    expect(
+      formatSnapshotDownload(
+        { build, directory: "/tmp/out", files: [file] },
+        "baseline snapshot",
+      ),
+    ).toContain("Downloaded 1 baseline snapshot of build #42");
+  });
+
+  it("says when there was nothing to download", () => {
+    expect(
+      formatSnapshotDownload(
+        { build, directory: "/tmp/out", files: [] },
+        "baseline snapshot",
+      ),
+    ).toBe("Build #42 has no baseline snapshots to download.");
   });
 });
 

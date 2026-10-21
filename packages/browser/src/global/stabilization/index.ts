@@ -1,6 +1,9 @@
 import type { ViewportOption } from "../../viewport";
 import { corePlugins, plugins, type PluginName } from "./plugins";
 
+export { applyHelper, type ArgosHelper } from "./plugins/argosHelpers";
+export { maskElements as mask } from "../mask";
+
 type Cleanup = () => void;
 
 export interface Plugin {

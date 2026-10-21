@@ -22,6 +22,7 @@ import {
 } from "@argos-ci/util";
 import { getAttachmentName, type ArgosAttachment } from "./attachment";
 import {
+  applyHelpers,
   attachAttachments,
   beforeAll,
   beforeEach,
@@ -38,6 +39,7 @@ import {
   screenshotToSnapshotPath,
   setViewportSize,
   takeCaptureIndex,
+  toLocator,
   waitForReadiness,
 } from "./util";
 import { writeFile } from "node:fs/promises";
@@ -48,7 +50,7 @@ type LocatorOptions = Parameters<Page["locator"]>[1];
 
 type ScreenshotOptions<
   TBase extends PageScreenshotOptions | LocatorScreenshotOptions,
-> = Omit<TBase, "encoding" | "type" | "omitBackground" | "path">;
+> = Omit<TBase, "encoding" | "type" | "omitBackground" | "path" | "mask">;
 
 export type ArgosScreenshotOptions = {
   /**
@@ -76,6 +78,38 @@ export type ArgosScreenshotOptions = {
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
+  /**
+   * Elements to hide from the screenshot, as `Locator`s or string selectors.
+   * Hidden elements keep their space in the layout, like with the
+   * `data-visual-test="transparent"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", {
+   *      hide: ["#clock", page.getByTestId("avatar")],
+   *    })
+   */
+  hide?: (string | Locator)[];
+
+  /**
+   * Elements to remove from the screenshot, as `Locator`s or string selectors.
+   * Removed elements no longer take space in the layout, like with the
+   * `data-visual-test="removed"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { remove: [".cookie-banner"] })
+   */
+  remove?: (string | Locator)[];
+
+  /**
+   * Elements to cover with a box when the screenshot is taken, as `Locator`s
+   * or string selectors, like with the `data-visual-test="blackout"` helper.
+   * Selectors that match nothing are ignored.
+   * @see https://playwright.dev/docs/api/class-page#page-screenshot-option-mask
+   * @example
+   *    argosScreenshot(page, "home", { mask: ["#map", page.getByRole("img")] })
+   */
+  mask?: (string | Locator)[];
 
   /**
    * Disable hover effects by moving the mouse to the top-left corner of the document.
@@ -181,6 +215,9 @@ export async function argosScreenshot(
     ariaSnapshot,
     disableHover = true,
     baseName,
+    hide,
+    remove,
+    mask = [],
     ...playwrightOptions
   } = options;
 
@@ -266,6 +303,7 @@ export async function argosScreenshot(
     });
 
     await waitForReadiness(handler, context);
+    await applyHelpers(handler, { hide, remove });
     const afterEach = await beforeEach(handler, context);
     await waitForReadiness(handler, context);
 
@@ -312,9 +350,12 @@ export async function argosScreenshot(
         path: screenshotPath,
         type: "png",
         fullPage,
-        mask: [handler.locator('[data-visual-test="blackout"]')],
         animations: "disabled",
         ...playwrightOptions,
+        // Extend the `blackout` helper mask, don't replace it.
+        mask: ['[data-visual-test="blackout"]', ...mask].map((target) =>
+          toLocator(handler, target),
+        ),
       }),
       writeMetadata(screenshotPath, metadata),
     ]);
