@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.4.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcypress%407.3.0...%40argos-ci%2Fcypress%407.4.0) (2026-10-21)
+
+### Bug Fixes
+
+* **cypress:** keep default blackout selector when passing `blackout` ([f72211e](https://github.com/argos-ci/argos-javascript/commit/f72211ef8186a17875c9f41500cb4a375d4bab53))
+* **cypress:** keep metadata when passing `onAfterScreenshot` ([d9b3695](https://github.com/argos-ci/argos-javascript/commit/d9b3695613efd4fc7192119dc6bfa486ac8992a4))
+
+### Features
+
+* add `hide` and `remove` screenshot options ([971e056](https://github.com/argos-ci/argos-javascript/commit/971e056c57596d4927d8be5e6b3d2e5367af6cf8))
+
+
 # [7.3.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcypress%407.2.4...%40argos-ci%2Fcypress%407.3.0) (2026-10-16)
 
 ### Features

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fwebdriverio%400.9.0...%40argos-ci%2Fwebdriverio%400.10.0) (2026-10-21)
+
+### Bug Fixes
+
+* **webdriverio:** keep capturing native apps without the Argos script ([5712957](https://github.com/argos-ci/argos-javascript/commit/57129577397cdef16ceb4b81694244f3323dfef8))
+
+### Features
+
+* **webdriverio:** add `hide`, `remove` and selector masks ([fab1fd1](https://github.com/argos-ci/argos-javascript/commit/fab1fd1a4524c38470a4f0a47863a591ad6126d6))
+
+
 # [0.9.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fwebdriverio%400.8.11...%40argos-ci%2Fwebdriverio%400.9.0) (2026-10-16)
 
 ### Features

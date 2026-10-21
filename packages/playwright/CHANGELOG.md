@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.8.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.7.2...%40argos-ci%2Fplaywright%407.8.0) (2026-10-21)
+
+### Bug Fixes
+
+* **playwright:** keep the blackout helper when passing `mask` ([4609e4a](https://github.com/argos-ci/argos-javascript/commit/4609e4a9ac219473a6d1214d76f4eeed16d2f22f))
+
+### Features
+
+* accept selectors in the Playwright and Vitest `mask` option ([586e091](https://github.com/argos-ci/argos-javascript/commit/586e091b6541cc3883ae86315fe478597ae6dc5b))
+* add `hide` and `remove` screenshot options ([971e056](https://github.com/argos-ci/argos-javascript/commit/971e056c57596d4927d8be5e6b3d2e5367af6cf8))
+* **playwright:** support Electron apps ([78dfbce](https://github.com/argos-ci/argos-javascript/commit/78dfbceb776d87451bce51748d6ea4528fedee96))
+
+
 ## [7.7.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fplaywright%407.7.1...%40argos-ci%2Fplaywright%407.7.2) (2026-10-16)
 
 ### Bug Fixes

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.11.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.10.0...%40argos-ci%2Fcli%406.11.0) (2026-10-21)
+
+### Features
+
+* **cli:** add `build list`, `build download` and `baseline download` ([b0c5dc3](https://github.com/argos-ci/argos-javascript/commit/b0c5dc3256ee833edf23e3e7d3ffbfd489a0f35c))
+
+
 # [6.10.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.9.6...%40argos-ci%2Fcli%406.10.0) (2026-10-16)
 
 ### Features

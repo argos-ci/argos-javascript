@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.4](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.4.3...%40argos-ci%2Fstorybook%406.4.4) (2026-10-21)
+
+### Bug Fixes
+
+* **storybook:** document uploadToArgos as defaulting to false ([64f21af](https://github.com/argos-ci/argos-javascript/commit/64f21af10723999cbd440677ae9663ed6ad768d3))
+
+
 ## [6.4.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.4.2...%40argos-ci%2Fstorybook%406.4.3) (2026-10-16)
 
 **Note:** Version bump only for package @argos-ci/storybook

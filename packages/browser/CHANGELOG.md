@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.6.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fbrowser%406.5.1...%40argos-ci%2Fbrowser%406.6.0) (2026-10-21)
+
+### Features
+
+* add `hide` and `remove` screenshot options ([971e056](https://github.com/argos-ci/argos-javascript/commit/971e056c57596d4927d8be5e6b3d2e5367af6cf8))
+* **puppeteer:** support the blackout helper and add `mask` option ([63990c0](https://github.com/argos-ci/argos-javascript/commit/63990c0d2f8083a76c1ec86fd16ec16d49256e9c))
+
+
 ## [6.5.1](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fbrowser%406.5.0...%40argos-ci%2Fbrowser%406.5.1) (2026-10-16)
 
 **Note:** Version bump only for package @argos-ci/browser
