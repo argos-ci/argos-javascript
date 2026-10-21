@@ -6,6 +6,7 @@ import {
   type ViewportOption,
   resolveViewport,
   type ArgosGlobal,
+  type ArgosHelper,
   getGlobalScript,
   type ViewportSize,
   type StabilizationPluginOptions,
@@ -56,6 +57,26 @@ export type ArgosScreenshotOptions = Omit<
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
+  /**
+   * Elements to hide from the screenshot, as `ElementHandle`s or string selectors.
+   * Hidden elements keep their space in the layout, like with the
+   * `data-visual-test="transparent"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { hide: ["#clock", ".avatar"] })
+   */
+  hide?: (string | ElementHandle)[];
+
+  /**
+   * Elements to remove from the screenshot, as `ElementHandle`s or string selectors.
+   * Removed elements no longer take space in the layout, like with the
+   * `data-visual-test="removed"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { remove: [".cookie-banner"] })
+   */
+  remove?: (string | ElementHandle)[];
 
   /**
    * Disable hover effects by moving the mouse to the top-left corner of the page.
@@ -215,6 +236,42 @@ async function beforeEach(page: Page, options: ArgosScreenshotOptions) {
 }
 
 /**
+ * Apply the `hide` and `remove` options until `afterEach` runs, as if the
+ * matched elements had the `data-visual-test` helper attribute.
+ */
+async function applyHelpers(page: Page, options: ArgosScreenshotOptions) {
+  const helpers: [ArgosHelper, (string | ElementHandle)[] | undefined][] = [
+    ["transparent", options.hide],
+    // Applied last, so an element both hidden and removed is removed.
+    ["removed", options.remove],
+  ];
+  for (const [helper, targets] of helpers) {
+    await Promise.all(
+      (targets ?? []).map((target) =>
+        typeof target === "string"
+          ? page.$$eval(
+              target,
+              (elements, helper) =>
+                ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
+                  elements,
+                  helper,
+                ),
+              helper,
+            )
+          : target.evaluate(
+              (element, helper) =>
+                ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
+                  [element],
+                  helper,
+                ),
+              helper,
+            ),
+      ),
+    );
+  }
+}
+
+/**
  * Wait for the UI to be ready before taking the screenshot.
  */
 async function waitForReadiness(page: Page, options: ArgosScreenshotOptions) {
@@ -270,6 +327,8 @@ export async function argosScreenshot(
     viewports,
     argosCSS: _argosCSS,
     baseName,
+    hide: _hide,
+    remove: _remove,
     ...puppeteerOptions
   } = options;
 
@@ -360,6 +419,7 @@ export async function argosScreenshot(
   ) {
     await waitForReadiness(page, options);
     const afterEach = await beforeEach(page, options);
+    await applyHelpers(page, options);
     await waitForReadiness(page, options);
 
     const [screenshotPath, metadata] = await Promise.all([
