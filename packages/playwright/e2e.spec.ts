@@ -200,7 +200,7 @@ test.describe("#argosScreenshot", () => {
         fullPage: false,
         hide: ["#hidden", ".does-not-exist"],
         remove: [page.locator("#removed")],
-        mask: [page.locator("#masked")],
+        mask: ["#masked", page.locator(".does-not-exist")],
       });
 
       // Each row is 50px high: `#removed` no longer takes space, so the rows
