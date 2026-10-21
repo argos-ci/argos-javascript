@@ -89,4 +89,20 @@ describe("argosScreenshot", () => {
         });
       });
   });
+
+  it("supports onAfterScreenshot option", () => {
+    cy.visit("cypress/pages/index.html");
+    let screenshotPath: string | undefined;
+    cy.argosScreenshot("onAfterScreenshot-option", {
+      onAfterScreenshot: (_$el, props) => {
+        screenshotPath = props.path;
+      },
+    });
+    cy.then(() => {
+      expect(screenshotPath).to.be.a("string");
+      cy.readFile(`${screenshotPath}.argos.json`)
+        .its("test.title")
+        .should("eq", "supports onAfterScreenshot option");
+    });
+  });
 });
