@@ -48,6 +48,7 @@
     "webdriverio": "^6 || ^7 || ^8 || ^9 || ^10"
   },
   "dependencies": {
+    "@argos-ci/browser": "workspace:*",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
