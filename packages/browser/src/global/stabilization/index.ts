@@ -1,8 +1,8 @@
 import type { ViewportOption } from "../../viewport";
-import { maskElements, unmaskElements } from "../mask";
 import { corePlugins, plugins, type PluginName } from "./plugins";
 
 export { applyHelper, type ArgosHelper } from "./plugins/argosHelpers";
+export { maskElements as mask } from "../mask";
 
 type Cleanup = () => void;
 
@@ -178,17 +178,6 @@ export function afterEach() {
     cleanup();
   });
   beforeEachCleanups.clear();
-}
-
-/**
- * Cover elements with a box of the given color, like the
- * `data-visual-test="blackout"` helper does, until `afterEach` runs.
- * Call it once the page is stable, right before taking the screenshot, for
- * SDKs whose automation library has no native mask.
- */
-export function mask(elements: Element[], color: string) {
-  maskElements(elements, color);
-  beforeEachCleanups.add(unmaskElements);
 }
 
 /**
