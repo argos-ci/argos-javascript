@@ -105,4 +105,32 @@ describe("argosScreenshot", () => {
         .should("eq", "supports onAfterScreenshot option");
     });
   });
+
+  it("supports hide and remove options", () => {
+    cy.visit("cypress/pages/index.html");
+    cy.document().then((doc) => {
+      const getHelpers = () =>
+        ["h1", ".specific-target"].map(
+          (selector) =>
+            doc.querySelector(selector)?.getAttribute("data-visual-test") ??
+            null,
+        );
+      let helpersDuringScreenshot: (string | null)[] = [];
+      cy.argosScreenshot("hide-remove-options", {
+        hide: [".specific-target", "h1"],
+        // Removing wins over hiding.
+        remove: ["h1", ".does-not-exist"],
+        onBeforeScreenshot: () => {
+          helpersDuringScreenshot = getHelpers();
+        },
+      }).then(() => {
+        expect(helpersDuringScreenshot).to.deep.equal([
+          "removed",
+          "transparent",
+        ]);
+        // The page is restored after the screenshot.
+        expect(getHelpers()).to.deep.equal([null, null]);
+      });
+    });
+  });
 });

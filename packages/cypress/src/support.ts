@@ -1,6 +1,7 @@
 import "cypress-wait-until";
 import {
   type ArgosGlobal,
+  type ArgosHelper,
   resolveViewport,
   type StabilizationContext,
   type StabilizationPluginOptions,
@@ -31,6 +32,26 @@ type ArgosScreenshotOptions = Partial<
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
+  /**
+   * Selectors of the elements to hide from the screenshot.
+   * Hidden elements keep their space in the layout, like with the
+   * `data-visual-test="transparent"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    cy.argosScreenshot("home", { hide: ["#clock", ".avatar"] })
+   */
+  hide?: string[];
+
+  /**
+   * Selectors of the elements to remove from the screenshot.
+   * Removed elements no longer take space in the layout, like with the
+   * `data-visual-test="removed"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    cy.argosScreenshot("home", { remove: [".cookie-banner"] })
+   */
+  remove?: string[];
 
   /**
    * Sensitivity threshold between 0 and 1.
@@ -156,6 +177,29 @@ function beforeEach(options: ArgosScreenshotOptions) {
   };
 }
 
+/**
+ * Apply the `hide` and `remove` options until `afterEach` runs, as if the
+ * matched elements had the `data-visual-test` helper attribute.
+ */
+function applyHelpers(options: ArgosScreenshotOptions) {
+  const helpers: [ArgosHelper, string[] | undefined][] = [
+    ["transparent", options.hide],
+    // Applied last, so an element both hidden and removed is removed.
+    ["removed", options.remove],
+  ];
+
+  cy.window({ log: false }).then((window) => {
+    for (const [helper, selectors] of helpers) {
+      for (const selector of selectors ?? []) {
+        ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
+          Cypress.$(selector, window.document).toArray(),
+          helper,
+        );
+      }
+    }
+  });
+}
+
 function getRetries(value: unknown) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return 0;
@@ -204,6 +248,8 @@ Cypress.Commands.add(
       baseName,
       blackout,
       onAfterScreenshot,
+      hide: _hide,
+      remove: _remove,
       ...cypressOptions
     } = options;
 
@@ -234,6 +280,7 @@ Cypress.Commands.add(
     function stabilizeAndScreenshot(name: string, baseNames: string[] | null) {
       waitForReadiness(options);
       const afterEach = beforeEach(options);
+      applyHelpers(options);
       waitForReadiness(options);
 
       const ref: any = {};

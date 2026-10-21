@@ -22,6 +22,7 @@ import {
 } from "@argos-ci/util";
 import { getAttachmentName, type ArgosAttachment } from "./attachment";
 import {
+  applyHelpers,
   attachAttachments,
   beforeAll,
   beforeEach,
@@ -75,6 +76,28 @@ export type ArgosScreenshotOptions = {
    * Custom CSS evaluated during the screenshot process.
    */
   argosCSS?: string;
+
+  /**
+   * Elements to hide from the screenshot, as `Locator`s or string selectors.
+   * Hidden elements keep their space in the layout, like with the
+   * `data-visual-test="transparent"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", {
+   *      hide: ["#clock", page.getByTestId("avatar")],
+   *    })
+   */
+  hide?: (string | Locator)[];
+
+  /**
+   * Elements to remove from the screenshot, as `Locator`s or string selectors.
+   * Removed elements no longer take space in the layout, like with the
+   * `data-visual-test="removed"` helper.
+   * Selectors that match nothing are ignored.
+   * @example
+   *    argosScreenshot(page, "home", { remove: [".cookie-banner"] })
+   */
+  remove?: (string | Locator)[];
 
   /**
    * Elements to mask with a box when the screenshot is taken, like with the
@@ -187,6 +210,8 @@ export async function argosScreenshot(
     ariaSnapshot,
     disableHover = true,
     baseName,
+    hide,
+    remove,
     mask = [],
     ...playwrightOptions
   } = options;
@@ -265,6 +290,7 @@ export async function argosScreenshot(
 
     await waitForReadiness(handler, context);
     const afterEach = await beforeEach(handler, context);
+    await applyHelpers(handler, { hide, remove });
     await waitForReadiness(handler, context);
 
     const [snapshotPath] = await Promise.all([
