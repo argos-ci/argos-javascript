@@ -7,6 +7,7 @@ import { argosScreenshot as typedArgosScreenshot } from "./src";
 // @ts-ignore
 import { argosScreenshot as argosScreenshotCjs } from "./dist/index.cjs";
 import { argosAriaSnapshot } from "./dist/index.mjs";
+import { readMetadata } from "@argos-ci/util";
 
 test.describe.configure({ mode: "serial" });
 const screenshotFolder = "screenshots";
@@ -273,6 +274,55 @@ test.describe("#argosScreenshot", () => {
         expectSnapshotToExists("viewport vw-1024"),
         expectSnapshotToExists("viewport vw-1440"),
       ]);
+    });
+  });
+
+  test.describe("without a viewport", () => {
+    // Like an Electron window: the page is sized by its window. The device
+    // preset of the project sets a `deviceScaleFactor`, which requires a
+    // viewport, so the context is created by hand.
+    let context: BrowserContext;
+    let page: Page;
+
+    test.beforeEach(async ({ browser }) => {
+      context = await browser.newContext({
+        viewport: null,
+        deviceScaleFactor: undefined,
+      });
+      page = await context.newPage();
+      await page.goto(fixture("basic.html"));
+    });
+
+    test.afterEach(async () => {
+      await context.close();
+    });
+
+    test("reads the viewport from the window", async () => {
+      const attachments = await argosScreenshot(page, "without-viewport", {
+        fullPage: false,
+      });
+      await expectSnapshotToExists("without-viewport");
+
+      const screenshot = attachments.find(
+        (attachment) => attachment.contentType === "image/png",
+      );
+      const metadata = await readMetadata(screenshot!.path);
+      expect(metadata?.viewport).toEqual(
+        await page.evaluate(() => ({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        })),
+      );
+    });
+
+    test("does not support the viewports option", async () => {
+      await expect(
+        argosScreenshot(page, "without-viewport-viewports", {
+          viewports: ["iphone-4"],
+        }),
+      ).rejects.toThrow(
+        "viewports option is not supported on a page without a viewport, such as an Electron window",
+      );
     });
   });
 

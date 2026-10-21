@@ -177,12 +177,36 @@ export function getPage(handler: Page | Frame): Page {
 /**
  * Get the viewport size.
  */
-export function getViewportSize(page: Page) {
+export async function getViewportSize(page: Page): Promise<ViewportSize> {
   const viewportSize = page.viewportSize();
-  if (!viewportSize) {
-    throw new Error("Snapshots can't be taken without a viewport.");
+  if (viewportSize) {
+    return viewportSize;
   }
-  return viewportSize;
+  // No emulated viewport (Electron windows, `viewport: null`): the page is
+  // sized by its window.
+  return page.evaluate(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }));
+}
+
+/**
+ * Get the browser running the page, or `undefined` if it can't be identified.
+ */
+export async function getBrowserMetadata(
+  page: Page,
+): Promise<ScreenshotMetadata["browser"]> {
+  const browser = page.context().browser();
+  if (browser) {
+    return { name: browser.browserType().name(), version: browser.version() };
+  }
+  // Electron contexts have no browser, but Electron adds its version to the
+  // default user agent. An app that overrides it stays unidentified.
+  const userAgent = await page.evaluate(() => navigator.userAgent);
+  const electronVersion = userAgent.match(/\bElectron\/(\S+)/)?.[1];
+  return electronVersion
+    ? { name: "electron", version: electronVersion }
+    : undefined;
 }
 
 type SnapshotNames = {
@@ -307,28 +331,27 @@ export async function getPathAndMetadata(args: {
 
   const dir = dirname(path);
 
-  const [colorScheme, mediaType, libMetadata, testMetadata] = await Promise.all(
-    [
-      handler.evaluate(() =>
-        ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
-      ),
-      handler.evaluate(() =>
-        ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
-      ),
-      getLibraryMetadata(),
-      getTestMetadata(testInfo),
-      dir !== root ? mkdir(dir, { recursive: true }) : null,
-    ],
-  );
+  const [
+    colorScheme,
+    mediaType,
+    libMetadata,
+    testMetadata,
+    viewportSize,
+    browser,
+  ] = await Promise.all([
+    handler.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).getColorScheme(),
+    ),
+    handler.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).getMediaType(),
+    ),
+    getLibraryMetadata(),
+    getTestMetadata(testInfo),
+    checkIsFrame(handler) ? null : getViewportSize(handler),
+    getBrowserMetadata(getPage(handler)),
+    dir !== root ? mkdir(dir, { recursive: true }) : null,
+  ]);
 
-  const viewportSize = checkIsFrame(handler) ? null : getViewportSize(handler);
-
-  const browser = getPage(handler).context().browser();
-  if (!browser) {
-    throw new Error("Can't take screenshots without a browser.");
-  }
-  const browserName = browser.browserType().name();
-  const browserVersion = browser.version();
   const url = overrides?.url ?? handler.url();
 
   const metadata: ScreenshotMetadata = {
@@ -337,10 +360,7 @@ export async function getPathAndMetadata(args: {
     mediaType,
     test: testMetadata,
     story: overrides?.story,
-    browser: {
-      name: browserName,
-      version: browserVersion,
-    },
+    browser,
     ...libMetadata,
   };
 
