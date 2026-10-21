@@ -29,10 +29,10 @@ import {
   checkIsFrame,
   checkIsPage,
   checkIsUsingArgosReporter,
+  getPage,
   getPathAndMetadata,
   getSnapshotNames,
   getTestInfo,
-  getViewportSize,
   PNG_EXTENSION,
   prepare,
   screenshotToSnapshotPath,
@@ -59,6 +59,7 @@ export type ArgosScreenshotOptions = {
 
   /**
    * Viewports to take screenshots of.
+   * Not supported on pages without a viewport, such as Electron windows.
    */
   viewports?: ViewportOption[];
 
@@ -191,6 +192,19 @@ export async function argosScreenshot(
   if (!name) {
     throw new Error("The `name` argument is required.");
   }
+  if (viewports) {
+    if (checkIsFrame(handler)) {
+      throw new Error(`viewports option is not supported with an iframe`);
+    }
+    // A page without a viewport (Electron window, `viewport: null`) is sized
+    // by its window. Setting one can't be undone: the page would stop
+    // following its window and lose its device scale factor.
+    if (!handler.viewportSize()) {
+      throw new Error(
+        `viewports option is not supported on a page without a viewport, such as an Electron window`,
+      );
+    }
+  }
 
   const screenshotTarget =
     typeof element === "string"
@@ -207,10 +221,6 @@ export async function argosScreenshot(
   const useArgosReporter = checkIsUsingArgosReporter(testInfo);
 
   await prepare({ handler, useArgosReporter, root });
-
-  const originalViewportSize = checkIsFrame(handler)
-    ? null
-    : getViewportSize(handler);
 
   const fullPage =
     options.fullPage !== undefined
@@ -349,13 +359,12 @@ export async function argosScreenshot(
 
   // If no viewports are specified, take a single screenshot
   if (viewports) {
-    if (checkIsFrame(handler)) {
-      throw new Error(`viewports option is not supported with an iframe`);
-    }
+    const page = getPage(handler);
+    const originalViewportSize = page.viewportSize();
     // Take screenshots for each viewport
     for (const viewport of viewports) {
       const viewportSize = resolveViewport(viewport);
-      await setViewportSize(handler, viewportSize);
+      await setViewportSize(page, viewportSize);
       // The viewport suffix is part of the name, so the baselines need it too.
       const attachments = await stabilizeAndScreenshot(
         getScreenshotName(name, { viewportWidth: viewportSize.width }),
@@ -367,10 +376,9 @@ export async function argosScreenshot(
     }
 
     // Restore the original viewport size
-    if (!originalViewportSize) {
-      throw new Error(`Invariant: viewport size must be saved`);
+    if (originalViewportSize) {
+      await setViewportSize(page, originalViewportSize);
     }
-    await setViewportSize(handler, originalViewportSize);
   } else {
     const attachments = await stabilizeAndScreenshot(name, baseNames);
     allAttachments.push(...attachments);

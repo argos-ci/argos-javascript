@@ -2,10 +2,11 @@ import { describe, it, expect } from "vitest";
 import {
   checkIsUsingArgosReporter,
   getAutomaticScreenshotName,
+  getBrowserMetadata,
   getSnapshotNames,
 } from "./util";
 import type { TestCase, TestResult } from "@playwright/test/reporter";
-import type { TestInfo } from "@playwright/test";
+import type { Browser, Page, TestInfo } from "@playwright/test";
 
 describe("getAutomaticScreenshotName", () => {
   const createMockTest = (
@@ -259,5 +260,64 @@ describe("checkIsUsingArgosReporter", () => {
   it("returns false when the reporter is not configured", () => {
     const testInfo = createMockTestInfo([["dot"], ["list"]]);
     expect(checkIsUsingArgosReporter(testInfo)).toBe(false);
+  });
+});
+
+const ELECTRON_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) my-app/1.0.0 Chrome/140.0.7339.41 Electron/38.2.0 Safari/537.36";
+
+const CHROME_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.41 Safari/537.36";
+
+describe("getBrowserMetadata", () => {
+  /**
+   * Create a page whose `evaluate` resolves to `userAgent`, as the real
+   * function only runs in a browser.
+   */
+  const createMockPage = (args: {
+    browser?: Browser;
+    userAgent?: string;
+  }): Page =>
+    ({
+      context: () => ({ browser: () => args.browser ?? null }),
+      evaluate: async () => args.userAgent,
+    }) as unknown as Page;
+
+  it("returns the browser of the context", async () => {
+    const browser = {
+      browserType: () => ({ name: () => "chromium" }),
+      version: () => "140.0.7339.41",
+    } as unknown as Browser;
+    const page = createMockPage({ browser });
+    expect(await getBrowserMetadata(page)).toEqual({
+      name: "chromium",
+      version: "140.0.7339.41",
+    });
+  });
+
+  it("detects Electron when the context has no browser", async () => {
+    const page = createMockPage({ userAgent: ELECTRON_USER_AGENT });
+    expect(await getBrowserMetadata(page)).toEqual({
+      name: "electron",
+      version: "38.2.0",
+    });
+  });
+
+  it("reads Electron pre-release versions", async () => {
+    const page = createMockPage({
+      userAgent: ELECTRON_USER_AGENT.replace(
+        "Electron/38.2.0",
+        "Electron/39.0.0-beta.3",
+      ),
+    });
+    expect(await getBrowserMetadata(page)).toEqual({
+      name: "electron",
+      version: "39.0.0-beta.3",
+    });
+  });
+
+  it("returns undefined when the browser can't be identified", async () => {
+    const page = createMockPage({ userAgent: CHROME_USER_AGENT });
+    expect(await getBrowserMetadata(page)).toBeUndefined();
   });
 });
