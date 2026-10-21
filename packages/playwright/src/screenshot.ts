@@ -77,6 +77,13 @@ export type ArgosScreenshotOptions = {
   argosCSS?: string;
 
   /**
+   * Elements to mask with a box when the screenshot is taken, like with the
+   * `data-visual-test="blackout"` helper.
+   * @see https://playwright.dev/docs/api/class-page#page-screenshot-option-mask
+   */
+  mask?: Locator[];
+
+  /**
    * Disable hover effects by moving the mouse to the top-left corner of the document.
    * @default true
    */
@@ -180,6 +187,7 @@ export async function argosScreenshot(
     ariaSnapshot,
     disableHover = true,
     baseName,
+    mask = [],
     ...playwrightOptions
   } = options;
 
@@ -302,9 +310,9 @@ export async function argosScreenshot(
         path: screenshotPath,
         type: "png",
         fullPage,
-        mask: [handler.locator('[data-visual-test="blackout"]')],
         animations: "disabled",
         ...playwrightOptions,
+        mask: [handler.locator('[data-visual-test="blackout"]'), ...mask],
       }),
       writeMetadata(screenshotPath, metadata),
     ]);
