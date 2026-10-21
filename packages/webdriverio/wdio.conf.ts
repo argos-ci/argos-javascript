@@ -8,6 +8,8 @@ export const config: Options.Testrunner & {
   // ====================
   // WebdriverIO supports running e2e tests as well as unit and component tests.
   runner: "local",
+  // Resolve the built `@argos-ci/*` packages, which embed the Argos browser script.
+  tsConfigPath: "../../tsconfig.build.json",
 
   //
   // ==================
