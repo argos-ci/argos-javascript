@@ -418,6 +418,13 @@ export async function beforeEach(
 }
 
 /**
+ * Get the `Locator` of a string selector, or the `Locator` itself.
+ */
+export function toLocator(handler: Page | Frame, target: string | Locator) {
+  return typeof target === "string" ? handler.locator(target) : target;
+}
+
+/**
  * Apply the `hide` and `remove` options until `afterEach` runs, as if the
  * matched elements had the `data-visual-test` helper attribute.
  */
@@ -429,18 +436,16 @@ export async function applyHelpers(
   },
 ) {
   const apply = (targets: (string | Locator)[] = [], helper: ArgosHelper) =>
-    targets.map((target) => {
-      const locator =
-        typeof target === "string" ? handler.locator(target) : target;
-      return locator.evaluateAll(
+    targets.map((target) =>
+      toLocator(handler, target).evaluateAll(
         (elements, helper) =>
           ((window as any).__ARGOS__ as ArgosGlobal).applyHelper(
             elements,
             helper,
           ),
         helper,
-      );
-    });
+      ),
+    );
   await Promise.all([
     ...apply(options.hide, "transparent"),
     ...apply(options.remove, "removed"),
