@@ -101,12 +101,10 @@ checkout.png (after)
 - For a **video**, it is the **poster frame wrapped in a link** to the share
   page. GitHub renders an inline player only for media it hosts itself, so a
   `<video>` tag or a bare `.mp4` link pointing at Argos renders as a dead link.
-  The poster-in-a-link is the form that actually shows something. The image CDN
-  extracts the poster after the upload, and until it has, the Markdown is a
-  plain `[▶ name](url)` link instead. Pasting it yourself? Run
-  `argos media get <id>` a little later to get the one with the poster. With
-  `--pr` or `--branch` there is nothing to do: Argos updates its comment once
-  the poster is ready.
+  The poster-in-a-link is the form that actually shows something. Right after
+  the upload the image CDN may not have extracted the frame yet: the embed then
+  shows a placeholder, which turns into the frame by itself once it exists.
+  Paste it straight away; it never needs updating.
 
 `URL` is the share page, for a human. `File` is the image or video itself, for
 you: fetch it when you want to look at what you just uploaded. Use `--json` when
@@ -258,8 +256,6 @@ broken image.
   the H.264 that screen recorders produce; ProRes and some HEVC exports won't play
   inline and the viewer gets a download. Export to H.264 if you need playback.
 - **Comment size** — the managed pull request comment lists up to 20 media.
-- **No waiting, except for a video's poster** — the share URL and the file work
-  the moment the upload finishes. A video's poster frame follows: the CDN
-  extracts it after the upload, usually within seconds, and much later when its
-  video processing is backed up. Until then the video's Markdown is a plain link
-  rather than a picture.
+- **No waiting** — a media is fully usable the moment the upload finishes, and
+  its Markdown is final. A video's poster frame is extracted by the CDN after
+  the upload, usually within seconds; until then its embed shows a placeholder.
