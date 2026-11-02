@@ -43,20 +43,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Setup npm auth
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+      # No npm token step: auth is npm Trusted Publishing. lerna exchanges this job's OIDC id-token
+      # (id-token: write above) for a short-lived npm token per package, so no secret can expire.
+      # Each package needs a trusted publisher on npmjs.com (DevinoSolutions/snapvisor-js,
+      # release.yml), and npm accepts the exchange only from GitHub-hosted runners. --loglevel
+      # verbose prints npm's reason when the exchange is refused instead of a bare E404/ENEEDAUTH.
       - name: Publish
         run: |
           if [ "${{ github.event.inputs.release_type }}" = "canary" ]; then
-            NPM_CONFIG_PROVENANCE=true npm run release-canary -- --yes
+            NPM_CONFIG_PROVENANCE=true npm run release-canary -- --yes --loglevel verbose
           elif [ "${{ github.event.inputs.release_type }}" = "from-package" ]; then
             npm run build
-            NPM_CONFIG_PROVENANCE=true npx lerna publish from-package --yes
+            NPM_CONFIG_PROVENANCE=true npx lerna publish from-package --yes --loglevel verbose
           else
-            NPM_CONFIG_PROVENANCE=true npm run release -- --yes
+            NPM_CONFIG_PROVENANCE=true npm run release -- --yes --loglevel verbose
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
