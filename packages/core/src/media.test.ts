@@ -1,9 +1,10 @@
 import { copyFile, mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMediaRequests } from "../mocks/handlers/createMedia";
-import { setupMockServer } from "../mocks/server";
+import { server, setupMockServer } from "../mocks/server";
 import { uploadMedia } from "./media";
 
 setupMockServer();
@@ -183,5 +184,102 @@ describe("#uploadMedia", () => {
     await expect(uploadMedia({ ...baseParams, files: [] })).rejects.toThrow(
       /No files to upload/,
     );
+  });
+});
+
+describe("#uploadMedia upload path", () => {
+  const MULTIPART_URL = "https://api.argos-ci.dev/uploads/multipart";
+  let singlePosts: number;
+  let multipartParts: number[];
+
+  /**
+   * Serve `createMedia` with a multipart target of `partSize`, and count which
+   * upload path the SDK took.
+   */
+  function mockUploadPaths(partSize: number | null) {
+    singlePosts = 0;
+    multipartParts = [];
+    server.use(
+      http.post<never, { size: number }>(
+        "https://api.argos-ci.dev/media",
+        async ({ request }) => {
+          const body = await request.json();
+          createMediaRequests.push(body as never);
+          return HttpResponse.json(
+            {
+              media: { id: "42", url: "https://app.argos-ci.dev/m/share" },
+              upload: {
+                url: "https://api.s3.dev/upload/media",
+                fields: { "Content-Type": "image/png", policy: "signed" },
+                multipart:
+                  partSize === null ? null : { url: MULTIPART_URL, partSize },
+              },
+            },
+            { status: 201 },
+          );
+        },
+      ),
+      http.post("https://api.s3.dev/upload/*", () => {
+        singlePosts += 1;
+        return new Response(null, { status: 204 });
+      }),
+      http.post(MULTIPART_URL, async ({ request }) => {
+        const { size } = (await request.json()) as { size: number };
+        return HttpResponse.json(
+          {
+            session: "session",
+            partSize: partSize!,
+            partCount: Math.ceil(size / partSize!),
+            expiresAt: "2026-10-29T12:00:00.000Z",
+          },
+          { status: 201 },
+        );
+      }),
+      http.put(`${MULTIPART_URL}/parts/:partNumber`, ({ params }) => {
+        const partNumber = Number(params["partNumber"]);
+        multipartParts.push(partNumber);
+        return HttpResponse.json({
+          partNumber,
+          etag: `"${partNumber}"`,
+          checksumCRC32: null,
+        });
+      }),
+      http.post(
+        `${MULTIPART_URL}/complete`,
+        () => new Response(null, { status: 204 }),
+      ),
+    );
+  }
+
+  beforeEach(() => {
+    createMediaRequests.length = 0;
+  });
+
+  it("uploads a file larger than the part size in parts", async () => {
+    // penelope.png is 258,431 bytes: three parts of 100,000.
+    mockUploadPaths(100_000);
+
+    await uploadMedia({ ...baseParams, files: [PNG], compress: false });
+
+    expect(multipartParts).toEqual([1, 2, 3]);
+    expect(singlePosts).toBe(0);
+  });
+
+  it("sends a file no larger than the part size in a single POST", async () => {
+    mockUploadPaths(10_000_000);
+
+    await uploadMedia({ ...baseParams, files: [PNG], compress: false });
+
+    expect(singlePosts).toBe(1);
+    expect(multipartParts).toEqual([]);
+  });
+
+  it("sends a single POST when the server offers no multipart target", async () => {
+    mockUploadPaths(null);
+
+    await uploadMedia({ ...baseParams, files: [PNG], compress: false });
+
+    expect(singlePosts).toBe(1);
+    expect(multipartParts).toEqual([]);
   });
 });

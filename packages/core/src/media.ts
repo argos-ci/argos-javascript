@@ -8,6 +8,7 @@ import { getConfigFromOptions } from "./config";
 import { debug } from "./debug";
 import { hashFile } from "./hashing";
 import { compressMediaToWebp, type MediaSource } from "./media-compress";
+import { uploadFileInParts } from "./multipart-upload";
 import { uploadFileWithPresignedPost } from "./s3";
 
 export type Media = ArgosAPISchema.components["schemas"]["Media"];
@@ -252,12 +253,25 @@ async function registerAndUpload(args: {
   }
 
   debug(`Uploading ${source.path}`);
-  await uploadFileWithPresignedPost({
-    url: upload.url,
-    fields: upload.fields,
-    path: source.path,
-    contentType: source.contentType,
-  });
+  // The server offers parts when the single POST goes through an edge that caps
+  // request bodies (100 MB); a server that does not (upstream Argos, presigned
+  // S3 POST) takes the whole file in one request, as does any small file.
+  if (upload.multipart && stats.size > upload.multipart.partSize) {
+    await uploadFileInParts({
+      target: upload.multipart,
+      fields: upload.fields,
+      path: source.path,
+      size: stats.size,
+      contentType: source.contentType,
+    });
+  } else {
+    await uploadFileWithPresignedPost({
+      url: upload.url,
+      fields: upload.fields,
+      path: source.path,
+      contentType: source.contentType,
+    });
+  }
 
   const finalizeResponse = await apiClient.POST("/media/{mediaId}/finalize", {
     params: { path: { mediaId: media.id } },

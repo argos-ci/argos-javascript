@@ -45,7 +45,7 @@ async function readS3ErrorMessage(response: Response): Promise<string | null> {
  * Build an error for a failed upload, including the S3 error details when
  * available so the user can understand why the upload was rejected.
  */
-async function createUploadError(
+export async function createUploadError(
   url: string,
   response: Response,
 ): Promise<Error> {
