@@ -11,6 +11,7 @@ import {
   clampPadding,
   type ElementPadding,
   getMetadataPath,
+  resolvePadding,
   getScreenshotName,
   getTestRunKey,
   nextCaptureIndex,
@@ -234,35 +235,18 @@ function clampPaddingToPage(
   padding: ElementPadding,
 ) {
   const rect = element.getBoundingClientRect();
-  const { body, documentElement } = window.document;
+  const metrics = (
+    (window as any).__ARGOS__ as ArgosGlobal
+  ).getDocumentMetrics();
   return clampPadding(
     {
-      x: rect.x + window.scrollX,
-      y: rect.y + window.scrollY,
+      x: rect.x + metrics.scrollX,
+      y: rect.y + metrics.scrollY,
       width: rect.width,
       height: rect.height,
     },
-    padding,
-    {
-      x: 0,
-      y: 0,
-      width: Math.max(
-        body?.scrollWidth ?? 0,
-        documentElement.scrollWidth,
-        body?.offsetWidth ?? 0,
-        documentElement.offsetWidth,
-        body?.clientWidth ?? 0,
-        documentElement.clientWidth,
-      ),
-      height: Math.max(
-        body?.scrollHeight ?? 0,
-        documentElement.scrollHeight,
-        body?.offsetHeight ?? 0,
-        documentElement.offsetHeight,
-        body?.clientHeight ?? 0,
-        documentElement.clientHeight,
-      ),
-    },
+    resolvePadding(padding),
+    { x: 0, y: 0, width: metrics.width, height: metrics.height },
   );
 }
 
@@ -344,7 +328,10 @@ Cypress.Commands.add(
 
       const ref: any = {};
 
-      const screenshot = (padding: ElementPadding | undefined) => {
+      const element = Cypress.dom.isJquery(subject) ? subject.get(0) : null;
+
+      // In a command, so the element is measured once the page is stable.
+      cy.window({ log: false }).then((window) => {
         cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
           blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
           onAfterScreenshot: ($el, props) => {
@@ -352,21 +339,16 @@ Cypress.Commands.add(
             onAfterScreenshot?.($el, props);
           },
           ...cypressOptions,
-          ...(padding !== undefined ? { padding } : {}),
+          // Cypress ignores the padding of other screenshots.
+          ...(padding !== undefined
+            ? {
+                padding: element
+                  ? clampPaddingToPage(window, element, padding)
+                  : padding,
+              }
+            : {}),
         });
-      };
-
-      const element = Cypress.dom.isJquery(subject)
-        ? (subject as JQuery).get(0)
-        : null;
-      if (padding !== undefined && element) {
-        cy.window({ log: false }).then((window) => {
-          screenshot(clampPaddingToPage(window, element, padding));
-        });
-      } else {
-        // Cypress ignores the padding of other screenshots.
-        screenshot(padding);
-      }
+      });
 
       cy.window({ log: false }).then((window) => {
         const mediaType = (

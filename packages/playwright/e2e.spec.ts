@@ -78,11 +78,20 @@ async function getPixels(
 }
 
 /**
- * Read the size of a PNG from its header.
+ * Read the size of a screenshot from its PNG header, and the color of some of
+ * its pixels.
  */
-async function getImageSize(path: string) {
+async function readScreenshot(
+  page: Page,
+  path: string,
+  points: { x: number; y: number }[] = [],
+) {
   const data = await readFile(path);
-  return { width: data.readUInt32BE(16), height: data.readUInt32BE(20) };
+  return {
+    width: data.readUInt32BE(16),
+    height: data.readUInt32BE(20),
+    pixels: await getPixels(page, path, points),
+  };
 }
 
 const WHITE = { r: 255, g: 255, b: 255 };
@@ -213,17 +222,13 @@ test.describe("#argosScreenshot", () => {
         element: "#shadowed",
         padding: 10,
       });
-      expect(await getImageSize(screenshot!.path)).toEqual({
-        width: 120,
-        height: 120,
-      });
       // The shadow overflowing the element box is captured.
       expect(
-        await getPixels(page, screenshot!.path, [
+        await readScreenshot(page, screenshot!.path, [
           { x: 2, y: 2 },
           { x: 60, y: 60 },
         ]),
-      ).toEqual([BLUE, RED]);
+      ).toEqual({ width: 120, height: 120, pixels: [BLUE, RED] });
     });
 
     test("captures an element below the fold", async ({ page }) => {
@@ -231,17 +236,27 @@ test.describe("#argosScreenshot", () => {
         element: "#below",
         padding: 10,
       });
-      expect(await getImageSize(screenshot!.path)).toEqual({
-        width: 120,
-        height: 120,
-      });
       expect(
-        await getPixels(page, screenshot!.path, [
+        await readScreenshot(page, screenshot!.path, [
           { x: 2, y: 2 },
           { x: 60, y: 60 },
           { x: 117, y: 117 },
         ]),
-      ).toEqual([BLUE, RED, BLUE]);
+      ).toEqual({ width: 120, height: 120, pixels: [BLUE, RED, BLUE] });
+    });
+
+    test("captures an area larger than the viewport", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding-large", {
+        element: "#below",
+        padding: 400,
+      });
+      // Clamped to the left of the page, so the element is 50px from the edge.
+      expect(
+        await readScreenshot(page, screenshot!.path, [
+          { x: 45, y: 395 },
+          { x: 100, y: 450 },
+        ]),
+      ).toEqual({ width: 550, height: 900, pixels: [BLUE, RED] });
     });
 
     test("follows the CSS shorthand", async ({ page }) => {
@@ -249,16 +264,12 @@ test.describe("#argosScreenshot", () => {
         element: page.locator("#shadowed"),
         padding: [10, 20],
       });
-      expect(await getImageSize(screenshot!.path)).toEqual({
-        width: 140,
-        height: 120,
-      });
       expect(
-        await getPixels(page, screenshot!.path, [
+        await readScreenshot(page, screenshot!.path, [
           { x: 5, y: 60 },
           { x: 15, y: 60 },
         ]),
-      ).toEqual([WHITE, BLUE]);
+      ).toEqual({ width: 140, height: 120, pixels: [WHITE, BLUE] });
     });
 
     test("clamps to the page", async ({ page }) => {
@@ -266,16 +277,12 @@ test.describe("#argosScreenshot", () => {
         element: "#corner",
         padding: 20,
       });
-      expect(await getImageSize(screenshot!.path)).toEqual({
-        width: 120,
-        height: 120,
-      });
       expect(
-        await getPixels(page, screenshot!.path, [
+        await readScreenshot(page, screenshot!.path, [
           { x: 50, y: 50 },
           { x: 110, y: 110 },
         ]),
-      ).toEqual([GREEN, WHITE]);
+      ).toEqual({ width: 120, height: 120, pixels: [GREEN, WHITE] });
     });
 
     test("clamps to the frame", async ({ page }) => {
@@ -285,16 +292,23 @@ test.describe("#argosScreenshot", () => {
         padding: 20,
       });
       // The frame border and the page around it are not captured.
-      expect(await getImageSize(screenshot!.path)).toEqual({
-        width: 70,
-        height: 70,
-      });
       expect(
-        await getPixels(page, screenshot!.path, [
+        await readScreenshot(page, screenshot!.path, [
           { x: 10, y: 10 },
           { x: 60, y: 60 },
         ]),
-      ).toEqual([RED, YELLOW]);
+      ).toEqual({ width: 70, height: 70, pixels: [RED, YELLOW] });
+    });
+
+    test("clamps to the frame of the element", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding-frame-page", {
+        element: page.frameLocator("iframe").locator("#framed"),
+        padding: 20,
+      });
+      expect(await readScreenshot(page, screenshot!.path)).toMatchObject({
+        width: 70,
+        height: 70,
+      });
     });
 
     test("throws without `element`", async ({ page }) => {
@@ -335,26 +349,19 @@ test.describe("#argosScreenshot", () => {
         page.locator("#shadowed"),
         "locator-handler",
       );
-      expect(await getImageSize(screenshot!.path)).toEqual({
-        width: 100,
-        height: 100,
-      });
-      expect(await getPixels(page, screenshot!.path, [{ x: 2, y: 2 }])).toEqual(
-        [RED],
-      );
+      expect(
+        await readScreenshot(page, screenshot!.path, [{ x: 2, y: 2 }]),
+      ).toEqual({ width: 100, height: 100, pixels: [RED] });
     });
 
-    test("supports a locator in a frame", async ({ page }) => {
+    test("stabilizes the frame of a locator in a frame", async ({ page }) => {
       const [screenshot] = await argosScreenshot(
         page.frameLocator("iframe").locator("#framed"),
         "locator-handler-frame",
-        { padding: 20 },
       );
-      // Clamped to the frame, so the frame is the handler.
-      expect(await getImageSize(screenshot!.path)).toEqual({
-        width: 70,
-        height: 70,
-      });
+      // The metadata comes from the frame, so the frame is the handler.
+      const metadata = await readMetadata(screenshot!.path);
+      expect(metadata?.url).toBe("about:srcdoc");
     });
 
     test("throws with `element`", async ({ page }) => {

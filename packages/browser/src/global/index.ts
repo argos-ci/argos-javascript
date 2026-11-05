@@ -1,3 +1,4 @@
+import { getDocumentMetrics } from "./document";
 import { getColorScheme, getMediaType } from "./media";
 import {
   beforeAll,
@@ -21,6 +22,7 @@ const ArgosGlobal = {
   getWaitFailureExplanations,
   getColorScheme: () => getColorScheme(),
   getMediaType: () => getMediaType(),
+  getDocumentMetrics,
 };
 
 (window as any).__ARGOS__ = ArgosGlobal;

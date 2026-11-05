@@ -16,7 +16,7 @@ import {
   getMetadataPath,
   getScreenshotName,
   normalizeBaseNames,
-  resolvePadding,
+  resolvePaddingOption,
   validateThreshold,
   writeMetadata,
   type ElementPadding,
@@ -267,16 +267,11 @@ export async function argosScreenshot(
   if (!name) {
     throw new Error("The `name` argument is required.");
   }
-  if (padding !== undefined) {
-    if (element === undefined) {
-      throw new Error("The `padding` option requires the `element` option.");
-    }
-    if (playwrightOptions.clip) {
-      throw new Error("The `padding` option can't be used with `clip`.");
-    }
-    // Fail on an invalid padding before stabilizing the page.
-    resolvePadding(padding);
-  }
+  const paddingSides = resolvePaddingOption({
+    padding,
+    element,
+    clip: playwrightOptions.clip,
+  });
   if (viewports) {
     if (checkIsFrame(handler)) {
       throw new Error(`viewports option is not supported with an iframe`);
@@ -294,7 +289,7 @@ export async function argosScreenshot(
   const elementTarget =
     typeof element === "string"
       ? handler.locator(element, { has, hasText, hasNot, hasNotText })
-      : (element ?? null);
+      : element;
   const screenshotTarget =
     elementTarget ??
     (checkIsFrame(handler) ? handler.locator("body") : handler);
@@ -357,6 +352,18 @@ export async function argosScreenshot(
     const afterEach = await beforeEach(handler, context);
     await waitForReadiness(handler, context);
 
+    const screenshotOptions: PageScreenshotOptions = {
+      path: screenshotPath,
+      type: "png",
+      fullPage,
+      animations: "disabled",
+      ...playwrightOptions,
+      // Extend the `blackout` helper mask, don't replace it.
+      mask: ['[data-visual-test="blackout"]', ...mask].map((target) =>
+        toLocator(handler, target),
+      ),
+    };
+
     const [snapshotPath] = await Promise.all([
       (async () => {
         if (!ariaSnapshot) {
@@ -396,27 +403,14 @@ export async function argosScreenshot(
 
         return snapshotPath;
       })(),
-      (() => {
-        const screenshotOptions: PageScreenshotOptions = {
-          path: screenshotPath,
-          type: "png",
-          fullPage,
-          animations: "disabled",
-          ...playwrightOptions,
-          // Extend the `blackout` helper mask, don't replace it.
-          mask: ['[data-visual-test="blackout"]', ...mask].map((target) =>
-            toLocator(handler, target),
-          ),
-        };
-        return padding !== undefined && elementTarget
-          ? screenshotElementWithPadding({
-              handler,
-              element: elementTarget,
-              padding,
-              options: screenshotOptions,
-            })
-          : screenshotTarget.screenshot(screenshotOptions);
-      })(),
+      elementTarget && paddingSides
+        ? screenshotElementWithPadding({
+            page: getPage(handler),
+            element: elementTarget,
+            padding: paddingSides,
+            options: screenshotOptions,
+          })
+        : screenshotTarget.screenshot(screenshotOptions),
       writeMetadata(screenshotPath, metadata),
     ]);
 

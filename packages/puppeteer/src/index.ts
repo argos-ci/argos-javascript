@@ -14,12 +14,13 @@ import {
 } from "@argos-ci/browser";
 import {
   type ElementPadding,
+  type PaddingSides,
   type ScreenshotMetadata,
   getPaddedClip,
   getScreenshotName,
   normalizeBaseNames,
   readVersionFromPackage,
-  resolvePadding,
+  resolvePaddingOption,
   validateThreshold,
   writeMetadata,
 } from "@argos-ci/util";
@@ -335,14 +336,19 @@ async function applyMask(
 async function screenshotElementWithPadding(
   page: Page,
   handle: ElementHandle,
-  padding: ElementPadding,
+  padding: PaddingSides,
   options: ScreenshotOptions,
 ) {
   // Like an element screenshot: scroll the element into view if needed.
   if (!(await handle.isIntersectingViewport({ threshold: 1 }))) {
     await handle.scrollIntoView();
   }
-  const box = await handle.boundingBox();
+  const [box, metrics] = await Promise.all([
+    handle.boundingBox(),
+    page.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).getDocumentMetrics(),
+    ),
+  ]);
   if (!box) {
     throw new Error(
       "Unable to take a screenshot with `padding`: the element is not visible.",
@@ -350,30 +356,6 @@ async function screenshotElementWithPadding(
   }
 
   // The bounding box is relative to the viewport, the clip to the document.
-  const metrics = await page.evaluate(() => {
-    const { body, documentElement } = document;
-    return {
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-      width: Math.max(
-        body?.scrollWidth ?? 0,
-        documentElement.scrollWidth,
-        body?.offsetWidth ?? 0,
-        documentElement.offsetWidth,
-        body?.clientWidth ?? 0,
-        documentElement.clientWidth,
-      ),
-      height: Math.max(
-        body?.scrollHeight ?? 0,
-        documentElement.scrollHeight,
-        body?.offsetHeight ?? 0,
-        documentElement.offsetHeight,
-        body?.clientHeight ?? 0,
-        documentElement.clientHeight,
-      ),
-    };
-  });
-
   await page.screenshot({
     ...options,
     fullPage: false,
@@ -456,16 +438,11 @@ export async function argosScreenshot(
   if (!name) {
     throw new Error("The `name` argument is required.");
   }
-  if (padding !== undefined) {
-    if (element === undefined) {
-      throw new Error("The `padding` option requires the `element` option.");
-    }
-    if (puppeteerOptions.clip) {
-      throw new Error("The `padding` option can't be used with `clip`.");
-    }
-    // Fail on an invalid padding before stabilizing the page.
-    resolvePadding(padding);
-  }
+  const paddingSides = resolvePaddingOption({
+    padding,
+    element,
+    clip: puppeteerOptions.clip,
+  });
 
   const [originalViewport] = await Promise.all([
     getViewport(page),
@@ -576,15 +553,22 @@ export async function argosScreenshot(
       if (!handle) {
         throw new Error(`Unable to find element ${element}`);
       }
-      if (padding !== undefined) {
-        await screenshotElementWithPadding(
-          page,
-          handle,
-          padding,
-          screenshotOptions,
-        );
-      } else {
-        await handle.screenshot(screenshotOptions);
+      try {
+        if (paddingSides) {
+          await screenshotElementWithPadding(
+            page,
+            handle,
+            paddingSides,
+            screenshotOptions,
+          );
+        } else {
+          await handle.screenshot(screenshotOptions);
+        }
+      } finally {
+        // Release the handle we resolved, not the one we were given.
+        if (handle !== element) {
+          await handle.dispose();
+        }
       }
     }
 
