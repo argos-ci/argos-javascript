@@ -4,7 +4,7 @@ import { fail } from "../lib/cli-error";
 import { formatAnalytics } from "../lib/format";
 import { handleCliError, output } from "../lib/run";
 import { resolveToken } from "../lib/target";
-import { jsonOption, tokenOption } from "../options";
+import { DAY_MS, jsonOption, toIsoOrFail, tokenOption } from "../options";
 
 type GroupBy = "day" | "week" | "month";
 
@@ -19,16 +19,6 @@ type AnalyticsOptions = {
 };
 
 const DEFAULT_PERIOD_DAYS = 30;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-/** Coerce a user-supplied date into an ISO 8601 datetime, or fail cleanly. */
-function toIsoOrFail(value: string, option: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    fail(`Invalid --${option} value: "${value}". Use an ISO 8601 datetime.`);
-  }
-  return date.toISOString();
-}
 
 /** Collect a repeatable `--project` flag into an array of project names. */
 function collectProject(value: string, previous: string[] = []): string[] {

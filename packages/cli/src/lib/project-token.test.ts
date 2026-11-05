@@ -1,34 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { CliError } from "./cli-error";
-import {
-  buildCreateTokenBody,
-  parsePermissions,
-  parseProjectNames,
-  resolveExpireAt,
-} from "./project-token";
+import { buildCreateTokenBody, resolveExpireAt } from "./project-token";
 
 const now = new Date("2026-11-05T12:00:00.000Z");
-
-describe("parsePermissions", () => {
-  it("parses a comma-separated list, trimmed and de-duplicated", () => {
-    expect(
-      parsePermissions("builds:write, deployments:write,builds:write"),
-    ).toEqual(["builds:write", "deployments:write"]);
-  });
-
-  it("rejects an unknown permission, naming it", () => {
-    expect(() => parsePermissions("builds:write,builds:read")).toThrow(
-      CliError,
-    );
-    expect(() => parsePermissions("builds:write,builds:read")).toThrow(
-      /Unknown permission: builds:read/,
-    );
-  });
-
-  it("rejects an empty list", () => {
-    expect(() => parsePermissions(" , ")).toThrow(/at least one/);
-  });
-});
 
 describe("resolveExpireAt", () => {
   it("never expires by default", () => {
@@ -43,8 +17,9 @@ describe("resolveExpireAt", () => {
 
   it("rejects --expires-in values that are not a positive integer", () => {
     for (const expiresIn of ["0", "-1", "1.5", "soon"]) {
+      expect(() => resolveExpireAt({ expiresIn }, now)).toThrow(CliError);
       expect(() => resolveExpireAt({ expiresIn }, now)).toThrow(
-        /--expires-in must be a positive number of days/,
+        /--expires-in must be a positive integer/,
       );
     }
   });
@@ -60,7 +35,7 @@ describe("resolveExpireAt", () => {
 
   it("rejects an invalid --expire-at", () => {
     expect(() => resolveExpireAt({ expireAt: "next week" }, now)).toThrow(
-      /--expire-at must be an ISO 8601 date/,
+      /Invalid --expire-at value/,
     );
   });
 
@@ -73,38 +48,23 @@ describe("resolveExpireAt", () => {
 
 describe("buildCreateTokenBody", () => {
   it("leaves permissions out so the API grants them all", () => {
-    expect(buildCreateTokenBody({ name: "GitHub Actions" })).toEqual({
+    const body = buildCreateTokenBody({ name: "GitHub Actions" });
+    expect(JSON.parse(JSON.stringify(body))).toEqual({
       name: "GitHub Actions",
       expireAt: null,
     });
   });
 
-  it("passes the parsed permissions", () => {
+  it("passes the permissions", () => {
     expect(
       buildCreateTokenBody({
         name: "Deploys",
-        permissions: "deployments:write",
+        permissions: ["deployments:write"],
       }),
     ).toEqual({
       name: "Deploys",
       permissions: ["deployments:write"],
       expireAt: null,
     });
-  });
-});
-
-describe("parseProjectNames", () => {
-  it("parses a comma-separated list of names", () => {
-    expect(parseProjectNames("web, docs,web")).toEqual(["web", "docs"]);
-  });
-
-  it("rejects owner/project paths, since the account comes from --account", () => {
-    expect(() => parseProjectNames("acme/web")).toThrow(
-      /without their account/,
-    );
-  });
-
-  it("rejects an empty list", () => {
-    expect(() => parseProjectNames(",")).toThrow(/at least one/);
   });
 });

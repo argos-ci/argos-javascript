@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { upload } from "./upload";
 import { getMergeBaseCommitSha, listAncestorCommits } from "./ci-environment";
 import type * as CiEnvironment from "./ci-environment";
+import { createBuildRequests } from "../mocks/handlers/createBuild";
 import { server, setupMockServer } from "../mocks/server";
 import { http, HttpResponse } from "msw";
 
@@ -344,17 +345,17 @@ describe("#upload", () => {
     const mergeBase = "a3a4ba0bf5c5d1f6c9ff5d76f22d03ca0dcb2a77";
 
     /**
-     * Answer the endpoints a token linked to several projects has to name its
-     * project on, and collect what `upload` sends them. The project has no
-     * remote content access, so the baseline lookup runs too.
+     * Answer `GET /project` and `POST /baseline`, collecting what `upload`
+     * sends them; `POST /builds` is recorded by its default handler. The
+     * project has no remote content access, so the baseline lookup runs too.
      */
     function captureProjectRequests() {
       vi.mocked(getMergeBaseCommitSha).mockResolvedValue(mergeBase);
       vi.mocked(listAncestorCommits).mockResolvedValue([]);
+      createBuildRequests.length = 0;
       const received: {
         projectUrl?: URL;
         baselineBody?: Record<string, unknown>;
-        createBuildBody?: Record<string, unknown>;
       } = {};
       server.use(
         http.get("https://api.argos-ci.dev/project", ({ request }) => {
@@ -371,16 +372,6 @@ describe("#upload", () => {
             unknown
           >;
           return HttpResponse.json({ baseline: null });
-        }),
-        http.post("https://api.argos-ci.dev/builds", async ({ request }) => {
-          received.createBuildBody = (await request.json()) as Record<
-            string,
-            unknown
-          >;
-          return HttpResponse.json({
-            build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
-            screenshots: [],
-          });
         }),
       );
       return received;
@@ -410,9 +401,9 @@ describe("#upload", () => {
           project: "acme/web",
           commits: [mergeBase],
         });
-        expect(received.createBuildBody).toMatchObject({
-          project: "acme/web",
-        });
+        expect(createBuildRequests).toEqual([
+          expect.objectContaining({ project: "acme/web" }),
+        ]);
       })();
     });
 
@@ -427,9 +418,9 @@ describe("#upload", () => {
           "acme/docs",
         );
         expect(received.baselineBody).toMatchObject({ project: "acme/docs" });
-        expect(received.createBuildBody).toMatchObject({
-          project: "acme/docs",
-        });
+        expect(createBuildRequests).toEqual([
+          expect.objectContaining({ project: "acme/docs" }),
+        ]);
       })();
     });
 
@@ -442,7 +433,8 @@ describe("#upload", () => {
 
         expect(received.projectUrl?.search).toBe("");
         expect(received.baselineBody).not.toHaveProperty("project");
-        expect(received.createBuildBody).not.toHaveProperty("project");
+        expect(createBuildRequests).toHaveLength(1);
+        expect(createBuildRequests[0]).not.toHaveProperty("project");
       })();
     });
   });

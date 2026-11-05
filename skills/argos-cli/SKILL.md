@@ -84,7 +84,7 @@ humans, not CI.
 - **Flakiness** — `test list [--build-name <name>] [--search <q>]` · `test get <testId>` · `test changes <testId> [--ignored true|false] [--metrics-period …]` · `test subscribe|unsubscribe <testId>` · `change list` · `change ignore|unignore <changeId> --project owner/project`
 - **Test comments** — `test comment list|create <testId>` · `test comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <testId> <id>` · `test comment react|unreact <testId> <id> <emoji>`
 - **Project** — `project get` · `project update [--name …] [--summary-check …] [--default-user-level …] [--ignore-changes true|false] [--deployments true|false] …` · `project transfer --to <slug>` · `project contributor list|set|remove` · `project deployments [--environment preview|production]` · `project domain get|set <domain>`
-- **Project tokens** — `project token list` · `project token create --name <name> [--permissions <p,…>] [--expire-at <iso> | --expires-in <days>]` · `project token revoke <tokenId>` · `account project-token list|revoke` · `account project-token create --projects <name,…> --name <name> […]` (one token for several projects)
+- **Project tokens** — `project token list` · `project token create --name <name> [--permissions <p…>] [--expire-at <iso> | --expires-in <days>]` · `project token revoke <tokenId>` · `account project-token list|revoke` · `account project-token create --projects <name…> --name <name> […]` (one token for several projects)
 - **Automation** — `automation list [--active true|false]` · `automation get <ruleId>` · `automation create|update [<ruleId>] --definition-file <path>` · `automation deactivate <ruleId>`
 - **Team** — `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
 - **Account** — `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
@@ -209,7 +209,7 @@ One token for several projects (a monorepo, say) comes from the account, and CI
 then names the project on every command:
 
 ```bash
-argos account project-token create --account acme --projects web,docs --name Monorepo --json | jq -r .token | gh secret set ARGOS_TOKEN
+argos account project-token create --account acme --projects web docs --name Monorepo --json | jq -r .token | gh secret set ARGOS_TOKEN
 ARGOS_PROJECT=acme/web argos upload ./screenshots
 ```
 

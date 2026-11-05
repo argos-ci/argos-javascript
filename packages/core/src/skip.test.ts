@@ -1,6 +1,6 @@
-import { http, HttpResponse } from "msw";
-import { afterEach, describe, it, expect, vi } from "vitest";
-import { server, setupMockServer } from "../mocks/server";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
+import { createBuildRequests } from "../mocks/handlers/createBuild";
+import { setupMockServer } from "../mocks/server";
 import { skip } from "./skip";
 
 setupMockServer();
@@ -12,22 +12,11 @@ const params = {
   token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
 };
 
-/** Collect the bodies `skip` sends to create the build. */
-function captureCreateBuildBodies() {
-  const bodies: Record<string, unknown>[] = [];
-  server.use(
-    http.post("https://api.argos-ci.dev/builds", async ({ request }) => {
-      bodies.push((await request.json()) as Record<string, unknown>);
-      return HttpResponse.json({
-        build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
-        screenshots: [],
-      });
-    }),
-  );
-  return bodies;
-}
-
 describe("#skip", () => {
+  beforeEach(() => {
+    createBuildRequests.length = 0;
+  });
+
   afterEach(() => {
     vi.unstubAllEnvs();
   });
@@ -41,22 +30,19 @@ describe("#skip", () => {
   });
 
   it("names the project when it is set", async () => {
-    const bodies = captureCreateBuildBodies();
-
     await skip({ ...params, project: "acme/web" });
 
-    expect(bodies).toEqual([
+    expect(createBuildRequests).toEqual([
       expect.objectContaining({ project: "acme/web", skipped: true }),
     ]);
   });
 
   it("sends no project when it is not set", async () => {
     vi.stubEnv("ARGOS_PROJECT", "");
-    const bodies = captureCreateBuildBodies();
 
     await skip(params);
 
-    expect(bodies).toHaveLength(1);
-    expect(bodies[0]).not.toHaveProperty("project");
+    expect(createBuildRequests).toHaveLength(1);
+    expect(createBuildRequests[0]).not.toHaveProperty("project");
   });
 });

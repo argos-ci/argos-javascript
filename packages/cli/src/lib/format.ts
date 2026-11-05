@@ -613,25 +613,19 @@ export function formatProjectDomain(domain: ProjectDomain): string {
   return `Deployment domain: ${formatValue(domain.domain)}`;
 }
 
-function formatTokenExpiration(
-  expireAt: string | null,
-  now: Date = new Date(),
-): string {
+function formatTokenExpiration(expireAt: string | null): string {
   if (!expireAt) {
     return "never";
   }
-  return new Date(expireAt).getTime() <= now.getTime()
+  return Date.parse(expireAt) <= Date.now()
     ? `${expireAt} (expired)`
     : expireAt;
 }
 
-/**
- * The details of a project token, under its title line. Token names are typed
- * by whoever created them, so they are sanitized like any remote text.
- */
+/** The details of a project token, under its title line. */
 function formatProjectTokenDetails(token: ProjectToken): string[] {
   return [
-    `  Projects: ${token.projects.length > 0 ? token.projects.join(", ") : "-"}`,
+    `  Projects: ${formatValue(token.projects.join(", "))}`,
     `  Permissions: ${token.permissions.join(", ")}`,
     `  Created: ${token.createdAt}`,
     `  Expires: ${formatTokenExpiration(token.expireAt)}`,
@@ -639,6 +633,8 @@ function formatProjectTokenDetails(token: ProjectToken): string[] {
   ];
 }
 
+// Token names are typed by whoever created the token, so they are sanitized
+// like any remote text.
 export function formatProjectTokens(tokens: ProjectToken[]): string {
   if (tokens.length === 0) {
     return "No tokens found.";

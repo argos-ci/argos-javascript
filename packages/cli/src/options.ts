@@ -79,6 +79,26 @@ export const limitOption = new Option(
   "Maximum number of items to fetch, following pagination as needed",
 ).default(String(DEFAULT_LIMIT));
 
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Parse the value of `--<option>` into a positive integer, or abort. */
+export function toPositiveInteger(value: string, option: string): number {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 1) {
+    fail(`--${option} must be a positive integer, received "${value}".`);
+  }
+  return number;
+}
+
+/** Coerce the value of `--<option>` into an ISO 8601 datetime, or abort. */
+export function toIsoOrFail(value: string, option: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    fail(`Invalid --${option} value: "${value}". Use an ISO 8601 datetime.`);
+  }
+  return date.toISOString();
+}
+
 /**
  * Parse a `--limit` value into a positive integer, or abort. Pass `max` when
  * the source caps how many items it can return.
@@ -87,10 +107,7 @@ export function toLimit(
   value: string,
   { max = Infinity }: { max?: number } = {},
 ): number {
-  const limit = Number(value);
-  if (!Number.isInteger(limit) || limit < 1) {
-    fail(`--limit must be a positive integer, received "${value}".`);
-  }
+  const limit = toPositiveInteger(value, "limit");
   if (limit > max) {
     fail(`--limit must be at most ${max}, received "${value}".`);
   }
@@ -99,11 +116,7 @@ export function toLimit(
 
 /** Parse a `--pr` value into a pull request number, or abort. */
 export function toPrNumber(value: string): number {
-  const prNumber = Number(value);
-  if (!Number.isInteger(prNumber) || prNumber < 1) {
-    fail(`--pr must be a positive integer, received "${value}".`);
-  }
-  return prNumber;
+  return toPositiveInteger(value, "pr");
 }
 
 /** API values accepted by the `metricsPeriod` query parameter. */
