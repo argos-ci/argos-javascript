@@ -11,6 +11,16 @@ export type ElementPadding =
   | [number, number, number]
   | [number, number, number, number];
 
+/**
+ * A padding resolved to the space on each side.
+ */
+export type PaddingSides = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
+
 export type Rect = {
   x: number;
   y: number;
@@ -22,20 +32,12 @@ export type Rect = {
  * Resolve a padding to the space on each side, like the CSS `padding`
  * shorthand. Throws if a value isn't a non-negative number.
  */
-export function resolvePadding(padding: ElementPadding): {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-} {
+export function resolvePadding(padding: ElementPadding): PaddingSides {
   const values = Array.isArray(padding) ? padding : [padding];
   if (
     values.length < 1 ||
     values.length > 4 ||
-    values.some(
-      (value) =>
-        typeof value !== "number" || !Number.isFinite(value) || value < 0,
-    )
+    values.some((value) => !Number.isFinite(value) || value < 0)
   ) {
     throw new Error(
       "The `padding` option must be a non-negative number or an array of 1 to 4 non-negative numbers.",
@@ -46,16 +48,56 @@ export function resolvePadding(padding: ElementPadding): {
 }
 
 /**
+ * Validate the `padding` option of an element screenshot and resolve it.
+ * Returns `null` when there is no space to add, so the screenshot can be
+ * taken like any element screenshot.
+ */
+export function resolvePaddingOption(options: {
+  padding?: ElementPadding | undefined;
+  element?: unknown;
+  clip?: unknown;
+}): PaddingSides | null {
+  const { padding, element, clip } = options;
+  if (padding === undefined) {
+    return null;
+  }
+  if (element === undefined) {
+    throw new Error("The `padding` option requires the `element` option.");
+  }
+  if (clip) {
+    throw new Error("The `padding` option can't be used with `clip`.");
+  }
+  const sides = resolvePadding(padding);
+  return sides.top || sides.right || sides.bottom || sides.left ? sides : null;
+}
+
+/**
+ * Get the overlap of two rects, with a zero size when they don't overlap.
+ */
+export function intersectRects(a: Rect, b: Rect): Rect {
+  const x = Math.max(a.x, b.x);
+  const y = Math.max(a.y, b.y);
+  return {
+    x,
+    y,
+    width: Math.max(0, Math.min(a.x + a.width, b.x + b.width) - x),
+    height: Math.max(0, Math.min(a.y + a.height, b.y + b.height) - y),
+  };
+}
+
+/**
  * Round a rect out to whole pixels, like an element screenshot does, while
  * tolerating float noise so a box at 10.0000001 doesn't grow a pixel.
  */
-function enclose(rect: Rect) {
+function enclose(rect: Rect): Rect {
   const epsilon = 1e-3;
+  const x = Math.floor(rect.x + epsilon);
+  const y = Math.floor(rect.y + epsilon);
   return {
-    x1: Math.floor(rect.x + epsilon),
-    y1: Math.floor(rect.y + epsilon),
-    x2: Math.ceil(rect.x + rect.width - epsilon),
-    y2: Math.ceil(rect.y + rect.height - epsilon),
+    x,
+    y,
+    width: Math.ceil(rect.x + rect.width - epsilon) - x,
+    height: Math.ceil(rect.y + rect.height - epsilon) - y,
   };
 }
 
@@ -67,25 +109,23 @@ function enclose(rect: Rect) {
  */
 export function getPaddedClip(
   box: Rect,
-  padding: ElementPadding,
+  padding: PaddingSides,
   bounds: Rect,
 ): Rect {
-  const { top, right, bottom, left } = resolvePadding(padding);
-  const area = enclose({
-    x: box.x - left,
-    y: box.y - top,
-    width: box.width + left + right,
-    height: box.height + top + bottom,
-  });
-  const limits = enclose(bounds);
-  const x1 = Math.max(area.x1, limits.x1);
-  const y1 = Math.max(area.y1, limits.y1);
-  const x2 = Math.min(area.x2, limits.x2);
-  const y2 = Math.min(area.y2, limits.y2);
-  if (x2 <= x1 || y2 <= y1) {
+  const { top, right, bottom, left } = padding;
+  const clip = intersectRects(
+    enclose({
+      x: box.x - left,
+      y: box.y - top,
+      width: box.width + left + right,
+      height: box.height + top + bottom,
+    }),
+    enclose(bounds),
+  );
+  if (!clip.width || !clip.height) {
     throw new Error("The element is outside of the page.");
   }
-  return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 };
+  return clip;
 }
 
 /**
@@ -95,10 +135,10 @@ export function getPaddedClip(
  */
 export function clampPadding(
   box: Rect,
-  padding: ElementPadding,
+  padding: PaddingSides,
   bounds: Rect,
 ): [number, number, number, number] {
-  const { top, right, bottom, left } = resolvePadding(padding);
+  const { top, right, bottom, left } = padding;
   const clamp = (value: number, space: number) =>
     Math.max(0, Math.min(value, space));
   return [

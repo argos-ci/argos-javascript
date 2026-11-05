@@ -134,13 +134,20 @@ describe("argosScreenshot", () => {
   });
 
   /**
+   * Read a screenshot saved by `argosScreenshot`.
+   */
+  function readScreenshot(screenshotName, encoding) {
+    return readFile(
+      new URL(`screenshots/argos/${screenshotName}.png`, import.meta.url),
+      encoding,
+    );
+  }
+
+  /**
    * Read the color of some pixels of a screenshot, decoded by the browser.
    */
   async function getPixels(screenshotName, points) {
-    const data = await readFile(
-      new URL(`screenshots/argos/${screenshotName}.png`, import.meta.url),
-      "base64",
-    );
+    const data = await readScreenshot(screenshotName, "base64");
     return page.evaluate(
       async (data, points) => {
         // Runs in the browser.
@@ -169,6 +176,7 @@ describe("argosScreenshot", () => {
   const RED = { r: 255, g: 0, b: 0 };
   const MAGENTA = { r: 255, g: 0, b: 255 };
   const CYAN = { r: 0, g: 255, b: 255 };
+  const GREEN = { r: 0, g: 128, b: 0 };
 
   describe("with hide and remove options", () => {
     beforeAll(async () => {
@@ -305,16 +313,17 @@ describe("argosScreenshot", () => {
 
   describe("with padding option", () => {
     /**
-     * Read the size of a screenshot from its PNG header.
+     * Read the size of a screenshot from its PNG header, and the color of
+     * some of its pixels.
      */
-    async function getImageSize(screenshotName) {
-      const data = await readFile(
-        new URL(`screenshots/argos/${screenshotName}.png`, import.meta.url),
-      );
-      return { width: data.readUInt32BE(16), height: data.readUInt32BE(20) };
+    async function readImage(screenshotName, points) {
+      const data = await readScreenshot(screenshotName);
+      return {
+        width: data.readUInt32BE(16),
+        height: data.readUInt32BE(20),
+        pixels: await getPixels(screenshotName, points),
+      };
     }
-
-    const GREEN = { r: 0, g: 128, b: 0 };
 
     beforeAll(async () => {
       await page.goto(new URL("fixtures/padding.html", import.meta.url).href);
@@ -325,17 +334,13 @@ describe("argosScreenshot", () => {
         element: "#shadowed",
         padding: 10,
       });
-      expect(await getImageSize("padding")).toEqual({
-        width: 120,
-        height: 120,
-      });
       // The shadow overflowing the element box is captured.
       expect(
-        await getPixels("padding", [
+        await readImage("padding", [
           { x: 2, y: 2 },
           { x: 60, y: 60 },
         ]),
-      ).toEqual([BLUE, RED]);
+      ).toEqual({ width: 120, height: 120, pixels: [BLUE, RED] });
     });
 
     it("captures an element below the fold", async () => {
@@ -344,17 +349,13 @@ describe("argosScreenshot", () => {
         element: await page.$("#below"),
         padding: 10,
       });
-      expect(await getImageSize("padding-below")).toEqual({
-        width: 120,
-        height: 120,
-      });
       expect(
-        await getPixels("padding-below", [
+        await readImage("padding-below", [
           { x: 2, y: 2 },
           { x: 60, y: 60 },
           { x: 117, y: 117 },
         ]),
-      ).toEqual([BLUE, RED, BLUE]);
+      ).toEqual({ width: 120, height: 120, pixels: [BLUE, RED, BLUE] });
     });
 
     it("follows the CSS shorthand", async () => {
@@ -362,16 +363,12 @@ describe("argosScreenshot", () => {
         element: "#shadowed",
         padding: [10, 20],
       });
-      expect(await getImageSize("padding-shorthand")).toEqual({
-        width: 140,
-        height: 120,
-      });
       expect(
-        await getPixels("padding-shorthand", [
+        await readImage("padding-shorthand", [
           { x: 5, y: 60 },
           { x: 15, y: 60 },
         ]),
-      ).toEqual([WHITE, BLUE]);
+      ).toEqual({ width: 140, height: 120, pixels: [WHITE, BLUE] });
     });
 
     it("clamps to the page", async () => {
@@ -379,16 +376,12 @@ describe("argosScreenshot", () => {
         element: "#corner",
         padding: 20,
       });
-      expect(await getImageSize("padding-corner")).toEqual({
-        width: 120,
-        height: 120,
-      });
       expect(
-        await getPixels("padding-corner", [
+        await readImage("padding-corner", [
           { x: 50, y: 50 },
           { x: 110, y: 110 },
         ]),
-      ).toEqual([GREEN, WHITE]);
+      ).toEqual({ width: 120, height: 120, pixels: [GREEN, WHITE] });
     });
 
     it("throws without element", async () => {
