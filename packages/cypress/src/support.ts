@@ -8,6 +8,8 @@ import {
 } from "@argos-ci/browser";
 import { getGlobalScript } from "@argos-ci/browser";
 import {
+  clampPadding,
+  type ElementPadding,
   getMetadataPath,
   getScreenshotName,
   getTestRunKey,
@@ -26,6 +28,19 @@ type ArgosScreenshotOptions = Partial<
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+
+  /**
+   * Space to capture around the element, in CSS pixels, to include shadows,
+   * outlines or anything overflowing its box. Only applies when the command
+   * is chained off an element.
+   * A number applies to every side. An array follows the CSS `padding`
+   * shorthand: `[vertical, horizontal]`, `[top, horizontal, bottom]` or
+   * `[top, right, bottom, left]`.
+   * The captured area is clamped to the page.
+   * @example
+   *    cy.get("[role=dialog]").argosScreenshot("dialog", { padding: 16 })
+   */
+  padding?: ElementPadding;
 
   /**
    * Custom CSS evaluated during the screenshot process.
@@ -210,6 +225,48 @@ function getRetries(value: unknown) {
 }
 
 /**
+ * Reduce the padding so the captured area stays within the page: Cypress
+ * would shift the area back into the page instead.
+ */
+function clampPaddingToPage(
+  window: Window,
+  element: Element,
+  padding: ElementPadding,
+) {
+  const rect = element.getBoundingClientRect();
+  const { body, documentElement } = window.document;
+  return clampPadding(
+    {
+      x: rect.x + window.scrollX,
+      y: rect.y + window.scrollY,
+      width: rect.width,
+      height: rect.height,
+    },
+    padding,
+    {
+      x: 0,
+      y: 0,
+      width: Math.max(
+        body?.scrollWidth ?? 0,
+        documentElement.scrollWidth,
+        body?.offsetWidth ?? 0,
+        documentElement.offsetWidth,
+        body?.clientWidth ?? 0,
+        documentElement.clientWidth,
+      ),
+      height: Math.max(
+        body?.scrollHeight ?? 0,
+        documentElement.scrollHeight,
+        body?.offsetHeight ?? 0,
+        documentElement.offsetHeight,
+        body?.clientHeight ?? 0,
+        documentElement.clientHeight,
+      ),
+    },
+  );
+}
+
+/**
  * Wait for the UI to be ready before taking the screenshot.
  */
 function waitForReadiness(options: ArgosScreenshotOptions) {
@@ -251,6 +308,7 @@ Cypress.Commands.add(
       onAfterScreenshot,
       hide,
       remove,
+      padding,
       ...cypressOptions
     } = options;
 
@@ -286,14 +344,29 @@ Cypress.Commands.add(
 
       const ref: any = {};
 
-      cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
-        blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
-        onAfterScreenshot: ($el, props) => {
-          ref.props = props;
-          onAfterScreenshot?.($el, props);
-        },
-        ...cypressOptions,
-      });
+      const screenshot = (padding: ElementPadding | undefined) => {
+        cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
+          blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
+          onAfterScreenshot: ($el, props) => {
+            ref.props = props;
+            onAfterScreenshot?.($el, props);
+          },
+          ...cypressOptions,
+          ...(padding !== undefined ? { padding } : {}),
+        });
+      };
+
+      const element = Cypress.dom.isJquery(subject)
+        ? (subject as JQuery).get(0)
+        : null;
+      if (padding !== undefined && element) {
+        cy.window({ log: false }).then((window) => {
+          screenshot(clampPaddingToPage(window, element, padding));
+        });
+      } else {
+        // Cypress ignores the padding of other screenshots.
+        screenshot(padding);
+      }
 
       cy.window({ log: false }).then((window) => {
         const mediaType = (

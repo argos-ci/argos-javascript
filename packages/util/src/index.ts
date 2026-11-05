@@ -6,6 +6,7 @@ export * from "./introspection";
 export * from "./metadata";
 export * from "./metadata-io";
 export * from "./name";
+export * from "./padding";
 export * from "./playwright-trace";
 export * from "./story";
 export * from "./threshold";

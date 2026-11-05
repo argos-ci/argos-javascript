@@ -151,6 +151,31 @@ test("captures a specific element via a selector", async () => {
   expect(attachments.length).toBe(2);
 });
 
+test("captures the space around an element with `padding`", async () => {
+  mount(
+    `<div id="shadowed" style="margin:40px;width:100px;height:100px;background:red;box-shadow:0 0 0 10px blue"></div>`,
+  );
+  const attachments = await argosScreenshot("padding", {
+    argosCSS: "body { margin: 0; background: white; }",
+    element: "#shadowed",
+    padding: 10,
+  });
+  const screenshot = attachments.find((a) => a.path.endsWith("padding.png"));
+  expect(screenshot).toBeDefined();
+  const image = await readPngImageData(screenshot!);
+  expect({ width: image.width, height: image.height }).toEqual({
+    width: 120,
+    height: 120,
+  });
+  const getPixel = (x: number, y: number) => {
+    const index = (y * image.width + x) * 4;
+    return Array.from(image.data.slice(index, index + 3));
+  };
+  // The shadow overflowing the element box is captured.
+  expect(getPixel(2, 2)).toEqual([0, 0, 255]);
+  expect(getPixel(60, 60)).toEqual([255, 0, 0]);
+});
+
 test("captures multiple viewports with per-viewport metadata", async () => {
   mount(
     `<div style="width:100%;box-sizing:border-box;padding:24px;background:linear-gradient(#f97316,#7c3aed);color:#fff;font:600 20px sans-serif;">Responsive content</div>`,

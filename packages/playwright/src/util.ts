@@ -3,6 +3,7 @@ import type {
   Frame,
   Locator,
   Page,
+  PageScreenshotOptions,
   TestInfo,
 } from "@playwright/test";
 import type { TestCase, TestResult } from "@playwright/test/reporter";
@@ -20,8 +21,11 @@ import {
   type ViewportSize,
 } from "@argos-ci/browser";
 import {
+  getPaddedClip,
   getTestRunKey,
   nextCaptureIndex,
+  type ElementPadding,
+  type Rect,
   type ScreenshotMetadata,
 } from "@argos-ci/util";
 import { dirname, resolve } from "node:path";
@@ -156,10 +160,178 @@ export function checkIsElementHandle(value: unknown): value is ElementHandle {
 }
 
 /**
+ * Check if the value is a Locator.
+ */
+export function checkIsLocator(value: unknown): value is Locator {
+  return Boolean(
+    value &&
+    typeof value === "object" &&
+    "nth" in value &&
+    typeof value.nth === "function" &&
+    "elementHandle" in value &&
+    typeof value.elementHandle === "function",
+  );
+}
+
+/**
  * Check if the handler is a Frame.
  */
 export function checkIsFrame(handler: Page | Frame): handler is Frame {
   return "page" in handler && typeof handler.page === "function";
+}
+
+/**
+ * Get the page or frame a locator lives in.
+ */
+export async function getLocatorHandler(
+  locator: Locator,
+): Promise<Page | Frame> {
+  const page = locator.page();
+  const handle = await locator.elementHandle();
+  try {
+    const frame = await handle.ownerFrame();
+    return !frame || frame === page.mainFrame() ? page : frame;
+  } finally {
+    await handle.dispose();
+  }
+}
+
+/**
+ * Get the visible area of a frame, relative to the page viewport.
+ * Nested frames are clipped by their parent frames.
+ */
+async function getFrameViewport(frame: Frame): Promise<Rect | null> {
+  let viewport: Rect | null = null;
+  for (
+    let current: Frame | null = frame;
+    current?.parentFrame();
+    current = current.parentFrame()
+  ) {
+    const frameElement = await current.frameElement();
+    try {
+      const [box, metrics] = await Promise.all([
+        frameElement.boundingBox(),
+        frameElement.evaluate((node) => {
+          const element = node as HTMLIFrameElement;
+          return {
+            clientLeft: element.clientLeft,
+            clientTop: element.clientTop,
+            clientWidth: element.clientWidth,
+            clientHeight: element.clientHeight,
+            offsetWidth: element.offsetWidth,
+            offsetHeight: element.offsetHeight,
+          };
+        }),
+      ]);
+      if (!box) {
+        return null;
+      }
+      // The box is transformed, the metrics are not: scale the metrics so the
+      // frame border is excluded even on a scaled frame.
+      const scaleX = metrics.offsetWidth ? box.width / metrics.offsetWidth : 1;
+      const scaleY = metrics.offsetHeight
+        ? box.height / metrics.offsetHeight
+        : 1;
+      const contentBox = {
+        x: box.x + metrics.clientLeft * scaleX,
+        y: box.y + metrics.clientTop * scaleY,
+        width: metrics.clientWidth * scaleX,
+        height: metrics.clientHeight * scaleY,
+      };
+      viewport = viewport ? intersectRects(viewport, contentBox) : contentBox;
+    } finally {
+      await frameElement.dispose();
+    }
+  }
+  return viewport;
+}
+
+function intersectRects(a: Rect, b: Rect): Rect {
+  const x = Math.max(a.x, b.x);
+  const y = Math.max(a.y, b.y);
+  return {
+    x,
+    y,
+    width: Math.max(0, Math.min(a.x + a.width, b.x + b.width) - x),
+    height: Math.max(0, Math.min(a.y + a.height, b.y + b.height) - y),
+  };
+}
+
+/**
+ * Take a screenshot of an element and the space around it, clamped to the
+ * page, or to the frame when the handler is a frame.
+ */
+export async function screenshotElementWithPadding(args: {
+  handler: Page | Frame;
+  element: Locator | ElementHandle;
+  padding: ElementPadding;
+  options: PageScreenshotOptions;
+}) {
+  const { handler, element, padding, options } = args;
+  const page = getPage(handler);
+
+  // Like an element screenshot: wait for the element to be visible and
+  // stable, then scroll it into view.
+  await element.scrollIntoViewIfNeeded({ timeout: options.timeout });
+  const box = checkIsElementHandle(element)
+    ? await element.boundingBox()
+    : await element.boundingBox({ timeout: options.timeout });
+  if (!box) {
+    throw new Error(
+      "Unable to take a screenshot with `padding`: the element is not visible.",
+    );
+  }
+
+  // Bounding boxes are relative to the page viewport, the clip of a full
+  // page screenshot is relative to the document.
+  const [pageMetrics, frameViewport] = await Promise.all([
+    page.evaluate(() => {
+      const { body, documentElement } = document;
+      return {
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
+        // The size Playwright gives to full page screenshots.
+        width: Math.max(
+          body?.scrollWidth ?? 0,
+          documentElement.scrollWidth,
+          body?.offsetWidth ?? 0,
+          documentElement.offsetWidth,
+          body?.clientWidth ?? 0,
+          documentElement.clientWidth,
+        ),
+        height: Math.max(
+          body?.scrollHeight ?? 0,
+          documentElement.scrollHeight,
+          body?.offsetHeight ?? 0,
+          documentElement.offsetHeight,
+          body?.clientHeight ?? 0,
+          documentElement.clientHeight,
+        ),
+      };
+    }),
+    checkIsFrame(handler) ? getFrameViewport(handler) : null,
+  ]);
+  const toDocument = (rect: Rect): Rect => ({
+    ...rect,
+    x: rect.x + pageMetrics.scrollX,
+    y: rect.y + pageMetrics.scrollY,
+  });
+
+  const pageRect = {
+    x: 0,
+    y: 0,
+    width: pageMetrics.width,
+    height: pageMetrics.height,
+  };
+  const bounds = frameViewport
+    ? intersectRects(pageRect, toDocument(frameViewport))
+    : pageRect;
+
+  return page.screenshot({
+    ...options,
+    fullPage: true,
+    clip: getPaddedClip(toDocument(box), padding, bounds),
+  });
 }
 
 /**
