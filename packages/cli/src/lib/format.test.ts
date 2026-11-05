@@ -7,11 +7,13 @@ import {
   formatComment,
   formatComments,
   formatCreatedProject,
+  formatCreatedProjectToken,
   formatDocsSearchResults,
   formatMedia,
   formatMediaList,
   formatMediaVersions,
   formatProject,
+  formatProjectTokens,
   formatReview,
   formatReviews,
   formatSnapshotDownload,
@@ -27,6 +29,7 @@ type BuildReview = ArgosAPISchema.components["schemas"]["BuildReview"];
 type Comment = ArgosAPISchema.components["schemas"]["Comment"];
 type Media = ArgosAPISchema.components["schemas"]["Media"];
 type MediaVersion = ArgosAPISchema.components["schemas"]["MediaVersion"];
+type ProjectToken = ArgosAPISchema.components["schemas"]["ProjectToken"];
 
 const build = {
   number: 42,
@@ -598,5 +601,71 @@ describe("formatDocsSearchResults", () => {
     expect(formatDocsSearchResults([], "nothing")).toBe(
       'No documentation found for "nothing".',
     );
+  });
+});
+
+describe("formatProjectTokens / formatCreatedProjectToken", () => {
+  const token: ProjectToken = {
+    id: "42",
+    name: "GitHub Actions",
+    projects: ["web", "docs"],
+    permissions: ["builds:write", "deployments:write"],
+    createdAt: "2026-11-01T10:00:00.000Z",
+    expireAt: null,
+    lastUsedAt: "2026-11-04T08:30:00.000Z",
+  };
+
+  it("lists tokens with their projects, permissions and usage", () => {
+    expect(
+      formatProjectTokens([
+        token,
+        {
+          ...token,
+          id: "7",
+          name: "Old CI",
+          projects: ["web"],
+          expireAt: "2020-01-01T00:00:00.000Z",
+          lastUsedAt: null,
+        },
+      ]),
+    ).toBe(
+      [
+        "Tokens (2)",
+        "",
+        "GitHub Actions · 42",
+        "  Projects: web, docs",
+        "  Permissions: builds:write, deployments:write",
+        "  Created: 2026-11-01T10:00:00.000Z",
+        "  Expires: never",
+        "  Last used: 2026-11-04T08:30:00.000Z",
+        "",
+        "Old CI · 7",
+        "  Projects: web",
+        "  Permissions: builds:write, deployments:write",
+        "  Created: 2026-11-01T10:00:00.000Z",
+        "  Expires: 2020-01-01T00:00:00.000Z (expired)",
+        "  Last used: never",
+      ].join("\n"),
+    );
+  });
+
+  it("says when there is no token", () => {
+    expect(formatProjectTokens([])).toBe("No tokens found.");
+  });
+
+  it("strips escape sequences from token names", () => {
+    expect(
+      formatProjectTokens([{ ...token, name: "CI\u001b[2K\rFake" }]),
+    ).toContain("CI Fake · 42");
+  });
+
+  it("prints the created token's value, once, with a warning", () => {
+    const output = formatCreatedProjectToken({
+      ...token,
+      token: "argos_0123456789abcdef0123456789abcdef01",
+    });
+    expect(output).toContain("Created token GitHub Actions · 42");
+    expect(output).toContain("\nargos_0123456789abcdef0123456789abcdef01\n");
+    expect(output).toMatch(/will not show it again/);
   });
 });
