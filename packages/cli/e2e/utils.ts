@@ -44,17 +44,70 @@ export function run(
   const stderr = result.stderr ?? "";
 
   if (result.status !== 0) {
-    throw new CommandError(
-      `Command failed: node ${cliPath} ${args.join(" ")}`,
-      {
-        status: result.status,
-        stdout,
-        stderr,
-      },
-    );
+    throw new CommandError(formatFailure(args, result, { stdout, stderr }), {
+      status: result.status,
+      stdout,
+      stderr,
+    });
   }
 
   return { stdout, stderr, combined: `${stdout}${stderr}` };
+}
+
+// Vitest's failure summary only shows the error message, so the CLI's output
+// goes in the message itself. Only the end of each stream is kept: that is
+// where the CLI prints its error, and `--json` output can be large.
+const MAX_STDERR_LENGTH = 4000;
+const MAX_STDOUT_LENGTH = 1000;
+
+function formatFailure(
+  args: string[],
+  result: {
+    status: number | null;
+    signal: NodeJS.Signals | null;
+    error?: Error;
+  },
+  output: { stdout: string; stderr: string },
+): string {
+  const outcome = result.signal
+    ? `killed by ${result.signal}`
+    : `exit status ${result.status}`;
+  const lines = [
+    `Command failed (${outcome}): node ${cliPath} ${args.join(" ")}`,
+  ];
+
+  if (result.error) {
+    lines.push(`spawn error: ${result.error.message}`);
+  }
+
+  lines.push(`stderr:\n${formatOutput(output.stderr, MAX_STDERR_LENGTH)}`);
+
+  if (output.stdout.trim()) {
+    lines.push(`stdout:\n${formatOutput(output.stdout, MAX_STDOUT_LENGTH)}`);
+  }
+
+  return lines.join("\n");
+}
+
+function formatOutput(output: string, maxLength: number): string {
+  let text = output.trim();
+
+  if (!text) {
+    return "  (empty)";
+  }
+
+  if (text.length > maxLength) {
+    let kept = text.slice(-maxLength);
+    // Start on a whole line when there is one.
+    const firstNewline = kept.indexOf("\n");
+    if (firstNewline !== -1) {
+      kept = kept.slice(firstNewline + 1);
+    }
+    const omitted = text.length - kept.length;
+    text = `[${omitted} earlier characters omitted]\n${kept}`;
+  }
+
+  return text.replace(/^/gm, "  ");
 }
 
 export function getRequiredEnv(name: string): string {
