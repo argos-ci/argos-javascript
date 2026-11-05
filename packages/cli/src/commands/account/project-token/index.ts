@@ -6,7 +6,6 @@ import {
 } from "../../../lib/format";
 import {
   buildCreateTokenBody,
-  parseProjectNames,
   tokenExpireAtOption,
   tokenExpiresInOption,
   tokenNameOption,
@@ -51,8 +50,8 @@ export function registerAccountProjectToken(account: Command) {
     )
     .addOption(
       new Option(
-        "--projects <names>",
-        "Names of the account's projects to link, comma-separated (e.g. web,docs)",
+        "--projects <names...>",
+        "Names of the account's projects to link, e.g. web docs",
       ).makeOptionMandatory(),
     )
     .addOption(tokenNameOption)
@@ -65,7 +64,7 @@ export function registerAccountProjectToken(account: Command) {
     .action(
       (
         options: AccountCommandOptions &
-          CreateProjectTokenOptions & { projects: string },
+          CreateProjectTokenOptions & { projects: string[] },
       ) =>
         runAccountAction({
           options,
@@ -75,7 +74,7 @@ export function registerAccountProjectToken(account: Command) {
                 params: { path: { accountSlug } },
                 body: {
                   ...buildCreateTokenBody(options),
-                  projects: parseProjectNames(options.projects),
+                  projects: options.projects,
                 },
               }),
             ),

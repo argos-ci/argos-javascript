@@ -15,7 +15,7 @@ import {
 } from "../../lib/download";
 import { formatSnapshotDownload } from "../../lib/format";
 import { handleCliError, output } from "../../lib/run";
-import { resolveOptionalToken } from "../../lib/target";
+import { resolveOptionalToken, resolveProjectPath } from "../../lib/target";
 import {
   buildProjectPathOption,
   jsonOption,
@@ -112,9 +112,11 @@ export function registerBaselineDownload(baseline: Command) {
         // Named on the token's endpoints only when set: a token linked to a
         // single project needs no more, one linked to several is rejected
         // without it.
-        const projectPath =
-          options.project || process.env["ARGOS_PROJECT"] || undefined;
-        const project = await fetchTokenProject(client, projectPath);
+        const projectPath = resolveProjectPath(options);
+        const projectSlug = projectPath
+          ? `${projectPath.owner}/${projectPath.project}`
+          : undefined;
+        const project = await fetchTokenProject(client, projectSlug);
         const path = { owner: project.account.slug, project: project.name };
         const branch = options.branch ?? project.defaultBaseBranch;
 
@@ -136,7 +138,7 @@ export function registerBaselineDownload(baseline: Command) {
             unwrap(
               await client.POST("/baseline", {
                 body: {
-                  project: projectPath,
+                  project: projectSlug,
                   commits,
                   name: options.buildName,
                   mode: options.mode,
