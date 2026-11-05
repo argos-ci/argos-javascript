@@ -13,7 +13,7 @@ export const tokenOption = new Option("--token <token>", "Repository token");
 export type ProjectOption = { project?: string | undefined };
 export const projectOption = new Option(
   "--project <slug>",
-  "Argos project slug (account/project), used to disambiguate tokenless authentication when multiple projects are linked to the same repository",
+  "Project in owner/project format. Also ARGOS_PROJECT. Required when the token is linked to several projects; also disambiguates tokenless authentication when several projects are linked to the same repository",
 );
 
 export type BuildNameOption = { buildName?: string | undefined };
@@ -52,17 +52,17 @@ export const changeProjectPathOption = new Option(
 
 export const testProjectPathOption = new Option(
   "--project <owner/project>",
-  "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+  "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token linked to a single project, which already identifies it",
 );
 
 export const buildProjectPathOption = new Option(
   "--project <owner/project>",
-  "Project the builds belong to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+  "Project the builds belong to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token linked to a single project, which already identifies it",
 );
 
 export const mediaProjectPathOption = new Option(
   "--project <owner/project>",
-  "Project the media belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+  "Project the media belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token linked to a single project, which already identifies it",
 );
 
 export const managedProjectPathOption = new Option(

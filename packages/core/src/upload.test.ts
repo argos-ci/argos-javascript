@@ -1,9 +1,23 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import createDebug from "debug";
 import { join } from "node:path";
 import { upload } from "./upload";
+import { getMergeBaseCommitSha, listAncestorCommits } from "./ci-environment";
+import type * as CiEnvironment from "./ci-environment";
 import { server, setupMockServer } from "../mocks/server";
 import { http, HttpResponse } from "msw";
+
+// Spied rather than replaced: only the baseline test stubs them, everything
+// else keeps the real git helpers (never reached while the project has remote
+// content access, as the default mock answers).
+vi.mock("./ci-environment", async (importOriginal) => {
+  const original = await importOriginal<typeof CiEnvironment>();
+  return {
+    ...original,
+    getMergeBaseCommitSha: vi.fn(original.getMergeBaseCommitSha),
+    listAncestorCommits: vi.fn(original.listAncestorCommits),
+  };
+});
 
 setupMockServer();
 
@@ -318,5 +332,118 @@ describe("#upload", () => {
     // Masked once, where the token is resolved, so the user can still tell
     // which one was used.
     expect(output).toContain("Authenticated with ARGOS_TOKEN (92d832…)");
+  });
+
+  describe("project", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      vi.mocked(getMergeBaseCommitSha).mockReset();
+      vi.mocked(listAncestorCommits).mockReset();
+    });
+
+    const mergeBase = "a3a4ba0bf5c5d1f6c9ff5d76f22d03ca0dcb2a77";
+
+    /**
+     * Answer the endpoints a token linked to several projects has to name its
+     * project on, and collect what `upload` sends them. The project has no
+     * remote content access, so the baseline lookup runs too.
+     */
+    function captureProjectRequests() {
+      vi.mocked(getMergeBaseCommitSha).mockResolvedValue(mergeBase);
+      vi.mocked(listAncestorCommits).mockResolvedValue([]);
+      const received: {
+        projectUrl?: URL;
+        baselineBody?: Record<string, unknown>;
+        createBuildBody?: Record<string, unknown>;
+      } = {};
+      server.use(
+        http.get("https://api.argos-ci.dev/project", ({ request }) => {
+          received.projectUrl = new URL(request.url);
+          return HttpResponse.json({
+            id: "123",
+            defaultBaseBranch: "main",
+            hasRemoteContentAccess: false,
+          });
+        }),
+        http.post("https://api.argos-ci.dev/baseline", async ({ request }) => {
+          received.baselineBody = (await request.json()) as Record<
+            string,
+            unknown
+          >;
+          return HttpResponse.json({ baseline: null });
+        }),
+        http.post("https://api.argos-ci.dev/builds", async ({ request }) => {
+          received.createBuildBody = (await request.json()) as Record<
+            string,
+            unknown
+          >;
+          return HttpResponse.json({
+            build: { id: "123", url: "https://app.argos-ci.dev/builds/123" },
+            screenshots: [],
+          });
+        }),
+      );
+      return received;
+    }
+
+    function uploadFixture(params: { project?: string } = {}) {
+      return upload({
+        branch: "feature",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        ...params,
+      });
+    }
+
+    it("names the project on every endpoint when it is set", () => {
+      return server.boundary(async () => {
+        const received = captureProjectRequests();
+
+        await uploadFixture({ project: "acme/web" });
+
+        expect(received.projectUrl?.searchParams.get("project")).toBe(
+          "acme/web",
+        );
+        expect(received.baselineBody).toMatchObject({
+          project: "acme/web",
+          commits: [mergeBase],
+        });
+        expect(received.createBuildBody).toMatchObject({
+          project: "acme/web",
+        });
+      })();
+    });
+
+    it("reads the project from ARGOS_PROJECT", () => {
+      return server.boundary(async () => {
+        vi.stubEnv("ARGOS_PROJECT", "acme/docs");
+        const received = captureProjectRequests();
+
+        await uploadFixture();
+
+        expect(received.projectUrl?.searchParams.get("project")).toBe(
+          "acme/docs",
+        );
+        expect(received.baselineBody).toMatchObject({ project: "acme/docs" });
+        expect(received.createBuildBody).toMatchObject({
+          project: "acme/docs",
+        });
+      })();
+    });
+
+    it("sends no project when it is not set", () => {
+      return server.boundary(async () => {
+        vi.stubEnv("ARGOS_PROJECT", "");
+        const received = captureProjectRequests();
+
+        await uploadFixture();
+
+        expect(received.projectUrl?.search).toBe("");
+        expect(received.baselineBody).not.toHaveProperty("project");
+        expect(received.createBuildBody).not.toHaveProperty("project");
+      })();
+    });
   });
 });

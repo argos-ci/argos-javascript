@@ -4,14 +4,17 @@ import { finalize } from "@argos-ci/core";
 import {
   buildNameOption,
   parallelNonceOption,
+  projectOption,
   tokenOption,
   type BuildNameOption,
   type ParallelNonceOption,
+  type ProjectOption,
   type TokenOption,
 } from "../options";
 
 type FinalizeOptions = ParallelNonceOption &
   TokenOption &
+  ProjectOption &
   BuildNameOption & { skipIfEmpty?: boolean | undefined };
 
 const skipIfEmptyOption = new Option(
@@ -25,6 +28,7 @@ export function finalizeCommand(program: Command) {
     .description("Finalize pending parallel builds")
     .addOption(parallelNonceOption)
     .addOption(tokenOption)
+    .addOption(projectOption)
     .addOption(skipIfEmptyOption)
     .addOption(buildNameOption)
     .action(async (options: FinalizeOptions) => {
@@ -32,6 +36,7 @@ export function finalizeCommand(program: Command) {
       try {
         const result = await finalize({
           token: options.token,
+          project: options.project,
           parallel: options.parallelNonce
             ? { nonce: options.parallelNonce }
             : undefined,
