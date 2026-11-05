@@ -303,6 +303,122 @@ describe("argosScreenshot", () => {
     });
   });
 
+  describe("with padding option", () => {
+    /**
+     * Read the size of a screenshot from its PNG header.
+     */
+    async function getImageSize(screenshotName) {
+      const data = await readFile(
+        new URL(`screenshots/argos/${screenshotName}.png`, import.meta.url),
+      );
+      return { width: data.readUInt32BE(16), height: data.readUInt32BE(20) };
+    }
+
+    const GREEN = { r: 0, g: 128, b: 0 };
+
+    beforeAll(async () => {
+      await page.goto(new URL("fixtures/padding.html", import.meta.url).href);
+    });
+
+    it("captures the space around the element", async () => {
+      await argosScreenshot(page, "padding", {
+        element: "#shadowed",
+        padding: 10,
+      });
+      expect(await getImageSize("padding")).toEqual({
+        width: 120,
+        height: 120,
+      });
+      // The shadow overflowing the element box is captured.
+      expect(
+        await getPixels("padding", [
+          { x: 2, y: 2 },
+          { x: 60, y: 60 },
+        ]),
+      ).toEqual([BLUE, RED]);
+    });
+
+    it("captures an element below the fold", async () => {
+      await page.evaluate(() => globalThis.scrollTo(0, 0));
+      await argosScreenshot(page, "padding-below", {
+        element: await page.$("#below"),
+        padding: 10,
+      });
+      expect(await getImageSize("padding-below")).toEqual({
+        width: 120,
+        height: 120,
+      });
+      expect(
+        await getPixels("padding-below", [
+          { x: 2, y: 2 },
+          { x: 60, y: 60 },
+          { x: 117, y: 117 },
+        ]),
+      ).toEqual([BLUE, RED, BLUE]);
+    });
+
+    it("follows the CSS shorthand", async () => {
+      await argosScreenshot(page, "padding-shorthand", {
+        element: "#shadowed",
+        padding: [10, 20],
+      });
+      expect(await getImageSize("padding-shorthand")).toEqual({
+        width: 140,
+        height: 120,
+      });
+      expect(
+        await getPixels("padding-shorthand", [
+          { x: 5, y: 60 },
+          { x: 15, y: 60 },
+        ]),
+      ).toEqual([WHITE, BLUE]);
+    });
+
+    it("clamps to the page", async () => {
+      await argosScreenshot(page, "padding-corner", {
+        element: "#corner",
+        padding: 20,
+      });
+      expect(await getImageSize("padding-corner")).toEqual({
+        width: 120,
+        height: 120,
+      });
+      expect(
+        await getPixels("padding-corner", [
+          { x: 50, y: 50 },
+          { x: 110, y: 110 },
+        ]),
+      ).toEqual([GREEN, WHITE]);
+    });
+
+    it("throws without element", async () => {
+      await expect(
+        argosScreenshot(page, "padding-no-element", { padding: 10 }),
+      ).rejects.toThrow("The `padding` option requires the `element` option.");
+    });
+
+    it("throws with an invalid padding", async () => {
+      await expect(
+        argosScreenshot(page, "padding-invalid", {
+          element: "#shadowed",
+          padding: [1, 2, 3, 4, 5],
+        }),
+      ).rejects.toThrow(
+        "The `padding` option must be a non-negative number or an array of 1 to 4 non-negative numbers.",
+      );
+    });
+
+    it("throws with clip", async () => {
+      await expect(
+        argosScreenshot(page, "padding-clip", {
+          element: "#shadowed",
+          padding: 10,
+          clip: { x: 0, y: 0, width: 10, height: 10 },
+        }),
+      ).rejects.toThrow("The `padding` option can't be used with `clip`.");
+    });
+  });
+
   describe("with cjs version", () => {
     it("works", async () => {
       await argosScreenshotCjs(page, "cjs");

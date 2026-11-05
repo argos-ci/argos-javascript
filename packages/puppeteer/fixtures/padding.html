@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Padding page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 3000px;
+        background: white;
+      }
+      .square {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: red;
+      }
+      #shadowed {
+        top: 200px;
+        left: 50px;
+        /* Overflows the element box by 10px on each side. */
+        box-shadow: 0 0 0 10px blue;
+      }
+      #corner {
+        top: 0;
+        left: 0;
+      }
+      #below {
+        top: 2000px;
+        left: 50px;
+        box-shadow: 0 0 0 10px blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="shadowed" class="square"></div>
+    <div id="corner" class="square" style="background: green"></div>
+    <div id="below" class="square"></div>
+  </body>
+</html>

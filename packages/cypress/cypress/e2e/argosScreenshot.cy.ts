@@ -106,6 +106,57 @@ describe("argosScreenshot", () => {
     });
   });
 
+  it("supports padding option on an element", () => {
+    cy.visit("cypress/pages/padding.html");
+    cy.get("#shadowed").argosScreenshot("padding-option", { padding: 10 });
+
+    cy.readFile(
+      `${Cypress.config("screenshotsFolder")}/${Cypress.spec.name}/argos/padding-option.png`,
+      null,
+    )
+      .then((buffer) => decodePng(buffer))
+      .then((image) => {
+        // The 100px element and 10px on each side.
+        const scale = image.width / 120;
+        expect(image.height).to.equal(image.width);
+        const getPixel = (x: number, y: number) => {
+          const index =
+            (Math.round(y * scale) * image.width + Math.round(x * scale)) * 4;
+          return Array.from(image.data.slice(index, index + 3));
+        };
+        // The shadow overflowing the element box is captured. The capture can
+        // carry the display color profile, so colors may not be exact.
+        const [r1, g1, b1] = getPixel(2, 2);
+        expect(r1).to.be.lessThan(100);
+        expect(g1).to.be.lessThan(100);
+        expect(b1).to.be.greaterThan(200);
+        const [r2, g2, b2] = getPixel(60, 60);
+        expect(r2).to.be.greaterThan(200);
+        expect(g2).to.be.lessThan(100);
+        expect(b2).to.be.lessThan(100);
+      });
+  });
+
+  it("clamps padding to the page", () => {
+    cy.visit("cypress/pages/padding.html");
+    cy.get("#corner").argosScreenshot("padding-corner", { padding: 20 });
+
+    cy.readFile(
+      `${Cypress.config("screenshotsFolder")}/${Cypress.spec.name}/argos/padding-corner.png`,
+      null,
+    )
+      .then((buffer) => decodePng(buffer))
+      .then((image) => {
+        cy.window().then((win) => {
+          // The 100px element and 20px on the right and bottom sides only.
+          expect({
+            width: image.width / win.devicePixelRatio,
+            height: image.height / win.devicePixelRatio,
+          }).to.deep.equal({ width: 120, height: 120 });
+        });
+      });
+  });
+
   it("supports hide and remove options", () => {
     cy.visit("cypress/pages/index.html");
     cy.document().then((doc) => {

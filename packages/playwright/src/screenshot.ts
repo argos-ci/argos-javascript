@@ -16,8 +16,10 @@ import {
   getMetadataPath,
   getScreenshotName,
   normalizeBaseNames,
+  resolvePadding,
   validateThreshold,
   writeMetadata,
+  type ElementPadding,
   type ScreenshotMetadata,
 } from "@argos-ci/util";
 import { getAttachmentName, type ArgosAttachment } from "./attachment";
@@ -28,14 +30,17 @@ import {
   beforeEach,
   checkIsElementHandle,
   checkIsFrame,
+  checkIsLocator,
   checkIsPage,
   checkIsUsingArgosReporter,
+  getLocatorHandler,
   getPage,
   getPathAndMetadata,
   getSnapshotNames,
   getTestInfo,
   PNG_EXTENSION,
   prepare,
+  screenshotElementWithPadding,
   screenshotToSnapshotPath,
   setViewportSize,
   takeCaptureIndex,
@@ -58,6 +63,22 @@ export type ArgosScreenshotOptions = {
    * Passing an `ElementHandle` is discouraged, use a `Locator` instead.
    */
   element?: string | ElementHandle | Locator;
+
+  /**
+   * Space to capture around the element, in CSS pixels, to include shadows,
+   * outlines or anything overflowing its box. Requires `element`.
+   * A number applies to every side. An array follows the CSS `padding`
+   * shorthand: `[vertical, horizontal]`, `[top, horizontal, bottom]` or
+   * `[top, right, bottom, left]`.
+   * The captured area is clamped to the page, or to the frame when taking the
+   * screenshot of a frame.
+   * @example
+   *    argosScreenshot(page, "dialog", {
+   *      element: page.getByRole("dialog"),
+   *      padding: 16,
+   *    })
+   */
+  padding?: ElementPadding;
 
   /**
    * Viewports to take screenshots of.
@@ -187,13 +208,15 @@ export type ArgosScreenshotOptions = {
  *
  * @example
  *    argosScreenshot(page, "my-screenshot")
+ *    argosScreenshot(page.getByRole("dialog"), "dialog")
  * @see https://argos-ci.com/docs/reference/playwright
  */
 export async function argosScreenshot(
   /**
    * Playwright `page` or `frame` object.
+   * A `Locator` takes a screenshot of its element, like the `element` option.
    */
-  handler: Page | Frame,
+  handler: Page | Frame | Locator,
   /**
    * Name of the screenshot. Must be unique.
    */
@@ -202,9 +225,27 @@ export async function argosScreenshot(
    * Options for the screenshot.
    */
   options: ArgosScreenshotOptions = {},
-) {
+): Promise<ArgosAttachment[]> {
+  if (!handler) {
+    throw new Error("A Playwright `handler` object is required.");
+  }
+
+  // `argosScreenshot(locator, name)` is a shortcut for an element screenshot.
+  if (checkIsLocator(handler)) {
+    if (options.element !== undefined) {
+      throw new Error(
+        "The `element` option can't be used when the handler is a `Locator`. Pass the page instead.",
+      );
+    }
+    return argosScreenshot(await getLocatorHandler(handler), name, {
+      ...options,
+      element: handler,
+    });
+  }
+
   const {
     element,
+    padding,
     has,
     hasText,
     hasNot,
@@ -223,11 +264,18 @@ export async function argosScreenshot(
 
   const baseNames = normalizeBaseNames(baseName);
 
-  if (!handler) {
-    throw new Error("A Playwright `handler` object is required.");
-  }
   if (!name) {
     throw new Error("The `name` argument is required.");
+  }
+  if (padding !== undefined) {
+    if (element === undefined) {
+      throw new Error("The `padding` option requires the `element` option.");
+    }
+    if (playwrightOptions.clip) {
+      throw new Error("The `padding` option can't be used with `clip`.");
+    }
+    // Fail on an invalid padding before stabilizing the page.
+    resolvePadding(padding);
   }
   if (viewports) {
     if (checkIsFrame(handler)) {
@@ -243,11 +291,13 @@ export async function argosScreenshot(
     }
   }
 
-  const screenshotTarget =
+  const elementTarget =
     typeof element === "string"
       ? handler.locator(element, { has, hasText, hasNot, hasNotText })
-      : (element ??
-        (checkIsFrame(handler) ? handler.locator("body") : handler));
+      : (element ?? null);
+  const screenshotTarget =
+    elementTarget ??
+    (checkIsFrame(handler) ? handler.locator("body") : handler);
 
   const testInfo = await getTestInfo();
 
@@ -346,17 +396,27 @@ export async function argosScreenshot(
 
         return snapshotPath;
       })(),
-      screenshotTarget.screenshot({
-        path: screenshotPath,
-        type: "png",
-        fullPage,
-        animations: "disabled",
-        ...playwrightOptions,
-        // Extend the `blackout` helper mask, don't replace it.
-        mask: ['[data-visual-test="blackout"]', ...mask].map((target) =>
-          toLocator(handler, target),
-        ),
-      }),
+      (() => {
+        const screenshotOptions: PageScreenshotOptions = {
+          path: screenshotPath,
+          type: "png",
+          fullPage,
+          animations: "disabled",
+          ...playwrightOptions,
+          // Extend the `blackout` helper mask, don't replace it.
+          mask: ['[data-visual-test="blackout"]', ...mask].map((target) =>
+            toLocator(handler, target),
+          ),
+        };
+        return padding !== undefined && elementTarget
+          ? screenshotElementWithPadding({
+              handler,
+              element: elementTarget,
+              padding,
+              options: screenshotOptions,
+            })
+          : screenshotTarget.screenshot(screenshotOptions);
+      })(),
       writeMetadata(screenshotPath, metadata),
     ]);
 
