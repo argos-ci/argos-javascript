@@ -1,6 +1,7 @@
 import { APIError } from "@argos-ci/api-client";
 
 import { CliError } from "./cli-error";
+import { isRequestedOAuthScope, OAUTH_ADMIN_SCOPES } from "./oauth";
 import {
   resolveBuildTarget,
   type AuthMode,
@@ -14,10 +15,6 @@ const USER_AUTH_HINT =
   "Ensure your token is a personal access token with access to this project. " +
   "Project tokens (ARGOS_TOKEN in CI) can read build data but cannot perform review or comment actions.";
 
-const SCOPE_HINT =
-  "Your `argos login` session was granted before the CLI asked for this permission. " +
-  "Run `argos login` again to grant it.";
-
 /**
  * A scope rejection, as opposed to any other 403: the token is valid and the
  * user is allowed, it was simply issued without the permission this endpoint
@@ -26,6 +23,60 @@ const SCOPE_HINT =
  */
 function isInsufficientScope(error: APIError): boolean {
   return error.status === 403 && /insufficient scope/i.test(error.message);
+}
+
+/**
+ * The scopes named by a scope rejection ("Insufficient scope. This endpoint
+ * requires: account:admin."). Anything not shaped like a scope is dropped, so
+ * the hint never echoes arbitrary server text.
+ */
+function parseRequiredScopes(message: string): string[] {
+  const match = /requires:\s*([^.]*)/i.exec(message);
+  if (!match?.[1]) {
+    return [];
+  }
+  return match[1]
+    .split(",")
+    .map((scope) => scope.trim())
+    .filter((scope) => /^[a-z]+(?::[a-z]+)?$/.test(scope));
+}
+
+function formatScopes(scopes: readonly string[]): string {
+  return scopes.map((scope) => `\`${scope}\``).join(", ");
+}
+
+/**
+ * How to get the scopes an `argos login` session is missing. A session lacks a
+ * scope for one of three reasons, each with its own fix: the CLI never asks for
+ * it (only a personal access token helps), it is an admin scope left out by the
+ * consent screen's default access level, or the session was granted before the
+ * CLI asked for it.
+ */
+export function getScopeHint(message: string): string {
+  const required = parseRequiredScopes(message);
+  if (required.length === 0) {
+    return "Run `argos login` again to grant the permission this command needs.";
+  }
+  const ungrantable = required.filter((scope) => !isRequestedOAuthScope(scope));
+  if (ungrantable.length > 0) {
+    return (
+      `\`argos login\` cannot grant ${formatScopes(ungrantable)}. ` +
+      "Use a personal access token instead (`--token` or `ARGOS_TOKEN`)."
+    );
+  }
+  const needsAdmin = required.some(
+    (scope) => isRequestedOAuthScope(scope) && OAUTH_ADMIN_SCOPES.has(scope),
+  );
+  if (needsAdmin) {
+    return (
+      `Your \`argos login\` session does not include ${formatScopes(required)}. ` +
+      'Run `argos login` again and choose "Admin" access on the consent screen to grant it.'
+    );
+  }
+  return (
+    `Your \`argos login\` session does not include ${formatScopes(required)}. ` +
+    "Run `argos login` again to grant it."
+  );
 }
 
 /**
@@ -40,7 +91,7 @@ export function handleCliError(error: unknown, auth?: AuthMode): never {
     if (error instanceof APIError && isInsufficientScope(error)) {
       // A missing scope is never fixed by switching token type, so this hint
       // replaces the one about tokens rather than piling on next to it.
-      message += `\n${SCOPE_HINT}`;
+      message += `\n${getScopeHint(error.message)}`;
     } else if (
       auth === "user" &&
       error instanceof APIError &&

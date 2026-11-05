@@ -58,6 +58,14 @@ Two token types — pick by command:
 `baseline download` takes only a project token: the baseline lookup it relies on
 rejects a PAT, including the one from `argos login`.
 
+`argos login` asks the user which access to grant. Its default, "Read and
+write", covers reviews, comments and media but not administration: `account *`,
+`create-project`, `project update`, `project transfer`, `project contributor
+set|remove`, `project domain set` and `automation create|update|deactivate`
+need "Admin" access. An `Insufficient scope` error names the missing
+permission: ask the user to run `argos login` again and choose "Admin", or use
+a PAT.
+
 Project tokens read build data but **cannot** review, comment, ignore changes, or
 administer a project or team — those need a PAT. If no suitable token is
 available, ask the user. For these actions, if no PAT exists, report the
