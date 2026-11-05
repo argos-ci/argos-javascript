@@ -20,6 +20,8 @@ export function getConfig() {
   return {
     commit: process.env.CI_COMMIT_SHA,
     argosToken: process.env.ARGOS_TOKEN,
+    // Required when the token is linked to several projects.
+    argosProject: process.env.ARGOS_PROJECT || undefined,
     gitlab: {
       projectId: process.env.CI_PROJECT_ID,
       authToken: process.env.ARGOS_GITLAB_TOKEN,
