@@ -28,6 +28,13 @@ export interface DeployParameters {
   token?: string;
 
   /**
+   * Argos project slug (`account/project`).
+   * Required when the token is linked to several projects.
+   * @default process.env.ARGOS_PROJECT
+   */
+  project?: string;
+
+  /**
    * Base URL of the Argos API.
    * @default "https://api.argos-ci.com/v2/"
    */
@@ -105,6 +112,7 @@ export async function deploy(params: DeployParameters) {
   debug("Creating deployment");
   const createResponse = await apiClient.POST("/deployments", {
     body: {
+      project: config.project ?? undefined,
       commit: config.commit ?? null,
       branch: config.branch ?? null,
       prNumber: config.prNumber ?? null,

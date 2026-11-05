@@ -3,11 +3,17 @@ import type { Command } from "commander";
 import { Option } from "commander";
 import { deploy } from "@argos-ci/core";
 import ora from "ora";
-import { tokenOption, type TokenOption } from "../options";
+import {
+  projectOption,
+  tokenOption,
+  type ProjectOption,
+  type TokenOption,
+} from "../options";
 
-type DeployOptions = TokenOption & {
-  prod?: boolean;
-};
+type DeployOptions = TokenOption &
+  ProjectOption & {
+    prod?: boolean;
+  };
 
 export function deployCommand(program: Command) {
   program
@@ -17,6 +23,7 @@ export function deployCommand(program: Command) {
       "Deploy a static build (Storybook or any static site) to Argos",
     )
     .addOption(tokenOption)
+    .addOption(projectOption)
     .addOption(
       new Option("--prod", "Deploy as a production deployment").default(false),
     )
@@ -25,6 +32,7 @@ export function deployCommand(program: Command) {
       try {
         const result = await deploy({
           token: options.token,
+          project: options.project,
           root: resolve(directory),
           environment: options.prod ? "production" : undefined,
         });

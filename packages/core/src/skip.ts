@@ -11,6 +11,7 @@ type SkipParameters = Pick<
   | "commit"
   | "branch"
   | "token"
+  | "project"
   | "prNumber"
   | "buildName"
   | "metadata"
@@ -36,6 +37,7 @@ export async function skip(
 
   const createBuildResponse = await apiClient.POST("/builds", {
     body: {
+      project: config.project ?? undefined,
       commit: config.commit,
       branch: config.branch,
       name: config.buildName,

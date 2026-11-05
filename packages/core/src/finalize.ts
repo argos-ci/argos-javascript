@@ -15,6 +15,13 @@ export type FinalizeParameters = {
    */
   token?: string;
 
+  /**
+   * Argos project slug (`account/project`).
+   * Required when the token is linked to several projects.
+   * @default process.env.ARGOS_PROJECT
+   */
+  project?: string;
+
   parallel?: {
     nonce: string;
   };
@@ -58,6 +65,7 @@ export async function finalize(
   const config = await readConfig({
     apiBaseUrl: params.apiBaseUrl,
     token: params.token,
+    project: params.project,
     parallelNonce: params.parallel?.nonce,
   });
   const authToken = await resolveArgosToken(config);
@@ -74,6 +82,7 @@ export async function finalize(
   const finalizeBuildsResult = await apiClient.POST("/builds/finalize", {
     body: {
       parallelNonce: config.parallelNonce,
+      project: config.project ?? undefined,
     },
   });
 
@@ -87,6 +96,7 @@ export async function finalize(
     const { build } = await skip({
       apiBaseUrl: params.apiBaseUrl,
       token: params.token,
+      project: params.project,
       buildName: params.buildName,
     });
     return { builds, skippedBuild: build };

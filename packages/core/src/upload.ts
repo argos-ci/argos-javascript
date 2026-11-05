@@ -81,8 +81,10 @@ export interface UploadParameters {
 
   /**
    * Argos project slug (`account/project`).
-   * Used to disambiguate tokenless authentication when multiple
-   * Argos projects are linked to the same repository.
+   * Required when the token is linked to several projects. Also used to
+   * disambiguate tokenless authentication when multiple Argos projects are
+   * linked to the same repository.
+   * @default process.env.ARGOS_PROJECT
    */
   project?: string;
 
@@ -274,8 +276,14 @@ export async function upload(params: UploadParameters): Promise<{
     };
   });
 
+  // Only sent when set: a token linked to a single project needs no more, and
+  // one linked to several is rejected without it.
+  const project = config.project ?? undefined;
+
   debug("Fetch project");
-  const projectResponse = await apiClient.GET("/project");
+  const projectResponse = await apiClient.GET("/project", {
+    params: { query: { project } },
+  });
   if (projectResponse.error) {
     throwAPIError(projectResponse.error, projectResponse.response);
   }
@@ -324,6 +332,7 @@ export async function upload(params: UploadParameters): Promise<{
       findBaseline: async (commits) => {
         const response = await apiClient.POST("/baseline", {
           body: {
+            project,
             commits,
             name: config.buildName ?? undefined,
             mode: config.mode ?? undefined,
@@ -355,6 +364,7 @@ export async function upload(params: UploadParameters): Promise<{
 
   const createBuildResponse = await apiClient.POST("/builds", {
     body: {
+      project,
       commit: config.commit,
       branch: config.branch,
       name: config.buildName,

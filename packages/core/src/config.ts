@@ -305,9 +305,10 @@ export interface Config {
   token: string | null;
 
   /**
-   * Argos project slug used for tokenless authentication.
-   * Useful to disambiguate when multiple Argos projects are linked
-   * to the same repository.
+   * Argos project slug (`owner/project`) the build, deployment or media
+   * belongs to. Required with a project token linked to several projects;
+   * also disambiguates tokenless authentication when multiple Argos projects
+   * are linked to the same repository.
    * @example "my-org/my-project"
    */
   project: string | null;
