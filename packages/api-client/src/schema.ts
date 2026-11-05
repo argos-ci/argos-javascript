@@ -1937,8 +1937,10 @@ export interface components {
             name: string;
             defaultBaseBranch: string;
             hasRemoteContentAccess: boolean;
-            /** @description Glob matching the branches whose builds are approved automatically. */
+            /** @description Glob matching the branches whose builds are approved automatically. Ignored while `autoApprovalEnabled` is `false`. */
             autoApprovedBranchGlob: string;
+            /** @description Whether builds on branches matching `autoApprovedBranchGlob` are approved automatically. When `false`, every build needs a review, including the ones on the base branch. */
+            autoApprovalEnabled: boolean;
             /** @description Glob matching the branches whose deployments are treated as production. */
             deploymentProductionBranchGlob: string;
             /** @description Whether the project is private. Resolved from the linked repository unless overridden. */
@@ -6109,6 +6111,8 @@ export interface operations {
                     defaultBaseBranch?: string | null;
                     /** @description Glob matching the branches whose builds are approved automatically. `null` falls back to the default base branch. */
                     autoApprovedBranchGlob?: string | null;
+                    /** @description Turn auto-approval on or off. When `false`, no branch is auto-approved and every build needs a review, including the ones on the base branch. */
+                    autoApprovalEnabled?: boolean;
                     /** @description Glob matching the branches whose deployments count as production. `null` falls back to the repository's default branch. */
                     deploymentProductionBranchGlob?: string | null;
                     /** @description Force the project's privacy. `null` inherits it from the linked repository. */

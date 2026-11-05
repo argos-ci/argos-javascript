@@ -86,6 +86,7 @@ describe("formatProject", () => {
       defaultBaseBranch: "main",
       hasRemoteContentAccess: true,
       autoApprovedBranchGlob: "main",
+      autoApprovalEnabled: true,
       deploymentProductionBranchGlob: "main",
       private: true,
       summaryCheck: "auto",
@@ -100,6 +101,7 @@ describe("formatProject", () => {
     const output = formatProject(project);
     expect(output).toContain("Project acme/my-app");
     expect(output).toContain("Visibility: private");
+    expect(output).toContain("Auto-approved branches: main");
     expect(output).toContain("Summary check: auto");
     expect(output).toContain(
       "Ignore changes: enabled, auto-ignore after 3 occurrences",
@@ -109,13 +111,14 @@ describe("formatProject", () => {
     );
   });
 
-  it("reports a disabled ignore config", () => {
+  it("reports disabled settings", () => {
     const project = {
       id: "project-1",
       name: "my-app",
       account: { id: "account-1", slug: "acme" },
       defaultBaseBranch: "main",
       autoApprovedBranchGlob: "main",
+      autoApprovalEnabled: false,
       deploymentProductionBranchGlob: "main",
       private: false,
       summaryCheck: "never",
@@ -129,6 +132,7 @@ describe("formatProject", () => {
     } as unknown as ArgosAPISchema.components["schemas"]["Project"];
     const output = formatProject(project);
     expect(output).toContain("Visibility: public");
+    expect(output).toContain("Auto-approved branches: none");
     expect(output).toContain("Ignore changes: disabled");
     expect(output).toContain("Default user level: -");
   });

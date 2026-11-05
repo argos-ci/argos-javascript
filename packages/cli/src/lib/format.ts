@@ -83,7 +83,7 @@ export function formatProject(project: Project): string {
     `ID: ${project.id}`,
     `Visibility: ${project.private ? "private" : "public"}`,
     `Default base branch: ${formatValue(project.defaultBaseBranch)}`,
-    `Auto-approved branches: ${formatValue(project.autoApprovedBranchGlob)}`,
+    `Auto-approved branches: ${project.autoApprovalEnabled ? formatValue(project.autoApprovedBranchGlob) : "none"}`,
     `Summary check: ${project.summaryCheck}`,
     `PR comment: ${formatBoolean(project.prCommentEnabled)}`,
     `Default user level: ${formatValue(project.defaultUserLevel)}`,

@@ -43,6 +43,7 @@ type UpdateOptions = ProjectCommandOptions & {
   name?: string | undefined;
   defaultBaseBranch?: string | undefined;
   autoApprovedBranchGlob?: string | undefined;
+  autoApproval?: BooleanChoice | undefined;
   deploymentProductionBranchGlob?: string | undefined;
   private?: BooleanChoice | "inherit" | undefined;
   summaryCheck?: SummaryCheck | undefined;
@@ -110,6 +111,9 @@ async function buildBody(
   if (options.autoApprovedBranchGlob !== undefined) {
     body.autoApprovedBranchGlob = toNullable(options.autoApprovedBranchGlob);
   }
+  if (options.autoApproval !== undefined) {
+    body.autoApprovalEnabled = toBoolean(options.autoApproval);
+  }
   if (options.deploymentProductionBranchGlob !== undefined) {
     body.deploymentProductionBranchGlob = toNullable(
       options.deploymentProductionBranchGlob,
@@ -173,6 +177,12 @@ export function registerProjectUpdate(project: Command) {
     .option(
       "--auto-approved-branch-glob <glob>",
       "Glob matching the branches whose builds are approved automatically. Pass an empty string to fall back to the default base branch",
+    )
+    .addOption(
+      new Option(
+        "--auto-approval <value>",
+        "Whether builds on branches matching the auto-approved glob are approved automatically. Pass false to review every build, base branch included; the glob is kept",
+      ).choices(BOOLEAN_CHOICES),
     )
     .option(
       "--deployment-production-branch-glob <glob>",
