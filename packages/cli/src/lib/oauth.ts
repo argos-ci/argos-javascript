@@ -15,7 +15,8 @@ export const OAUTH_CLIENT_ID = "argos-cli";
 
 /**
  * Scopes requested by `argos login`, covering the CLI's user actions (identity,
- * projects, reviews, comments, media). Build upload keeps using a project token.
+ * projects, reviews, comments, media, team administration). Build upload keeps
+ * using a project token.
  *
  * Every scope a CLI command needs has to be listed here: the consent screen
  * only offers what the client asks for, so a missing entry is not something the
@@ -30,7 +31,25 @@ export const OAUTH_SCOPES = [
   "comments:write",
   "media:read",
   "media:write",
+  "account:admin",
 ] as const;
+
+export type OAuthScope = (typeof OAUTH_SCOPES)[number];
+
+/**
+ * Requested scopes that the consent screen grants only with "Admin" access
+ * (`level: "admin"` in the Argos backend's `apps/backend/src/oauth/scopes.ts`).
+ * The default, "Read and write", leaves them out, so a session can lack them
+ * even when it was granted after the CLI started asking for them.
+ */
+export const OAUTH_ADMIN_SCOPES: ReadonlySet<OAuthScope> = new Set([
+  "projects:write",
+  "account:admin",
+]);
+
+export function isRequestedOAuthScope(value: string): value is OAuthScope {
+  return (OAUTH_SCOPES as readonly string[]).includes(value);
+}
 
 /** Refresh a bit early so a token never expires mid-request. */
 const EXPIRY_SKEW_MS = 60 * 1000;
