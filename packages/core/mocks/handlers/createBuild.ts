@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 
 type CreateBuildParams = never;
 type CreateBuildRequestBody = {
+  project?: string | null;
   commit: string;
   screenshots: { key: string; contentType: string }[];
   pwTraceKeys?: string[];
@@ -29,12 +30,16 @@ type CreateBuildResponseBody = {
   }[];
 };
 
+/** Every body sent to `POST /builds`, for tests to assert on. */
+export const createBuildRequests: CreateBuildRequestBody[] = [];
+
 export const createBuild = http.post<
   CreateBuildParams,
   CreateBuildRequestBody,
   CreateBuildResponseBody
 >("https://api.argos-ci.dev/builds", async ({ request }) => {
   const body = await request.json();
+  createBuildRequests.push(body);
   return HttpResponse.json({
     build: {
       id: "123",

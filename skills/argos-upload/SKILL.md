@@ -16,7 +16,7 @@ metadata:
   author: argos-ci
   homepage: https://argos-ci.com
   source: https://github.com/argos-ci/argos-javascript
-argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project <owner/project>` when using a personal access token.
+argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project <owner/project>` when using a personal access token or a project token linked to several projects.
 ---
 
 # Argos media upload
@@ -219,8 +219,8 @@ uploading it anyway.
 
 Media belongs to a **project**, so it inherits that project's access — including
 transferring with it. With a personal access token, pass `--project
-<owner/project>` (or set `ARGOS_PROJECT`); a project token already identifies its
-own project.
+<owner/project>` (or set `ARGOS_PROJECT`); a project token linked to a single
+project already identifies it, one linked to several needs `--project` too.
 
 | Command                         | Token                                                                    |
 | ------------------------------- | ------------------------------------------------------------------------ |

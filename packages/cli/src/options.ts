@@ -13,7 +13,7 @@ export const tokenOption = new Option("--token <token>", "Repository token");
 export type ProjectOption = { project?: string | undefined };
 export const projectOption = new Option(
   "--project <slug>",
-  "Argos project slug (account/project), used to disambiguate tokenless authentication when multiple projects are linked to the same repository",
+  "Project in owner/project format. Also ARGOS_PROJECT. Required when the token is linked to several projects; also disambiguates tokenless authentication when several projects are linked to the same repository",
 );
 
 export type BuildNameOption = { buildName?: string | undefined };
@@ -52,17 +52,17 @@ export const changeProjectPathOption = new Option(
 
 export const testProjectPathOption = new Option(
   "--project <owner/project>",
-  "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+  "Project the test belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token linked to a single project, which already identifies it",
 );
 
 export const buildProjectPathOption = new Option(
   "--project <owner/project>",
-  "Project the builds belong to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+  "Project the builds belong to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token linked to a single project, which already identifies it",
 );
 
 export const mediaProjectPathOption = new Option(
   "--project <owner/project>",
-  "Project the media belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token, which already identifies its project",
+  "Project the media belongs to, in owner/project format. Also ARGOS_PROJECT. Optional with a project token linked to a single project, which already identifies it",
 );
 
 export const managedProjectPathOption = new Option(
@@ -79,6 +79,26 @@ export const limitOption = new Option(
   "Maximum number of items to fetch, following pagination as needed",
 ).default(String(DEFAULT_LIMIT));
 
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Parse the value of `--<option>` into a positive integer, or abort. */
+export function toPositiveInteger(value: string, option: string): number {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 1) {
+    fail(`--${option} must be a positive integer, received "${value}".`);
+  }
+  return number;
+}
+
+/** Coerce the value of `--<option>` into an ISO 8601 datetime, or abort. */
+export function toIsoOrFail(value: string, option: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    fail(`Invalid --${option} value: "${value}". Use an ISO 8601 datetime.`);
+  }
+  return date.toISOString();
+}
+
 /**
  * Parse a `--limit` value into a positive integer, or abort. Pass `max` when
  * the source caps how many items it can return.
@@ -87,10 +107,7 @@ export function toLimit(
   value: string,
   { max = Infinity }: { max?: number } = {},
 ): number {
-  const limit = Number(value);
-  if (!Number.isInteger(limit) || limit < 1) {
-    fail(`--limit must be a positive integer, received "${value}".`);
-  }
+  const limit = toPositiveInteger(value, "limit");
   if (limit > max) {
     fail(`--limit must be at most ${max}, received "${value}".`);
   }
@@ -99,11 +116,7 @@ export function toLimit(
 
 /** Parse a `--pr` value into a pull request number, or abort. */
 export function toPrNumber(value: string): number {
-  const prNumber = Number(value);
-  if (!Number.isInteger(prNumber) || prNumber < 1) {
-    fail(`--pr must be a positive integer, received "${value}".`);
-  }
-  return prNumber;
+  return toPositiveInteger(value, "pr");
 }
 
 /** API values accepted by the `metricsPeriod` query parameter. */

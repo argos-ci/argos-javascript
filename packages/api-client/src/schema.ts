@@ -200,6 +200,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/accounts/{accountSlug}/project-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an account's project tokens
+         * @description List every project token of an account, whatever projects they are linked to. Requires administrator access to the account.
+         */
+        get: operations["listAccountProjectTokens"];
+        put?: never;
+        /**
+         * Create a project token for several projects
+         * @description Create a project token linked to one or more projects of an account. CI using it has to name the project it uploads to (`ARGOS_PROJECT`) when it is linked to several. Requires administrator access to the account, or to every listed project.
+         */
+        post: operations["createAccountProjectToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/project-tokens/{tokenId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke a project token of an account
+         * @description Revoke a project token: CI using it is rejected from its next request. Requires administrator access to the account, or to every project the token is linked to.
+         */
+        delete: operations["deleteAccountProjectToken"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/accounts/{accountSlug}/invite-link/reset": {
         parameters: {
             query?: never;
@@ -697,7 +741,7 @@ export interface paths {
         };
         /**
          * Get the current project
-         * @description Retrieve the project associated with the project token used to authenticate the request.
+         * @description Retrieve the project associated with the project token used to authenticate the request. Any project token can read it, whatever its permissions.
          */
         get: operations["getAuthProject"];
         put?: never;
@@ -879,6 +923,50 @@ export interface paths {
          * @description Revoke a user's access to a project. Requires administrator access to the project, except when removing yourself — a contributor can always walk away from a project.
          */
         delete: operations["removeProjectContributor"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's tokens
+         * @description List the tokens linked to a project, including the ones linked to other projects too. Requires the reviewer role on the project.
+         */
+        get: operations["listProjectTokens"];
+        put?: never;
+        /**
+         * Create a project token
+         * @description Create a token linked to a project, to set as `ARGOS_TOKEN` in CI. To rotate a token without downtime, create its replacement, update the CI secret, then revoke the old one. Requires administrator access to the project.
+         */
+        post: operations["createProjectToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{owner}/{project}/tokens/{tokenId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke a project token
+         * @description Revoke a token linked to a project: CI using it is rejected from its next request. Requires administrator access to every project the token is linked to, or to the account.
+         */
+        delete: operations["deleteProjectToken"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1564,6 +1652,16 @@ export interface components {
          * @enum {string}
          */
         TeamUserLevel: "owner" | "member" | "contributor";
+        /**
+         * @description What a project token can do on its projects:
+         *     - `builds:write`: Create, update and finalize builds and their screenshots.
+         *     - `deployments:write`: Create and finalize deployments.
+         *     - `projects:read`: Read builds, screenshot diffs, tests and deployments.
+         *     - `media:read`: Read the images and videos uploaded to the projects.
+         *     - `media:write`: Upload images and videos, and delete the ones already uploaded.
+         * @enum {string}
+         */
+        ProjectTokenPermission: "builds:write" | "deployments:write" | "projects:read" | "media:read" | "media:write";
         /** @description The public ID of the comment (e.g. `comment-xf23d`) */
         CommentId: string;
         /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
@@ -1690,6 +1788,10 @@ export interface components {
                     /** @description True if the story has a play function */
                     play?: boolean;
                 } | null;
+                capture?: {
+                    /** @description The 0-based position of the screenshot within its test, following capture order */
+                    index: number;
+                } | null;
                 /** @description Tags associated to the screenshot */
                 tags?: string[];
             } | null;
@@ -1720,6 +1822,11 @@ export interface components {
          * @enum {string}
          */
         SummaryCheck: "always" | "never" | "auto";
+        /**
+         * @description Status reported to the Git provider while a build has changes waiting for a review: `failure`, or `pending` until the build is approved or rejected (`running` on GitLab).
+         * @enum {string}
+         */
+        AwaitingReviewStatus: "failure" | "pending";
         /**
          * @description Access level given to team members that are not explicit contributors on the project. `null` means they get no access.
          * @enum {string}
@@ -1875,6 +1982,8 @@ export interface components {
                     projects: {
                         [key: string]: number;
                     };
+                    /** @description Screenshots captured from Storybook stories. Already included in `total`, so the rest of the test suite is `total - storybook`. */
+                    storybook: number;
                     /** @description Unix timestamp in milliseconds at the start of the period. */
                     ts: number;
                 }[];
@@ -1884,6 +1993,8 @@ export interface components {
                     projects: {
                         [key: string]: number;
                     };
+                    /** @description Screenshots captured from Storybook stories. Already included in `total`, so the rest of the test suite is `total - storybook`. */
+                    storybook: number;
                 };
                 projects: {
                     id: string;
@@ -1944,6 +2055,7 @@ export interface components {
             /** @description Whether the project is private. Resolved from the linked repository unless overridden. */
             private: boolean;
             summaryCheck: components["schemas"]["SummaryCheck"];
+            awaitingReviewStatus: components["schemas"]["AwaitingReviewStatus"];
             /** @description Whether Argos comments on pull requests. */
             prCommentEnabled: boolean;
             /** @description Whether builds can authenticate with a GitHub Actions OIDC token instead of a project token. */
@@ -1993,6 +2105,33 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        /** @description A token CI and the SDK authenticate with, set as `ARGOS_TOKEN`. Its value is only returned at creation. */
+        ProjectToken: {
+            id: string;
+            name: string;
+            /** @description Names of the projects of the account the token reaches, among the ones you can see. */
+            projects: string[];
+            permissions: components["schemas"]["ProjectTokenPermission"][];
+            /** Format: date-time */
+            createdAt: string;
+            expireAt: string | null;
+            /** @description When CI last authenticated with the token, to a few minutes. Once it stops moving, a replaced token can be revoked safely. */
+            lastUsedAt: string | null;
+        };
+        CreatedProjectToken: {
+            id: string;
+            name: string;
+            /** @description Names of the projects of the account the token reaches, among the ones you can see. */
+            projects: string[];
+            permissions: components["schemas"]["ProjectTokenPermission"][];
+            /** Format: date-time */
+            createdAt: string;
+            expireAt: string | null;
+            /** @description When CI last authenticated with the token, to a few minutes. Once it stops moving, a replaced token can be revoked safely. */
+            lastUsedAt: string | null;
+            /** @description The token itself. It is not stored and never returned again: save it now. */
+            token: string;
+        };
         InviteLink: {
             /**
              * Format: uri
@@ -2023,7 +2162,7 @@ export interface components {
              * @description Share page URL. This is the link to put in a pull request or a chat message, and it keeps working across versions — it always shows the newest one.
              */
             url: string;
-            /** @description Ready-to-paste Markdown. Images embed directly; videos embed their poster frame linked to the share page, because GitHub only renders inline players for media it hosts itself. */
+            /** @description Ready-to-paste Markdown: the picture — the image itself, or a video's poster frame — embedded from the CDN and linked to the share page. Embed this rather than building your own from `url`: that is an HTML page, and an image embed pointing at it renders as a broken image. */
             markdown: string;
             /** @description Which version this response describes: 1 for a first upload, incrementing each time the same name is uploaded again. */
             version: number;
@@ -2110,6 +2249,8 @@ export interface components {
             /** @description Plain-text rendering of the comment content. */
             text: string;
             author: components["schemas"]["User"] | null;
+            /** @description The coding agent that posted the comment on the author's behalf. Null when the author posted it directly. */
+            agent: components["schemas"]["Agent"] | null;
             /** @description Screenshot diff this comment is anchored to, if any. */
             screenshotDiffId: string | null;
             /** @description Where the comment points on its screenshot diff. Null means the whole diff. */
@@ -2140,6 +2281,13 @@ export interface components {
                 /** @description The users who reacted with this emoji. */
                 users: components["schemas"]["User"][];
             }[];
+        };
+        /** @description A coding agent acting on behalf of a user. */
+        Agent: {
+            /** @description Stable id of the agent, e.g. `claude-code`. `unknown` when it could not be identified. */
+            id: string;
+            /** @description Name to display, e.g. `Claude Code`. Null for an agent we cannot name. */
+            name: string | null;
         };
         /** @description Build */
         Build: {
@@ -2208,6 +2356,11 @@ export interface components {
                 gitlab: {
                     /** @enum {string} */
                     state: "pending" | "running" | "success" | "failed" | "canceled";
+                };
+                origin: {
+                    /** @enum {string} */
+                    status: "queued" | "in_progress" | "completed";
+                    conclusion: ("success" | "failure") | null;
                 };
                 /** Format: uri */
                 url: string;
@@ -2380,6 +2533,10 @@ export interface components {
                         /** @description True if the story has a play function */
                         play?: boolean;
                     } | null;
+                    capture?: {
+                        /** @description The 0-based position of the screenshot within its test, following capture order */
+                        index: number;
+                    } | null;
                     /** @description Tags associated to the screenshot */
                     tags?: string[];
                 } | null;
@@ -2492,6 +2649,10 @@ export interface components {
                         /** @description True if the story has a play function */
                         play?: boolean;
                     } | null;
+                    capture?: {
+                        /** @description The 0-based position of the screenshot within its test, following capture order */
+                        index: number;
+                    } | null;
                     /** @description Tags associated to the screenshot */
                     tags?: string[];
                 } | null;
@@ -2559,6 +2720,8 @@ export interface components {
             dismissedAt: string | null;
             /** @description The user who dismissed the review, if any. */
             dismissedBy: components["schemas"]["User"] | null;
+            /** @description The coding agent that submitted the review on the reviewer's behalf. Null when they submitted it themselves. */
+            agent: components["schemas"]["Agent"] | null;
             /** @description Date the review was created. */
             date: string;
         };
@@ -3676,6 +3839,232 @@ export interface operations {
             };
         };
     };
+    listAccountProjectTokens: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's project tokens, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectToken"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createAccountProjectToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description A name to recognize the token, e.g. `GitHub Actions`. */
+                    name: string;
+                    /**
+                     * @description What the token can do. Defaults to everything.
+                     * @default [
+                     *       "builds:write",
+                     *       "deployments:write",
+                     *       "projects:read",
+                     *       "media:read",
+                     *       "media:write"
+                     *     ]
+                     */
+                    permissions?: components["schemas"]["ProjectTokenPermission"][];
+                    /** @description When the token stops working. Omit it for a token that never expires. */
+                    expireAt?: string | null;
+                    /** @description Names of the projects of the account to link. */
+                    projects: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The created token, with its value */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedProjectToken"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteAccountProjectToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+                /** @description ID of the token. */
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     resetAccountInviteLink: {
         parameters: {
             query?: never;
@@ -3769,9 +4158,10 @@ export interface operations {
                     size: number;
                     /** @description SHA-256 of the file contents, hex encoded. Uploading the same file twice is free: Argos recognizes the hash and skips the transfer, and byte-identical bytes do not create a new version. */
                     hash: string;
+                    /** @description Who can open the media share page. `team` requires an Argos session with access to the owning account; `public` only requires the share URL. Omit it — the usual case — and the media follows its project's visibility: `public` for a public project, `team` for a private one. `team` requires a paid plan. */
                     visibility?: ("team" | "public") | null;
                     /**
-                     * @description Project to upload to, as `owner/project`. Required with a personal access token; ignored with a project token, which already identifies its project.
+                     * @description Project to upload to, as `owner/project`. Required with a personal access token, and with a project token linked to several projects.
                      * @example acme/web
                      */
                     project?: string | null;
@@ -5012,6 +5402,8 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    project?: string | null;
                     /** @description The commit the build is running on */
                     commit: components["schemas"]["Sha1Hash"];
                     /** @description The branch the build is running on */
@@ -5055,7 +5447,6 @@ export interface operations {
                      *     This is useful when a build is created from an incomplete test suite where some tests are skipped.
                      */
                     subset?: boolean | null;
-                } & ({
                     /**
                      * @deprecated
                      * @description Keys of screenshot files
@@ -5063,10 +5454,55 @@ export interface operations {
                     screenshotKeys: components["schemas"]["Sha256Hash"][];
                     screenshots?: unknown;
                 } | {
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    project?: string | null;
+                    /** @description The commit the build is running on */
+                    commit: components["schemas"]["Sha1Hash"];
+                    /** @description The branch the build is running on */
+                    branch: components["schemas"]["GitBranch"];
+                    /** @description Keys of Playwright trace files */
+                    pwTraceKeys?: components["schemas"]["Sha256Hash"][];
+                    /** @description The name of the build (for multi-build setups) */
+                    name?: string | null;
+                    /** @description Whether to run the build in parallel */
+                    parallel?: boolean | null;
+                    /** @description A unique nonce for the parallel build */
+                    parallelNonce?: string | null;
+                    /** @description The pull request number */
+                    prNumber?: number | null;
+                    /** @description The head commit of the pull request */
+                    prHeadCommit?: components["schemas"]["Sha1Hash"] | null;
+                    /** @description The commit to use as a reference for the build */
+                    referenceCommit?: components["schemas"]["Sha1Hash"] | null;
+                    /** @description The branch to use as a reference for the build */
+                    referenceBranch?: string | null;
+                    /** @description The parent commits of the build */
+                    parentCommits?: components["schemas"]["Sha1Hash"][] | null;
+                    /** @description The mode in which the build is running */
+                    mode?: ("ci" | "monitoring") | null;
+                    /** @description The CI provider being used */
+                    ciProvider?: string | null;
+                    /** @description The version of the Argos SDK being used */
+                    argosSdk?: string | null;
+                    /** @description The ID of the current run */
+                    runId?: string | null;
+                    /** @description The attempt number of the current run */
+                    runAttempt?: number | null;
+                    /** @description Whether the build was skipped, not comparing anything and always succeeding */
+                    skipped?: boolean | null;
+                    /** @description Whether the build has been created in a merge queue */
+                    mergeQueue?: boolean | null;
+                    /** @description Pull request numbers aggregated by the merge queue build. Requires `mergeQueue` to be `true`. */
+                    mergeQueuePrNumbers?: number[] | null;
+                    /**
+                     * @description Indicates whether this build contains only a subset of screenshots.
+                     *     This is useful when a build is created from an incomplete test suite where some tests are skipped.
+                     */
+                    subset?: boolean | null;
                     /** @description Screenshot files to upload */
                     screenshots: components["schemas"]["ScreenshotUploadRequest"][];
                     screenshotKeys?: unknown;
-                });
+                };
             };
         };
         responses: {
@@ -5131,6 +5567,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Conflict */
             409: {
                 headers: {
@@ -5161,6 +5606,8 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    project?: string | null;
                     /** @description The commit SHA */
                     commit: components["schemas"]["Sha1Hash"];
                     /** @description The branch name */
@@ -5213,6 +5660,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5274,6 +5730,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5344,6 +5809,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5439,6 +5913,8 @@ export interface operations {
             content: {
                 "application/json": {
                     parallelNonce: string;
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    project?: string | null;
                 };
             };
         };
@@ -5520,6 +5996,8 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    project?: string | null;
                     /** @description The commits to look for an eligible baseline, ordered from the closest to the furthest ancestor. The first commit with an eligible baseline wins. */
                     commits: components["schemas"]["Sha1Hash"][];
                     /**
@@ -5560,6 +6038,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5839,7 +6326,10 @@ export interface operations {
     };
     getAuthProject: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                project?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -5853,6 +6343,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description Unauthorized */
@@ -6114,6 +6613,7 @@ export interface operations {
                     /** @description Force the project's privacy. `null` inherits it from the linked repository. */
                     private?: boolean | null;
                     summaryCheck?: components["schemas"]["SummaryCheck"];
+                    awaitingReviewStatus?: components["schemas"]["AwaitingReviewStatus"];
                     /** @description Access given to team members that are not contributors on this project. `null` gives them none. */
                     defaultUserLevel?: components["schemas"]["ProjectUserLevel"] | null;
                     ignoreConfig?: components["schemas"]["IgnoreConfig"];
@@ -6777,6 +7277,230 @@ export interface operations {
             };
         };
     };
+    listProjectTokens: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The project's tokens, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectToken"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createProjectToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description A name to recognize the token, e.g. `GitHub Actions`. */
+                    name: string;
+                    /**
+                     * @description What the token can do. Defaults to everything.
+                     * @default [
+                     *       "builds:write",
+                     *       "deployments:write",
+                     *       "projects:read",
+                     *       "media:read",
+                     *       "media:write"
+                     *     ]
+                     */
+                    permissions?: components["schemas"]["ProjectTokenPermission"][];
+                    /** @description When the token stops working. Omit it for a token that never expires. */
+                    expireAt?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The created token, with its value */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedProjectToken"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteProjectToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+                /** @description ID of the token. */
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     transferProject: {
         parameters: {
             query?: never;
@@ -7138,6 +7862,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8945,6 +9678,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Not found */
             404: {
                 headers: {
@@ -9025,6 +9767,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Not found */
             404: {
                 headers: {
@@ -9077,6 +9828,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9229,6 +9989,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Not found */
             404: {
                 headers: {
@@ -9286,6 +10055,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9359,6 +10137,15 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

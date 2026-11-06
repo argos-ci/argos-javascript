@@ -15,15 +15,18 @@ import {
 } from "../../lib/download";
 import { formatSnapshotDownload } from "../../lib/format";
 import { handleCliError, output } from "../../lib/run";
-import { resolveOptionalToken } from "../../lib/target";
+import { resolveOptionalToken, resolveProjectPath } from "../../lib/target";
 import {
+  buildProjectPathOption,
   jsonOption,
   tokenOption,
   type JsonOption,
+  type ProjectPathOption,
   type TokenOption,
 } from "../../options";
 
 type DownloadOptions = TokenOption &
+  ProjectPathOption &
   JsonOption & {
     output?: string | undefined;
     branch?: string | undefined;
@@ -32,7 +35,8 @@ type DownloadOptions = TokenOption &
   };
 
 // The baseline lookup (`POST /baseline`) only accepts a project token, and the
-// project it searches is the token's own.
+// project it searches is the token's own — the one named by --project when the
+// token is linked to several.
 const PROJECT_TOKEN_HINT =
   "Finding the baseline takes the project's token: pass it with --token or set ARGOS_TOKEN. The token stored by `argos login` cannot be used.";
 
@@ -43,9 +47,14 @@ const FAILURE_STATUSES = new Set<SnapshotDiff["status"]>([
   "retryFailure",
 ]);
 
-async function fetchTokenProject(client: ArgosAPIClient) {
+async function fetchTokenProject(
+  client: ArgosAPIClient,
+  project: string | undefined,
+) {
   try {
-    return unwrap(await client.GET("/project"));
+    return unwrap(
+      await client.GET("/project", { params: { query: { project } } }),
+    );
   } catch (error) {
     if (
       error instanceof APIError &&
@@ -85,6 +94,7 @@ export function registerBaselineDownload(baseline: Command) {
         .choices(["ci", "monitoring"])
         .default("ci"),
     )
+    .addOption(buildProjectPathOption)
     .addOption(tokenOption)
     .addOption(jsonOption)
     .action(async (options: DownloadOptions) => {
@@ -99,7 +109,14 @@ export function registerBaselineDownload(baseline: Command) {
           );
         }
         const client = createApiClient(token);
-        const project = await fetchTokenProject(client);
+        // Named on the token's endpoints only when set: a token linked to a
+        // single project needs no more, one linked to several is rejected
+        // without it.
+        const projectPath = resolveProjectPath(options);
+        const projectSlug = projectPath
+          ? `${projectPath.owner}/${projectPath.project}`
+          : undefined;
+        const project = await fetchTokenProject(client, projectSlug);
         const path = { owner: project.account.slug, project: project.name };
         const branch = options.branch ?? project.defaultBaseBranch;
 
@@ -120,7 +137,12 @@ export function registerBaselineDownload(baseline: Command) {
           findBaseline: async (commits) =>
             unwrap(
               await client.POST("/baseline", {
-                body: { commits, name: options.buildName, mode: options.mode },
+                body: {
+                  project: projectSlug,
+                  commits,
+                  name: options.buildName,
+                  mode: options.mode,
+                },
               }),
             ).baseline,
         });
