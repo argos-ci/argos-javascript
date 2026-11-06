@@ -13,10 +13,14 @@ import {
   type StabilizationContext,
 } from "@argos-ci/browser";
 import {
+  type ElementPadding,
+  type PaddingSides,
   type ScreenshotMetadata,
+  getPaddedClip,
   getScreenshotName,
   normalizeBaseNames,
   readVersionFromPackage,
+  resolvePaddingOption,
   validateThreshold,
   writeMetadata,
 } from "@argos-ci/util";
@@ -47,6 +51,18 @@ export type ArgosScreenshotOptions = Omit<
    * ElementHandle or string selector of the element to take a screenshot of.
    */
   element?: string | ElementHandle;
+
+  /**
+   * Space to capture around the element, in CSS pixels, to include shadows,
+   * outlines or anything overflowing its box. Requires `element`.
+   * A number applies to every side. An array follows the CSS `padding`
+   * shorthand: `[vertical, horizontal]`, `[top, horizontal, bottom]` or
+   * `[top, right, bottom, left]`.
+   * The captured area is clamped to the page.
+   * @example
+   *    argosScreenshot(page, "dialog", { element: "[role=dialog]", padding: 16 })
+   */
+  padding?: ElementPadding;
 
   /**
    * Viewports to take screenshots of.
@@ -314,6 +330,44 @@ async function applyMask(
 }
 
 /**
+ * Take a screenshot of an element and the space around it, clamped to the
+ * page.
+ */
+async function screenshotElementWithPadding(
+  page: Page,
+  handle: ElementHandle,
+  padding: PaddingSides,
+  options: ScreenshotOptions,
+) {
+  // Like an element screenshot: scroll the element into view if needed.
+  if (!(await handle.isIntersectingViewport({ threshold: 1 }))) {
+    await handle.scrollIntoView();
+  }
+  const [box, metrics] = await Promise.all([
+    handle.boundingBox(),
+    page.evaluate(() =>
+      ((window as any).__ARGOS__ as ArgosGlobal).getDocumentMetrics(),
+    ),
+  ]);
+  if (!box) {
+    throw new Error(
+      "Unable to take a screenshot with `padding`: the element is not visible.",
+    );
+  }
+
+  // The bounding box is relative to the viewport, the clip to the document.
+  await page.screenshot({
+    ...options,
+    fullPage: false,
+    clip: getPaddedClip(
+      { ...box, x: box.x + metrics.scrollX, y: box.y + metrics.scrollY },
+      padding,
+      { x: 0, y: 0, width: metrics.width, height: metrics.height },
+    ),
+  });
+}
+
+/**
  * Wait for the UI to be ready before taking the screenshot.
  */
 async function waitForReadiness(page: Page, options: ArgosScreenshotOptions) {
@@ -366,6 +420,7 @@ export async function argosScreenshot(
 ) {
   const {
     element,
+    padding,
     viewports,
     argosCSS: _argosCSS,
     baseName,
@@ -383,6 +438,11 @@ export async function argosScreenshot(
   if (!name) {
     throw new Error("The `name` argument is required.");
   }
+  const paddingSides = resolvePaddingOption({
+    padding,
+    element,
+    clip: puppeteerOptions.clip,
+  });
 
   const [originalViewport] = await Promise.all([
     getViewport(page),
@@ -485,21 +545,31 @@ export async function argosScreenshot(
     // If no element is specified, take a screenshot of the whole page
     if (element === undefined) {
       await page.screenshot(screenshotOptions);
-    }
-
-    // If a string is passed, take a screenshot of the element matching the selector
-    else if (typeof element === "string") {
-      await page.waitForSelector(element);
-      const handle = await page.$(element);
+    } else {
+      const handle =
+        typeof element === "string"
+          ? await page.waitForSelector(element)
+          : element;
       if (!handle) {
         throw new Error(`Unable to find element ${element}`);
       }
-      await handle.screenshot(screenshotOptions);
-    }
-
-    // If an element is passed, take a screenshot of it
-    else {
-      await element.screenshot(screenshotOptions);
+      try {
+        if (paddingSides) {
+          await screenshotElementWithPadding(
+            page,
+            handle,
+            paddingSides,
+            screenshotOptions,
+          );
+        } else {
+          await handle.screenshot(screenshotOptions);
+        }
+      } finally {
+        // Release the handle we resolved, not the one we were given.
+        if (handle !== element) {
+          await handle.dispose();
+        }
+      }
     }
 
     await afterEach();

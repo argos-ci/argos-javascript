@@ -14,6 +14,41 @@ async function decodePng(buffer: Uint8Array) {
   return context.getImageData(0, 0, bitmap.width, bitmap.height);
 }
 
+/**
+ * Read and decode a screenshot taken by `argosScreenshot` in this spec.
+ */
+function readScreenshot(name: string) {
+  return cy
+    .readFile(
+      `${Cypress.config("screenshotsFolder")}/${Cypress.spec.name}/argos/${name}.png`,
+      null,
+    )
+    .then((buffer) => decodePng(buffer));
+}
+
+/**
+ * Get the color of a pixel of an image, in image pixels.
+ */
+function getPixel(image: ImageData, x: number, y: number) {
+  const index = (Math.round(y) * image.width + Math.round(x)) * 4;
+  return Array.from(image.data.slice(index, index + 3));
+}
+
+/**
+ * Check the color of a pixel, where each channel is either 0 or 255.
+ * The capture can carry the display color profile, so colors may not be
+ * exact: 0 is checked as below 100 and 255 as above 200.
+ */
+function expectColor(pixel: number[], color: [number, number, number]) {
+  color.forEach((channel, index) => {
+    if (channel === 0) {
+      expect(pixel[index]).to.be.lessThan(100);
+    } else {
+      expect(pixel[index]).to.be.greaterThan(200);
+    }
+  });
+}
+
 describe("argosScreenshot", () => {
   it("takes a screenshot with a simple name", () => {
     cy.visit("cypress/pages/index.html");
@@ -58,36 +93,27 @@ describe("argosScreenshot", () => {
       blackout: ["#custom-blackout"],
     });
 
-    cy.readFile(
-      `${Cypress.config("screenshotsFolder")}/${Cypress.spec.name}/argos/blackout-option.png`,
-      null,
-    )
-      .then((buffer) => decodePng(buffer))
-      .then((image) => {
-        cy.window().then((win) => {
-          const scale = image.width / win.innerWidth;
-          const getCenterPixel = (selector: string) => {
-            const element = win.document.querySelector(selector);
-            if (!element) {
-              throw new Error(`No element matches ${selector}`);
-            }
-            const rect = element.getBoundingClientRect();
-            const x = Math.round((rect.left + rect.width / 2) * scale);
-            const y = Math.round((rect.top + rect.height / 2) * scale);
-            const index = (y * image.width + x) * 4;
-            return Array.from(image.data.slice(index, index + 3));
-          };
+    readScreenshot("blackout-option").then((image) => {
+      cy.window().then((win) => {
+        const scale = image.width / win.innerWidth;
+        const getCenterPixel = (selector: string) => {
+          const element = win.document.querySelector(selector);
+          if (!element) {
+            throw new Error(`No element matches ${selector}`);
+          }
+          const rect = element.getBoundingClientRect();
+          return getPixel(
+            image,
+            (rect.left + rect.width / 2) * scale,
+            (rect.top + rect.height / 2) * scale,
+          );
+        };
 
-          expect(getCenterPixel("#default-blackout")).to.deep.equal([0, 0, 0]);
-          expect(getCenterPixel("#custom-blackout")).to.deep.equal([0, 0, 0]);
-          // The capture can carry the display color profile, so red may not be
-          // exactly [255, 0, 0].
-          const [r, g, b] = getCenterPixel("#visible");
-          expect(r).to.be.greaterThan(200);
-          expect(g).to.be.lessThan(100);
-          expect(b).to.be.lessThan(100);
-        });
+        expect(getCenterPixel("#default-blackout")).to.deep.equal([0, 0, 0]);
+        expect(getCenterPixel("#custom-blackout")).to.deep.equal([0, 0, 0]);
+        expectColor(getCenterPixel("#visible"), [255, 0, 0]);
       });
+    });
   });
 
   it("supports onAfterScreenshot option", () => {
@@ -103,6 +129,39 @@ describe("argosScreenshot", () => {
       cy.readFile(`${screenshotPath}.argos.json`)
         .its("test.title")
         .should("eq", "supports onAfterScreenshot option");
+    });
+  });
+
+  it("supports padding option on an element", () => {
+    cy.visit("cypress/pages/padding.html");
+    cy.get("#shadowed").argosScreenshot("padding-option", { padding: 10 });
+
+    readScreenshot("padding-option").then((image) => {
+      cy.window().then((win) => {
+        const scale = win.devicePixelRatio;
+        // The 100px element and 10px on each side.
+        expect([image.width / scale, image.height / scale]).to.deep.equal([
+          120, 120,
+        ]);
+        // The shadow overflowing the element box is captured.
+        expectColor(getPixel(image, 2 * scale, 2 * scale), [0, 0, 255]);
+        expectColor(getPixel(image, 60 * scale, 60 * scale), [255, 0, 0]);
+      });
+    });
+  });
+
+  it("clamps padding to the page", () => {
+    cy.visit("cypress/pages/padding.html");
+    cy.get("#corner").argosScreenshot("padding-corner", { padding: 20 });
+
+    readScreenshot("padding-corner").then((image) => {
+      cy.window().then((win) => {
+        const scale = win.devicePixelRatio;
+        // The 100px element and 20px on the right and bottom sides only.
+        expect([image.width / scale, image.height / scale]).to.deep.equal([
+          120, 120,
+        ]);
+      });
     });
   });
 

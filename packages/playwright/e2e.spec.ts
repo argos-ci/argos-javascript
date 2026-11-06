@@ -50,6 +50,59 @@ function fixture(name: string) {
 }
 
 /**
+ * Read the color of some pixels of a PNG, decoded by the browser.
+ */
+async function getPixels(
+  page: Page,
+  path: string,
+  points: { x: number; y: number }[],
+) {
+  const data = await readFile(path, "base64");
+  return page.evaluate(
+    async ({ data, points }) => {
+      const img = new Image();
+      img.src = `data:image/png;base64,${data}`;
+      await img.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0);
+      return points.map(({ x, y }) => {
+        const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
+        return { r, g, b };
+      });
+    },
+    { data, points },
+  );
+}
+
+/**
+ * Read the size of a screenshot from its PNG header, and the color of some of
+ * its pixels.
+ */
+async function readScreenshot(
+  page: Page,
+  path: string,
+  points: { x: number; y: number }[] = [],
+) {
+  const data = await readFile(path);
+  return {
+    width: data.readUInt32BE(16),
+    height: data.readUInt32BE(20),
+    pixels: await getPixels(page, path, points),
+  };
+}
+
+const WHITE = { r: 255, g: 255, b: 255 };
+const MASK = { r: 255, g: 0, b: 255 };
+const BLACK = { r: 0, g: 0, b: 0 };
+const RED = { r: 255, g: 0, b: 0 };
+const GREEN = { r: 0, g: 128, b: 0 };
+const BLUE = { r: 0, g: 0, b: 255 };
+const YELLOW = { r: 255, g: 255, b: 0 };
+
+/**
  * Delay Google Font loading so the `waitForFonts` stabilizer is exercised.
  */
 async function delayFonts(context: BrowserContext) {
@@ -159,39 +212,170 @@ test.describe("#argosScreenshot", () => {
     });
   });
 
-  test.describe("with `hide`, `remove` and `mask`", () => {
-    /**
-     * Read the color of some pixels of a PNG, decoded by the browser.
-     */
-    async function getPixels(
-      page: Page,
-      path: string,
-      points: { x: number; y: number }[],
-    ) {
-      const data = await readFile(path, "base64");
-      return page.evaluate(
-        async ({ data, points }) => {
-          const img = new Image();
-          img.src = `data:image/png;base64,${data}`;
-          await img.decode();
-          const canvas = document.createElement("canvas");
-          canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
-          const ctx = canvas.getContext("2d")!;
-          ctx.drawImage(img, 0, 0);
-          return points.map(({ x, y }) => {
-            const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
-            return { r, g, b };
-          });
-        },
-        { data, points },
+  test.describe("with `padding`", () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(fixture("padding.html"));
+    });
+
+    test("captures the space around the element", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding", {
+        element: "#shadowed",
+        padding: 10,
+      });
+      // The shadow overflowing the element box is captured.
+      expect(
+        await readScreenshot(page, screenshot!.path, [
+          { x: 2, y: 2 },
+          { x: 60, y: 60 },
+        ]),
+      ).toEqual({ width: 120, height: 120, pixels: [BLUE, RED] });
+    });
+
+    test("captures an element below the fold", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding-below", {
+        element: "#below",
+        padding: 10,
+      });
+      expect(
+        await readScreenshot(page, screenshot!.path, [
+          { x: 2, y: 2 },
+          { x: 60, y: 60 },
+          { x: 117, y: 117 },
+        ]),
+      ).toEqual({ width: 120, height: 120, pixels: [BLUE, RED, BLUE] });
+    });
+
+    test("captures an area larger than the viewport", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding-large", {
+        element: "#below",
+        padding: 400,
+      });
+      // Clamped to the left of the page, so the element is 50px from the edge.
+      expect(
+        await readScreenshot(page, screenshot!.path, [
+          { x: 45, y: 395 },
+          { x: 100, y: 450 },
+        ]),
+      ).toEqual({ width: 550, height: 900, pixels: [BLUE, RED] });
+    });
+
+    test("follows the CSS shorthand", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding-shorthand", {
+        element: page.locator("#shadowed"),
+        padding: [10, 20],
+      });
+      expect(
+        await readScreenshot(page, screenshot!.path, [
+          { x: 5, y: 60 },
+          { x: 15, y: 60 },
+        ]),
+      ).toEqual({ width: 140, height: 120, pixels: [WHITE, BLUE] });
+    });
+
+    test("clamps to the page", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding-corner", {
+        element: "#corner",
+        padding: 20,
+      });
+      expect(
+        await readScreenshot(page, screenshot!.path, [
+          { x: 50, y: 50 },
+          { x: 110, y: 110 },
+        ]),
+      ).toEqual({ width: 120, height: 120, pixels: [GREEN, WHITE] });
+    });
+
+    test("clamps to the frame", async ({ page }) => {
+      const frame = page.frame({ name: "child" })!;
+      const [screenshot] = await argosScreenshot(frame, "padding-frame", {
+        element: "#framed",
+        padding: 20,
+      });
+      // The frame border and the page around it are not captured.
+      expect(
+        await readScreenshot(page, screenshot!.path, [
+          { x: 10, y: 10 },
+          { x: 60, y: 60 },
+        ]),
+      ).toEqual({ width: 70, height: 70, pixels: [RED, YELLOW] });
+    });
+
+    test("clamps to the frame of the element", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(page, "padding-frame-page", {
+        element: page.frameLocator("iframe").locator("#framed"),
+        padding: 20,
+      });
+      expect(await readScreenshot(page, screenshot!.path)).toMatchObject({
+        width: 70,
+        height: 70,
+      });
+    });
+
+    test("throws without `element`", async ({ page }) => {
+      await expect(
+        argosScreenshot(page, "padding-no-element", { padding: 10 }),
+      ).rejects.toThrow("The `padding` option requires the `element` option.");
+    });
+
+    test("throws with an invalid padding", async ({ page }) => {
+      await expect(
+        argosScreenshot(page, "padding-invalid", {
+          element: "#shadowed",
+          padding: -1,
+        }),
+      ).rejects.toThrow(
+        "The `padding` option must be a non-negative number or an array of 1 to 4 non-negative numbers.",
       );
-    }
+    });
 
-    const WHITE = { r: 255, g: 255, b: 255 };
-    const MASK = { r: 255, g: 0, b: 255 };
-    const BLACK = { r: 0, g: 0, b: 0 };
+    test("throws with `clip`", async ({ page }) => {
+      await expect(
+        argosScreenshot(page, "padding-clip", {
+          element: "#shadowed",
+          padding: 10,
+          clip: { x: 0, y: 0, width: 10, height: 10 },
+        }),
+      ).rejects.toThrow("The `padding` option can't be used with `clip`.");
+    });
+  });
 
+  test.describe("with a `Locator` as handler", () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(fixture("padding.html"));
+    });
+
+    test("takes a screenshot of the element", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(
+        page.locator("#shadowed"),
+        "locator-handler",
+      );
+      expect(
+        await readScreenshot(page, screenshot!.path, [{ x: 2, y: 2 }]),
+      ).toEqual({ width: 100, height: 100, pixels: [RED] });
+    });
+
+    test("stabilizes the frame of a locator in a frame", async ({ page }) => {
+      const [screenshot] = await argosScreenshot(
+        page.frameLocator("iframe").locator("#framed"),
+        "locator-handler-frame",
+      );
+      // The metadata comes from the frame, so the frame is the handler.
+      const metadata = await readMetadata(screenshot!.path);
+      expect(metadata?.url).toBe("about:srcdoc");
+    });
+
+    test("throws with `element`", async ({ page }) => {
+      await expect(
+        argosScreenshot(page.locator("#corner"), "locator-handler-element", {
+          element: "#shadowed",
+        }),
+      ).rejects.toThrow(
+        "The `element` option can't be used when the handler is a `Locator`. Pass the page instead.",
+      );
+    });
+  });
+
+  test.describe("with `hide`, `remove` and `mask`", () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(fixture("helpers.html"));
     });

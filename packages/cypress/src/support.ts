@@ -8,7 +8,10 @@ import {
 } from "@argos-ci/browser";
 import { getGlobalScript } from "@argos-ci/browser";
 import {
+  clampPadding,
+  type ElementPadding,
   getMetadataPath,
+  resolvePadding,
   getScreenshotName,
   getTestRunKey,
   nextCaptureIndex,
@@ -26,6 +29,19 @@ type ArgosScreenshotOptions = Partial<
    * Viewports to take screenshots of.
    */
   viewports?: ViewportOption[];
+
+  /**
+   * Space to capture around the element, in CSS pixels, to include shadows,
+   * outlines or anything overflowing its box. Only applies when the command
+   * is chained off an element.
+   * A number applies to every side. An array follows the CSS `padding`
+   * shorthand: `[vertical, horizontal]`, `[top, horizontal, bottom]` or
+   * `[top, right, bottom, left]`.
+   * The captured area is clamped to the page.
+   * @example
+   *    cy.get("[role=dialog]").argosScreenshot("dialog", { padding: 16 })
+   */
+  padding?: ElementPadding;
 
   /**
    * Custom CSS evaluated during the screenshot process.
@@ -210,6 +226,31 @@ function getRetries(value: unknown) {
 }
 
 /**
+ * Reduce the padding so the captured area stays within the page: Cypress
+ * would shift the area back into the page instead.
+ */
+function clampPaddingToPage(
+  window: Window,
+  element: Element,
+  padding: ElementPadding,
+) {
+  const rect = element.getBoundingClientRect();
+  const metrics = (
+    (window as any).__ARGOS__ as ArgosGlobal
+  ).getDocumentMetrics();
+  return clampPadding(
+    {
+      x: rect.x + metrics.scrollX,
+      y: rect.y + metrics.scrollY,
+      width: rect.width,
+      height: rect.height,
+    },
+    resolvePadding(padding),
+    { x: 0, y: 0, width: metrics.width, height: metrics.height },
+  );
+}
+
+/**
  * Wait for the UI to be ready before taking the screenshot.
  */
 function waitForReadiness(options: ArgosScreenshotOptions) {
@@ -251,6 +292,7 @@ Cypress.Commands.add(
       onAfterScreenshot,
       hide,
       remove,
+      padding,
       ...cypressOptions
     } = options;
 
@@ -286,13 +328,26 @@ Cypress.Commands.add(
 
       const ref: any = {};
 
-      cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
-        blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
-        onAfterScreenshot: ($el, props) => {
-          ref.props = props;
-          onAfterScreenshot?.($el, props);
-        },
-        ...cypressOptions,
+      const element = Cypress.dom.isJquery(subject) ? subject.get(0) : null;
+
+      // In a command, so the element is measured once the page is stable.
+      cy.window({ log: false }).then((window) => {
+        cy.wrap(subject).screenshot(`${NAME_PREFIX}${name}`, {
+          blackout: ['[data-visual-test="blackout"]'].concat(blackout || []),
+          onAfterScreenshot: ($el, props) => {
+            ref.props = props;
+            onAfterScreenshot?.($el, props);
+          },
+          ...cypressOptions,
+          // Cypress ignores the padding of other screenshots.
+          ...(padding !== undefined
+            ? {
+                padding: element
+                  ? clampPaddingToPage(window, element, padding)
+                  : padding,
+              }
+            : {}),
+        });
       });
 
       cy.window({ log: false }).then((window) => {

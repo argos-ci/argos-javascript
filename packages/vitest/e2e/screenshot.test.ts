@@ -57,6 +57,12 @@ async function readPngImageData(attachment: ArgosAttachment) {
   return context.getImageData(0, 0, bitmap.width, bitmap.height);
 }
 
+/** Read the color of a pixel of a decoded capture. */
+function getPixel(image: ImageData, x: number, y: number) {
+  const index = (y * image.width + x) * 4;
+  return Array.from(image.data.slice(index, index + 3));
+}
+
 /**
  * Check that a horizontal band of the capture is fully white, which is what
  * areas of the page the browser never painted look like.
@@ -151,6 +157,27 @@ test("captures a specific element via a selector", async () => {
   expect(attachments.length).toBe(2);
 });
 
+test("captures the space around an element with `padding`", async () => {
+  mount(
+    `<div id="shadowed" style="margin:40px;width:100px;height:100px;background:red;box-shadow:0 0 0 10px blue"></div>`,
+  );
+  const attachments = await argosScreenshot("padding", {
+    argosCSS: "body { margin: 0; background: white; }",
+    element: "#shadowed",
+    padding: 10,
+  });
+  const screenshot = attachments.find((a) => a.path.endsWith("padding.png"));
+  expect(screenshot).toBeDefined();
+  const image = await readPngImageData(screenshot!);
+  expect({ width: image.width, height: image.height }).toEqual({
+    width: 120,
+    height: 120,
+  });
+  // The shadow overflowing the element box is captured.
+  expect(getPixel(image, 2, 2)).toEqual([0, 0, 255]);
+  expect(getPixel(image, 60, 60)).toEqual([255, 0, 0]);
+});
+
 test("captures multiple viewports with per-viewport metadata", async () => {
   mount(
     `<div style="width:100%;box-sizing:border-box;padding:24px;background:linear-gradient(#f97316,#7c3aed);color:#fff;font:600 20px sans-serif;">Responsive content</div>`,
@@ -199,15 +226,11 @@ test("hides, removes and masks elements", async () => {
   const screenshot = attachments.find((a) => a.path.endsWith("helpers.png"));
   expect(screenshot).toBeDefined();
   const image = await readPngImageData(screenshot!);
-  const getPixel = (x: number, y: number) => {
-    const index = (y * image.width + x) * 4;
-    return Array.from(image.data.slice(index, index + 3));
-  };
   // `#hidden` keeps its space but is transparent.
-  expect(getPixel(10, 25)).toEqual([255, 255, 255]);
+  expect(getPixel(image, 10, 25)).toEqual([255, 255, 255]);
   // `#removed` no longer takes space, so the rows below it move up.
-  expect(getPixel(10, 75)).toEqual([0, 255, 255]);
-  expect(getPixel(10, 125)).toEqual([0, 0, 0]);
+  expect(getPixel(image, 10, 75)).toEqual([0, 255, 255]);
+  expect(getPixel(image, 10, 125)).toEqual([0, 0, 0]);
 
   // The page is restored after the screenshot.
   expect(

@@ -34,6 +34,16 @@ export interface VitestScreenshotOptions {
   element?: string;
 
   /**
+   * Space to capture around the element, in CSS pixels, to include shadows,
+   * outlines or anything overflowing its box. Requires `element`.
+   * A number applies to every side. An array follows the CSS `padding`
+   * shorthand: `[vertical, horizontal]`, `[top, horizontal, bottom]` or
+   * `[top, right, bottom, left]`.
+   * The captured area is clamped to the content of the test.
+   */
+  padding?: PlaywrightScreenshotOptions["padding"];
+
+  /**
    * Viewports to take screenshots of.
    * Implemented by resizing the Vitest iframe (Playwright's native `viewports`
    * option does not work on a frame).
