@@ -200,8 +200,10 @@ async function uploadOne(args: {
     });
   } finally {
     // The converted bytes live in a temporary file; nothing else deletes it, and
-    // a batch of screenshots would otherwise leave one per file behind.
-    compressed?.cleanup();
+    // a batch of screenshots would otherwise leave one per file behind. Awaited so
+    // the file is gone by the time the upload resolves, even if the caller exits
+    // straight after.
+    await compressed?.cleanup();
   }
 }
 

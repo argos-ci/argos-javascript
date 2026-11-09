@@ -1,7 +1,8 @@
+import fs, { existsSync } from "node:fs";
 import { copyFile, mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { beforeEach, describe, expect, it } from "vitest";
+import { basename, join } from "node:path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMediaRequests } from "../mocks/handlers/createMedia";
 import { setupMockServer } from "../mocks/server";
 import { uploadMedia } from "./media";
@@ -102,6 +103,33 @@ describe("#uploadMedia", () => {
       (entry) => !before.includes(entry) && entry.startsWith("argos-media-"),
     );
     expect(added).toEqual([]);
+  });
+
+  it("has deleted its temporary file by the time it resolves", async () => {
+    // Slow the delete down so it cannot win a race against the assertion. The
+    // file has to be gone when the upload settles: a CLI that exits right after
+    // drops a delete still in flight, and the file stays on disk.
+    const realUnlink = fs.unlink;
+    const unlinked: string[] = [];
+    const unlinkSpy = vi.spyOn(fs, "unlink").mockImplementation(((
+      path: fs.PathLike,
+      callback: fs.NoParamCallback,
+    ) => {
+      unlinked.push(String(path));
+      setTimeout(() => realUnlink(path, callback), 50);
+    }) as typeof fs.unlink);
+
+    try {
+      await uploadMedia({ ...baseParams, files: [PNG] });
+    } finally {
+      unlinkSpy.mockRestore();
+    }
+
+    const temporary = unlinked.filter((path) =>
+      basename(path).startsWith("argos-media-"),
+    );
+    expect(temporary).toHaveLength(1);
+    expect(existsSync(temporary[0]!)).toBe(false);
   });
 
   it("refuses a batch with an unreadable file before uploading any of it", async () => {
