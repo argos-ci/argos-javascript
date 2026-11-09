@@ -56,10 +56,17 @@ export type CompressedMedia = {
   /** What to upload. The original, when converting would not have helped. */
   source: MediaSource;
   /**
-   * Removes the temporary file, if one was written. Always safe to call, and must
-   * be called once the bytes have been uploaded.
+   * Removes the temporary file, if one was written. Always safe to call, never
+   * rejects, and must be awaited once the bytes have been uploaded: the file is
+   * only gone when the promise settles.
    */
-  cleanup: () => void;
+  cleanup: () => Promise<void>;
+};
+
+type TemporaryFile = {
+  path: string;
+  /** Deletes the file. Settles once it is gone; never rejects. */
+  remove: () => Promise<void>;
 };
 
 /**
@@ -81,7 +88,7 @@ export type CompressedMedia = {
 export async function compressMediaToWebp(
   source: MediaSource,
 ): Promise<CompressedMedia> {
-  const keepOriginal: CompressedMedia = { source, cleanup: () => {} };
+  const keepOriginal: CompressedMedia = { source, cleanup: async () => {} };
 
   if (!COMPRESSIBLE_CONTENT_TYPES.has(source.contentType)) {
     debug(
@@ -90,7 +97,7 @@ export async function compressMediaToWebp(
     return keepOriginal;
   }
 
-  let temporary: { path: string; remove: () => void } | null = null;
+  let temporary: TemporaryFile | null = null;
 
   try {
     if (await checkIsAnimatedPng(source)) {
@@ -139,7 +146,7 @@ export async function compressMediaToWebp(
       debug(
         `Not compressing ${source.path}: WebP is larger (${size} >= ${originalStats.size} bytes)`,
       );
-      temporary.remove();
+      await temporary.remove();
       return keepOriginal;
     }
 
@@ -157,7 +164,7 @@ export async function compressMediaToWebp(
     // refuse an upload that would have worked without compression.
     const message = error instanceof Error ? error.message : "Unknown Error";
     debug(`Not compressing ${source.path}: ${message}`);
-    temporary?.remove();
+    await temporary?.remove();
     return keepOriginal;
   }
 }
@@ -169,8 +176,13 @@ export async function compressMediaToWebp(
  * open descriptor and the remove callback, which leaks one of each per file —
  * `tmp` only cleans up at exit when `setGracefulCleanup()` was called, and even
  * then it would hold every file for the whole run.
+ *
+ * The callback from the async `tmp.file()` deletes with `fs.unlink`, so it returns
+ * before the file is gone; `remove` waits for the unlink to report back.
+ * Otherwise a caller that exits right after an upload drops the pending unlink
+ * and leaves the file behind.
  */
-function createTemporaryFile(): Promise<{ path: string; remove: () => void }> {
+function createTemporaryFile(): Promise<TemporaryFile> {
   return new Promise((resolve, reject) => {
     tmp.file(
       { prefix: "argos-media-", postfix: ".webp", discardDescriptor: true },
@@ -179,14 +191,32 @@ function createTemporaryFile(): Promise<{ path: string; remove: () => void }> {
           reject(error);
           return;
         }
+        // `@types/tmp` declares the callback without arguments, but the async
+        // API's one takes `next`, called once the unlink is done (ENOENT is
+        // already treated as success by `tmp`).
+        const removeAsync = removeCallback as (
+          next: (error?: Error | null) => void,
+        ) => void;
+        // `tmp` runs the removal once and ignores later calls, `next` included,
+        // so a second `remove()` would wait forever without this.
+        let removal: Promise<void> | null = null;
         resolve({
           path,
           remove: () => {
-            try {
-              removeCallback();
-            } catch {
-              // Already gone, or never written. Nothing to report.
-            }
+            removal ??= new Promise<void>((settle) => {
+              try {
+                removeAsync((removeError) => {
+                  if (removeError) {
+                    debug(`Could not delete ${path}: ${removeError.message}`);
+                  }
+                  settle();
+                });
+              } catch {
+                // Already gone, or never written. Nothing to report.
+                settle();
+              }
+            });
+            return removal;
           },
         });
       },
