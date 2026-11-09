@@ -3923,18 +3923,15 @@ export interface operations {
                     /** @description A name to recognize the token, e.g. `GitHub Actions`. */
                     name: string;
                     /**
-                     * @description What the token can do. Defaults to everything.
+                     * @description What the token can do. Defaults to uploading builds and deployments.
                      * @default [
                      *       "builds:write",
-                     *       "deployments:write",
-                     *       "projects:read",
-                     *       "media:read",
-                     *       "media:write"
+                     *       "deployments:write"
                      *     ]
                      */
                     permissions?: components["schemas"]["ProjectTokenPermission"][];
-                    /** @description When the token stops working. Omit it for a token that never expires. */
-                    expireAt?: string | null;
+                    /** @description When the token stops working, or `null` for a token that never expires. */
+                    expireAt: string | null;
                     /** @description Names of the projects of the account to link. */
                     projects: string[];
                 };
@@ -5402,7 +5399,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, ignored when it is linked to only one. */
                     project?: string | null;
                     /** @description The commit the build is running on */
                     commit: components["schemas"]["Sha1Hash"];
@@ -5454,7 +5451,7 @@ export interface operations {
                     screenshotKeys: components["schemas"]["Sha256Hash"][];
                     screenshots?: unknown;
                 } | {
-                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, ignored when it is linked to only one. */
                     project?: string | null;
                     /** @description The commit the build is running on */
                     commit: components["schemas"]["Sha1Hash"];
@@ -5606,7 +5603,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, ignored when it is linked to only one. */
                     project?: string | null;
                     /** @description The commit SHA */
                     commit: components["schemas"]["Sha1Hash"];
@@ -5913,7 +5910,7 @@ export interface operations {
             content: {
                 "application/json": {
                     parallelNonce: string;
-                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, ignored when it is linked to only one. */
                     project?: string | null;
                 };
             };
@@ -5996,7 +5993,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                    /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, ignored when it is linked to only one. */
                     project?: string | null;
                     /** @description The commits to look for an eligible baseline, ordered from the closest to the furthest ancestor. The first commit with an eligible baseline wins. */
                     commits: components["schemas"]["Sha1Hash"][];
@@ -6327,7 +6324,7 @@ export interface operations {
     getAuthProject: {
         parameters: {
             query?: {
-                /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, optional when it is linked to only one. */
+                /** @description Project to act on, as `owner/project`. Required when the project token is linked to several projects, ignored when it is linked to only one. */
                 project?: string | null;
             };
             header?: never;
@@ -7361,18 +7358,15 @@ export interface operations {
                     /** @description A name to recognize the token, e.g. `GitHub Actions`. */
                     name: string;
                     /**
-                     * @description What the token can do. Defaults to everything.
+                     * @description What the token can do. Defaults to uploading builds and deployments.
                      * @default [
                      *       "builds:write",
-                     *       "deployments:write",
-                     *       "projects:read",
-                     *       "media:read",
-                     *       "media:write"
+                     *       "deployments:write"
                      *     ]
                      */
                     permissions?: components["schemas"]["ProjectTokenPermission"][];
-                    /** @description When the token stops working. Omit it for a token that never expires. */
-                    expireAt?: string | null;
+                    /** @description When the token stops working, or `null` for a token that never expires. */
+                    expireAt: string | null;
                 };
             };
         };

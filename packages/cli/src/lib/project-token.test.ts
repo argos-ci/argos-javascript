@@ -47,12 +47,20 @@ describe("resolveExpireAt", () => {
 });
 
 describe("buildCreateTokenBody", () => {
-  it("leaves permissions out so the API grants them all", () => {
+  it("leaves permissions out so the API applies its default", () => {
+    const body = buildCreateTokenBody({ name: "GitHub Actions" });
+    expect(JSON.parse(JSON.stringify(body))).not.toHaveProperty("permissions");
+  });
+
+  it("always sends expireAt, which the API requires, null for never", () => {
     const body = buildCreateTokenBody({ name: "GitHub Actions" });
     expect(JSON.parse(JSON.stringify(body))).toEqual({
       name: "GitHub Actions",
       expireAt: null,
     });
+    expect(
+      buildCreateTokenBody({ name: "GitHub Actions", expiresIn: "1" }),
+    ).toHaveProperty("expireAt", expect.any(String));
   });
 
   it("passes the permissions", () => {

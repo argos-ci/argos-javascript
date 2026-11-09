@@ -195,8 +195,10 @@ argos project update --project acme/web --summary-check auto --ignore-changes tr
 
 Rotate a project token without downtime: create the replacement, update the CI
 secret, then revoke the old token once CI stops using it (its `lastUsedAt` stops
-moving). Permissions default to all of them and tokens never expire unless told
-otherwise:
+moving). Tokens never expire unless told otherwise, and permissions default to
+`builds:write` and `deployments:write`: enough for `upload`, `finalize`, `skip`
+and `deploy`. Add `--permissions` when CI also reads builds (`projects:read`, which
+`baseline download` needs too) or handles media (`media:read`, `media:write`):
 
 ```bash
 argos project token list --project acme/web --json                 # find the old token's id

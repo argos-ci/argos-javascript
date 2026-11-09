@@ -75,8 +75,9 @@ export interface UploadMediaParameters {
 
   /**
    * Project to upload to, as `owner/project`. Required when authenticating with
-   * a personal access token; ignored with a project token, which already
-   * identifies its project.
+   * a personal access token or a project token linked to several projects;
+   * ignored with a project token linked to a single one, which already
+   * identifies it.
    */
   project?: string;
 
