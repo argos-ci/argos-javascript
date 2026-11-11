@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { http, HttpResponse } from "msw";
 import {
   isGitHubActionsOidcAvailable,
@@ -77,18 +77,69 @@ describe("exchangeGitHubActionsOidcToken", () => {
     expect(token).toBe(MOCK_ARGOS_TOKEN);
   });
 
-  it("throws when the GitHub OIDC endpoint returns an error", async () => {
-    server.use(
-      http.get(MOCK_OIDC_URL, () => {
-        return HttpResponse.json(null, { status: 500 });
-      }),
-    );
-    await expect(
-      exchangeGitHubActionsOidcToken({
+  describe("when the GitHub OIDC endpoint returns an error", () => {
+    // Skips the waits between retries.
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["setTimeout"] });
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    /** Answers `status` to the first `times` token requests, then a token. */
+    function failOidcRequests(status: number, times = Infinity) {
+      let requestCount = 0;
+      server.use(
+        http.get(MOCK_OIDC_URL, () => {
+          requestCount++;
+          if (requestCount <= times) {
+            return HttpResponse.json(null, { status });
+          }
+          return HttpResponse.json({ value: MOCK_OIDC_TOKEN, count: 1 });
+        }),
+      );
+      return { getRequestCount: () => requestCount };
+    }
+
+    async function exchangeSkippingWaits() {
+      const result = exchangeGitHubActionsOidcToken({
         apiBaseUrl: "https://api.argos-ci.com/v2/",
         config: baseConfig,
-      }),
-    ).rejects.toThrow("Failed to fetch GitHub Actions OIDC token: 500");
+      });
+      let settled = false;
+      result.then(
+        () => (settled = true),
+        () => (settled = true),
+      );
+      // Each wait is scheduled only once its failed response has arrived.
+      while (!settled) {
+        await new Promise((resolve) => setImmediate(resolve));
+        await vi.runOnlyPendingTimersAsync();
+      }
+      return result;
+    }
+
+    it("retries a server error", async () => {
+      const oidc = failOidcRequests(503, 1);
+      await expect(exchangeSkippingWaits()).resolves.toBe(MOCK_ARGOS_TOKEN);
+      expect(oidc.getRequestCount()).toBe(2);
+    });
+
+    it("throws once the retries for server errors run out", async () => {
+      const oidc = failOidcRequests(503);
+      await expect(exchangeSkippingWaits()).rejects.toThrow(
+        "Failed to fetch GitHub Actions OIDC token: 503",
+      );
+      expect(oidc.getRequestCount()).toBe(4);
+    });
+
+    it("does not retry a client error", async () => {
+      const oidc = failOidcRequests(403);
+      await expect(exchangeSkippingWaits()).rejects.toThrow(
+        "Failed to fetch GitHub Actions OIDC token: 403",
+      );
+      expect(oidc.getRequestCount()).toBe(1);
+    });
   });
 
   it("throws when the Argos API exchange returns an error", async () => {
