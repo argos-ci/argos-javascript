@@ -1,5 +1,7 @@
 import { createClient, throwAPIError } from "@argos-ci/api-client";
+import pRetry from "p-retry";
 import type { Config } from "./config";
+import { debug } from "./debug";
 
 /**
  * Check if GitHub Actions OIDC is available for auto-detection.
@@ -25,18 +27,39 @@ async function fetchOidcToken(args: { audience: string }): Promise<string> {
   const url = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
   url.searchParams.set("audience", args.audience);
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`,
-      Accept: "application/json; api-version=2.0",
-      "Content-Type": "application/json",
+  const getErrorMessage = (response: Response) =>
+    `Failed to fetch GitHub Actions OIDC token: ${response.status} ${response.statusText}`;
+
+  // One 5xx would fail the whole upload. `@actions/core` retries this
+  // endpoint too.
+  const response = await pRetry(
+    async () => {
+      const response = await fetch(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`,
+          Accept: "application/json; api-version=2.0",
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status >= 500) {
+        throw new Error(getErrorMessage(response));
+      }
+      return response;
     },
-  });
+    {
+      retries: 3,
+      onFailedAttempt: ({ error, retriesLeft, retryDelay }) => {
+        if (retriesLeft > 0) {
+          debug(
+            `${error.message}, retrying in ${retryDelay}ms (${retriesLeft} left)`,
+          );
+        }
+      },
+    },
+  );
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch GitHub Actions OIDC token: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(getErrorMessage(response));
   }
 
   const data = (await response.json()) as { value?: string };

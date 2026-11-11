@@ -88,10 +88,10 @@ describe("resolveArgosToken", () => {
 
     it("throws when the GitHub OIDC endpoint fails", async () => {
       server.use(
-        http.get(MOCK_OIDC_URL, () => HttpResponse.json(null, { status: 500 })),
+        http.get(MOCK_OIDC_URL, () => HttpResponse.json(null, { status: 403 })),
       );
       await expect(resolveArgosToken(baseConfig)).rejects.toThrow(
-        "Failed to fetch GitHub Actions OIDC token: 500",
+        "Failed to fetch GitHub Actions OIDC token: 403",
       );
     });
 
