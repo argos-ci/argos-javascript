@@ -29,7 +29,7 @@ export const tokenNameOption = new Option(
 
 export const tokenPermissionsOption = new Option(
   "--permissions <permissions...>",
-  "What the token can do. Defaults to builds:write and deployments:write, enough for upload, finalize, skip and deploy",
+  "What the token can do. Defaults to every permission",
 ).choices(PROJECT_TOKEN_PERMISSIONS);
 
 export const tokenExpireAtOption = new Option(

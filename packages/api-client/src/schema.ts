@@ -652,26 +652,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/cli/token": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Exchange a CLI authorization code for a token
-         * @description Called by the CLI to exchange a PKCE authorization code for an API token.
-         */
-        post: operations["exchangeCliToken"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/auth/github-actions/oidc/exchange": {
         parameters: {
             query?: never;
@@ -3925,10 +3905,13 @@ export interface operations {
                     /** @description A name to recognize the token, e.g. `GitHub Actions`. */
                     name: string;
                     /**
-                     * @description What the token can do. Defaults to uploading builds and deployments.
+                     * @description What the token can do. Defaults to every permission.
                      * @default [
                      *       "builds:write",
-                     *       "deployments:write"
+                     *       "deployments:write",
+                     *       "projects:read",
+                     *       "media:read",
+                     *       "media:write"
                      *     ]
                      */
                     permissions?: components["schemas"]["ProjectTokenPermission"][];
@@ -6064,65 +6047,6 @@ export interface operations {
             };
         };
     };
-    exchangeCliToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /** @description PKCE authorization code from the login flow */
-                    code: string;
-                    /** @description PKCE code verifier matching the code challenge */
-                    code_verifier: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Token exchange successful */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Argos API token for CLI use */
-                        token: string;
-                    };
-                };
-            };
-            /** @description Invalid parameters */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
     exchangeGitHubActionsOidcToken: {
         parameters: {
             query?: never;
@@ -7362,10 +7286,13 @@ export interface operations {
                     /** @description A name to recognize the token, e.g. `GitHub Actions`. */
                     name: string;
                     /**
-                     * @description What the token can do. Defaults to uploading builds and deployments.
+                     * @description What the token can do. Defaults to every permission.
                      * @default [
                      *       "builds:write",
-                     *       "deployments:write"
+                     *       "deployments:write",
+                     *       "projects:read",
+                     *       "media:read",
+                     *       "media:write"
                      *     ]
                      */
                     permissions?: components["schemas"]["ProjectTokenPermission"][];
