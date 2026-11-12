@@ -48,6 +48,9 @@ const EXTENSION_BY_CONTENT_TYPE: Record<string, string> = {
 
 const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp"]);
 
+/** Host of the image CDN (ImageKit) Argos serves most screenshots from. */
+const IMAGE_CDN_HOSTNAME = "files.argos-ci.com";
+
 // Characters Windows refuses in a file name.
 // eslint-disable-next-line no-control-regex
 const WINDOWS_RESERVED_CHARACTERS = /[<>:"|?*\u0000-\u001f]/g;
@@ -140,6 +143,28 @@ export async function assertEmptyDirectory(directory: string): Promise<void> {
   }
 }
 
+/**
+ * Get the URL that serves a snapshot's file exactly as it was uploaded.
+ *
+ * Argos serves images through ImageKit, which picks the format of each
+ * response on the fly: a small PNG can come back as a JPEG, so the file
+ * written under `home.png` would hold lossy JPEG bytes. `tr=orig-true` asks it
+ * for the original instead. Other URLs (large images and text snapshots) are
+ * presigned S3 URLs: they already serve the original, and any added parameter
+ * would break their signature, so they are left alone.
+ */
+export function getOriginalFileUrl(url: string): string {
+  if (!URL.canParse(url)) {
+    return url;
+  }
+  const parsed = new URL(url);
+  if (parsed.hostname !== IMAGE_CDN_HOSTNAME) {
+    return url;
+  }
+  parsed.searchParams.set("tr", "orig-true");
+  return parsed.href;
+}
+
 /** A failed response, and whether trying again may succeed. */
 class HTTPStatusError extends Error {
   retryable: boolean;
@@ -155,10 +180,11 @@ async function downloadFile(
   path: string,
   signal: AbortSignal,
 ): Promise<void> {
+  const url = getOriginalFileUrl(file.url);
   for (let attempt = 1; ; attempt++) {
     signal.throwIfAborted();
     try {
-      const response = await fetch(file.url, { signal });
+      const response = await fetch(url, { signal });
       if (!response.ok || !response.body) {
         await response.body?.cancel();
         throw new HTTPStatusError(response.status);
@@ -177,7 +203,7 @@ async function downloadFile(
       const retryable = !(error instanceof HTTPStatusError) || error.retryable;
       if (!retryable || attempt >= MAX_ATTEMPTS) {
         const reason = error instanceof Error ? error.message : String(error);
-        fail(`Could not download "${file.name}" (${reason}): ${file.url}`);
+        fail(`Could not download "${file.name}" (${reason}): ${url}`);
       }
       await sleep(RETRY_DELAY_MS * attempt, undefined, { signal });
     }

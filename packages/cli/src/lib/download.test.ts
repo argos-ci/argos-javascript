@@ -6,6 +6,7 @@ import { CliError } from "./cli-error";
 import {
   assertEmptyDirectory,
   downloadSnapshots,
+  getOriginalFileUrl,
   getSnapshotPath,
   getSnapshotPaths,
 } from "./download";
@@ -67,6 +68,32 @@ describe("getSnapshotPaths", () => {
   });
 });
 
+describe("getOriginalFileUrl", () => {
+  it("asks the image CDN for the original file", () => {
+    expect(getOriginalFileUrl("https://files.argos-ci.com/abc")).toBe(
+      "https://files.argos-ci.com/abc?tr=orig-true",
+    );
+  });
+
+  it("keeps the rest of the query string", () => {
+    expect(getOriginalFileUrl("https://files.argos-ci.com/abc?v=2")).toBe(
+      "https://files.argos-ci.com/abc?v=2&tr=orig-true",
+    );
+    // A transformation would change the file too: the original replaces it.
+    expect(getOriginalFileUrl("https://files.argos-ci.com/abc?tr=w-100")).toBe(
+      "https://files.argos-ci.com/abc?tr=orig-true",
+    );
+  });
+
+  it("leaves other URLs alone", () => {
+    // An added parameter would break the signature of a presigned S3 URL.
+    const presigned =
+      "https://argos.s3.us-east-1.amazonaws.com/abc?X-Amz-Signature=def";
+    expect(getOriginalFileUrl(presigned)).toBe(presigned);
+    expect(getOriginalFileUrl("not a url")).toBe("not a url");
+  });
+});
+
 describe("assertEmptyDirectory", () => {
   let root: string;
 
@@ -113,7 +140,9 @@ describe("downloadSnapshots", () => {
         throw status;
       }
       return status === 200
-        ? new Response(`bytes of ${String(input).split("/").pop()}`)
+        ? new Response(
+            `bytes of ${new URL(String(input)).pathname.split("/").pop()}`,
+          )
         : new Response(null, { status });
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -155,6 +184,48 @@ describe("downloadSnapshots", () => {
     expect(onProgress).toHaveBeenLastCalledWith(2, 2);
   });
 
+  it("writes the original bytes of an image the CDN would convert", async () => {
+    // Like ImageKit: the format of the response is the CDN's pick, unless the
+    // original is asked for.
+    const fetchMock = vi.fn<typeof fetch>(async (input) =>
+      new URL(String(input)).searchParams.get("tr") === "orig-true"
+        ? new Response("original PNG", {
+            headers: { "content-type": "image/png" },
+          })
+        : new Response("converted JPEG", {
+            headers: { "content-type": "image/jpeg" },
+          }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const [entry] = await downloadSnapshots(
+      [file("chromium/home.png")],
+      directory,
+    );
+    await expect(
+      readFile(join(directory, "chromium/home.png"), "utf8"),
+    ).resolves.toBe("original PNG");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://files.argos-ci.com/chromium-home.png?tr=orig-true",
+      expect.anything(),
+    );
+    // The result lists the snapshot's URL as Argos gave it.
+    expect(entry?.url).toBe("https://files.argos-ci.com/chromium-home.png");
+  });
+
+  it("fetches a presigned URL as it is", async () => {
+    const fetchMock = mockFetch();
+    const url =
+      "https://bucket.s3.us-east-1.amazonaws.com/tree?X-Amz-Signature=abc";
+    await downloadSnapshots(
+      [{ name: "tree.aria.yml", url, contentType: "text/yaml" }],
+      directory,
+    );
+    expect(fetchMock).toHaveBeenCalledWith(url, expect.anything());
+    await expect(
+      readFile(join(directory, "tree.aria.yml"), "utf8"),
+    ).resolves.toBe("bytes of tree");
+  });
+
   it("keeps the fields of each snapshot in the result", async () => {
     mockFetch();
     const [entry] = await downloadSnapshots(
@@ -178,7 +249,7 @@ describe("downloadSnapshots", () => {
     await expect(
       downloadSnapshots([file("home.png")], directory),
     ).rejects.toThrow(
-      'Could not download "home.png" (HTTP 500): https://files.argos-ci.com/home.png',
+      'Could not download "home.png" (HTTP 500): https://files.argos-ci.com/home.png?tr=orig-true',
     );
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
