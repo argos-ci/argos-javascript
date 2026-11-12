@@ -51,8 +51,8 @@ identifies its own project. `project` and `automation` commands take the same
 `ARGOS_ACCOUNT`).
 
 A project token can be linked to several projects of an account. Such a token
-does not identify a project on its own: every command using it — `upload`,
-`finalize`, `skip`, `deploy`, `media upload` and the read commands alike — needs
+does not identify a project on its own. Every command that uses it (`upload`,
+`finalize`, `skip`, `deploy`, `media upload` and the read commands) needs
 `--project owner/project` or `ARGOS_PROJECT`, or Argos answers 400. A project
 token can also lack a permission (`builds:write`, `deployments:write`,
 `projects:read`, `media:read`, `media:write`): Argos answers 403 naming the one
@@ -84,7 +84,7 @@ humans, not CI.
 - **Flakiness** — `test list [--build-name <name>] [--search <q>]` · `test get <testId>` · `test changes <testId> [--ignored true|false] [--metrics-period …]` · `test subscribe|unsubscribe <testId>` · `change list` · `change ignore|unignore <changeId> --project owner/project`
 - **Test comments** — `test comment list|create <testId>` · `test comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <testId> <id>` · `test comment react|unreact <testId> <id> <emoji>`
 - **Project** — `project get` · `project update [--name …] [--summary-check …] [--default-user-level …] [--ignore-changes true|false] [--deployments true|false] …` · `project transfer --to <slug>` · `project contributor list|set|remove` · `project deployments [--environment preview|production]` · `project domain get|set <domain>`
-- **Project tokens** — `project token list` · `project token create --name <name> [--permissions <p…>] [--expire-at <iso> | --expires-in <days>]` · `project token revoke <tokenId>` · `account project-token list|revoke` · `account project-token create --projects <name…> --name <name> […]` (one token for several projects)
+- **Project tokens**: `project token list` · `project token create --name <name> [--permissions <p…>] [--expire-at <iso> | --expires-in <days>]` · `project token revoke <tokenId>` · `account project-token list|revoke` · `account project-token create --projects <name…> --name <name> […]` (one token for several projects)
 - **Automation** — `automation list [--active true|false]` · `automation get <ruleId>` · `automation create|update [<ruleId>] --definition-file <path>` · `automation deactivate <ruleId>`
 - **Team** — `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
 - **Account** — `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
