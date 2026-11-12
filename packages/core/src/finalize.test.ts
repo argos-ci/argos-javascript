@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { createBuildRequests } from "../mocks/handlers/createBuild";
+import { finalizeBuildsRequests } from "../mocks/handlers/finalizeBuilds";
 import { setupMockServer } from "../mocks/server";
 import { finalize } from "./finalize";
 
@@ -82,6 +84,59 @@ describe("#finalize", () => {
         builds: [{ id: "456", url: "https://app.argos-ci.dev/builds/456" }],
         skippedBuild: null,
       });
+    });
+  });
+
+  describe("project", () => {
+    beforeEach(() => {
+      finalizeBuildsRequests.length = 0;
+      createBuildRequests.length = 0;
+    });
+
+    it("names the project, on the skipped build too", async () => {
+      await finalize({
+        apiBaseUrl: "https://api.argos-ci.dev",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        project: "acme/web",
+        parallel: { nonce: "empty" },
+        skipIfEmpty: true,
+      });
+
+      expect(finalizeBuildsRequests).toEqual([
+        { parallelNonce: "empty", project: "acme/web" },
+      ]);
+      expect(createBuildRequests).toEqual([
+        expect.objectContaining({ project: "acme/web", skipped: true }),
+      ]);
+    });
+
+    it("reads the project from ARGOS_PROJECT", async () => {
+      vi.stubEnv("ARGOS_PROJECT", "acme/docs");
+
+      await finalize({
+        apiBaseUrl: "https://api.argos-ci.dev",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        parallel: { nonce: "nonce-123" },
+      });
+
+      expect(finalizeBuildsRequests).toEqual([
+        { parallelNonce: "nonce-123", project: "acme/docs" },
+      ]);
+    });
+
+    it("sends no project when it is not set", async () => {
+      vi.stubEnv("ARGOS_PROJECT", "");
+
+      await finalize({
+        apiBaseUrl: "https://api.argos-ci.dev",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        parallel: { nonce: "empty" },
+        skipIfEmpty: true,
+      });
+
+      expect(finalizeBuildsRequests).toEqual([{ parallelNonce: "empty" }]);
+      expect(createBuildRequests).toHaveLength(1);
+      expect(createBuildRequests[0]).not.toHaveProperty("project");
     });
   });
 });

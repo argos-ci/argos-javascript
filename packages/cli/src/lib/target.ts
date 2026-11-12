@@ -84,6 +84,17 @@ export async function resolveToken(options: {
   return token;
 }
 
+/**
+ * The project named by `--project` or the `ARGOS_PROJECT` environment variable,
+ * or `null` when neither is set. Aborts on a value that is not `owner/project`.
+ */
+export function resolveProjectPath(options: {
+  project?: string | undefined;
+}): ProjectPath | null {
+  const slug = options.project || process.env["ARGOS_PROJECT"];
+  return slug ? parseProjectPathOrFail(slug) : null;
+}
+
 function explicitProjectPath(
   reference: BuildReference,
   options: TargetOptions,
@@ -91,11 +102,7 @@ function explicitProjectPath(
   if (reference.owner && reference.project) {
     return { owner: reference.owner, project: reference.project };
   }
-  const project = options.project || process.env["ARGOS_PROJECT"];
-  if (project) {
-    return parseProjectPathOrFail(project);
-  }
-  return null;
+  return resolveProjectPath(options);
 }
 
 /**
@@ -152,9 +159,9 @@ export async function resolveProjectTarget(
   { auth }: { auth: AuthMode },
 ): Promise<ProjectTarget> {
   const client = createApiClient(await resolveToken(options));
-  const projectPath = options.project || process.env["ARGOS_PROJECT"];
+  const projectPath = resolveProjectPath(options);
   if (projectPath) {
-    return { client, ...parseProjectPathOrFail(projectPath) };
+    return { client, ...projectPath };
   }
   if (auth === "user") {
     fail(

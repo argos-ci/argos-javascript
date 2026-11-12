@@ -27,6 +27,9 @@ type InviteLink = ArgosAPISchema.components["schemas"]["InviteLink"];
 type ProjectContributor =
   ArgosAPISchema.components["schemas"]["ProjectContributor"];
 type ProjectDomain = ArgosAPISchema.components["schemas"]["ProjectDomain"];
+type ProjectToken = ArgosAPISchema.components["schemas"]["ProjectToken"];
+type CreatedProjectToken =
+  ArgosAPISchema.components["schemas"]["CreatedProjectToken"];
 type IgnoredChange = ArgosAPISchema.components["schemas"]["IgnoredChange"];
 type Media = ArgosAPISchema.components["schemas"]["Media"];
 type MediaVersion = ArgosAPISchema.components["schemas"]["MediaVersion"];
@@ -608,6 +611,56 @@ export function formatDeployments(deployments: ProjectDeployment[]): string {
 
 export function formatProjectDomain(domain: ProjectDomain): string {
   return `Deployment domain: ${formatValue(domain.domain)}`;
+}
+
+function formatTokenExpiration(expireAt: string | null): string {
+  if (!expireAt) {
+    return "never";
+  }
+  return Date.parse(expireAt) <= Date.now()
+    ? `${expireAt} (expired)`
+    : expireAt;
+}
+
+/** The details of a project token, under its title line. */
+function formatProjectTokenDetails(token: ProjectToken): string[] {
+  return [
+    `  Projects: ${formatValue(token.projects.join(", "))}`,
+    `  Permissions: ${token.permissions.join(", ")}`,
+    `  Created: ${token.createdAt}`,
+    `  Expires: ${formatTokenExpiration(token.expireAt)}`,
+    `  Last used: ${token.lastUsedAt ?? "never"}`,
+  ];
+}
+
+// Token names are typed by whoever created the token, so they are sanitized
+// like any remote text.
+export function formatProjectTokens(tokens: ProjectToken[]): string {
+  if (tokens.length === 0) {
+    return "No tokens found.";
+  }
+  return [
+    `Tokens (${tokens.length})`,
+    "",
+    ...tokens.flatMap((token) => [
+      `${sanitizeTerminalText(token.name)} · ${token.id}`,
+      ...formatProjectTokenDetails(token),
+      "",
+    ]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+export function formatCreatedProjectToken(token: CreatedProjectToken): string {
+  return [
+    `Created token ${sanitizeTerminalText(token.name)} · ${token.id}`,
+    ...formatProjectTokenDetails(token),
+    "",
+    token.token,
+    "",
+    "Save this token now: Argos does not store it and will not show it again.",
+  ].join("\n");
 }
 
 export function formatIgnoredChanges(changes: IgnoredChange[]): string {

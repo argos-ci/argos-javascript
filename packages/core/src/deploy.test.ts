@@ -70,4 +70,25 @@ describe("#deploy", () => {
       expect.objectContaining({ commit, prHeadCommit: null }),
     ]);
   });
+
+  it("names the project when it is set", async () => {
+    vi.stubEnv("ARGOS_PROJECT", "acme/web");
+    const bodies = captureDeploymentBodies();
+
+    await deployFixture();
+
+    expect(bodies).toEqual([
+      expect.objectContaining({ project: "acme/web", commit }),
+    ]);
+  });
+
+  it("sends no project when it is not set", async () => {
+    vi.stubEnv("ARGOS_PROJECT", "");
+    const bodies = captureDeploymentBodies();
+
+    await deployFixture();
+
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]).not.toHaveProperty("project");
+  });
 });

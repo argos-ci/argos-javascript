@@ -1,24 +1,25 @@
 ---
 name: argos-cli
 description: >
-  Operate Argos visual testing from the terminal with the `argos` CLI — list
+  Operate Argos visual testing from the terminal with the `argos` CLI: list
   and inspect builds and snapshot diffs, download a build's screenshots or a
   project's latest baseline, submit reviews, request reviewers, post comments,
   inspect a test's flakiness and its recurring changes, ignore flaky test
-  changes, configure a project and its contributors, manage a team's members,
+  changes, configure a project and its contributors, create, rotate and revoke
+  the project tokens CI uses, manage a team's members,
   invites and email domains, manage automation rules, fetch analytics, upload
   screenshots, manage CI builds, and search the Argos documentation. Use
   whenever running `argos` commands or working with Argos builds, snapshots,
   flakiness, projects, teams, or visual-regression reviews from a shell,
   script, or CI pipeline.
-  Load before running `argos` — it covers the token model and JSON output
+  Load before running `argos`. It covers the token model and JSON output
   contract that prevent silent failures.
 license: MIT
 metadata:
   author: argos-ci
   homepage: https://argos-ci.com
   source: https://github.com/argos-ci/argos-javascript
-argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project owner/project` for build-number refs on review/comment commands, for every `change`, `project` and `automation` command, and for `test` commands unless the token is a project token; `--account <slug>` (or ARGOS_ACCOUNT) for every `account` command.
+argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project owner/project` for build-number refs on review/comment commands, for every `change`, `project` and `automation` command, for `test` commands unless the token is a project token, and for every command when the project token is linked to several projects; `--account <slug>` (or ARGOS_ACCOUNT) for every `account` command.
 ---
 
 # Argos CLI
@@ -32,7 +33,9 @@ command map.
 - Pass `--json` whenever you parse stdout; commands print human-readable text
   otherwise.
 - Errors go to **stderr** as `Error: <message>`. Exit `0` = success, `1` = failure.
-- Never print token values.
+- Never print token values. The only commands that print one are the two token
+  creation commands, and only once: pipe the value straight into the secret
+  that needs it (see the token rotation flow below) instead of echoing it.
 
 ## Authentication
 
@@ -42,18 +45,26 @@ is not a build ref: it comes from a diff's `change.id` and does **not** carry th
 account, so every `change` command needs `--project owner/project` (or
 `ARGOS_PROJECT`). A `<testId>` comes from a diff's `test.id` and carries the
 project name but not the account, so `test` commands need the same
-`--project`/`ARGOS_PROJECT` — except with a project token, which already
+`--project`/`ARGOS_PROJECT`, except with a project token, which already
 identifies its own project. `project` and `automation` commands take the same
 `--project owner/project`; `account` commands take `--account <slug>` (or
 `ARGOS_ACCOUNT`).
 
-Two token types — pick by command:
+A project token can be linked to several projects of an account. Such a token
+does not identify a project on its own. Every command that uses it (`upload`,
+`finalize`, `skip`, `deploy`, `media upload` and the read commands) needs
+`--project owner/project` or `ARGOS_PROJECT`, or Argos answers 400. A project
+token can also lack a permission (`builds:write`, `deployments:write`,
+`projects:read`, `media:read`, `media:write`): Argos answers 403 naming the one
+the command needs, and only a new token with it fixes that.
 
-| Commands                                                                                                                                                                                                                                                                                                         | Token                       | Resolution order                            |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------- |
-| `build list`, `build get`, `build snapshots`, `build download`, `baseline download`, `test list`, `test get`, `test changes`, `change list`, `project get`, `project deployments`, `project domain get`, `media get`, `media list`, `media versions`, `media update`, `media delete`                             | Project token               | `--token` › `ARGOS_TOKEN`                   |
-| `review *`, `comment *`, `test comment *`, `media comment *`, `test subscribe` / `unsubscribe`, `build subscribe` / `unsubscribe`, `change ignore` / `unignore`, `account *`, `project update`, `project transfer`, `project contributor *`, `project domain set`, `automation *`, `analytics`, `create-project` | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
-| `upload`, `finalize`, `skip`, `deploy`, `media upload`                                                                                                                                                                                                                                                           | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
+There are two token types. Pick one by command:
+
+| Commands                                                                                                                                                                                                                                                                                                                            | Token                       | Resolution order                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------- |
+| `build list`, `build get`, `build snapshots`, `build download`, `baseline download`, `test list`, `test get`, `test changes`, `change list`, `project get`, `project deployments`, `project domain get`, `media get`, `media list`, `media versions`, `media update`, `media delete`                                                | Project token               | `--token` › `ARGOS_TOKEN`                   |
+| `review *`, `comment *`, `test comment *`, `media comment *`, `test subscribe` / `unsubscribe`, `build subscribe` / `unsubscribe`, `change ignore` / `unignore`, `account *`, `project update`, `project transfer`, `project contributor *`, `project token *`, `project domain set`, `automation *`, `analytics`, `create-project` | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
+| `upload`, `finalize`, `skip`, `deploy`, `media upload`                                                                                                                                                                                                                                                                              | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
 
 `baseline download` takes only a project token: the baseline lookup it relies on
 rejects a PAT, including the one from `argos login`.
@@ -67,35 +78,36 @@ permission: ask the user to run `argos login` again and choose "Admin", or use
 a PAT.
 
 Project tokens read build data but **cannot** review, comment, ignore changes, or
-administer a project or team — those need a PAT. If no suitable token is
+administer a project or team. Those need a PAT. If no suitable token is
 available, ask the user. For these actions, if no PAT exists, report the
 conclusion and evidence instead of acting. `argos login` is for interactive
 humans, not CI.
 
 ## Commands
 
-- **Inspect** — `build list [--branch <b>] [--commit <sha>] [--search <q>]` · `build get <ref>` · `build snapshots <ref> [--needs-review] [--metrics-period 24h|3d|7d|30d|90d]` · `build subscribe|unsubscribe <ref>`
-- **Export** — `build download <ref> [-o <dir>]` · `baseline download [-o <dir>] [--branch <b>] [--build-name <name>] [--mode ci|monitoring]`
-- **Review** — `review list <ref>` · `review create <ref> --event <approve|reject|comment> [--body <md>]` · `review dismiss <ref> <reviewId>` · `review reviewer list <ref>` · `review reviewer add|remove <ref> <userId...>`
-- **Comment** — `comment list <ref>` · `comment create <ref> --body <md> [--reply-to <id>] [--diff <id>] [--draft]` · `comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <ref> <id>` · `comment react|unreact <ref> <id> <emoji>`
-- **Flakiness** — `test list [--build-name <name>] [--search <q>]` · `test get <testId>` · `test changes <testId> [--ignored true|false] [--metrics-period …]` · `test subscribe|unsubscribe <testId>` · `change list` · `change ignore|unignore <changeId> --project owner/project`
-- **Test comments** — `test comment list|create <testId>` · `test comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <testId> <id>` · `test comment react|unreact <testId> <id> <emoji>`
-- **Project** — `project get` · `project update [--name …] [--summary-check …] [--default-user-level …] [--ignore-changes true|false] [--deployments true|false] …` · `project transfer --to <slug>` · `project contributor list|set|remove` · `project deployments [--environment preview|production]` · `project domain get|set <domain>`
-- **Automation** — `automation list [--active true|false]` · `automation get <ruleId>` · `automation create|update [<ruleId>] --definition-file <path>` · `automation deactivate <ruleId>`
-- **Team** — `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
-- **Account** — `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
-- **Media** — `media upload <files...> [--branch <b> | --pr <n>] [--state before|after] [--description <text>] [--visibility team|public] [--no-compress]` · `media list [--branch <b>] [--pr <n>] [--stage staged|published] [--search <q>] [--type image|video]` · `media get|delete|versions <mediaId>` · `media update <mediaId> [--name <n>] [--description <text>] [--branch <b>]`
-- **Media comments** — `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
-- **CI** — `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
-- **Auth** — `login` · `logout`
-- **Docs** — `docs search <query> [--limit <n>]` (no token; up to 10 results, 5 by default)
+- **Inspect**: `build list [--branch <b>] [--commit <sha>] [--search <q>]` · `build get <ref>` · `build snapshots <ref> [--needs-review] [--metrics-period 24h|3d|7d|30d|90d]` · `build subscribe|unsubscribe <ref>`
+- **Export**: `build download <ref> [-o <dir>]` · `baseline download [-o <dir>] [--branch <b>] [--build-name <name>] [--mode ci|monitoring]`
+- **Review**: `review list <ref>` · `review create <ref> --event <approve|reject|comment> [--body <md>]` · `review dismiss <ref> <reviewId>` · `review reviewer list <ref>` · `review reviewer add|remove <ref> <userId...>`
+- **Comment**: `comment list <ref>` · `comment create <ref> --body <md> [--reply-to <id>] [--diff <id>] [--draft]` · `comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <ref> <id>` · `comment react|unreact <ref> <id> <emoji>`
+- **Flakiness**: `test list [--build-name <name>] [--search <q>]` · `test get <testId>` · `test changes <testId> [--ignored true|false] [--metrics-period …]` · `test subscribe|unsubscribe <testId>` · `change list` · `change ignore|unignore <changeId> --project owner/project`
+- **Test comments**: `test comment list|create <testId>` · `test comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <testId> <id>` · `test comment react|unreact <testId> <id> <emoji>`
+- **Project**: `project get` · `project update [--name …] [--summary-check …] [--default-user-level …] [--ignore-changes true|false] [--deployments true|false] …` · `project transfer --to <slug>` · `project contributor list|set|remove` · `project deployments [--environment preview|production]` · `project domain get|set <domain>`
+- **Project tokens**: `project token list` · `project token create --name <name> [--permissions <p…>] [--expire-at <iso> | --expires-in <days>]` · `project token revoke <tokenId>` · `account project-token list|revoke` · `account project-token create --projects <name…> --name <name> […]` (one token for several projects)
+- **Automation**: `automation list [--active true|false]` · `automation get <ruleId>` · `automation create|update [<ruleId>] --definition-file <path>` · `automation deactivate <ruleId>`
+- **Team**: `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
+- **Account**: `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
+- **Media**: `media upload <files...> [--branch <b> | --pr <n>] [--state before|after] [--description <text>] [--visibility team|public] [--no-compress]` · `media list [--branch <b>] [--pr <n>] [--stage staged|published] [--search <q>] [--type image|video]` · `media get|delete|versions <mediaId>` · `media update <mediaId> [--name <n>] [--description <text>] [--branch <b>]`
+- **Media comments**: `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
+- **CI**: `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
+- **Auth**: `login` · `logout`
+- **Docs**: `docs search <query> [--limit <n>]` (no token; up to 10 results, 5 by default)
 
 List commands (`build list`, `test list`, `change list`, `account member
 list`, `project contributor list`, `project deployments`, `automation list`,
 `account invite list`) follow pagination up to `--limit` (default 100).
 
 `build snapshots --json` enriches each diff with `test.metrics` (flakiness:
-`stability`, `consistency`, `flakiness`, all 0–1) and, on a change, `change`
+`stability`, `consistency`, `flakiness`, all from 0 to 1) and, on a change, `change`
 (`id`, `ignored`, `occurrences`). High `occurrences` or `flakiness` flags a
 change worth ignoring; pass its `change.id` to `change ignore`.
 
@@ -172,8 +184,8 @@ argos finalize --parallel-nonce $ID
 ```
 
 Onboard someone onto a team and a project. Team roles come from `account`,
-per-project access from `project contributor` — owners and members already reach
-every project, so contributors are the only ones that need a grant:
+per-project access from `project contributor`. Owners and members already reach
+every project, so only contributors need a grant:
 
 ```bash
 argos account invite create dev@acme.com --account acme --level contributor --json
@@ -187,6 +199,25 @@ prints the project back so you can check what it ended up with:
 ```bash
 argos project get --project acme/web --json
 argos project update --project acme/web --summary-check auto --ignore-changes true --auto-ignore-after 3 --json
+```
+
+Rotate a project token without downtime: create the replacement, update the CI
+secret, then revoke the old token once CI stops using it (its `lastUsedAt` stops
+moving). Tokens get every permission and never expire unless told otherwise:
+
+```bash
+argos project token list --project acme/web --json                 # find the old token's id
+argos project token create --project acme/web --name "GitHub Actions" --expires-in 365 --json \
+  | jq -r .token | gh secret set ARGOS_TOKEN                         # never echo the value
+argos project token revoke <oldTokenId> --project acme/web
+```
+
+One token for several projects (a monorepo, say) comes from the account, and CI
+then names the project on every command:
+
+```bash
+argos account project-token create --account acme --projects web docs --name Monorepo --json | jq -r .token | gh secret set ARGOS_TOKEN
+ARGOS_PROJECT=acme/web argos upload ./screenshots
 ```
 
 Ask for a review on a build, then check who is still on the hook:

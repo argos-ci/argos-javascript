@@ -11,14 +11,17 @@ async function run(input: {
   commit: string;
   pullInterval: number;
   argosClient: ArgosAPIClient;
+  argosProject: string | undefined;
   gitlabClient: GitlabAPIClient;
   gitlabProjectId: string;
 }) {
   const { argosClient, gitlabClient, gitlabProjectId, pullInterval, commit } =
     input;
 
-  const { data: project, error: projectError } =
-    await argosClient.GET("/project");
+  const { data: project, error: projectError } = await argosClient.GET(
+    "/project",
+    { params: { query: { project: input.argosProject } } },
+  );
   if (projectError) {
     console.error(projectError);
     throw new Error(projectError.error);
@@ -84,6 +87,11 @@ export async function updateGitLabCommitStatuses(input: {
   commit: string;
   pullInterval?: number;
   argosToken: string;
+  /**
+   * Argos project, as `owner/project`. Required when the token is linked to
+   * several projects.
+   */
+  argosProject?: string | undefined;
   gitlab: {
     projectId: string;
     authToken: string;
@@ -99,6 +107,7 @@ export async function updateGitLabCommitStatuses(input: {
   });
   await run({
     argosClient: argos,
+    argosProject: input.argosProject,
     gitlabClient: gitlab,
     gitlabProjectId: input.gitlab.projectId,
     commit: input.commit,
