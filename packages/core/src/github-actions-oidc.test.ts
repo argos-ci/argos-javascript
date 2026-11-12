@@ -88,17 +88,13 @@ describe("exchangeGitHubActionsOidcToken", () => {
 
     /** Answers `status` to the first `times` token requests, then a token. */
     function failOidcRequests(status: number, times = Infinity) {
-      let requestCount = 0;
-      server.use(
-        http.get(MOCK_OIDC_URL, () => {
-          requestCount++;
-          if (requestCount <= times) {
-            return HttpResponse.json(null, { status });
-          }
-          return HttpResponse.json({ value: MOCK_OIDC_TOKEN, count: 1 });
-        }),
+      const handler = vi.fn(() =>
+        handler.mock.calls.length <= times
+          ? HttpResponse.json(null, { status })
+          : HttpResponse.json({ value: MOCK_OIDC_TOKEN, count: 1 }),
       );
-      return { getRequestCount: () => requestCount };
+      server.use(http.get(MOCK_OIDC_URL, handler));
+      return handler;
     }
 
     async function exchangeSkippingWaits() {
@@ -122,7 +118,7 @@ describe("exchangeGitHubActionsOidcToken", () => {
     it("retries a server error", async () => {
       const oidc = failOidcRequests(503, 1);
       await expect(exchangeSkippingWaits()).resolves.toBe(MOCK_ARGOS_TOKEN);
-      expect(oidc.getRequestCount()).toBe(2);
+      expect(oidc).toHaveBeenCalledTimes(2);
     });
 
     it("throws once the retries for server errors run out", async () => {
@@ -130,7 +126,7 @@ describe("exchangeGitHubActionsOidcToken", () => {
       await expect(exchangeSkippingWaits()).rejects.toThrow(
         "Failed to fetch GitHub Actions OIDC token: 503",
       );
-      expect(oidc.getRequestCount()).toBe(4);
+      expect(oidc).toHaveBeenCalledTimes(4);
     });
 
     it("does not retry a client error", async () => {
@@ -138,7 +134,7 @@ describe("exchangeGitHubActionsOidcToken", () => {
       await expect(exchangeSkippingWaits()).rejects.toThrow(
         "Failed to fetch GitHub Actions OIDC token: 403",
       );
-      expect(oidc.getRequestCount()).toBe(1);
+      expect(oidc).toHaveBeenCalledTimes(1);
     });
   });
 
