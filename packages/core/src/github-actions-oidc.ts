@@ -1,5 +1,5 @@
 import { createClient, throwAPIError } from "@argos-ci/api-client";
-import pRetry from "p-retry";
+import pRetry, { AbortError } from "p-retry";
 import type { Config } from "./config";
 import { debug } from "./debug";
 
@@ -27,11 +27,8 @@ async function fetchOidcToken(args: { audience: string }): Promise<string> {
   const url = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
   url.searchParams.set("audience", args.audience);
 
-  const getErrorMessage = (response: Response) =>
-    `Failed to fetch GitHub Actions OIDC token: ${response.status} ${response.statusText}`;
-
-  // One 5xx would fail the whole upload. `@actions/core` retries this
-  // endpoint too.
+  // One server error or network failure would fail the whole upload.
+  // `@actions/core` retries this endpoint too. A 4xx is not retried.
   const response = await pRetry(
     async () => {
       const response = await fetch(url.toString(), {
@@ -41,8 +38,11 @@ async function fetchOidcToken(args: { audience: string }): Promise<string> {
           "Content-Type": "application/json",
         },
       });
-      if (response.status >= 500) {
-        throw new Error(getErrorMessage(response));
+      if (!response.ok) {
+        const message = `Failed to fetch GitHub Actions OIDC token: ${response.status} ${response.statusText}`;
+        throw response.status >= 500
+          ? new Error(message)
+          : new AbortError(message);
       }
       return response;
     },
@@ -57,10 +57,6 @@ async function fetchOidcToken(args: { audience: string }): Promise<string> {
       },
     },
   );
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(response));
-  }
 
   const data = (await response.json()) as { value?: string };
 
