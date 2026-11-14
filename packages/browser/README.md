@@ -1,15 +1,4 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
-
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Argos Browser
+# Snapvisor Browser
 
 Low-level browser utilities that stabilize the page before a screenshot is taken — waiting for fonts and images to load, hiding scrollbars and text carets, and resolving viewports.
 
@@ -17,9 +6,13 @@ Low-level browser utilities that stabilize the page before a screenshot is taken
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/browser.svg)](https://www.npmjs.com/package/@snapvisor/browser)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/browser.svg)](https://www.npmjs.com/package/@snapvisor/browser)
 
-> This package is an internal building block used by the higher-level Argos SDKs (Playwright, Cypress, Puppeteer, …). You usually don't need to install it directly — pick the integration for your test framework instead.
+> This package is an internal building block used by the higher-level Snapvisor SDKs (Playwright, Cypress, Puppeteer, …). You usually don't need to install it directly — pick the integration for your test framework instead.
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs)
-- [Discord](https://argos-ci.com/discord)
+- [Snapvisor SDK docs](https://snapvisor.io/docs/sdks)
+- [Getting started](https://snapvisor.io/docs/getting-started)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).

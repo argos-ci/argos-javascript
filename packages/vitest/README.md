@@ -1,23 +1,12 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
-
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Official Argos Vitest integration
+# Snapvisor Vitest integration
 
 [![npm version](https://img.shields.io/npm/v/@snapvisor/vitest.svg)](https://www.npmjs.com/package/@snapvisor/vitest)
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/vitest.svg)](https://www.npmjs.com/package/@snapvisor/vitest)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/vitest.svg)](https://www.npmjs.com/package/@snapvisor/vitest)
 
-Capture Argos screenshots directly from your [Vitest browser tests](https://vitest.dev/guide/browser/).
+Capture screenshots and snapshots from your [Vitest browser tests](https://vitest.dev/guide/browser/) and upload them to [Snapvisor](https://app.snapvisor.io), which compares them with your approved baseline and reports the result on your pull request.
 
-Visit the [Vitest SDK documentation](https://argos-ci.com/docs/reference/vitest) for guides, API and more.
+Visit the [Vitest SDK documentation](https://snapvisor.io/docs/sdks) for guides, API and more.
 
 ## Installation
 
@@ -51,7 +40,7 @@ import { argosVitestPlugin } from "@snapvisor/vitest/plugin";
 export default defineConfig({
   plugins: [
     argosVitestPlugin({
-      // Upload the screenshots to Argos at the end of the run.
+      // Upload the screenshots to Snapvisor at the end of the run.
       uploadToArgos: process.env.CI === "true",
     }),
   ],
@@ -82,7 +71,7 @@ test("Button", async () => {
 
 ### Automatic naming
 
-The name is optional. When omitted, Argos derives one from the current test,
+The name is optional. When omitted, Snapvisor derives one from the current test,
 mimicking [Vitest snapshots](https://vitest.dev/guide/snapshot). Several unnamed
 captures in the same test get an incrementing counter so they stay unique:
 
@@ -95,14 +84,14 @@ test("Button", async () => {
 ```
 
 Unlike Vitest — which keeps a per-file `.snap`, so its keys only need to be
-unique within a file — Argos names are **global** across the build. The
+unique within a file — Snapvisor names are **global** across the build. The
 generated name therefore includes the test file path, so two tests with the same
 title in different files never collide.
 
 ## Snapshots
 
 `argosSnapshot` captures a snapshot of any value — not just a screenshot — and
-uploads it to Argos to diff across builds, mimicking
+uploads it to Snapvisor to diff across builds, mimicking
 [Vitest snapshots](https://vitest.dev/guide/snapshot). Unlike `argosScreenshot`,
 it does not need a browser and works in **both** browser and Node tests.
 
@@ -123,7 +112,7 @@ test("API response", async () => {
 });
 ```
 
-Use the `extension` option to control how Argos renders and diffs the snapshot,
+Use the `extension` option to control how Snapvisor renders and diffs the snapshot,
 and `tag` to attach tags:
 
 ```ts
@@ -138,8 +127,15 @@ Screenshots and snapshots are both written to the `./snapshots` directory by
 default (configurable via the plugin `root` option) and uploaded by the reporter
 when `uploadToArgos` is enabled.
 
+## Authentication
+
+Uploads need your Snapvisor project token. Create a project in the [Snapvisor app](https://app.snapvisor.io), copy its token, and expose it to your CI job as the `ARGOS_TOKEN` environment variable (store it as a CI secret, never in the repository). The variable keeps the upstream Argos name on purpose, so pipelines already wired for the Argos SDKs keep working. On GitHub Actions you can skip the token with tokenless authentication.
+
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/reference/vitest)
-- [Quickstart](https://argos-ci.com/docs/quickstart/vitest-quickstart)
-- [Discord](https://argos-ci.com/discord)
+- [Snapvisor SDK docs](https://snapvisor.io/docs/sdks)
+- [Getting started](https://snapvisor.io/docs/getting-started)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).

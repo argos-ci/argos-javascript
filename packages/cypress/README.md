@@ -1,23 +1,12 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
-
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Official Argos Cypress integration
+# Snapvisor Cypress integration
 
 [![npm version](https://img.shields.io/npm/v/@snapvisor/cypress.svg)](https://www.npmjs.com/package/@snapvisor/cypress)
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/cypress.svg)](https://www.npmjs.com/package/@snapvisor/cypress)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/cypress.svg)](https://www.npmjs.com/package/@snapvisor/cypress)
 
-Capture stable Argos screenshots from your [Cypress](https://www.cypress.io/) tests.
+Capture stable Snapvisor screenshots from your [Cypress](https://www.cypress.io/) tests.
 
-Visit the [Cypress SDK documentation](https://argos-ci.com/docs/reference/cypress) for guides, the API reference, and more.
+Visit the [Cypress SDK documentation](https://snapvisor.io/docs/sdks) for guides, the API reference, and more.
 
 ## Installation
 
@@ -27,7 +16,7 @@ npm install --save-dev @snapvisor/cypress
 
 ## Usage
 
-Register the Argos task in your Cypress config:
+Register the Snapvisor task in your Cypress config:
 
 ```ts
 // cypress.config.js
@@ -38,7 +27,7 @@ module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       registerArgosTask(on, config, {
-        // Upload the screenshots to Argos only on CI.
+        // Upload the screenshots to Snapvisor only on CI.
         uploadToArgos: !!process.env.CI,
       });
 
@@ -69,6 +58,9 @@ describe("Homepage", () => {
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/reference/cypress)
-- [Quickstart](https://argos-ci.com/docs/quickstart/cypress-quickstart)
-- [Discord](https://argos-ci.com/discord)
+- [Snapvisor SDK docs](https://snapvisor.io/docs/sdks)
+- [Getting started](https://snapvisor.io/docs/getting-started)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).

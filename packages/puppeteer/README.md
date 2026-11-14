@@ -1,27 +1,16 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
-
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Official Argos Puppeteer integration
+# Snapvisor Puppeteer integration
 
 [![npm version](https://img.shields.io/npm/v/@snapvisor/puppeteer.svg)](https://www.npmjs.com/package/@snapvisor/puppeteer)
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/puppeteer.svg)](https://www.npmjs.com/package/@snapvisor/puppeteer)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/puppeteer.svg)](https://www.npmjs.com/package/@snapvisor/puppeteer)
 
-Capture stable Argos screenshots from your [Puppeteer](https://github.com/puppeteer/puppeteer) tests.
+Capture stable Snapvisor screenshots from your [Puppeteer](https://github.com/puppeteer/puppeteer) tests.
 
-Visit the [Puppeteer SDK documentation](https://argos-ci.com/docs/reference/puppeteer) for guides, the API reference, and more.
+Visit the [Puppeteer SDK documentation](https://snapvisor.io/docs/sdks) for guides, the API reference, and more.
 
 ## Installation
 
-Install the SDK alongside the [Argos CLI](https://argos-ci.com/docs/reference/argos-command-line-interface-cli), which uploads the screenshots to Argos:
+Install the SDK alongside the [Snapvisor CLI](https://snapvisor.io/docs/sdks), which uploads the screenshots to Snapvisor:
 
 ```sh
 npm install --save-dev @snapvisor/puppeteer @snapvisor/cli
@@ -42,7 +31,7 @@ await argosScreenshot(page, "homepage");
 await browser.close();
 ```
 
-Screenshots are saved locally (in `./screenshots/argos` by default). Upload them to Argos with the Argos CLI, usually at the end of your CI job:
+Screenshots are saved locally (in `./screenshots/argos` by default). Upload them to Snapvisor with the Snapvisor CLI, usually at the end of your CI job:
 
 ```sh
 npx @snapvisor/cli upload ./screenshots
@@ -50,6 +39,9 @@ npx @snapvisor/cli upload ./screenshots
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/reference/puppeteer)
-- [Quickstart](https://argos-ci.com/docs/quickstart/puppeteer-quickstart)
-- [Discord](https://argos-ci.com/discord)
+- [Snapvisor SDK docs](https://snapvisor.io/docs/sdks)
+- [Getting started](https://snapvisor.io/docs/getting-started)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).

@@ -1,23 +1,12 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
+# Snapvisor Command Line Interface
 
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Argos Command Line Interface
-
-Interact with and upload screenshots to [argos-ci.com](https://argos-ci.com) from the command line.
+Interact with and upload screenshots to [Snapvisor](https://app.snapvisor.io) from the command line.
 
 [![npm version](https://img.shields.io/npm/v/@snapvisor/cli.svg)](https://www.npmjs.com/package/@snapvisor/cli)
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/cli.svg)](https://www.npmjs.com/package/@snapvisor/cli)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/cli.svg)](https://www.npmjs.com/package/@snapvisor/cli)
 
-Visit the [Argos CLI documentation](https://argos-ci.com/docs/reference/argos-command-line-interface-cli) for the full command reference and more.
+Visit the [Snapvisor CLI documentation](https://snapvisor.io/docs/sdks) for the full command reference and more.
 
 ## Installation
 
@@ -27,10 +16,10 @@ npm install --save-dev @snapvisor/cli
 
 ## Usage
 
-Upload a directory of screenshots to Argos. Authenticate with your project token via the `ARGOS_TOKEN` environment variable:
+Upload a directory of screenshots to Snapvisor. Authenticate with your project token via the `ARGOS_TOKEN` environment variable:
 
 ```sh
-ARGOS_TOKEN="<your-argos-token>" npx @snapvisor/cli upload ./screenshots
+ARGOS_TOKEN="<your-project-token>" npx @snapvisor/cli upload ./screenshots
 ```
 
 ### Failing CI when a build needs review
@@ -38,7 +27,7 @@ ARGOS_TOKEN="<your-argos-token>" npx @snapvisor/cli upload ./screenshots
 By default `upload` exits right after the build is created, so a build with unreviewed changes does not fail the job (the commit status does). Pass `--wait` to make the command wait for the build to finish and report the result through its exit code:
 
 ```sh
-ARGOS_TOKEN="<your-argos-token>" npx @snapvisor/cli upload ./screenshots --wait --wait-timeout 300
+ARGOS_TOKEN="<your-project-token>" npx @snapvisor/cli upload ./screenshots --wait --wait-timeout 300
 ```
 
 | Build state                                                | Exit code |
@@ -59,5 +48,9 @@ npx @snapvisor/cli --help
 
 ## Links
 
-- [Official CLI Docs](https://argos-ci.com/docs/reference/argos-command-line-interface-cli)
-- [Discord](https://argos-ci.com/discord)
+- [Snapvisor SDK docs](https://snapvisor.io/docs/sdks)
+- [Getting started](https://snapvisor.io/docs/getting-started)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).

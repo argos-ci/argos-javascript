@@ -1,23 +1,12 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
+# Snapvisor Node.js SDK
 
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Argos Node.js SDK
-
-Node.js SDK for visual testing with Argos. It powers the Argos CLI and the higher-level integrations (Playwright, Cypress, …), and can be used directly to upload screenshots from Node.js.
+Node.js SDK for visual testing with Snapvisor. It powers the Snapvisor CLI and the higher-level integrations (Playwright, Cypress, …), and can be used directly to upload screenshots from Node.js.
 
 [![npm version](https://img.shields.io/npm/v/@snapvisor/core.svg)](https://www.npmjs.com/package/@snapvisor/core)
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/core.svg)](https://www.npmjs.com/package/@snapvisor/core)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/core.svg)](https://www.npmjs.com/package/@snapvisor/core)
 
-Visit the [Node.js SDK documentation](https://argos-ci.com/docs/reference/node.js-sdk) for guides, the API reference, and more.
+Visit the [Node.js SDK documentation](https://snapvisor.io/docs/sdks) for guides, the API reference, and more.
 
 ## Installation
 
@@ -27,7 +16,7 @@ npm install @snapvisor/core
 
 ## Usage
 
-Upload a directory of screenshots to Argos and create a build:
+Upload a directory of screenshots to Snapvisor and create a build:
 
 ```ts
 import { upload } from "@snapvisor/core";
@@ -46,6 +35,9 @@ console.log(`Build created: ${build.url}`);
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/reference/node.js-sdk)
-- [API Reference](https://js-sdk-reference.argos-ci.com)
-- [Discord](https://argos-ci.com/discord)
+- [Snapvisor SDK docs](https://snapvisor.io/docs/sdks)
+- [Getting started](https://snapvisor.io/docs/getting-started)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).

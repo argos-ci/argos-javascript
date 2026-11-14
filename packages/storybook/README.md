@@ -1,23 +1,12 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
-
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Official Argos Storybook integration
+# Snapvisor Storybook integration
 
 [![npm version](https://img.shields.io/npm/v/@snapvisor/storybook.svg)](https://www.npmjs.com/package/@snapvisor/storybook)
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/storybook.svg)](https://www.npmjs.com/package/@snapvisor/storybook)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/storybook.svg)](https://www.npmjs.com/package/@snapvisor/storybook)
 
-Capture and review visual changes of your [Storybook](https://storybook.js.org/) stories with Argos. It runs your stories in a real browser and uploads a screenshot of each one to Argos in your CI.
+Capture and review visual changes of your [Storybook](https://storybook.js.org/) stories with Snapvisor. It runs your stories in a real browser and uploads a screenshot of each one to Snapvisor in your CI.
 
-Visit the [Storybook SDK documentation](https://argos-ci.com/docs/reference/storybook) for guides, the API reference, and more.
+Visit the [Storybook SDK documentation](https://snapvisor.io/docs/sdks) for guides, the API reference, and more.
 
 ## Installation
 
@@ -27,7 +16,7 @@ npm install --save-dev @snapvisor/storybook
 
 ## Usage
 
-The recommended way to run visual tests is with the [Storybook Vitest addon](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon). Register the Argos plugin in your Vitest config:
+The recommended way to run visual tests is with the [Storybook Vitest addon](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon). Register the Snapvisor plugin in your Vitest config:
 
 ```ts
 // vitest.config.ts
@@ -37,7 +26,7 @@ import { argosVitestPlugin } from "@snapvisor/storybook/vitest-plugin";
 export default defineConfig({
   plugins: [
     argosVitestPlugin({
-      // Upload the screenshots to Argos only on CI.
+      // Upload the screenshots to Snapvisor only on CI.
       uploadToArgos: process.env.CI === "true",
     }),
   ],
@@ -65,6 +54,9 @@ export const Example: Story = {
 
 ## Links
 
-- [Official SDK Docs](https://argos-ci.com/docs/reference/storybook)
-- [Quickstart](https://argos-ci.com/docs/quickstart/storybook-quickstart)
-- [Discord](https://argos-ci.com/discord)
+- [Snapvisor SDK docs](https://snapvisor.io/docs/sdks)
+- [Getting started](https://snapvisor.io/docs/getting-started)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).

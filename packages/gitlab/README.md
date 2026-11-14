@@ -1,27 +1,16 @@
-<p align="center">
-  <a href="https://argos-ci.com/?utm_source=github&utm_medium=logo" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-dark.png">
-    <img alt="Argos" src="https://raw.githubusercontent.com/argos-ci/argos/main/resources/logos/github-readme-logo-light.png" width="360" height="70">
-  </picture>
-  </a>
-</p>
+# Snapvisor GitLab
 
-<p align="center"><strong>The open source visual testing platform for teams and AI agents.</strong></p>
-
-# Argos GitLab
-
-GitLab utilities to report Argos build statuses back to your merge requests when running Argos with a self-managed GitLab instance.
+GitLab utilities to report Snapvisor build statuses back to your merge requests when running Snapvisor with a self-managed GitLab instance.
 
 [![npm version](https://img.shields.io/npm/v/@snapvisor/gitlab.svg)](https://www.npmjs.com/package/@snapvisor/gitlab)
 [![npm dm](https://img.shields.io/npm/dm/@snapvisor/gitlab.svg)](https://www.npmjs.com/package/@snapvisor/gitlab)
 [![npm dt](https://img.shields.io/npm/dt/@snapvisor/gitlab.svg)](https://www.npmjs.com/package/@snapvisor/gitlab)
 
-Visit the [GitLab integration documentation](https://argos-ci.com/docs/learn/integrations/gitlab-integration) for the full setup guide.
+Visit the [GitLab integration documentation](https://snapvisor.io/docs/gitlab) for the full setup guide.
 
 ## Usage
 
-Run the `argos-gitlab update-statuses` command in your GitLab CI pipeline. It waits for the Argos builds of the current commit to complete and reports their status to the related merge request:
+Run the `argos-gitlab update-statuses` command in your GitLab CI pipeline. It waits for the Snapvisor builds of the current commit to complete and reports their status to the related merge request:
 
 ```yaml
 # .gitlab-ci.yml
@@ -37,6 +26,9 @@ argos-status:
 
 ## Links
 
-- [GitLab integration guide](https://argos-ci.com/docs/learn/integrations/gitlab-integration)
-- [Official Docs](https://argos-ci.com/docs)
-- [Discord](https://argos-ci.com/discord)
+- [GitLab integration guide](https://snapvisor.io/docs/gitlab)
+- [Snapvisor docs](https://snapvisor.io/docs)
+
+## Attribution
+
+Based on [Argos](https://github.com/argos-ci/argos-javascript) (MIT, Copyright 2022 Smooth Code). Snapvisor modifications are copyright Devino Solutions Inc. See the [LICENSE](https://github.com/DevinoSolutions/snapvisor-js/blob/main/LICENSE).
