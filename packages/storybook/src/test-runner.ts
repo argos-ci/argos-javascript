@@ -43,6 +43,9 @@ export async function argosScreenshot(
     {
       mode: "automatic",
       name: storyContext.id,
+      // `--browsers` runs every story once per browser. A persistent context
+      // has no browser to read it from.
+      browserName: page.context().browser()?.browserType().name() ?? null,
       playwrightLibraries: ["@storybook/test-runner"],
       beforeScreenshot: async ({ handler }) => {
         await waitForPageReady(handler);

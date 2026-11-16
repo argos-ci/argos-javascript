@@ -82,6 +82,9 @@ export const createArgosScreenshotCommand = (
         frame,
         {
           ...testContext,
+          // Each browser of `browser.instances` runs as a project of its own,
+          // whose config names its browser.
+          browserName: ctx.project.config.browser.name || null,
           playwrightLibraries: ["@storybook/addon-vitest"],
           setViewportSize: async (size) => {
             await setIframeViewportSize(ctx, size, {
