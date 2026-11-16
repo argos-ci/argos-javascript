@@ -14,6 +14,12 @@ export type RegisterArgosTaskOptions = Omit<
    * @default true
    */
   uploadToArgos?: boolean;
+  /**
+   * Do not fail the Cypress run when the upload to Argos fails. The error is
+   * still logged.
+   * @default false
+   */
+  ignoreUploadFailures?: boolean;
 };
 
 function checkIsCypressFailedResult(
@@ -49,9 +55,12 @@ async function createDirectory(directory: string): Promise<void> {
 function getArgosConfigFromOptions(
   options: RegisterArgosTaskOptions | undefined,
 ) {
-  return {
-    uploadToArgos: options?.uploadToArgos ?? true,
-  };
+  const {
+    uploadToArgos = true,
+    ignoreUploadFailures = false,
+    ...uploadParameters
+  } = options ?? {};
+  return { uploadToArgos, ignoreUploadFailures, uploadParameters };
 }
 
 /**
@@ -120,7 +129,8 @@ export async function argosAfterRun(
     | CypressCommandLine.CypressFailedRunResult,
   options?: RegisterArgosTaskOptions,
 ) {
-  const { uploadToArgos } = getArgosConfigFromOptions(options);
+  const { uploadToArgos, ignoreUploadFailures, uploadParameters } =
+    getArgosConfigFromOptions(options);
 
   if (!uploadToArgos) {
     return;
@@ -128,24 +138,36 @@ export async function argosAfterRun(
 
   const argosScreenshotsDir = await getScreenshotsDirectory();
 
-  const res = await upload({
-    ...options,
-    files: ["**/*.png"],
-    root: argosScreenshotsDir,
-    metadata: {
-      testReport: checkIsCypressFailedResult(results)
-        ? { status: "failed" }
-        : {
-            status: "passed",
-            stats: {
-              startTime: results.startedTestsAt,
-              duration: results.totalDuration,
+  try {
+    const res = await upload({
+      ...uploadParameters,
+      files: ["**/*.png"],
+      root: argosScreenshotsDir,
+      metadata: {
+        testReport: checkIsCypressFailedResult(results)
+          ? { status: "failed" }
+          : {
+              status: "passed",
+              stats: {
+                startTime: results.startedTestsAt,
+                duration: results.totalDuration,
+              },
             },
-          },
-    },
-  });
+      },
+    });
 
-  console.log(`✅ Argos build created: ${res.build.url}`);
+    console.log(`✅ Argos build created: ${res.build.url}`);
+  } catch (error) {
+    // Rethrown, the error fails the Cypress run.
+    if (!ignoreUploadFailures) {
+      throw error;
+    }
+    console.error(`❌ Error while creating the Argos build`);
+    console.error(error);
+    console.warn(
+      "⚠️  Upload failure ignored due to the `ignoreUploadFailures` option",
+    );
+  }
 }
 
 /**
