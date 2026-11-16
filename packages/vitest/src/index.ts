@@ -1,4 +1,5 @@
 import type { ArgosAttachment } from "@argos-ci/playwright";
+import { getBrowserSuffix } from "@argos-ci/util/browser";
 import { resolveAutoName } from "./auto-name";
 import { getCaptureMetadata, type TestMetadata } from "./metadata";
 import type {
@@ -18,7 +19,8 @@ const METADATA_SUFFIX = ".argos.json";
  * Characters reserved after a screenshot name when building its filename: the
  * `` ` vw-<width>` `` viewport suffix, the largest capture extension
  * (`.aria.yml`), and the metadata sidecar. Keeps auto-generated names within
- * the filesystem limit.
+ * the filesystem limit. The browser suffix the Node command adds is reserved on
+ * top of it: `server.browser` is the `config.browser.name` it reads.
  */
 const SCREENSHOT_NAME_RESERVED =
   " vw-99999".length + ".aria.yml".length + METADATA_SUFFIX.length;
@@ -93,8 +95,14 @@ export async function argosScreenshot(
     return [];
   }
 
+  // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
+  // environments.
+  const { server } = await import("vitest/browser");
   const [resolvedName, { test, captureIndex, storybook }] = await Promise.all([
-    resolveAutoName(name, { reservedLength: SCREENSHOT_NAME_RESERVED }),
+    resolveAutoName(name, {
+      reservedLength:
+        SCREENSHOT_NAME_RESERVED + getBrowserSuffix(server.browser).length,
+    }),
     // Gather the test metadata here (browser side), where the Vitest test
     // context is available; it crosses the RPC boundary to the Node command.
     getCaptureMetadata(),
@@ -103,9 +111,6 @@ export async function argosScreenshot(
     warnIfStoriesUndetected();
   }
 
-  // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
-  // environments.
-  const { server } = await import("vitest/browser");
   // Pass a defined `options` so the trailing `test` argument is never preceded
   // by an `undefined` hole (which the browser/node RPC would drop).
   return server.commands.argosScreenshot(
@@ -158,17 +163,26 @@ export async function argosSnapshot(
     return [];
   }
 
-  // Reserve room for the `.snapshot<ext>` suffix and the metadata sidecar so an
+  // Reserve room for the browser suffix the Node command adds (in browser
+  // mode), the `.snapshot<ext>` suffix and the metadata sidecar so an
   // auto-generated filename stays within the filesystem limit. Kept in sync with
   // `writeSnapshotFile` in `snapshot-file.ts`.
   const rawExtension = options.extension ?? ".txt";
   const extension = rawExtension.startsWith(".")
     ? rawExtension
     : `.${rawExtension}`;
+  // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
+  // environments.
+  const browserServer = checkIsBrowserEnv()
+    ? (await import("vitest/browser")).server
+    : null;
   const [resolvedName, { test, captureIndex, storybook }] = await Promise.all([
     resolveAutoName(options.name, {
       reservedLength:
-        ".snapshot".length + extension.length + METADATA_SUFFIX.length,
+        ".snapshot".length +
+        extension.length +
+        METADATA_SUFFIX.length +
+        getBrowserSuffix(browserServer?.browser).length,
     }),
     // Gather the test metadata here (browser or Node), where the Vitest test
     // context is available.
@@ -191,11 +205,8 @@ export async function argosSnapshot(
     ...serializableOptions
   } = options;
 
-  if (checkIsBrowserEnv()) {
-    // Load vitest/browser using dynamic import to avoid loading it in non-Vitest
-    // environments.
-    const { server } = await import("vitest/browser");
-    return server.commands.argosSnapshot(
+  if (browserServer) {
+    return browserServer.commands.argosSnapshot(
       resolvedName,
       serialized,
       serializableOptions,
