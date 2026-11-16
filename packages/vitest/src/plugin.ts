@@ -77,6 +77,10 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
     dirname(fileURLToPath(import.meta.url)),
     "./storybook-setup-file.mjs",
   );
+  // A single reporter for the whole run: it uploads everything in `root`.
+  const reporter = uploadToArgos
+    ? new ArgosReporter({ ...otherOptions, root })
+    : null;
   return {
     name: "@argos-ci/vitest",
     configureVitest({ vitest, project }) {
@@ -88,10 +92,10 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
         project.config.setupFiles.unshift(storybookSetupFile);
       }
 
-      if (uploadToArgos) {
-        vitest.config.reporters.push(
-          new ArgosReporter({ ...otherOptions, root }),
-        );
+      // The hook runs for every project, including each browser of
+      // `browser.instances`: add the reporter once, or it uploads once each.
+      if (reporter && !vitest.config.reporters.includes(reporter)) {
+        vitest.config.reporters.push(reporter);
       }
     },
     config() {
