@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.3.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fpuppeteer%406.2.0...%40argos-ci%2Fpuppeteer%406.3.0) (2026-11-16)
+
+### Features
+
+* add a `padding` option to element screenshots ([8eba107](https://github.com/argos-ci/argos-javascript/commit/8eba107e310fb8dfec99bb35ee5cff3a220867de))
+
+
 # [6.2.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fpuppeteer%406.1.12...%40argos-ci%2Fpuppeteer%406.2.0) (2026-10-21)
 
 ### Features

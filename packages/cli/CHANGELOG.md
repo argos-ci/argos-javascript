@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.12.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.11.0...%40argos-ci%2Fcli%406.12.0) (2026-11-16)
+
+### Bug Fixes
+
+* **cli:** request `account:admin` so `account` commands work with `argos login` ([10f4338](https://github.com/argos-ci/argos-javascript/commit/10f4338903bc6cc0b852724d4a87e5fa7b708694))
+* follow the project token API's new defaults ([f7db756](https://github.com/argos-ci/argos-javascript/commit/f7db7561ce73072989480e96b0ca541c86087d01)), closes [argos-ci/argos#2747](https://github.com/argos-ci/argos/issues/2747)
+* give new project tokens every permission by default ([d5f6c20](https://github.com/argos-ci/argos-javascript/commit/d5f6c20eba3951cc99e2d668657de0c637ce8d49)), closes [argos-ci/argos#2747](https://github.com/argos-ci/argos/issues/2747)
+
+### Features
+
+* **cli:** add commands to create, list and revoke project tokens ([3401211](https://github.com/argos-ci/argos-javascript/commit/3401211aad50737f3b5d1591b66a4b0f0242c619)), closes [argos-ci/argos#2747](https://github.com/argos-ci/argos/issues/2747)
+* **cli:** turn auto-approval on or off with `project update` ([58c7cf7](https://github.com/argos-ci/argos-javascript/commit/58c7cf7cb3a14ffa428f1e9b250c88cb58f011b3)), closes [#386](https://github.com/argos-ci/argos-javascript/issues/386) [argos-ci/argos#2754](https://github.com/argos-ci/argos/issues/2754)
+* name the project on the endpoints a project token uses ([8157a18](https://github.com/argos-ci/argos-javascript/commit/8157a18b38cc7ee58e9cc04614fbfd2c18e64013)), closes [argos-ci/argos#2747](https://github.com/argos-ci/argos/issues/2747)
+
+
 # [6.11.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.10.0...%40argos-ci%2Fcli%406.11.0) (2026-10-21)
 
 ### Features

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fgitlab%400.7.21...%40argos-ci%2Fgitlab%400.8.0) (2026-11-16)
+
+### Features
+
+* name the project on the endpoints a project token uses ([8157a18](https://github.com/argos-ci/argos-javascript/commit/8157a18b38cc7ee58e9cc04614fbfd2c18e64013)), closes [argos-ci/argos#2747](https://github.com/argos-ci/argos/issues/2747)
+
+
 ## [0.7.21](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fgitlab%400.7.20...%40argos-ci%2Fgitlab%400.7.21) (2026-10-16)
 
 **Note:** Version bump only for package @argos-ci/gitlab

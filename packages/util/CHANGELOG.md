@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.3.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Futil%404.2.3...%40argos-ci%2Futil%404.3.0) (2026-11-16)
+
+### Features
+
+* add a `padding` option to element screenshots ([8eba107](https://github.com/argos-ci/argos-javascript/commit/8eba107e310fb8dfec99bb35ee5cff3a220867de))
+
+
 ## [4.2.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Futil%404.2.2...%40argos-ci%2Futil%404.2.3) (2026-10-16)
 
 **Note:** Version bump only for package @argos-ci/util

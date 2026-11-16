@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.9.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.8...%40argos-ci%2Fcore%406.9.0) (2026-11-16)
+
+### Bug Fixes
+
+* **core:** retry the GitHub Actions OIDC token request on 5xx ([d1a584a](https://github.com/argos-ci/argos-javascript/commit/d1a584a8b86a421ee1706ec66a0bfa72c39c2be6))
+* **core:** wait for compressed media temp files to be deleted ([96ea33b](https://github.com/argos-ci/argos-javascript/commit/96ea33b06042b1b47f3cf302c04b3a1553dd8663))
+* follow the project token API's new defaults ([f7db756](https://github.com/argos-ci/argos-javascript/commit/f7db7561ce73072989480e96b0ca541c86087d01)), closes [argos-ci/argos#2747](https://github.com/argos-ci/argos/issues/2747)
+
+### Features
+
+* name the project on the endpoints a project token uses ([8157a18](https://github.com/argos-ci/argos-javascript/commit/8157a18b38cc7ee58e9cc04614fbfd2c18e64013)), closes [argos-ci/argos#2747](https://github.com/argos-ci/argos/issues/2747)
+
+
 ## [6.8.8](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.8.7...%40argos-ci%2Fcore%406.8.8) (2026-10-16)
 
 **Note:** Version bump only for package @argos-ci/core
