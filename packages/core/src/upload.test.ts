@@ -335,6 +335,40 @@ describe("#upload", () => {
     expect(output).toContain("Authenticated with ARGOS_TOKEN (92d832…)");
   });
 
+  describe("preview URL (deprecated)", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      vi.restoreAllMocks();
+    });
+
+    it("still links screenshots to ARGOS_PREVIEW_BASE_URL, with a warning", async () => {
+      vi.stubEnv("ARGOS_PREVIEW_BASE_URL", "https://preview.example.com");
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      // The warning shows once per process: load a fresh copy so an earlier
+      // upload can't have shown it already.
+      vi.resetModules();
+      const { upload: freshUpload } = await import("./upload");
+
+      const result = await freshUpload({
+        branch: "main",
+        apiBaseUrl: "https://api.argos-ci.dev",
+        root: join(__dirname, "../../../__fixtures__/screenshots"),
+        commit: "f16f980bd17cccfa93a1ae7766727e67950773d0",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+      });
+
+      const screenshot = result.screenshots.find(
+        (screenshot) => screenshot.name === "penelope.png",
+      );
+      expect(screenshot?.metadata?.previewUrl).toBe(
+        "https://preview.example.com/test",
+      );
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("ARGOS_PREVIEW_BASE_URL is deprecated."),
+      );
+    });
+  });
+
   describe("project", () => {
     afterEach(() => {
       vi.unstubAllEnvs();

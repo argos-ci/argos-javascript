@@ -18,6 +18,7 @@ import { getMergeBaseCommitSha, listAncestorCommits } from "./ci-environment";
 import { resolveBaseline, PARENT_COMMITS_LIMIT } from "./find-reference-commit";
 import { getSnapshotMimeType } from "./mime-type";
 import { skip } from "./skip";
+import { formatPreviewUrl, getPreviewUrlFormatter } from "./preview-url";
 
 /**
  * Size of the chunks used to process and upload screenshots.
@@ -148,6 +149,10 @@ export interface UploadParameters {
   /**
    * Preview URL configuration.
    * Can be a fixed base URL or a function to transform URLs dynamically.
+   * @deprecated Report the deployment to Argos instead, with
+   * `argos deploy --url <url>` or `deploy({ url })`. Argos links each
+   * screenshot to the same page on it.
+   * @see https://argos-ci.com/docs/learn/deployments
    */
   previewUrl?:
     | {
@@ -211,9 +216,10 @@ export async function upload(params: UploadParameters): Promise<{
     return { build, screenshots: [] };
   }
 
-  const previewUrlFormatter: UploadParameters["previewUrl"] =
-    params.previewUrl ??
-    (config.previewBaseUrl ? { baseUrl: config.previewBaseUrl } : undefined);
+  const previewUrlFormatter = getPreviewUrlFormatter({
+    option: params.previewUrl,
+    baseUrl: config.previewBaseUrl,
+  });
 
   const globs = params.files ?? ["**/*.{png,jpg,jpeg}"];
   const { token: _configToken, ...debugConfig } = config;
@@ -528,21 +534,4 @@ function createSecureUploadFileInput(
     fields: upload.fields,
     ...file,
   };
-}
-
-/**
- * Format the preview URL.
- */
-function formatPreviewUrl(
-  url: string,
-  formatter: NonNullable<UploadParameters["previewUrl"]>,
-) {
-  if (typeof formatter === "function") {
-    return formatter(url);
-  }
-  const urlObj = new URL(url);
-  return new URL(
-    urlObj.pathname + urlObj.search + urlObj.hash,
-    formatter.baseUrl,
-  ).href;
 }
