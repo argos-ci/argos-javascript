@@ -98,7 +98,7 @@ humans, not CI.
 - **Account**: `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
 - **Media**: `media upload <files...> [--branch <b> | --pr <n>] [--state before|after] [--description <text>] [--visibility team|public] [--no-compress]` · `media list [--branch <b>] [--pr <n>] [--stage staged|published] [--search <q>] [--type image|video]` · `media get|delete|versions <mediaId>` · `media update <mediaId> [--name <n>] [--description <text>] [--branch <b>]`
 - **Media comments**: `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
-- **CI**: `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
+- **CI**: `upload <dir>` · `finalize` · `skip` · `deploy <dir>` (Argos hosts it) · `deploy --url <url>` (reports a deployment hosted elsewhere, such as Vercel; replaces `ARGOS_PREVIEW_BASE_URL`)
 - **Auth**: `login` · `logout`
 - **Docs**: `docs search <query> [--limit <n>]` (no token; up to 10 results, 5 by default)
 
