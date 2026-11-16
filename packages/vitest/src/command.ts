@@ -4,7 +4,11 @@ import {
   type ArgosAttachment,
 } from "@argos-ci/playwright";
 import { resolveViewport, type ViewportSize } from "@argos-ci/browser";
-import { getScreenshotName, normalizeBaseNames } from "@argos-ci/util";
+import {
+  getBrowserSuffix,
+  getScreenshotName,
+  normalizeBaseNames,
+} from "@argos-ci/util";
 import type {
   ArgosVitestPluginOptions,
   VitestScreenshotOptions,
@@ -44,7 +48,14 @@ export const createArgosScreenshotCommand = (
     }
 
     const merged: ArgosVitestPluginOptions = { ...pluginOptions, ...options };
-    const baseNames = normalizeBaseNames(merged.baseName);
+    // Each browser of `browser.instances` is a project of its own, and writes
+    // to the same `root`: its name keeps the browsers from overwriting each
+    // other. Comes before the viewport suffix.
+    const browserSuffix = getBrowserSuffix(ctx.project.config.browser.name);
+    const screenshotName = `${name}${browserSuffix}`;
+    const baseNames = normalizeBaseNames(merged.baseName)?.map(
+      (baseName) => `${baseName}${browserSuffix}`,
+    );
     const fullPage = merged.fullPage ?? false;
     const fitWidth = !fullPage;
 
@@ -87,7 +98,7 @@ export const createArgosScreenshotCommand = (
           setMetadata(size);
           const shot = await screenshotFrame(
             ctx,
-            getScreenshotName(name, { viewportWidth: size.width }),
+            getScreenshotName(screenshotName, { viewportWidth: size.width }),
             {
               ...merged,
               // The viewports loop is reimplemented here rather than delegated
@@ -106,7 +117,12 @@ export const createArgosScreenshotCommand = (
       } else {
         await setIframeViewportSize(ctx, "default", { fullPage });
         setMetadata();
-        const shot = await screenshotFrame(ctx, name, merged, { fitWidth });
+        const shot = await screenshotFrame(
+          ctx,
+          screenshotName,
+          { ...merged, baseName: baseNames },
+          { fitWidth },
+        );
         attachments.push(...shot);
       }
 

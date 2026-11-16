@@ -9,7 +9,14 @@ vi.mock("./snapshot-file", () => ({ writeSnapshotFile }));
 
 import { createArgosSnapshotCommand } from "./snapshot-command";
 
-const ctx = {} as BrowserCommandContext;
+/** Context of a command run by the project of a `browser.instances` entry. */
+function createCtx(browserName: string): BrowserCommandContext {
+  return {
+    project: { config: { browser: { name: browserName } } },
+  } as unknown as BrowserCommandContext;
+}
+
+const ctx = createCtx("chromium");
 
 describe("createArgosSnapshotCommand", () => {
   beforeEach(() => {
@@ -94,6 +101,19 @@ describe("createArgosSnapshotCommand", () => {
       null,
       0,
       storybook,
+    );
+  });
+
+  it("adds the browser to the name outside Chromium", async () => {
+    const command = createArgosSnapshotCommand({ root: "/abs/screenshots" });
+    await command(createCtx("firefox"), "user", "serialized");
+    expect(writeSnapshotFile).toHaveBeenCalledWith(
+      "user browser-[firefox]",
+      "serialized",
+      { root: "/abs/screenshots" },
+      undefined,
+      undefined,
+      undefined,
     );
   });
 });

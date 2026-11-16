@@ -1,5 +1,6 @@
 import type { BrowserCommand } from "vitest/node";
 import type { ArgosAttachment } from "@argos-ci/playwright";
+import { getBrowserSuffix } from "@argos-ci/util";
 import type { TestMetadata } from "./metadata";
 import type {
   ArgosVitestPluginOptions,
@@ -31,7 +32,7 @@ export const createArgosSnapshotCommand = (
   pluginOptions: ArgosVitestPluginOptions = {},
 ): BrowserCommand<ArgosSnapshotCommandArgs> => {
   return async (
-    _ctx,
+    ctx,
     name,
     content,
     options,
@@ -46,8 +47,11 @@ export const createArgosSnapshotCommand = (
       root: pluginOptions.root,
       ...options,
     };
+    // Same as screenshots: each browser of `browser.instances` writes to the
+    // same `root`, and would overwrite the snapshots of the others.
+    const browserSuffix = getBrowserSuffix(ctx.project.config.browser.name);
     return writeSnapshotFile(
-      name,
+      `${name}${browserSuffix}`,
       content,
       merged,
       test,

@@ -22,13 +22,17 @@ const TEST_PATH = "/project/src/Button.test.tsx";
 
 import { createArgosScreenshotCommand } from "./command";
 
-function createCtx() {
+function createCtx(browserName = "chromium") {
   const evaluate = vi.fn().mockResolvedValue(undefined);
   const frame = { __brand: "frame" };
   const ctx = {
     page: { evaluate },
     frame: vi.fn().mockResolvedValue(frame),
     testPath: TEST_PATH,
+    // Each browser of `browser.instances` is a project of its own.
+    project: {
+      config: { browser: { name: browserName } },
+    },
   } as unknown as BrowserCommandContext;
   return { ctx, evaluate, frame };
 }
@@ -203,5 +207,44 @@ describe("createArgosScreenshotCommand", () => {
     expect(viewports).toContainEqual({ width: 1280, height: 800 });
     // Attachments from every viewport are returned.
     expect(attachments).toHaveLength(4);
+  });
+
+  it("adds the browser to the name and the baselines outside Chromium", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx } = createCtx("firefox");
+
+    await command(ctx, "shot", { baseName: ["shot-variant", "shot"] });
+
+    const [, name, opts] = argosScreenshot.mock.calls[0]!;
+    expect(name).toBe("shot browser-[firefox]");
+    expect(opts.baseName).toEqual([
+      "shot-variant browser-[firefox]",
+      "shot browser-[firefox]",
+    ]);
+  });
+
+  it("keeps the name and the baselines of Chromium", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx } = createCtx("chromium");
+
+    await command(ctx, "shot", { baseName: "base" });
+
+    const [, name, opts] = argosScreenshot.mock.calls[0]!;
+    expect(name).toBe("shot");
+    expect(opts.baseName).toEqual(["base"]);
+  });
+
+  it("puts the browser before the viewport, in the name and the baselines", async () => {
+    const command = createArgosScreenshotCommand();
+    const { ctx } = createCtx("webkit");
+
+    await command(ctx, "resp", {
+      viewports: [{ width: 320, height: 480 }],
+      baseName: "base",
+    });
+
+    const [, name, opts] = argosScreenshot.mock.calls[0]!;
+    expect(name).toBe("resp browser-[webkit] vw-320");
+    expect(opts.baseName).toEqual(["base browser-[webkit] vw-320"]);
   });
 });
