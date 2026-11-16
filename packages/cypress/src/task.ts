@@ -57,7 +57,7 @@ function getArgosConfigFromOptions(
 ) {
   const {
     uploadToArgos = true,
-    ignoreUploadFailures = false,
+    ignoreUploadFailures,
     ...uploadParameters
   } = options ?? {};
   return { uploadToArgos, ignoreUploadFailures, uploadParameters };
@@ -158,7 +158,7 @@ export async function argosAfterRun(
 
     console.log(`✅ Argos build created: ${res.build.url}`);
   } catch (error) {
-    // Rethrown, the error fails the Cypress run.
+    // Fails the Cypress run.
     if (!ignoreUploadFailures) {
       throw error;
     }

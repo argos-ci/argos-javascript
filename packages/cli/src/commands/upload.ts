@@ -31,15 +31,6 @@ type UploadOptions = BuildNameOption &
   };
 
 /**
- * Whether a boolean environment variable is enabled. Matches how the core
- * reads its own boolean variables, such as `ARGOS_SUBSET`: any value but an
- * empty one or "false".
- */
-function isEnvEnabled(value: string | undefined): boolean {
-  return Boolean(value) && value?.toLowerCase() !== "false";
-}
-
-/**
  * Where `--ignore-upload-failures` comes from, or `null` when upload failures
  * should fail the command.
  */
@@ -50,7 +41,10 @@ export function getIgnoreUploadFailuresSource(
   if (options.ignoreUploadFailures) {
     return "--ignore-upload-failures";
   }
-  if (isEnvEnabled(env.ARGOS_IGNORE_UPLOAD_FAILURES)) {
+  // Read like the core reads its boolean variables, such as `ARGOS_SUBSET`:
+  // any value but an empty one or "false".
+  const envValue = env.ARGOS_IGNORE_UPLOAD_FAILURES;
+  if (!!envValue && envValue.toLowerCase() !== "false") {
     return "ARGOS_IGNORE_UPLOAD_FAILURES";
   }
   return null;
