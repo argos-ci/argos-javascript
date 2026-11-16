@@ -72,8 +72,8 @@ rejects a PAT, including the one from `argos login`.
 `argos login` asks the user which access to grant. Its default, "Read and
 write", covers reviews, comments and media but not administration: `account *`,
 `create-project`, `project update`, `project transfer`, `project contributor
-set|remove`, `project domain set` and `automation create|update|deactivate`
-need "Admin" access. An `Insufficient scope` error names the missing
+set|remove`, `project token create|revoke`, `project domain set` and
+`automation create|update|deactivate` need "Admin" access. An `Insufficient scope` error names the missing
 permission: ask the user to run `argos login` again and choose "Admin", or use
 a PAT.
 
