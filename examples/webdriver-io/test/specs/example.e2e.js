@@ -1,13 +1,14 @@
-// Welcome to Argos WebdriverIO example
+import { browser } from "@wdio/globals";
+import { argosScreenshot } from "@argos-ci/webdriverio";
 
-// Here is the minimal example of how to take a screenshot
-// with WebdriverIO.
+// Welcome to the Argos WebdriverIO example!
+//
+// `argosScreenshot` from the @argos-ci/webdriverio package
+// saves the screenshot in the `./screenshots/argos` folder.
 
-const screenshots = `./screenshots`;
-
-describe("Screenshot homepage", () => {
-  it("should take a screenshot", async () => {
-    await browser.url(`https://webdriver.io/`);
-    await browser.saveScreenshot(`${screenshots}/homepage.png`);
+describe("Homepage", () => {
+  it("takes a screenshot", async () => {
+    await browser.url("https://webdriver.io/");
+    await argosScreenshot(browser, "homepage");
   });
 });

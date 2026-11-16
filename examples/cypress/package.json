@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "test": "cypress run",
     "cypress:open": "cypress open"
   },
   "devDependencies": {

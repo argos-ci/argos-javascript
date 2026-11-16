@@ -1,3 +1,4 @@
-src/screenshots/argos
-/node_modules
+node_modules/
 
+# Ignore Argos screenshots
+screenshots/

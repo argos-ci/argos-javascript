@@ -1,7 +1,8 @@
 node_modules/
 
-# Ignore screenshots
-screenshots/*
+# Playwright test output, including the Argos screenshots
+# captured with the Argos reporter
+test-results/
 
-# Add screenshots folder (empty)
-!screenshots/.gitkeep
+# Argos screenshots captured without the Argos reporter
+screenshots/

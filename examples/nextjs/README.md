@@ -11,13 +11,24 @@
 
 # Example of Argos + Next.js
 
-This example showcases Argos Visual Testing integrated to [Next.js](https://nextjs.org/).
+This example showcases Argos Visual Testing integrated to a [Next.js](https://nextjs.org/) app, using [Playwright](https://playwright.dev/) and the [Argos Playwright SDK](https://argos-ci.com/docs/quickstart/playwright-quickstart).
+
+## Run locally
+
+```sh
+npm install
+npx playwright install
+npm run build
+npx playwright test
+```
+
+Playwright starts the built app with `npm run start` (see `webServer` in `playwright.config.ts`) and runs the tests in Chromium, Firefox and WebKit. Locally, the Argos screenshots are written to `test-results/` and nothing is uploaded: the Argos reporter uploads to Argos on CI only.
 
 ## Integrate with CI
 
-This example shows how configure GitHub Actions to run Playwright on your CI.
+Run `npm run build` and `npx playwright test` on your CI with the `ARGOS_TOKEN` environment variable set. The [Playwright quickstart](https://argos-ci.com/docs/quickstart/playwright-quickstart) shows a GitHub Actions workflow.
 
-Read [Argos documentations](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos/tree/main/examples) to find the best way to integrate your CI.
+Read the [Argos documentation](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos-javascript/tree/main/examples) to find the best way to integrate your CI.
 
 ## Links
 

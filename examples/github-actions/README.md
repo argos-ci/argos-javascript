@@ -15,8 +15,9 @@ This example showcases Argos Visual Testing running on [GitHub Actions](https://
 
 ## Setup
 
-- Follow [Argos getting started guide](https://argos-ci.com/docs) to obtain a Argos token.
-- Add `ARGOS_TOKEN` as a [GitHub Actions Secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+- [Create a project in Argos](https://app.argos-ci.com/new) and copy its [project token](https://argos-ci.com/docs/learn/account-and-access/project-tokens).
+- Add it as an `ARGOS_TOKEN` [GitHub Actions secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+- Replace the placeholder comment in `.github/workflows/ci.yml` with the steps that save your screenshots to `./screenshots`.
 
 ## Links
 

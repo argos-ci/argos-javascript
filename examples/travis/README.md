@@ -15,8 +15,9 @@ This example showcases Argos Visual Testing running on [Travis](https://www.trav
 
 ## Setup
 
-- Follow [Argos getting started guide](https://argos-ci.com/docs) to obtain a Argos token.
-- Add `ARGOS_TOKEN` as an [encrypted environment variable on TravisCI](https://docs.travis-ci.com/user/environment-variables/#defining-encrypted-variables-in-travisyml)
+- [Create a project in Argos](https://app.argos-ci.com/new) and copy its [project token](https://argos-ci.com/docs/learn/account-and-access/project-tokens).
+- Add it as an `ARGOS_TOKEN` [encrypted environment variable on Travis CI](https://docs.travis-ci.com/user/environment-variables/#defining-encrypted-variables-in-travisyml).
+- Replace the placeholder comment in `.travis.yml` with the steps that save your screenshots to `./screenshots`.
 
 ## Links
 
