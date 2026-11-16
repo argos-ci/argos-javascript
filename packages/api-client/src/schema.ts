@@ -1628,10 +1628,10 @@ export interface components {
          */
         TeamDefaultUserLevel: "member" | "contributor";
         /**
-         * @description Role of a user on a team. Owners administer the team, members see every project, contributors only the projects they are added to.
+         * @description Role of a user on a team. Owners administer the team, members see every project, contributors only the projects they are added to. Billing members are members who also manage the plan, spend limit and invoices.
          * @enum {string}
          */
-        TeamUserLevel: "owner" | "member" | "contributor";
+        TeamUserLevel: "owner" | "billing" | "member" | "contributor";
         /**
          * @description What a project token can do on its projects:
          *     - `builds:write`: Create, update and finalize builds and their screenshots.

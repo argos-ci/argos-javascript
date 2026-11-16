@@ -183,9 +183,11 @@ argos upload ./screenshots --parallel-nonce $ID --parallel-index $i --parallel-t
 argos finalize --parallel-nonce $ID
 ```
 
-Onboard someone onto a team and a project. Team roles come from `account`,
-per-project access from `project contributor`. Owners and members already reach
-every project, so only contributors need a grant:
+Onboard someone onto a team and a project. Team roles (`owner`, `billing`,
+`member`, `contributor`) come from `account`, per-project access from
+`project contributor`. `billing` is a member who also manages the plan, spend
+limit and invoices. Every role but `contributor` already reaches every project,
+so only contributors need a grant:
 
 ```bash
 argos account invite create dev@acme.com --account acme --level contributor --json
