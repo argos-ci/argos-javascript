@@ -25,9 +25,7 @@ export type StorybookScreenshotContext<Handler extends Page | Frame> = {
   mode: "manual" | "automatic";
   name: string;
   /**
-   * Browser running the story, like `chromium` or `firefox`, or `null` when it
-   * can't be identified. Screenshots taken outside Chromium carry it in their
-   * name, so each browser gets its own baselines.
+   * Browser running the story, or `null` when it can't be identified.
    */
   browserName: string | null;
   playwrightLibraries: string[];

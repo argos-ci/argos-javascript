@@ -13,6 +13,23 @@ export function getScreenshotName(
 }
 
 /**
+ * Browser whose screenshots keep their plain name. It is the default of every
+ * test runner, so existing baselines stay valid when another browser is added.
+ */
+const DEFAULT_BROWSER = "chromium";
+
+/**
+ * Suffix that keeps apart the screenshots of each browser, when the same tests
+ * run in several of them: ` browser-[firefox]`, or `""` for Chromium or an
+ * unknown browser.
+ */
+export function getBrowserSuffix(browserName: string | null | undefined) {
+  return browserName && browserName !== DEFAULT_BROWSER
+    ? ` browser-[${browserName}]`
+    : "";
+}
+
+/**
  * Sanitize a path to be safe on all OSes.
  */
 function sanitizePath(name: string) {
