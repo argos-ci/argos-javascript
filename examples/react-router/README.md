@@ -11,13 +11,28 @@
 
 # Example of Argos + React Router
 
-This example showcases Argos Visual Testing integrated to [React Router](https://reactrouter.com/).
+This example showcases Argos Visual Testing integrated with a [React Router](https://reactrouter.com/) app, using [Playwright](https://playwright.dev/) and the [Argos Playwright SDK](https://argos-ci.com/docs/quickstart/playwright-quickstart).
+
+- `playwright.config.ts` builds the app, starts it, and adds the Argos reporter.
+- `tests/homepage.spec.ts` takes a screenshot of the homepage with `argosScreenshot`.
+
+## Run locally
+
+Requires Node.js 22.22 or later.
+
+```sh
+npm install
+npx playwright install chromium
+npx playwright test
+```
+
+Screenshots are written to `test-results/`. They are uploaded to Argos only on CI.
 
 ## Integrate with CI
 
-This example shows how configure GitHub Actions to run Playwright on your CI.
+This example shows how to configure GitHub Actions to run Playwright on your CI and upload the screenshots to Argos: see [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml). Copy it to the `.github/workflows` folder at the root of your repository and add your project's `ARGOS_TOKEN` as a repository secret.
 
-Read [Argos documentations](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos/tree/main/examples) to find the best way to integrate your CI.
+Read the [Argos documentation](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos-javascript/tree/main/examples) to find the best way to integrate your CI.
 
 ## Links
 

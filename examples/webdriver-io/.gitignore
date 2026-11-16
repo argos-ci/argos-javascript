@@ -1,7 +1,4 @@
-examples/webdriverIO/.gitignorenode_modules/
+node_modules/
 
-# Ignore screenshots
-screenshots/*
-
-# Add screenshots folder (empty)
-!screenshots/.gitkeep
+# Ignore Argos screenshots
+screenshots/

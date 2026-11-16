@@ -8,17 +8,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Storybook
         run: npm exec -- storybook build --output-dir ./storybook-static
 
+      # Storycap drives the Google Chrome preinstalled on GitHub-hosted runners.
       - name: Screenshot Storybook with Storycap
-        run: npm exec -- storycap --outDir ./screenshots --serverCmd "npx http-server ./storybook-static --port 6006" http://127.0.0.1:6006
+        run: npm exec -- storycap --serverCmd "npx http-server ./storybook-static --port 6006" http://127.0.0.1:6006 --outDir ./screenshots
 
       - name: Upload screenshots to Argos
         run: npm exec -- argos upload ./screenshots

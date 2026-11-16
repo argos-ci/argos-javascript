@@ -11,15 +11,28 @@
 
 # Example of Argos + WebdriverIO
 
-This example showcases Argos Visual Testing integrated to [WebdriverIO](https://webdriver.io/) testing framework.
+This example showcases Argos Visual Testing integrated with the [WebdriverIO](https://webdriver.io/) testing framework.
+
+## Run the example
+
+```sh
+npm install
+npm run wdio
+```
+
+`argosScreenshot` writes the screenshots to `screenshots/argos`. On CI, upload them to Argos with the Argos CLI, with the `ARGOS_TOKEN` environment variable set:
+
+```sh
+npm exec -- argos upload ./screenshots/argos
+```
 
 ## Integrate with CI
 
-This example only shows how to takes screenshots using WebdriverIO.
+This example only shows how to take screenshots using Argos + WebdriverIO.
 
-It does not include the Argos CI integration on purpose to keep it as clear as possible.
+It does not include any CI integration on purpose to keep it as clear as possible.
 
-Read [Argos documentations](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos/tree/main/examples) to find the best way to integrate your CI.
+Read the [WebdriverIO quickstart](https://argos-ci.com/docs/quickstart/webdriverio-quickstart) or explore the [examples](https://github.com/argos-ci/argos-javascript/tree/main/examples) to find the best way to integrate your CI.
 
 ## Links
 

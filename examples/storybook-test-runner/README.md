@@ -11,15 +11,31 @@
 
 # Example of Argos + Storybook Test Runner
 
-This example showcases Argos Visual Testing integrated to [Storybook](https://storybook.js.org/) testing framework.
+This example showcases Argos Visual Testing integrated to [Storybook](https://storybook.js.org/) with the [Storybook Test Runner](https://storybook.js.org/docs/writing-tests/integrations/test-runner). The `postVisit` hook in [`.storybook/test-runner.ts`](.storybook/test-runner.ts) captures a screenshot of every story.
+
+Storybook now recommends the Vitest addon over the Test Runner for Vite-based projects: see the [Storybook Vitest example](https://github.com/argos-ci/argos-javascript/tree/main/examples/storybook-vitest).
+
+## Run it locally
+
+```sh
+npm install
+npx playwright install chromium
+npm run build-storybook
+
+# Serve Storybook, then run the tests from another terminal
+npx http-server ./storybook-static --port 6006 --silent
+npm run test-storybook
+```
+
+Screenshots are written to `./screenshots`. On CI, upload them to Argos with `npm exec -- argos upload ./screenshots`.
 
 ## Integrate with CI
 
-This example only shows how to takes screenshots using Storybook.
+This example only shows how to take screenshots using Storybook.
 
 It does not include any CI integration on purpose to keep it as clear as possible.
 
-Read [Argos documentations](https://argos-ci.com/docs) or explore [Storybook Testing in CI guide](https://storybook.js.org/docs/writing-tests/in-ci) to learn how to integrate into your CI.
+Read [Argos documentation](https://argos-ci.com/docs) or explore [Storybook Testing in CI guide](https://storybook.js.org/docs/writing-tests/in-ci) to learn how to integrate into your CI.
 
 ## Links
 

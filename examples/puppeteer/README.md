@@ -11,15 +11,28 @@
 
 # Example of Argos + Puppeteer
 
-This example showcases Argos Visual Testing integrated to [Puppeteer](https://pptr.dev/).
+This example showcases Argos Visual Testing integrated with [Puppeteer](https://pptr.dev/).
+
+## Run the example
+
+```sh
+npm install
+npm test
+```
+
+`argosScreenshot` writes the screenshots to `screenshots/argos`. On CI, upload them to Argos with the Argos CLI, with the `ARGOS_TOKEN` environment variable set:
+
+```sh
+npm exec -- argos upload ./screenshots/argos
+```
 
 ## Integrate with CI
 
-This example only shows how to takes screenshots using Puppeteer.
+This example only shows how to take screenshots using Argos + Puppeteer.
 
 It does not include any CI integration on purpose to keep it as clear as possible.
 
-Read [Argos documentations](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos/tree/main/examples) to find the best way to integrate your CI.
+Read the [Puppeteer quickstart](https://argos-ci.com/docs/quickstart/puppeteer-quickstart) or explore the [examples](https://github.com/argos-ci/argos-javascript/tree/main/examples) to find the best way to integrate your CI.
 
 ## Links
 

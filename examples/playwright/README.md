@@ -11,15 +11,25 @@
 
 # Example of Argos + Playwright
 
-This example showcases Argos Visual Testing integrated to [Playwright](https://playwright.dev/) testing framework.
+This example showcases Argos Visual Testing integrated with the [Playwright](https://playwright.dev/) testing framework.
+
+## Run the example
+
+```sh
+npm install
+npx playwright install chromium
+npm test
+```
+
+`argosScreenshot` captures the screenshots, and the Argos reporter in `playwright.config.ts` uploads them to Argos only when the tests run on CI, using the `ARGOS_TOKEN` environment variable.
 
 ## Integrate with CI
 
-This example only shows how to takes screenshots using Playwright.
+This example only shows how to take screenshots using Argos + Playwright.
 
 It does not include any CI integration on purpose to keep it as clear as possible.
 
-Read [Argos documentations](https://argos-ci.com/docs) or explore [examples](https://github.com/argos-ci/argos/tree/main/examples) to find the best way to integrate your CI.
+Read the [Playwright quickstart](https://argos-ci.com/docs/quickstart/playwright-quickstart) or explore the [examples](https://github.com/argos-ci/argos-javascript/tree/main/examples) to find the best way to integrate your CI.
 
 ## Links
 

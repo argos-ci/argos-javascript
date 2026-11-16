@@ -15,8 +15,9 @@ This example showcases Argos Visual Testing running on [CircleCI](https://circle
 
 ## Setup
 
-- Follow [Argos getting started guide](https://argos-ci.com/docs) to obtain a Argos token.
-- Add `ARGOS_TOKEN` as an [masked environment variable on CircleCI](https://circleci.com/docs/env-vars)
+- [Create a project in Argos](https://app.argos-ci.com/new) and copy its [project token](https://argos-ci.com/docs/learn/account-and-access/project-tokens).
+- Add it as an `ARGOS_TOKEN` [environment variable on CircleCI](https://circleci.com/docs/env-vars) (values are masked in the job output).
+- Replace the placeholder comment in `.circleci/config.yml` with the steps that save your screenshots to `./screenshots`.
 
 ## Links
 

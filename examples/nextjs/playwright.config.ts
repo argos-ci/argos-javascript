@@ -1,10 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
+import { createArgosReporterOptions } from "@argos-ci/playwright/reporter";
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -19,62 +14,58 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  // Adds Argos reporter in CI environments
-  reporter: process.env.CI
-    ? [["list"], ["@argos-ci/playwright/reporter"]]
-    : "list",
+
+  reporter: [
+    // Use "dot" reporter on CI, "list" otherwise (Playwright default).
+    process.env.CI ? ["dot"] : ["list"],
+    // Add Argos reporter.
+    [
+      "@argos-ci/playwright/reporter",
+      createArgosReporterOptions({
+        // Upload to Argos on CI only.
+        uploadToArgos: !!process.env.CI,
+      }),
+    ],
+  ],
+
+  // Start the production build of the app before the tests run.
+  // Run `npm run build` first.
+  webServer: {
+    command: "npm run start",
+    url: "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
+  },
 
   use: {
-    // Capture a screenshot when a test fails
-    screenshot: "only-on-failure",
+    // Resolve relative URLs like page.goto("/") against the app.
+    baseURL: "http://localhost:3000",
 
-    // Keeps traces for failed tests
-    trace: "retain-on-failure",
+    // Collect trace when retrying the failed test.
+    trace: "on-first-retry",
+
+    // Capture screenshot after each test failure.
+    screenshot: "only-on-failure",
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // Reduce text rendering differences between machines.
+        launchOptions: {
+          args: ["--disable-lcd-text", "--font-render-hinting=none"],
+        },
+      },
     },
-
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
     },
-
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
     },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
-
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "pnpm run dev",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
-  },
 });

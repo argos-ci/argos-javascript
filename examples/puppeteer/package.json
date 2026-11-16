@@ -1,13 +1,14 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
     "test": "node src/index.js"
   },
   "dependencies": {
-    "puppeteer": "^23.1.0"
+    "puppeteer": "latest"
   },
   "devDependencies": {
-    "@argos-ci/cli": "^2.3.1",
-    "@argos-ci/puppeteer": "^2.2.1"
+    "@argos-ci/cli": "latest",
+    "@argos-ci/puppeteer": "latest"
   }
 }
