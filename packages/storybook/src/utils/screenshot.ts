@@ -8,6 +8,7 @@ import {
 import type { Frame, Page, ViewportSize } from "playwright";
 import { getArgosStorybookVersion } from "./metadata";
 import { getStoryMetadata } from "./storyMetadata";
+import { getStoryScreenshotName } from "./name";
 import {
   getArgosParameters,
   getDefaultViewport,
@@ -23,6 +24,12 @@ export type StorybookScreenshotContext<Handler extends Page | Frame> = {
    */
   mode: "manual" | "automatic";
   name: string;
+  /**
+   * Browser running the story, like `chromium` or `firefox`, or `null` when it
+   * can't be identified. Screenshots taken outside Chromium carry it in their
+   * name, so each browser gets its own baselines.
+   */
+  browserName: string | null;
   playwrightLibraries: string[];
   test?: MetadataConfig["test"];
   setViewportSize: (
@@ -110,7 +117,6 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
           context,
           metadata,
           options: argosOptions,
-          suffix: getModeSuffix(name),
           mode: name,
           globals: {
             ...context.story.globals,
@@ -164,7 +170,11 @@ export async function storybookArgosScreenshot<Handler extends Page | Frame>(
 
     await argosPlaywrightScreenshot(
       handler,
-      composeName(context.name, getModeSuffix(currentMode)),
+      getStoryScreenshotName({
+        name: context.name,
+        mode: currentMode,
+        browserName: context.browserName,
+      }),
       options,
     );
   }
@@ -283,7 +293,6 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
   options: ArgosScreenshotOptions;
   globals: StorybookGlobals;
   mode: string | null;
-  suffix?: string;
   metadata: MetadataConfig;
 }) {
   const { handler, context, options, globals, metadata, mode } = args;
@@ -313,15 +322,11 @@ async function runHooksAndScreenshot<Handler extends Page | Frame>(args: {
 
   return argosPlaywrightScreenshot(
     handler,
-    composeName(context.name, args.suffix),
+    getStoryScreenshotName({
+      name: context.name,
+      mode,
+      browserName: context.browserName,
+    }),
     options,
   );
-}
-
-function getModeSuffix(mode: string | null) {
-  return mode ? ` mode-[${mode}]` : "";
-}
-
-function composeName(name: string, suffix: string | undefined) {
-  return name + (suffix ?? "");
 }
