@@ -1,9 +1,4 @@
-/**
- * Browser whose screenshots keep the plain story name. It is the default of
- * every Storybook runner, so existing baselines stay valid when another browser
- * is added to the run.
- */
-const DEFAULT_BROWSER = "chromium";
+import { getBrowserSuffix } from "@argos-ci/util";
 
 /**
  * Name of a screenshot of a story. The mode and the browser are part of it, so
@@ -23,18 +18,11 @@ export function getStoryScreenshotName(input: {
    */
   mode: string | null;
   /**
-   * Browser running the story, like `chromium` or `firefox`, or `null` when it
-   * can't be identified.
+   * Browser running the story, or `null` when it can't be identified.
    */
   browserName: string | null;
 }): string {
   const { name, mode, browserName } = input;
-  let result = name;
-  if (mode) {
-    result += ` mode-[${mode}]`;
-  }
-  if (browserName && browserName !== DEFAULT_BROWSER) {
-    result += ` browser-[${browserName}]`;
-  }
-  return result;
+  const modeSuffix = mode ? ` mode-[${mode}]` : "";
+  return `${name}${modeSuffix}${getBrowserSuffix(browserName)}`;
 }

@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { getScreenshotName } from "./name";
+import { getBrowserSuffix, getScreenshotName } from "./name";
+
+describe("getBrowserSuffix", () => {
+  it.each([
+    ["chromium", ""],
+    [null, ""],
+    [undefined, ""],
+    ["firefox", " browser-[firefox]"],
+    ["webkit", " browser-[webkit]"],
+  ])("returns %j for %s", (browserName, expected) => {
+    expect(getBrowserSuffix(browserName)).toBe(expected);
+  });
+});
 
 describe("getScreenshotName", () => {
   it("returns the name unchanged if no options are provided and name is safe", () => {

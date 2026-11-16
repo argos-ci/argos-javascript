@@ -2,25 +2,39 @@ import { describe, expect, it } from "vitest";
 import { ArgosReporter } from "@argos-ci/vitest/plugin";
 import { argosVitestPlugin } from "./vitest-plugin";
 
-function configure(setupFiles: string[]) {
-  const plugin = argosVitestPlugin({ uploadToArgos: false }) as any;
-  const project = { config: { setupFiles } };
-  plugin.configureVitest({ vitest: { config: { reporters: [] } }, project });
-  return project.config.setupFiles as string[];
+const USER_SETUP_FILE = "/project/.storybook/vitest.setup.ts";
+
+/**
+ * Run the plugin's `configureVitest` hook for `projects` projects of the same
+ * Vitest run, the way Vitest does for each browser of `browser.instances`.
+ */
+function configure(
+  options: { uploadToArgos?: boolean; projects?: number } = {},
+) {
+  const { uploadToArgos = false, projects = 1 } = options;
+  const plugin = argosVitestPlugin({ uploadToArgos }) as any;
+  const vitest = { config: { reporters: [] as unknown[] } };
+  // Each project has its own setup files; all of them end up the same.
+  let setupFiles: string[] = [];
+  for (let index = 0; index < projects; index++) {
+    setupFiles = [USER_SETUP_FILE];
+    plugin.configureVitest({ vitest, project: { config: { setupFiles } } });
+  }
+  return { setupFiles, reporters: vitest.config.reporters };
 }
 
 describe("argosVitestPlugin", () => {
   it("registers the channel setup ahead of the user's setup files", () => {
-    const setupFiles = configure(["/project/.storybook/vitest.setup.ts"]);
+    const { setupFiles } = configure();
 
     // Addon preview modules capture a channel when the user's setup file
     // imports them, so ours has to install one first.
     expect(setupFiles[0]).toMatch(/vitest-setup-channel-file\.mjs$/);
-    expect(setupFiles).toContain("/project/.storybook/vitest.setup.ts");
+    expect(setupFiles).toContain(USER_SETUP_FILE);
   });
 
   it("registers the screenshot setup after the user's setup files", () => {
-    const setupFiles = configure(["/project/.storybook/vitest.setup.ts"]);
+    const { setupFiles } = configure();
 
     // `afterEach` hooks run in reverse registration order, so registering last
     // is what makes the screenshot happen before Storybook unmounts the story.
@@ -28,26 +42,15 @@ describe("argosVitestPlugin", () => {
   });
 
   it("adds the Argos reporter once for all the browser instances", () => {
-    const plugin = argosVitestPlugin({ uploadToArgos: true }) as any;
-    const vitest = { config: { reporters: [] as unknown[] } };
-    // Vitest runs each browser of `browser.instances` as a project of its own,
-    // and calls `configureVitest` for each of them.
-    for (const browser of ["chromium", "firefox", "webkit"]) {
-      plugin.configureVitest({
-        vitest,
-        project: { name: browser, config: { setupFiles: [] } },
-      });
-    }
+    const { reporters } = configure({ uploadToArgos: true, projects: 3 });
 
-    expect(vitest.config.reporters).toHaveLength(1);
-    expect(vitest.config.reporters[0]).toBeInstanceOf(ArgosReporter);
+    expect(reporters).toHaveLength(1);
+    expect(reporters[0]).toBeInstanceOf(ArgosReporter);
   });
 
   it("adds no reporter when not uploading to Argos", () => {
-    const plugin = argosVitestPlugin({ uploadToArgos: false }) as any;
-    const vitest = { config: { reporters: [] as unknown[] } };
-    plugin.configureVitest({ vitest, project: { config: { setupFiles: [] } } });
+    const { reporters } = configure();
 
-    expect(vitest.config.reporters).toHaveLength(0);
+    expect(reporters).toHaveLength(0);
   });
 });
