@@ -51,7 +51,7 @@
   "dependencies": {
     "@argos-ci/api-client": "workspace:*",
     "@gitbeaker/rest": "^43.8.0",
-    "commander": "^15.0.0"
+    "commander": "^15.1.0"
   },
   "devDependencies": {
     "@types/node": "catalog:"
