@@ -137,6 +137,9 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
   const distDir = dirname(fileURLToPath(import.meta.url));
   const setupFile = resolve(distDir, "./vitest-setup-file.mjs");
   const channelSetupFile = resolve(distDir, "./vitest-setup-channel-file.mjs");
+  const reporter = uploadToArgos
+    ? new ArgosReporter({ ...otherOptions, root })
+    : null;
   return {
     name: "@argos-ci/storybook/vitest-plugin",
     configureVitest({ vitest, project }) {
@@ -148,10 +151,11 @@ export function argosVitestPlugin(options?: ArgosVitestPluginOptions): Plugin {
       // unmounts the story.
       project.config.setupFiles.push(setupFile);
 
-      if (uploadToArgos) {
-        vitest.config.reporters.push(
-          new ArgosReporter({ ...otherOptions, root }),
-        );
+      // Each browser of `browser.instances` is a project of its own, and this
+      // hook runs for every project: add the reporter only once, or the
+      // screenshots would be uploaded once per browser.
+      if (reporter && !vitest.config.reporters.includes(reporter)) {
+        vitest.config.reporters.push(reporter);
       }
     },
     config() {
