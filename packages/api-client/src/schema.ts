@@ -1964,7 +1964,7 @@ export interface components {
                     };
                     /** @description Screenshots captured from Storybook stories. Already included in `total`, so the rest of the test suite is `total - storybook`. */
                     storybook: number;
-                    /** @description Unix timestamp in milliseconds at the start of the period. */
+                    /** @description Unix timestamp in milliseconds at the start of the period: midnight in `timeZone`, UTC by default. */
                     ts: number;
                 }[];
                 all: {
@@ -1992,7 +1992,7 @@ export interface components {
                     noChanges: number;
                     accepted: number;
                     rejected: number;
-                    /** @description Unix timestamp in milliseconds at the start of the period. */
+                    /** @description Unix timestamp in milliseconds at the start of the period: midnight in `timeZone`, UTC by default. */
                     ts: number;
                 }[];
                 all: {
@@ -3042,6 +3042,8 @@ export interface operations {
                 to?: string;
                 /** @description Time period used to group each series data point. */
                 groupBy: "day" | "week" | "month";
+                /** @description IANA time zone that periods start in, such as `Europe/Paris`. Defaults to UTC. Set `from` to midnight in that zone, such as `2026-11-02T00:00:00+01:00`, to get a whole first period. */
+                timeZone?: string;
                 /** @description Optional project name filter. Pass one value or repeat the parameter for multiple projects. */
                 projectNames?: string | string[];
             };
