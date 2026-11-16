@@ -9,6 +9,7 @@ type TeamUserLevel = ArgosAPISchema.components["schemas"]["TeamUserLevel"];
 
 const TEAM_USER_LEVELS = [
   "owner",
+  "billing",
   "member",
   "contributor",
 ] as const satisfies TeamUserLevel[];
