@@ -4,7 +4,12 @@ import { fail } from "../lib/cli-error";
 import { formatAnalytics } from "../lib/format";
 import { handleCliError, output } from "../lib/run";
 import { resolveToken } from "../lib/target";
-import { DAY_MS, jsonOption, toIsoOrFail, tokenOption } from "../options";
+import {
+  checkTimeZone,
+  getStartOfDayDaysAgo,
+  parseDateTimeOrFail,
+} from "../lib/time-zone";
+import { jsonOption, tokenOption } from "../options";
 
 type GroupBy = "day" | "week" | "month";
 
@@ -13,6 +18,7 @@ type AnalyticsOptions = {
   from?: string | undefined;
   to?: string | undefined;
   groupBy: GroupBy;
+  timeZone?: string | undefined;
   project?: string[] | undefined;
   token?: string | undefined;
   json?: boolean | undefined;
@@ -35,11 +41,11 @@ export function analyticsCommand(program: Command) {
     )
     .option(
       "--from <datetime>",
-      `Start of the analytics period (ISO 8601). Defaults to ${DEFAULT_PERIOD_DAYS} days ago.`,
+      `Start of the analytics period, as a date (2026-11-02) or an ISO 8601 datetime. A date or a time without an offset is read in --time-zone. Defaults to midnight ${DEFAULT_PERIOD_DAYS} days ago.`,
     )
     .option(
       "--to <datetime>",
-      "End of the analytics period (ISO 8601). Defaults to now.",
+      "End of the analytics period, as a date or an ISO 8601 datetime. A date includes the whole day. Defaults to now.",
     )
     .addOption(
       new Option(
@@ -48,6 +54,10 @@ export function analyticsCommand(program: Command) {
       )
         .choices(["day", "week", "month"])
         .default("day"),
+    )
+    .option(
+      "--time-zone <iana>",
+      "IANA time zone that days, weeks and months start in, such as Europe/Paris. Defaults to UTC. The Analytics page uses your browser's time zone.",
     )
     .option(
       "--project <name>",
@@ -64,10 +74,14 @@ export function analyticsCommand(program: Command) {
             "An account is required. Use --account <slug> or set ARGOS_ACCOUNT.",
           );
         }
+        const timeZone = options.timeZone ?? "UTC";
+        checkTimeZone(timeZone);
         const from = options.from
-          ? toIsoOrFail(options.from, "from")
-          : new Date(Date.now() - DEFAULT_PERIOD_DAYS * DAY_MS).toISOString();
-        const to = options.to ? toIsoOrFail(options.to, "to") : undefined;
+          ? parseDateTimeOrFail(options.from, "from", { timeZone })
+          : getStartOfDayDaysAgo(DEFAULT_PERIOD_DAYS, timeZone, new Date());
+        const to = options.to
+          ? parseDateTimeOrFail(options.to, "to", { timeZone, endOfDay: true })
+          : undefined;
 
         const client = createApiClient(
           await resolveToken({ token: options.token }),
@@ -80,6 +94,7 @@ export function analyticsCommand(program: Command) {
                 from,
                 to,
                 groupBy: options.groupBy,
+                timeZone: options.timeZone,
                 projectNames: options.project,
               },
             },
@@ -91,6 +106,7 @@ export function analyticsCommand(program: Command) {
             from,
             to,
             groupBy: options.groupBy,
+            timeZone,
           }),
         );
       } catch (error) {

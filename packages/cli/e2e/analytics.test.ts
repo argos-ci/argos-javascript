@@ -140,4 +140,87 @@ describe("argos analytics", () => {
     const analytics = JSON.parse(output.stdout);
     expect(typeof analytics.builds.all.total).toBe("number");
   });
+
+  test("rejects a --time-zone the runtime does not know", () => {
+    const error = expectRunToFail([
+      "analytics",
+      "--account",
+      account,
+      "--token",
+      userAccessToken,
+      "--time-zone",
+      "Mars/Olympus",
+    ]);
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain(
+      'Unknown time zone "Mars/Olympus". Use an IANA name such as Europe/Paris.',
+    );
+  });
+
+  test("rejects a numeric offset as --time-zone", () => {
+    // Intl accepts "+02:00", so the API is the one rejecting it: Postgres
+    // would read it as UTC-2.
+    const error = expectRunToFail([
+      "analytics",
+      "--account",
+      account,
+      "--token",
+      userAccessToken,
+      "--time-zone",
+      "+02:00",
+    ]);
+    expect(error.status).not.toBe(0);
+    expect(error.stderr).toContain('Unknown time zone "+02:00"');
+  });
+
+  test("starts each day at midnight in --time-zone", () => {
+    // Paris moves to summer time on 2024-03-31, so the two days start at
+    // different UTC hours.
+    const output = run(
+      [
+        "analytics",
+        "--account",
+        account,
+        "--token",
+        userAccessToken,
+        "--from",
+        "2024-03-31",
+        "--to",
+        "2024-04-01",
+        "--time-zone",
+        "Europe/Paris",
+        "--json",
+      ],
+      baseEnv,
+    );
+    const analytics = JSON.parse(output.stdout);
+    const days = ["2024-03-30T23:00:00.000Z", "2024-03-31T22:00:00.000Z"];
+    for (const { series } of [analytics.builds, analytics.screenshots]) {
+      expect(
+        series.map((point: { ts: number }) => new Date(point.ts).toISOString()),
+      ).toEqual(days);
+    }
+  });
+
+  test("prints the period in --time-zone", () => {
+    const output = run(
+      [
+        "analytics",
+        "--account",
+        account,
+        "--token",
+        userAccessToken,
+        "--from",
+        "2024-03-31",
+        "--to",
+        "2024-04-01",
+        "--time-zone",
+        "Europe/Paris",
+      ],
+      baseEnv,
+    );
+    expect(output.stdout).toContain(
+      "Period: 2024-03-31T00:00:00+01:00 → 2024-04-01T23:59:59+02:00 (grouped by day in Europe/Paris)",
+    );
+  });
 });

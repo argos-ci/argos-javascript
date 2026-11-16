@@ -95,7 +95,7 @@ humans, not CI.
 - **Project tokens**: `project token list` · `project token create --name <name> [--permissions <p…>] [--expire-at <iso> | --expires-in <days>]` · `project token revoke <tokenId>` · `account project-token list|revoke` · `account project-token create --projects <name…> --name <name> […]` (one token for several projects)
 - **Automation**: `automation list [--active true|false]` · `automation get <ruleId>` · `automation create|update [<ruleId>] --definition-file <path>` · `automation deactivate <ruleId>`
 - **Team**: `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
-- **Account**: `analytics --account <slug>` · `create-project <name> --account <slug>` · `whoami`
+- **Account**: `analytics --account <slug> [--from <date>] [--to <date>] [--group-by day|week|month] [--time-zone <iana>] [--project <name>]` · `create-project <name> --account <slug>` · `whoami`
 - **Media**: `media upload <files...> [--branch <b> | --pr <n>] [--state before|after] [--description <text>] [--visibility team|public] [--no-compress]` · `media list [--branch <b>] [--pr <n>] [--stage staged|published] [--search <q>] [--type image|video]` · `media get|delete|versions <mediaId>` · `media update <mediaId> [--name <n>] [--description <text>] [--branch <b>]`
 - **Media comments**: `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
 - **CI**: `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
@@ -110,6 +110,11 @@ list`, `project contributor list`, `project deployments`, `automation list`,
 `stability`, `consistency`, `flakiness`, all from 0 to 1) and, on a change, `change`
 (`id`, `ignored`, `occurrences`). High `occurrences` or `flakiness` flags a
 change worth ignoring; pass its `change.id` to `change ignore`.
+
+`analytics` starts each day, week and month at midnight UTC. The Analytics page
+uses the viewer's browser time zone, so pass `--time-zone <iana>` (e.g.
+`Europe/Paris`) to get the same numbers. A date in `--from` starts at midnight
+in that zone, and a date in `--to` includes the whole day.
 
 ## Common flows
 

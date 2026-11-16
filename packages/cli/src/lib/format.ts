@@ -3,6 +3,7 @@ import type { ArgosAPISchema } from "@argos-ci/api-client";
 import type { DocsSearchResult } from "./docs";
 import type { SnapshotDownload } from "./download";
 import { sanitizeTerminalText } from "./terminal";
+import { formatInTimeZone } from "./time-zone";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
 type SnapshotDiff = ArgosAPISchema.components["schemas"]["SnapshotDiff"];
@@ -340,12 +341,14 @@ export function formatAnalytics(
     from: string;
     to?: string | undefined;
     groupBy: string;
+    timeZone: string;
   },
 ): string {
   const { screenshots, builds } = analytics;
+  const { from, to, timeZone } = context;
   const lines = [
     `Analytics for ${context.account}`,
-    `Period: ${context.from} → ${context.to ?? "now"} (grouped by ${context.groupBy})`,
+    `Period: ${formatInTimeZone(from, timeZone)} → ${to ? formatInTimeZone(to, timeZone) : "now"} (grouped by ${context.groupBy} in ${timeZone})`,
     "",
     `Builds: ${builds.all.total}`,
     `  Changes detected: ${builds.all.changesDetected}`,
