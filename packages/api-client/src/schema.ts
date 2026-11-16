@@ -171,7 +171,7 @@ export interface paths {
         put?: never;
         /**
          * Open a team to an email domain
-         * @description Add an email domain to a team, so anyone signing up with a verified address on it joins automatically. Requires administrator access to the team, and you must yourself hold a verified address on the domain — a team can only be opened to a domain its administrator demonstrably belongs to. Public email providers are refused.
+         * @description Add an email domain to a team, so anyone signing up with a verified address on it joins automatically. Requires administrator access to the team, and you must yourself hold a verified address on the domain. A team can only be opened to a domain its administrator demonstrably belongs to. Public email providers are refused.
          */
         post: operations["addTeamDomain"];
         delete?: never;
@@ -279,13 +279,13 @@ export interface paths {
          *
          *     Uploading takes three calls:
          *
-         *     1. `POST /media` — declare the file and get back an `upload` target.
+         *     1. `POST /media`: declare the file and get back an `upload` target.
          *     2. `POST` the file to `upload.url` as `multipart/form-data`, appending every entry of `upload.fields` **before** the `file` part.
-         *     3. `POST /media/{mediaId}/finalize` — confirm the bytes landed.
+         *     3. `POST /media/{mediaId}/finalize`: confirm the bytes landed.
          *
          *     When `upload` comes back `null`, Argos already holds this exact file and steps 2 and 3 are unnecessary.
          *
-         *     Pass `prNumber` when the pull request already exists, or `branch` when it does not. A media uploaded against a branch is **staged**: it has its share URL immediately, and the moment a pull request opens for that branch Argos attaches it and posts the comment — nothing has to come back and connect the two.
+         *     Pass `prNumber` when the pull request already exists, or `branch` when it does not. A media uploaded against a branch is **staged**: it has its share URL immediately, and the moment a pull request opens for that branch Argos attaches it and posts the comment. Nothing has to come back and connect the two.
          *
          *     The `argos media upload` CLI command does all of this in one step.
          */
@@ -321,7 +321,7 @@ export interface paths {
          * Update a staged media
          * @description Change a staged media's name, description or branch.
          *
-         *     Staged media only. A media's name and branch are its identity — what decides whether the next upload of that name is a new version or a new media, and which pull request will publish it — and once it is published that identity is what the pull request comment is built from and what a reviewer's comments hang off. Editing it there would rewrite history rather than correct a staged media.
+         *     Staged media only. A media's name and branch are its identity: they decide whether the next upload of that name is a new version or a new media, and which pull request will publish it. Once it is published, that identity is what the pull request comment is built from and what a reviewer's comments hang off. Editing it there would rewrite history rather than correct a staged media.
          *
          *     Omitted fields are left alone. `description` and `branch` accept `null` to clear them; `name` is required and has no cleared state. Clearing a staged media's branch leaves it attached to nothing, so no pull request will ever publish it.
          */
@@ -339,9 +339,9 @@ export interface paths {
          * List a media's versions
          * @description A media's most recent uploaded versions, newest first, up to 100.
          *
-         *     A separate call because it is rarely needed: a media usually has one version, and the media itself already carries the newest one flattened onto it. Check `versionCount` first — at 1 there is nothing here you do not already have.
+         *     A separate call because it is rarely needed: a media usually has one version, and the media itself already carries the newest one flattened onto it. Check `versionCount` first: at 1 there is nothing here you do not already have.
          *
-         *     When you do need it, it is because a comment carries the `mediaVersionId` it was written against. A pin describes a spot on *those* bytes, so feedback written on an earlier upload has to be read against that upload — match the id here to get its file.
+         *     When you do need it, it is because a comment carries the `mediaVersionId` it was written against. A pin describes a spot on *those* bytes, so feedback written on an earlier upload has to be read against that upload. Match the id here to get its file.
          */
         get: operations["listMediaVersions"];
         put?: never;
@@ -387,7 +387,7 @@ export interface paths {
         put?: never;
         /**
          * Post a comment (or reply) on a media
-         * @description Post a comment on an uploaded media. Start a new thread, or reply to an existing one with `threadId`. Pass an `anchor` to pin the comment to a point on the image — normalized coordinates, so it survives any scaling — which is how a reviewer marks up a screenshot.
+         * @description Post a comment on an uploaded media. Start a new thread, or reply to an existing one with `threadId`. Pass an `anchor` to pin the comment to a point on the image (normalized coordinates, so it survives any scaling). This is how a reviewer marks up a screenshot.
          */
         post: operations["createMediaComment"];
         delete?: never;
@@ -855,7 +855,7 @@ export interface paths {
         put?: never;
         /**
          * Deactivate an automation rule
-         * @description Stop a rule from firing. Rules are never deleted — a deactivated one keeps its run history, which is what tells you why something fired. Requires administrator access to the project.
+         * @description Stop a rule from firing. Rules are never deleted: a deactivated one keeps its run history, which is what tells you why something fired. Requires administrator access to the project.
          */
         post: operations["deactivateAutomationRule"];
         delete?: never;
@@ -873,7 +873,7 @@ export interface paths {
         };
         /**
          * List a project's contributors
-         * @description List the users explicitly granted access to a project, with their level. Team owners and members are not listed — they reach every project through their team role. The authenticated user comes first when they are one of them.
+         * @description List the users explicitly granted access to a project, with their level. Team owners and members are not listed: they reach every project through their team role. The authenticated user comes first when they are one of them.
          */
         get: operations["listProjectContributors"];
         put?: never;
@@ -900,7 +900,7 @@ export interface paths {
         post?: never;
         /**
          * Revoke a contributor's access
-         * @description Revoke a user's access to a project. Requires administrator access to the project, except when removing yourself — a contributor can always walk away from a project.
+         * @description Revoke a user's access to a project. Requires administrator access to the project, except when removing yourself: a contributor can always walk away from a project.
          */
         delete: operations["removeProjectContributor"];
         options?: never;
@@ -983,7 +983,7 @@ export interface paths {
          * List a project's media
          * @description List the standalone images and videos uploaded to a project, most recent first.
          *
-         *     `branch` and `prNumber` are what this is usually for: everything uploaded for the work in hand, whether or not a pull request exists yet. `branch` covers both — a media keeps its branch after publishing — so it stays a single query across the moment the pull request opens.
+         *     `branch` and `prNumber` are what this is usually for: everything uploaded for the work in hand, whether or not a pull request exists yet. `branch` covers both (a media keeps its branch after publishing), so it stays a single query across the moment the pull request opens.
          */
         get: operations["listMedia"];
         put?: never;
@@ -1043,7 +1043,7 @@ export interface paths {
         };
         /**
          * List a build's screenshot diffs
-         * @description List the screenshot diffs of a build, with pagination. Each diff compares a baseline screenshot to the one captured by the build. Each diff also carries its test's flakiness metrics and, when it is a change, its ignore state and occurrence count — so you can tell whether a change is worth reviewing or is just a flaky one. Use `needsReview` to return only the diffs that require review.
+         * @description List the screenshot diffs of a build, with pagination. Each diff compares a baseline screenshot to the one captured by the build. Each diff also carries its test's flakiness metrics and, when it is a change, its ignore state and occurrence count, so you can tell whether a change is worth reviewing or is just a flaky one. Use `needsReview` to return only the diffs that require review.
          */
         get: operations["listBuildDiffs"];
         put?: never;
@@ -1157,7 +1157,7 @@ export interface paths {
         put?: never;
         /**
          * Subscribe to a build
-         * @description Start receiving notifications about a build — new comments, reviews, and status changes. Clears a previous explicit unsubscription.
+         * @description Start receiving notifications about a build: new comments, reviews, and status changes. Clears a previous explicit unsubscription.
          */
         post: operations["subscribeBuild"];
         /**
@@ -1181,7 +1181,7 @@ export interface paths {
         put?: never;
         /**
          * Subscribe to a test
-         * @description Start receiving notifications about a test — new comments and the changes it produces. Clears a previous explicit unsubscription.
+         * @description Start receiving notifications about a test: new comments and the changes it produces. Clears a previous explicit unsubscription.
          */
         post: operations["subscribeTest"];
         /**
@@ -1363,7 +1363,7 @@ export interface paths {
         };
         /**
          * List a project's tests
-         * @description List the tests currently running in a project, flakiest first. A test is listed when it appeared in the latest reference build of its build name — tests that were deleted, renamed or skipped drop out. Use it to find what to stabilise: the first page is the project's flakiness backlog.
+         * @description List the tests currently running in a project, flakiest first. A test is listed when it appeared in the latest reference build of its build name. Tests that were deleted, renamed or skipped drop out. Use it to find what to stabilise: the first page is the project's flakiness backlog.
          */
         get: operations["listTests"];
         put?: never;
@@ -1383,7 +1383,7 @@ export interface paths {
         };
         /**
          * List a project's deployments
-         * @description List a project's deployments, most recent first. Use `environment` to keep only the production ones — the deployments that answer "what is live right now?".
+         * @description List a project's deployments, most recent first. Use `environment` to keep only the production ones: the deployments that answer "what is live right now?".
          */
         get: operations["listProjectDeployments"];
         put?: never;
@@ -1467,7 +1467,7 @@ export interface paths {
         };
         /**
          * List a test's changes
-         * @description List the distinct changes a test produced over a period, the ones that came back most often first. Each change is one exact visual difference, with how many times it reappeared, whether it is ignored, and the diff of its latest occurrence — so you can look at what moved. A change that keeps reappearing while nothing in the UI changed is a flaky one: fix what makes it unstable, or silence it with `ignoreChange`.
+         * @description List the distinct changes a test produced over a period, the ones that came back most often first. Each change is one exact visual difference, with how many times it reappeared, whether it is ignored, and the diff of its latest occurrence, so you can look at what moved. A change that keeps reappearing while nothing in the UI changed is a flaky one: fix what makes it unstable, or silence it with `ignoreChange`.
          */
         get: operations["listTestChanges"];
         put?: never;
@@ -2141,14 +2141,14 @@ export interface components {
             prNumber: number | null;
             /**
              * Format: uri
-             * @description Share page URL. This is the link to put in a pull request or a chat message, and it keeps working across versions — it always shows the newest one.
+             * @description Share page URL. This is the link to put in a pull request or a chat message, and it keeps working across versions: it always shows the newest one.
              */
             url: string;
-            /** @description Ready-to-paste Markdown: the picture — the image itself, or a video's poster frame — embedded from the CDN and linked to the share page. Embed this rather than building your own from `url`: that is an HTML page, and an image embed pointing at it renders as a broken image. */
+            /** @description Ready-to-paste Markdown: the picture (the image itself, or a video's poster frame) embedded from the CDN and linked to the share page. Embed this rather than building your own from `url`: that is an HTML page, and an image embed pointing at it renders as a broken image. */
             markdown: string;
             /** @description Which version this response describes: 1 for a first upload, incrementing each time the same name is uploaded again. */
             version: number;
-            /** @description How many uploaded versions this media has. Above 1, `GET /media/{mediaId}/versions` lists them — which is how a comment's `mediaVersionId` resolves to the file it was written against. */
+            /** @description How many uploaded versions this media has. Above 1, `GET /media/{mediaId}/versions` lists them, which is how a comment's `mediaVersionId` resolves to the file it was written against. */
             versionCount: number;
             /**
              * Format: uri
@@ -2171,7 +2171,7 @@ export interface components {
              */
             visibility: "team" | "public";
             /**
-             * @description `pending` until the bytes are uploaded, then `ready`. There is no processing step — Argos serves the bytes it was given.
+             * @description `pending` until the bytes are uploaded, then `ready`. There is no processing step: Argos serves the bytes it was given.
              * @enum {string}
              */
             status: "pending" | "ready";
@@ -2193,7 +2193,7 @@ export interface components {
         };
         /** @description One uploaded version of a media */
         MediaVersion: {
-            /** @description Unique identifier of this version — what a comment's `mediaVersionId` points at. */
+            /** @description Unique identifier of this version: what a comment's `mediaVersionId` points at. */
             id: string;
             /** @description 1-based, and what the UI calls the version. Increments each time the same name is uploaded again. */
             number: number;
@@ -2214,7 +2214,7 @@ export interface components {
         };
         /** @description A comment posted on a build or on a test. */
         Comment: {
-            /** @description Public ID of the comment (e.g. `comment-xf23d`) — the one the app links to, and the one every endpoint taking a comment ID expects. */
+            /** @description Public ID of the comment (e.g. `comment-xf23d`): the one the app links to, and the one every endpoint taking a comment ID expects. */
             id: string;
             /** @description Build this comment is posted on, null when it is posted on a test. */
             buildId: string | null;
@@ -2222,7 +2222,7 @@ export interface components {
             testId: string | null;
             /** @description Media this comment is posted on, null when it is posted on a build or a test. */
             mediaId: string | null;
-            /** @description Version of the media the comment was written against. A pin describes a spot on the bytes its author was looking at, so feedback on an older upload has to be read against that upload — match this id against `GET /media/{mediaId}/versions` to get the right file. */
+            /** @description Version of the media the comment was written against. A pin describes a spot on the bytes its author was looking at, so feedback on an older upload has to be read against that upload. Match this id against `GET /media/{mediaId}/versions` to get the right file. */
             mediaVersionId: string | null;
             /** @description Root comment ID when this comment is a reply. */
             threadId: string | null;
@@ -2528,7 +2528,7 @@ export interface components {
                 height: number | null;
                 /**
                  * Format: uri
-                 * @description Public URL of the snapshot
+                 * @description Public URL of the snapshot file, as it was uploaded
                  */
                 url: string;
                 /** @description Content type of the snapshot file */
@@ -2644,7 +2644,7 @@ export interface components {
                 height: number | null;
                 /**
                  * Format: uri
-                 * @description Public URL of the snapshot
+                 * @description Public URL of the snapshot file, as it was uploaded
                  */
                 url: string;
                 /** @description Content type of the snapshot file */
@@ -2763,7 +2763,7 @@ export interface components {
             lastSeenChange: components["schemas"]["TestChangeOccurrence"] | null;
         };
         /**
-         * @description `ongoing` when the test still runs — it showed up in the latest build of its build name. `removed` when it did not, so it was deleted, renamed or skipped.
+         * @description `ongoing` when the test still runs: it showed up in the latest build of its build name. `removed` when it did not, so it was deleted, renamed or skipped.
          * @enum {string}
          */
         TestStatus: "ongoing" | "removed";
@@ -3248,7 +3248,7 @@ export interface operations {
             path: {
                 /** @description Slug of the team. */
                 accountSlug: string;
-                /** @description Identifier of the user to act on — the `user.id` returned by `listAccountMembers`, which is the user's account id. */
+                /** @description Identifier of the user to act on: the `user.id` returned by `listAccountMembers`, which is the user's account id. */
                 userId: string;
             };
             cookie?: never;
@@ -3316,7 +3316,7 @@ export interface operations {
             path: {
                 /** @description Slug of the team. */
                 accountSlug: string;
-                /** @description Identifier of the user to act on — the `user.id` returned by `listAccountMembers`, which is the user's account id. */
+                /** @description Identifier of the user to act on: the `user.id` returned by `listAccountMembers`, which is the user's account id. */
                 userId: string;
             };
             cookie?: never;
@@ -4140,14 +4140,14 @@ export interface operations {
                     size: number;
                     /** @description SHA-256 of the file contents, hex encoded. Uploading the same file twice is free: Argos recognizes the hash and skips the transfer, and byte-identical bytes do not create a new version. */
                     hash: string;
-                    /** @description Who can open the media share page. `team` requires an Argos session with access to the owning account; `public` only requires the share URL. Omit it — the usual case — and the media follows its project's visibility: `public` for a public project, `team` for a private one. `team` requires a paid plan. */
+                    /** @description Who can open the media share page. `team` requires an Argos session with access to the owning account; `public` only requires the share URL. Omit it (the usual case) and the media follows its project's visibility: `public` for a public project, `team` for a private one. `team` requires a paid plan. */
                     visibility?: ("team" | "public") | null;
                     /**
                      * @description Project to upload to, as `owner/project`. Required with a personal access token, and with a project token linked to several projects.
                      * @example acme/web
                      */
                     project?: string | null;
-                    /** @description Pull request this media belongs to. Argos maintains a single comment on it listing every media uploaded, editing it in place rather than posting a new one each time — attaching a media to a pull request and showing it there are the same act, not two. Also part of the media's identity: uploading the same name again on this pull request adds a version. */
+                    /** @description Pull request this media belongs to. Argos maintains a single comment on it listing every media uploaded, editing it in place rather than posting a new one each time. Attaching a media to a pull request and showing it there are the same act, not two. Also part of the media's identity: uploading the same name again on this pull request adds a version. */
                     prNumber?: number | null;
                     branch?: string | null;
                 };
@@ -4162,7 +4162,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         media: components["schemas"]["Media"];
-                        /** @description Where to send the bytes, or `null` when Argos already holds this exact file — in which case the media is ready and nothing needs uploading. */
+                        /** @description Where to send the bytes, or `null` when Argos already holds this exact file, in which case the media is ready and nothing needs uploading. */
                         upload: components["schemas"]["MediaUploadTarget"] | null;
                     };
                 };
@@ -4653,7 +4653,7 @@ export interface operations {
                     };
                     /** @description Public ID of the root comment to reply to (e.g. `comment-xf23d`). */
                     threadId?: string;
-                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0–1) coordinates; lines is a 1-based inclusive range. */
+                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0-1) coordinates; lines is a 1-based inclusive range. */
                     anchor?: {
                         /** @constant */
                         type: "point";
@@ -4669,7 +4669,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Comment created successfully — returns the comment */
+            /** @description The created comment */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -4809,7 +4809,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Comment deleted successfully — returns the comment */
+            /** @description The deleted comment */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4888,7 +4888,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Comment updated successfully — returns the comment */
+            /** @description The updated comment */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4965,7 +4965,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Reaction added — returns the comment */
+            /** @description The comment, with the reaction added */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -5038,7 +5038,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Reaction removed — returns the comment */
+            /** @description The comment, with the reaction removed */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -5108,7 +5108,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Thread resolved — returns the root comment */
+            /** @description The root comment of the resolved thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -5178,7 +5178,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Thread reopened — returns the root comment */
+            /** @description The root comment of the reopened thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -5248,7 +5248,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Subscribed — returns the root comment */
+            /** @description The root comment of the subscribed thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -5318,7 +5318,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Unsubscribed — returns the root comment */
+            /** @description The root comment of the unsubscribed thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -6406,7 +6406,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Project created successfully — returns the project */
+            /** @description The created project */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -7065,7 +7065,7 @@ export interface operations {
             path: {
                 owner: string;
                 project: string;
-                /** @description Identifier of the user — the `user.id` returned by `listAccountMembers` or `listProjectContributors`. */
+                /** @description Identifier of the user: the `user.id` returned by `listAccountMembers` or `listProjectContributors`. */
                 userId: string;
             };
             cookie?: never;
@@ -7141,7 +7141,7 @@ export interface operations {
             path: {
                 owner: string;
                 project: string;
-                /** @description Identifier of the user — the `user.id` returned by `listAccountMembers` or `listProjectContributors`. */
+                /** @description Identifier of the user: the `user.id` returned by `listAccountMembers` or `listProjectContributors`. */
                 userId: string;
             };
             cookie?: never;
@@ -7840,7 +7840,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Change ignored — returns the updated change */
+            /** @description The ignored change */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7913,7 +7913,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Change unignored — returns the updated change */
+            /** @description The unignored change */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8084,7 +8084,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Review submitted successfully — returns the review */
+            /** @description The submitted review */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8225,7 +8225,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description Identifiers of the users to act on — the `id` of a user as returned by `listBuildReviewers` or `getMe`. */
+                    /** @description Identifiers of the users to act on: the `id` of a user as returned by `listBuildReviewers` or `getMe`. */
                     userIds: string[];
                 };
             };
@@ -8302,7 +8302,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description Identifiers of the users to act on — the `id` of a user as returned by `listBuildReviewers` or `getMe`. */
+                    /** @description Identifiers of the users to act on: the `id` of a user as returned by `listBuildReviewers` or `getMe`. */
                     userIds: string[];
                 };
             };
@@ -8660,7 +8660,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Review dismissed successfully — returns the review */
+            /** @description The dismissed review */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8809,7 +8809,7 @@ export interface operations {
                     threadId?: string;
                     /** @description Screenshot diff to anchor the comment to. Required when anchor is set. */
                     screenshotDiffId?: string;
-                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0–1) coordinates; lines is a 1-based inclusive range. */
+                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0-1) coordinates; lines is a 1-based inclusive range. */
                     anchor?: {
                         /** @constant */
                         type: "point";
@@ -8827,7 +8827,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Comment created successfully — returns the comment */
+            /** @description The created comment */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -8971,7 +8971,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Comment deleted successfully — returns the comment */
+            /** @description The deleted comment */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9052,7 +9052,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Comment updated successfully — returns the comment */
+            /** @description The updated comment */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9131,7 +9131,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Reaction added — returns the comment */
+            /** @description The comment, with the reaction added */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9206,7 +9206,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Reaction removed — returns the comment */
+            /** @description The comment, with the reaction removed */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9278,7 +9278,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Thread resolved — returns the root comment */
+            /** @description The root comment of the resolved thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9350,7 +9350,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Thread reopened — returns the root comment */
+            /** @description The root comment of the reopened thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9422,7 +9422,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Subscribed — returns the root comment */
+            /** @description The root comment of the subscribed thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9494,7 +9494,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Unsubscribed — returns the root comment */
+            /** @description The root comment of the unsubscribed thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9803,7 +9803,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description The full domain to serve production deployments on, under the Argos deployments domain — e.g. `acme-web.argos-ci.live`.
+                     * @description The full domain to serve production deployments on, under the Argos deployments domain (e.g. `acme-web.argos-ci.live`).
                      * @example acme-web.argos-ci.live
                      */
                     domain: string;
@@ -10193,7 +10193,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Comment created successfully — returns the comment */
+            /** @description The created comment */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -10337,7 +10337,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Comment deleted successfully — returns the comment */
+            /** @description The deleted comment */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10418,7 +10418,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Comment updated successfully — returns the comment */
+            /** @description The updated comment */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10497,7 +10497,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Reaction added — returns the comment */
+            /** @description The comment, with the reaction added */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10572,7 +10572,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Reaction removed — returns the comment */
+            /** @description The comment, with the reaction removed */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10644,7 +10644,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Thread resolved — returns the root comment */
+            /** @description The root comment of the resolved thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10716,7 +10716,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Thread reopened — returns the root comment */
+            /** @description The root comment of the reopened thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10788,7 +10788,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Subscribed — returns the root comment */
+            /** @description The root comment of the subscribed thread */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10860,7 +10860,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Unsubscribed — returns the root comment */
+            /** @description The root comment of the unsubscribed thread */
             200: {
                 headers: {
                     [name: string]: unknown;
