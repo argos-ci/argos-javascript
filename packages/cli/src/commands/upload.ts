@@ -27,7 +27,34 @@ type UploadOptions = BuildNameOption &
     referenceCommit?: string | undefined;
     threshold?: number | undefined;
     subset?: boolean | undefined;
+    ignoreUploadFailures?: boolean | undefined;
   };
+
+/**
+ * Whether a boolean environment variable is enabled. Matches how the core
+ * reads its own boolean variables, such as `ARGOS_SUBSET`: any value but an
+ * empty one or "false".
+ */
+function isEnvEnabled(value: string | undefined): boolean {
+  return Boolean(value) && value?.toLowerCase() !== "false";
+}
+
+/**
+ * Where `--ignore-upload-failures` comes from, or `null` when upload failures
+ * should fail the command.
+ */
+export function getIgnoreUploadFailuresSource(
+  options: Pick<UploadOptions, "ignoreUploadFailures">,
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
+  if (options.ignoreUploadFailures) {
+    return "--ignore-upload-failures";
+  }
+  if (isEnvEnabled(env.ARGOS_IGNORE_UPLOAD_FAILURES)) {
+    return "ARGOS_IGNORE_UPLOAD_FAILURES";
+  }
+  return null;
+}
 
 export function uploadCommand(program: Command) {
   program
@@ -97,6 +124,12 @@ export function uploadCommand(program: Command) {
         "Whether this build contains only a subset of screenshots.\nThis is useful when a build is created from an incomplete test suite where some tests are skipped.\nCan also be set via the ARGOS_SUBSET environment variable.",
       ),
     )
+    .addOption(
+      new Option(
+        "--ignore-upload-failures",
+        "Exit successfully when the upload fails, after logging the error.\nThis is useful to keep CI green when Argos can't be reached or the project isn't set up yet.\nCan also be set via the ARGOS_IGNORE_UPLOAD_FAILURES environment variable.",
+      ),
+    )
     .action(async (directory: string, options: UploadOptions) => {
       const spinner = ora("Uploading screenshots").start();
       try {
@@ -137,6 +170,13 @@ export function uploadCommand(program: Command) {
         if (error instanceof Error) {
           spinner.fail(`Build failed: ${error.message}`);
           console.error(error.stack);
+        } else {
+          spinner.fail("Build failed");
+        }
+        const ignoreSource = getIgnoreUploadFailuresSource(options);
+        if (ignoreSource) {
+          console.warn(`⚠️  Upload failure ignored due to ${ignoreSource}`);
+          return;
         }
         process.exit(1);
       }
