@@ -117,6 +117,7 @@ export async function writeSnapshotFile(
     sdk: { name: "@argos-ci/vitest", version: sdkVersion },
     ...(storybook?.story ? { story: storybook.story } : {}),
     ...(tags ? { tags } : {}),
+    ...(options.description ? { description: options.description } : {}),
     ...(resolvedTest ? { test: resolvedTest } : {}),
     ...(captureIndex != null ? { capture: { index: captureIndex } } : {}),
   };

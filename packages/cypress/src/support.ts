@@ -104,6 +104,12 @@ type ArgosScreenshotOptions = Partial<
    * Tag or array of tags to attach to the screenshot.
    */
   tag?: string | string[];
+
+  /**
+   * Description of the screenshot, shown next to it when reviewing the build
+   * in Argos.
+   */
+  description?: string;
 };
 
 declare global {
@@ -287,6 +293,7 @@ Cypress.Commands.add(
       viewports,
       argosCSS: _argosCSS,
       tag,
+      description,
       baseName,
       blackout,
       onAfterScreenshot,
@@ -396,6 +403,10 @@ Cypress.Commands.add(
 
         if (tag) {
           metadata.tags = Array.isArray(tag) ? tag : [tag];
+        }
+
+        if (description) {
+          metadata.description = description;
         }
 
         if (options.threshold !== undefined) {

@@ -152,6 +152,12 @@ export type ArgosScreenshotOptions = Omit<
    * Tag or array of tags to attach to the screenshot.
    */
   tag?: string | string[];
+
+  /**
+   * Description of the screenshot, shown next to it when reviewing the build
+   * in Argos.
+   */
+  description?: string;
 };
 
 async function getPuppeteerVersion(): Promise<string> {
@@ -507,6 +513,10 @@ export async function argosScreenshot(
 
     if (options?.tag) {
       metadata.tags = Array.isArray(options.tag) ? options.tag : [options.tag];
+    }
+
+    if (options?.description) {
+      metadata.description = options.description;
     }
 
     if (options?.threshold !== undefined) {

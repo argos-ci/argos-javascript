@@ -124,6 +124,12 @@ export interface VitestScreenshotOptions {
   tag?: string | string[];
 
   /**
+   * Description of the screenshot, shown next to it when reviewing the build
+   * in Argos.
+   */
+  description?: string;
+
+  /**
    * Capture an ARIA snapshot along with the screenshot.
    * @default false
    */
@@ -187,6 +193,12 @@ export interface VitestSnapshotOptions {
    * Tag or array of tags to attach to the snapshot.
    */
   tag?: string | string[];
+
+  /**
+   * Description of the snapshot, shown next to it when reviewing the build in
+   * Argos.
+   */
+  description?: string;
 
   /**
    * Custom serializer used when `content` is not already a string.
