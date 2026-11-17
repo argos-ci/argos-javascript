@@ -3,6 +3,11 @@ export type ScreenshotMetadata = {
   url?: string | null;
   /** @description An URL to an accessible preview of the screenshot */
   previewUrl?: string | null;
+  /**
+   * @description What the screenshot shows, displayed next to it in the build
+   * review
+   */
+  description?: string | null;
   viewport?: {
     /** @description The width of the viewport */
     width: number;

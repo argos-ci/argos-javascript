@@ -77,6 +77,20 @@ describe("writeSnapshotFile", () => {
     expect(metadata.tags).toEqual(["a", "b"]);
   });
 
+  it("records the description in the metadata", async () => {
+    const attachments = await writeSnapshotFile("described", "x", {
+      root,
+      description: "Settings page\nwith the sidebar open",
+    });
+    const metadataAttachment = attachments.find((a) =>
+      a.path.endsWith(".argos.json"),
+    )!;
+    const metadata = JSON.parse(
+      await readFile(metadataAttachment.path, "utf-8"),
+    );
+    expect(metadata.description).toBe("Settings page\nwith the sidebar open");
+  });
+
   it("reports a snapshot of a story as a Storybook one", async () => {
     // The temporary directory doubles as the user project, with Storybook
     // installed next to the test file.

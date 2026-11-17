@@ -174,6 +174,12 @@ export type ArgosScreenshotOptions = {
   tag?: string | string[];
 
   /**
+   * Description of the screenshot, shown next to it when reviewing the build
+   * in Argos.
+   */
+  description?: string;
+
+  /**
    * Wait for the UI to stabilize before taking the screenshot.
    * Set to `false` to disable stabilization.
    * Pass an object to customize the stabilization.
@@ -329,6 +335,10 @@ export async function argosScreenshot(
 
     if (options.tag) {
       metadata.tags = Array.isArray(options.tag) ? options.tag : [options.tag];
+    }
+
+    if (options.description) {
+      metadata.description = options.description;
     }
 
     if (options.threshold !== undefined) {
