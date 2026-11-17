@@ -63,23 +63,10 @@ describe("writeSnapshotFile", () => {
     expect(snapshot!.path).toBe(join(root, "data.snapshot.yml"));
   });
 
-  it("records tags in the metadata", async () => {
+  it("records tags and the description in the metadata", async () => {
     const attachments = await writeSnapshotFile("tagged", "x", {
       root,
       tag: ["a", "b"],
-    });
-    const metadataAttachment = attachments.find((a) =>
-      a.path.endsWith(".argos.json"),
-    )!;
-    const metadata = JSON.parse(
-      await readFile(metadataAttachment.path, "utf-8"),
-    );
-    expect(metadata.tags).toEqual(["a", "b"]);
-  });
-
-  it("records the description in the metadata", async () => {
-    const attachments = await writeSnapshotFile("described", "x", {
-      root,
       description: "Settings page\nwith the sidebar open",
     });
     const metadataAttachment = attachments.find((a) =>
@@ -88,6 +75,7 @@ describe("writeSnapshotFile", () => {
     const metadata = JSON.parse(
       await readFile(metadataAttachment.path, "utf-8"),
     );
+    expect(metadata.tags).toEqual(["a", "b"]);
     expect(metadata.description).toBe("Settings page\nwith the sidebar open");
   });
 
