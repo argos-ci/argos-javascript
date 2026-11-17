@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.5.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.4.5...%40argos-ci%2Fstorybook%406.5.0) (2026-11-17)
+
+### Bug Fixes
+
+* **storybook:** upload once when Vitest runs several browsers ([b831868](https://github.com/argos-ci/argos-javascript/commit/b83186825e57d7541438d6b482dd5f5476e09b8f))
+
+### Features
+
+* **storybook:** name screenshots after the browser outside Chromium ([8eb920a](https://github.com/argos-ci/argos-javascript/commit/8eb920a016d8f9a526df7612ec904cab3bbbac48))
+
+
 ## [6.4.5](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fstorybook%406.4.4...%40argos-ci%2Fstorybook%406.4.5) (2026-11-16)
 
 **Note:** Version bump only for package @argos-ci/storybook

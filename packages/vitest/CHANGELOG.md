@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.10.0...%40argos-ci%2Fvitest%400.11.0) (2026-11-17)
+
+### Bug Fixes
+
+* **vitest:** upload once when Vitest runs several browsers ([874e055](https://github.com/argos-ci/argos-javascript/commit/874e05584405660df6a82a22a97dc0a5b2118919))
+
+### Features
+
+* add a `description` option to screenshots ([c4e6c95](https://github.com/argos-ci/argos-javascript/commit/c4e6c955160e6152fca072bb32099828d92a5a7b))
+* **vitest:** name captures per browser when running several browsers ([bf55a8e](https://github.com/argos-ci/argos-javascript/commit/bf55a8eae4ecf673eb368ad5b9990022584e3453))
+
+
 # [0.10.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.9.0...%40argos-ci%2Fvitest%400.10.0) (2026-11-16)
 
 ### Features

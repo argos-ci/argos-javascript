@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.6.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcypress%407.5.0...%40argos-ci%2Fcypress%407.6.0) (2026-11-17)
+
+### Features
+
+* add a `description` option to screenshots ([c4e6c95](https://github.com/argos-ci/argos-javascript/commit/c4e6c955160e6152fca072bb32099828d92a5a7b))
+* **cypress:** add ignoreUploadFailures option ([65de655](https://github.com/argos-ci/argos-javascript/commit/65de6558c5268729c73da25dfbd5941e3245912f))
+
+
 # [7.5.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcypress%407.4.0...%40argos-ci%2Fcypress%407.5.0) (2026-11-16)
 
 ### Features

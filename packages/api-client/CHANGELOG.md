@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.32.0...%40argos-ci%2Fapi-client%400.33.0) (2026-11-17)
+
+### Features
+
+* **api-client:** type the analytics `timeZone` parameter ([ce0237b](https://github.com/argos-ci/argos-javascript/commit/ce0237b66cfe3c55bc87c7402db9689f3de85e24))
+
+
 # [0.32.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.31.3...%40argos-ci%2Fapi-client%400.32.0) (2026-11-16)
 
 ### Bug Fixes

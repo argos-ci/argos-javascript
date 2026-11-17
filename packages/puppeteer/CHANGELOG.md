@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.4.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fpuppeteer%406.3.0...%40argos-ci%2Fpuppeteer%406.4.0) (2026-11-17)
+
+### Features
+
+* add a `description` option to screenshots ([c4e6c95](https://github.com/argos-ci/argos-javascript/commit/c4e6c955160e6152fca072bb32099828d92a5a7b))
+
+
 # [6.3.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fpuppeteer%406.2.0...%40argos-ci%2Fpuppeteer%406.3.0) (2026-11-16)
 
 ### Features

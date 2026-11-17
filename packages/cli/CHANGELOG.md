@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.13.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.12.0...%40argos-ci%2Fcli%406.13.0) (2026-11-17)
+
+### Features
+
+* **cli:** add --ignore-upload-failures to argos upload ([d0b93d9](https://github.com/argos-ci/argos-javascript/commit/d0b93d990a306b39501f5c9cbd9e4abbb4960a26))
+* **cli:** add `--time-zone` to `argos analytics` ([3fec4d3](https://github.com/argos-ci/argos-javascript/commit/3fec4d3f63a614204130c01ca7bc7192ef92359a))
+
+
 # [6.12.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.11.0...%40argos-ci%2Fcli%406.12.0) (2026-11-16)
 
 ### Bug Fixes
