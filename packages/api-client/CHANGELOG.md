@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.33.0...%40argos-ci%2Fapi-client%400.34.0) (2026-11-19)
+
+### Features
+
+* **cli:** accept the billing team role ([eddbbae](https://github.com/argos-ci/argos-javascript/commit/eddbbaec3a3a110006186ab242ac9abb98e4a77a))
+* **cli:** add --anchor-area to pin a comment to an area ([118baa8](https://github.com/argos-ci/argos-javascript/commit/118baa85f52d3709d1104aa31e8c911db028cb3e))
+
+
 # [0.33.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.32.0...%40argos-ci%2Fapi-client%400.33.0) (2026-11-17)
 
 ### Features
