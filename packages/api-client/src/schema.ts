@@ -381,13 +381,13 @@ export interface paths {
         };
         /**
          * List the comments on a media
-         * @description List the comments on an uploaded media, oldest first. A comment may carry an `anchor` pinning it to a point on the image, which is how reviewers mark up a screenshot.
+         * @description List the comments on an uploaded media, oldest first. A comment may carry an `anchor` pinning it to a point or an area of the image, which is how reviewers mark up a screenshot.
          */
         get: operations["listMediaComments"];
         put?: never;
         /**
          * Post a comment (or reply) on a media
-         * @description Post a comment on an uploaded media. Start a new thread, or reply to an existing one with `threadId`. Pass an `anchor` to pin the comment to a point on the image (normalized coordinates, so it survives any scaling). This is how a reviewer marks up a screenshot.
+         * @description Post a comment on an uploaded media. Start a new thread, or reply to an existing one with `threadId`. Pass an `anchor` to pin the comment to a point or an area of the image (normalized coordinates, so it survives any scaling). This is how a reviewer marks up a screenshot.
          */
         post: operations["createMediaComment"];
         delete?: never;
@@ -1229,7 +1229,7 @@ export interface paths {
         put?: never;
         /**
          * Post a comment (or reply) on a build
-         * @description Post a comment on a build. Start a new thread, reply to an existing one with `threadId`, optionally anchor the comment to a screenshot diff, or attach it to your pending review with `addToReview`.
+         * @description Post a comment on a build. Start a new thread, reply to an existing one with `threadId`, optionally anchor the comment to a screenshot diff (and to a point, an area or a line range on it with `anchor`), or attach it to your pending review with `addToReview`.
          */
         post: operations["createBuildComment"];
         delete?: never;
@@ -2241,6 +2241,17 @@ export interface components {
                 type: "point";
                 x: number;
                 y: number;
+            } | {
+                /** @constant */
+                type: "area";
+                /** @description Left edge of the area, normalized (0-1). */
+                x: number;
+                /** @description Top edge of the area, normalized (0-1). */
+                y: number;
+                /** @description Width of the area, normalized (0-1). `x + width` is at most 1. */
+                width: number;
+                /** @description Height of the area, normalized (0-1). `y + height` is at most 1. */
+                height: number;
             } | {
                 /** @constant */
                 type: "lines";
@@ -4655,12 +4666,23 @@ export interface operations {
                     };
                     /** @description Public ID of the root comment to reply to (e.g. `comment-xf23d`). */
                     threadId?: string;
-                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0-1) coordinates; lines is a 1-based inclusive range. */
+                    /** @description Where on the image or snapshot the comment points: a point, an area, or a line range. */
                     anchor?: {
                         /** @constant */
                         type: "point";
                         x: number;
                         y: number;
+                    } | {
+                        /** @constant */
+                        type: "area";
+                        /** @description Left edge of the area, normalized (0-1). */
+                        x: number;
+                        /** @description Top edge of the area, normalized (0-1). */
+                        y: number;
+                        /** @description Width of the area, normalized (0-1). `x + width` is at most 1. */
+                        width: number;
+                        /** @description Height of the area, normalized (0-1). `y + height` is at most 1. */
+                        height: number;
                     } | {
                         /** @constant */
                         type: "lines";
@@ -8811,12 +8833,23 @@ export interface operations {
                     threadId?: string;
                     /** @description Screenshot diff to anchor the comment to. Required when anchor is set. */
                     screenshotDiffId?: string;
-                    /** @description Where on the referenced screenshot diff the comment points. A point uses normalized (0-1) coordinates; lines is a 1-based inclusive range. */
+                    /** @description Where on the image or snapshot the comment points: a point, an area, or a line range. */
                     anchor?: {
                         /** @constant */
                         type: "point";
                         x: number;
                         y: number;
+                    } | {
+                        /** @constant */
+                        type: "area";
+                        /** @description Left edge of the area, normalized (0-1). */
+                        x: number;
+                        /** @description Top edge of the area, normalized (0-1). */
+                        y: number;
+                        /** @description Width of the area, normalized (0-1). `x + width` is at most 1. */
+                        width: number;
+                        /** @description Height of the area, normalized (0-1). `y + height` is at most 1. */
+                        height: number;
                     } | {
                         /** @constant */
                         type: "lines";

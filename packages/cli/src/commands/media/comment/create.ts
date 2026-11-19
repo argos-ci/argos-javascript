@@ -14,6 +14,7 @@ type MediaCommentCreateOptions = JsonOption & {
   bodyFile?: string;
   replyTo?: string;
   anchorPoint?: string;
+  anchorArea?: string;
 };
 
 export function registerMediaCommentCreate(comment: Command) {
@@ -31,6 +32,10 @@ export function registerMediaCommentCreate(comment: Command) {
       "--anchor-point <x,y>",
       "Pin the comment to a spot on the media, in normalized 0-1 coordinates",
     )
+    .option(
+      "--anchor-area <x,y,width,height>",
+      "Pin the comment to an area of the media, in normalized 0-1 coordinates with x,y at its top-left corner",
+    )
     .addOption(tokenOption)
     .addOption(jsonOption)
     .action(async (mediaId: string, options: MediaCommentCreateOptions) => {
@@ -40,7 +45,7 @@ export function registerMediaCommentCreate(comment: Command) {
         // A reply inherits the spot its thread already points at, and a line
         // range describes a text snapshot rather than an image.
         if (anchor && options.replyTo) {
-          fail("--anchor-point cannot be used with --reply-to.");
+          fail(`--anchor-${anchor.type} cannot be used with --reply-to.`);
         }
         const client = createApiClient(await resolveToken(options));
         const result = unwrap(

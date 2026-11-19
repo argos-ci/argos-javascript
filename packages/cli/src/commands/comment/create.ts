@@ -13,6 +13,7 @@ type CommentCreateOptions = BaseCommandOptions & {
   replyTo?: string;
   diff?: string;
   anchorPoint?: string;
+  anchorArea?: string;
   anchorLines?: string;
   draft?: boolean;
 };
@@ -37,6 +38,10 @@ export function registerCommentCreate(comment: Command) {
       "Point on the diff in normalized 0-1 coordinates (requires --diff)",
     )
     .option(
+      "--anchor-area <x,y,width,height>",
+      "Area on the diff in normalized 0-1 coordinates, x,y at its top-left corner (requires --diff)",
+    )
+    .option(
       "--anchor-lines <from,to>",
       "1-based inclusive line range on the diff (requires --diff)",
     )
@@ -56,9 +61,7 @@ export function registerCommentCreate(comment: Command) {
           const body = await resolveBody(options, { required: true });
           const anchor = parseAnchor(options);
           if (anchor && !options.diff) {
-            fail(
-              "--anchor-point and --anchor-lines require --diff <screenshotDiffId>.",
-            );
+            fail(`--anchor-${anchor.type} requires --diff <screenshotDiffId>.`);
           }
           return unwrap(
             await client.POST(

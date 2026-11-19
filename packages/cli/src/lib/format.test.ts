@@ -424,6 +424,20 @@ describe("formatComment / formatComments", () => {
     expect(output).toContain("Media version: media-version-9");
   });
 
+  it("renders an area as its top-left corner and size", () => {
+    const anchor = { type: "area", x: 0.1, y: 0.2, width: 0.3, height: 0.25 };
+    const onDiff = {
+      ...comment,
+      screenshotDiffId: "diff-1",
+      anchor,
+    } as unknown as Comment;
+    const onMedia = { ...comment, mediaId: "42", anchor } as unknown as Comment;
+    expect(formatComment(onDiff)).toContain(
+      "Diff: diff-1 (area 0.1,0.2 0.3x0.25)",
+    );
+    expect(formatComment(onMedia)).toContain("Pinned: area 0.1,0.2 0.3x0.25");
+  });
+
   it("reports an empty comment list", () => {
     expect(formatComments([])).toBe("No comments found.");
   });
