@@ -543,7 +543,13 @@ export interface paths {
         put?: never;
         /**
          * Create a deployment
-         * @description Create a deployment and receive signed upload URLs for the files Argos doesn't already store. Files already present (matched by content hash) are reused and omitted from `uploadFiles`. The environment is inferred from the branch when omitted.
+         * @description Create a deployment hosted by Argos, or report one hosted elsewhere.
+         *
+         *     With `files`, Argos returns signed upload URLs for the files it doesn't already store. Files already present (matched by content hash) are reused and omitted from `uploadFiles`. Finalize the deployment once they are uploaded.
+         *
+         *     With `url`, the deployment is ready at once and `uploadFiles` is empty.
+         *
+         *     The environment is inferred from the branch when omitted.
          */
         post: operations["createDeployment"];
         delete?: never;
@@ -5605,13 +5611,18 @@ export interface operations {
                      * @enum {string}
                      */
                     environment?: "preview" | "production";
-                    /** @description List of files to deploy */
-                    files: {
+                    /** @description The files Argos hosts and serves. Required unless `url` is set. */
+                    files?: {
                         path: string;
                         hash: components["schemas"]["Sha256Hash"];
                         size: number;
                         contentType: string;
                     }[];
+                    /**
+                     * Format: uri
+                     * @description The URL of a deployment hosted elsewhere, such as a Vercel or Netlify preview. The deployment is created `ready`, and the builds of the same commit link their screenshots to it. Required unless `files` is set.
+                     */
+                    url?: string;
                 };
             };
         };

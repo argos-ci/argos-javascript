@@ -91,4 +91,101 @@ describe("#deploy", () => {
     expect(bodies).toHaveLength(1);
     expect(bodies[0]).not.toHaveProperty("project");
   });
+
+  describe("with a url", () => {
+    const url = "https://web-git-feature.vercel.app";
+    const deployment = {
+      id: "43",
+      status: "ready",
+      environment: "preview",
+      branch: "feature",
+      commitSha: commit,
+      url: `${url}/`,
+      createdAt: "2026-11-16T12:00:00.000Z",
+    };
+
+    /**
+     * Answers the requests `deploy` makes to report a deployment hosted
+     * elsewhere, and collects them.
+     */
+    function captureReportRequests() {
+      const received = { bodies: [] as unknown[], finalized: false };
+      server.use(
+        http.post(`${apiBaseUrl}/deployments`, async ({ request }) => {
+          received.bodies.push(await request.json());
+          return HttpResponse.json(
+            { deploymentId: "43", uploadFiles: [] },
+            { status: 201 },
+          );
+        }),
+        http.get(`${apiBaseUrl}/deployments/43`, () =>
+          HttpResponse.json(deployment),
+        ),
+        http.post(`${apiBaseUrl}/deployments/43/finalize`, () => {
+          received.finalized = true;
+          return HttpResponse.json(deployment);
+        }),
+      );
+      return received;
+    }
+
+    it("reports the deployment without files and returns it", async () => {
+      const received = captureReportRequests();
+
+      const result = await deploy({
+        url,
+        apiBaseUrl,
+        commit,
+        branch: "feature",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+      });
+
+      expect(received.bodies).toEqual([
+        expect.objectContaining({ commit, branch: "feature", url }),
+      ]);
+      expect(received.bodies[0]).not.toHaveProperty("files");
+      expect(received.finalized).toBe(false);
+      expect(result).toEqual(deployment);
+    });
+
+    it("sends the pull request and the environment", async () => {
+      vi.stubEnv("ARGOS_PR_NUMBER", "12");
+      vi.stubEnv("ARGOS_PR_HEAD_COMMIT", prHeadCommit);
+      const received = captureReportRequests();
+
+      await deploy({
+        url,
+        environment: "production",
+        apiBaseUrl,
+        commit,
+        branch: "feature",
+        token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+      });
+
+      expect(received.bodies).toEqual([
+        expect.objectContaining({
+          url,
+          prNumber: 12,
+          prHeadCommit,
+          environment: "production",
+        }),
+      ]);
+    });
+
+    it("refuses a root and a url together", async () => {
+      const received = captureReportRequests();
+
+      await expect(
+        deploy({
+          url,
+          root: join(__dirname, "../../../__fixtures__/deploy"),
+          apiBaseUrl,
+          commit,
+          branch: "feature",
+          token: "92d832e0d22ab113c8979d73a87a11130eaa24a9",
+        } as unknown as Parameters<typeof deploy>[0]),
+      ).rejects.toThrow("`root` and `url` can't be used together.");
+      expect(received.bodies).toEqual([]);
+    });
+  });
 });

@@ -419,6 +419,10 @@ export interface Config {
   /**
    * Base URL to use for preview links.
    * @example "https://my-preview.example.com"
+   * @deprecated `ARGOS_PREVIEW_BASE_URL` is deprecated. Report the deployment
+   * to Argos instead, with `argos deploy --url <url>` or `deploy({ url })`.
+   * Argos links each screenshot to the same page on it.
+   * @see https://argos-ci.com/docs/learn/deployments
    */
   previewBaseUrl: string | null;
 
