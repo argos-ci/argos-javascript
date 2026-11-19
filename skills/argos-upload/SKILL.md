@@ -147,9 +147,9 @@ argos media update 4821 --no-branch          # detach: nothing will publish it
 
 ## Reading the feedback you were given
 
-A human can comment on an uploaded screenshot and pin a comment to a **spot** on
-it. That is how you get told "this button is misaligned" about a pixel you cannot
-look at. Find the media, then read its threads:
+A human can comment on an uploaded screenshot and pin a comment to a **spot** or
+an **area** of it. That is how you get told "this button is misaligned" about
+pixels you cannot look at. Find the media, then read its threads:
 
 ```bash
 argos media list --branch feat/checkout --json      # or --pr 1234
@@ -159,9 +159,11 @@ argos media comment list 4821 --json                # open threads; --all for se
 `media comment list` shows **open threads only**, so what comes back is what is
 left to do. Add `--all` to see the ones already dealt with.
 
-Each comment carries the pin as `Pinned: point x,y` in normalized 0–1 coordinates
-of the image (`0.62,0.34` is 62% across, 34% down), and the media's `File:` URL is
-what you fetch to go and look. A comment also carries the **media version** it was
+Each comment carries the pin in normalized 0-1 coordinates of the image (its
+`anchor` field with `--json`). `Pinned: point 0.62,0.34` is a spot 62% across
+and 34% down. `Pinned: area 0.1,0.2 0.3x0.25` is a region with its top-left
+corner at `0.1,0.2`, 30% wide and 25% tall. The media's `File:` URL is what you
+fetch to go and look. A comment also carries the **media version** it was
 written against: if `versionCount` is above 1, the pin describes the bytes of
 _that_ upload, so resolve it before trusting the coordinates.
 

@@ -397,9 +397,14 @@ function formatAnchor(anchor: Comment["anchor"]): string | null {
   if (!anchor) {
     return null;
   }
-  return anchor.type === "point"
-    ? `point ${anchor.x},${anchor.y}`
-    : `lines ${anchor.from}-${anchor.to}`;
+  switch (anchor.type) {
+    case "point":
+      return `point ${anchor.x},${anchor.y}`;
+    case "area":
+      return `area ${anchor.x},${anchor.y} ${anchor.width}x${anchor.height}`;
+    case "lines":
+      return `lines ${anchor.from}-${anchor.to}`;
+  }
 }
 
 function formatReactions(reactions: Comment["reactions"]): string | null {

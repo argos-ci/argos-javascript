@@ -77,8 +77,11 @@ and evidence instead of posting — the CLI can't submit the review.
    ```
 
    - `<screenshotDiffId>` is the diff `id` from `build snapshots --json`.
-   - Pin to a region with `--anchor-lines <from,to>` or `--anchor-point <x,y>`
-     (normalized 0–1); reply in a thread with `--reply-to <commentId>`.
+   - Pin the comment with `--anchor-area <x,y,width,height>` (`x,y` is the
+     top-left corner) when the problem is a whole component or region, or with
+     `--anchor-point <x,y>` when it is one spot. Both take normalized 0-1
+     coordinates. On a text snapshot, use `--anchor-lines <from,to>`.
+   - Reply in a thread with `--reply-to <commentId>`.
    - Use `--draft` to bundle comments into your pending review, then submit them
      together in the next step.
 

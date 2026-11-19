@@ -88,7 +88,7 @@ humans, not CI.
 - **Inspect**: `build list [--branch <b>] [--commit <sha>] [--search <q>]` · `build get <ref>` · `build snapshots <ref> [--needs-review] [--metrics-period 24h|3d|7d|30d|90d]` · `build subscribe|unsubscribe <ref>`
 - **Export**: `build download <ref> [-o <dir>]` · `baseline download [-o <dir>] [--branch <b>] [--build-name <name>] [--mode ci|monitoring]`
 - **Review**: `review list <ref>` · `review create <ref> --event <approve|reject|comment> [--body <md>]` · `review dismiss <ref> <reviewId>` · `review reviewer list <ref>` · `review reviewer add|remove <ref> <userId...>`
-- **Comment**: `comment list <ref>` · `comment create <ref> --body <md> [--reply-to <id>] [--diff <id>] [--draft]` · `comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <ref> <id>` · `comment react|unreact <ref> <id> <emoji>`
+- **Comment**: `comment list <ref>` · `comment create <ref> --body <md> [--reply-to <id>] [--diff <id> [<anchor>]] [--draft]` · `comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <ref> <id>` · `comment react|unreact <ref> <id> <emoji>`
 - **Flakiness**: `test list [--build-name <name>] [--search <q>]` · `test get <testId>` · `test changes <testId> [--ignored true|false] [--metrics-period …]` · `test subscribe|unsubscribe <testId>` · `change list` · `change ignore|unignore <changeId> --project owner/project`
 - **Test comments**: `test comment list|create <testId>` · `test comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <testId> <id>` · `test comment react|unreact <testId> <id> <emoji>`
 - **Project**: `project get` · `project update [--name …] [--summary-check …] [--default-user-level …] [--ignore-changes true|false] [--deployments true|false] …` · `project transfer --to <slug>` · `project contributor list|set|remove` · `project deployments [--environment preview|production]` · `project domain get|set <domain>`
@@ -97,7 +97,7 @@ humans, not CI.
 - **Team**: `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
 - **Account**: `analytics --account <slug> [--from <date>] [--to <date>] [--group-by day|week|month] [--time-zone <iana>] [--project <name>]` · `create-project <name> --account <slug>` · `whoami`
 - **Media**: `media upload <files...> [--branch <b> | --pr <n>] [--state before|after] [--description <text>] [--visibility team|public] [--no-compress]` · `media list [--branch <b>] [--pr <n>] [--stage staged|published] [--search <q>] [--type image|video]` · `media get|delete|versions <mediaId>` · `media update <mediaId> [--name <n>] [--description <text>] [--branch <b>]`
-- **Media comments**: `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId>` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
+- **Media comments**: `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId> --body <md> [--reply-to <id> | <anchor>]` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
 - **CI**: `upload <dir>` · `finalize` · `skip` · `deploy <dir>`
 - **Auth**: `login` · `logout`
 - **Docs**: `docs search <query> [--limit <n>]` (no token; up to 10 results, 5 by default)
@@ -105,6 +105,12 @@ humans, not CI.
 List commands (`build list`, `test list`, `change list`, `account member
 list`, `project contributor list`, `project deployments`, `automation list`,
 `account invite list`) follow pagination up to `--limit` (default 100).
+
+An `<anchor>` pins a comment to part of the screenshot, in normalized 0-1
+coordinates (`0.62,0.34` is 62% across, 34% down). Use `--anchor-area
+<x,y,width,height>` (`x,y` is the top-left corner) when the feedback is about a
+whole component or region, and `--anchor-point <x,y>` only when it is about one
+spot. Build comments also take `--anchor-lines <from,to>` for a text snapshot.
 
 `build snapshots --json` enriches each diff with `test.metrics` (flakiness:
 `stability`, `consistency`, `flakiness`, all from 0 to 1) and, on a change, `change`
