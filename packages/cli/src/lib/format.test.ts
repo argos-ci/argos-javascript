@@ -8,12 +8,14 @@ import {
   formatComments,
   formatCreatedProject,
   formatCreatedProjectToken,
+  formatCreatedWebhook,
   formatDocsSearchResults,
   formatMedia,
   formatMediaList,
   formatMediaVersions,
   formatProject,
   formatProjectTokens,
+  formatResentWebhookDelivery,
   formatReview,
   formatReviews,
   formatSnapshotDownload,
@@ -21,6 +23,10 @@ import {
   formatSnapshots,
   formatStats,
   formatValue,
+  formatWebhook,
+  formatWebhookDeliveries,
+  formatWebhookDelivery,
+  formatWebhooks,
 } from "./format";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
@@ -30,6 +36,8 @@ type Comment = ArgosAPISchema.components["schemas"]["Comment"];
 type Media = ArgosAPISchema.components["schemas"]["Media"];
 type MediaVersion = ArgosAPISchema.components["schemas"]["MediaVersion"];
 type ProjectToken = ArgosAPISchema.components["schemas"]["ProjectToken"];
+type Webhook = ArgosAPISchema.components["schemas"]["Webhook"];
+type WebhookDelivery = ArgosAPISchema.components["schemas"]["WebhookDelivery"];
 
 const build = {
   number: 42,
@@ -681,5 +689,194 @@ describe("formatProjectTokens / formatCreatedProjectToken", () => {
     expect(output).toContain("Created token GitHub Actions · 42");
     expect(output).toContain("\nargos_0123456789abcdef0123456789abcdef01\n");
     expect(output).toMatch(/will not show it again/);
+  });
+});
+
+describe("formatWebhook / formatWebhooks / formatCreatedWebhook", () => {
+  const webhook: Webhook = {
+    id: "12",
+    url: "https://example.com/argos",
+    events: ["build.completed", "deployment.ready"],
+    projects: null,
+    createdAt: "2026-11-20T10:00:00.000Z",
+  };
+
+  it("formats a webhook that receives the events of every project", () => {
+    expect(formatWebhook(webhook)).toBe(
+      [
+        "Webhook 12",
+        "URL: https://example.com/argos",
+        "Events: build.completed, deployment.ready",
+        "Projects: all, including future ones",
+        "Created: 2026-11-20T10:00:00.000Z",
+      ].join("\n"),
+    );
+  });
+
+  it("lists webhooks with their events and projects", () => {
+    expect(
+      formatWebhooks([
+        webhook,
+        {
+          ...webhook,
+          id: "7",
+          url: "https://hooks.acme.com/argos",
+          events: ["build.reviewed"],
+          projects: ["web", "docs"],
+        },
+      ]),
+    ).toBe(
+      [
+        "Webhooks (2)",
+        "",
+        "https://example.com/argos · 12",
+        "  Events: build.completed, deployment.ready",
+        "  Projects: all, including future ones",
+        "  Created: 2026-11-20T10:00:00.000Z",
+        "",
+        "https://hooks.acme.com/argos · 7",
+        "  Events: build.reviewed",
+        "  Projects: web, docs",
+        "  Created: 2026-11-20T10:00:00.000Z",
+      ].join("\n"),
+    );
+  });
+
+  it("says when there is no webhook", () => {
+    expect(formatWebhooks([])).toBe("No webhooks found.");
+  });
+
+  it("strips escape sequences from webhook URLs", () => {
+    expect(
+      formatWebhook({ ...webhook, url: "https://a.com/\u001b[2K\rFake" }),
+    ).toContain("URL: https://a.com/ Fake");
+  });
+
+  it("prints the created webhook's secret, once, with a warning", () => {
+    const output = formatCreatedWebhook({ ...webhook, secret: "whsec_abc" });
+    expect(output).toContain("Created webhook 12");
+    expect(output).toContain("\nwhsec_abc\n");
+    expect(output).toMatch(/will not show it again/);
+  });
+});
+
+describe("formatWebhookDeliveries / formatWebhookDelivery", () => {
+  const delivery: WebhookDelivery = {
+    id: "300",
+    status: "failed",
+    eventId: "evt_1",
+    eventType: "build.completed",
+    attempts: 3,
+    attemptedAt: "2026-11-20T10:05:00.000Z",
+    responseStatus: 500,
+    durationMs: 120,
+    failureReason: "Endpoint answered HTTP 500",
+    createdAt: "2026-11-20T10:00:00.000Z",
+  };
+
+  const pending: WebhookDelivery = {
+    ...delivery,
+    id: "301",
+    status: "pending",
+    attempts: 0,
+    attemptedAt: null,
+    responseStatus: null,
+    durationMs: null,
+    failureReason: null,
+  };
+
+  it("lists deliveries with the outcome of their latest attempt", () => {
+    expect(formatWebhookDeliveries([delivery, pending])).toBe(
+      [
+        "Deliveries (2)",
+        "",
+        "300 [failed]",
+        "  Event: build.completed · evt_1",
+        "  Attempts: 3",
+        "  Last attempt: 2026-11-20T10:05:00.000Z",
+        "  Response: HTTP 500 in 120 ms",
+        "  Failure: Endpoint answered HTTP 500",
+        "  Created: 2026-11-20T10:00:00.000Z",
+        "",
+        "301 [pending]",
+        "  Event: build.completed · evt_1",
+        "  Attempts: 0",
+        "  Last attempt: none yet",
+        "  Created: 2026-11-20T10:00:00.000Z",
+      ].join("\n"),
+    );
+  });
+
+  it("says when an attempt got no response", () => {
+    expect(
+      formatWebhookDeliveries([
+        { ...delivery, responseStatus: null, durationMs: 10000 },
+      ]),
+    ).toContain("  Response: none after 10000 ms");
+  });
+
+  it("says when there is no delivery", () => {
+    expect(formatWebhookDeliveries([])).toBe("No deliveries found.");
+  });
+
+  it("prints the request body and the start of the response", () => {
+    expect(
+      formatWebhookDelivery({
+        ...delivery,
+        responseBody: "Internal error\r\nRetry later",
+        event: {
+          id: "evt_1",
+          type: "build.completed",
+          timestamp: "2026-11-20T10:00:00.000Z",
+          data: { branch: "main\u001b[2K" },
+        } as unknown as Parameters<typeof formatWebhookDelivery>[0]["event"],
+      }),
+    ).toBe(
+      [
+        "Delivery 300 [failed]",
+        "Event: build.completed · evt_1",
+        "Attempts: 3",
+        "Last attempt: 2026-11-20T10:05:00.000Z",
+        "Response: HTTP 500 in 120 ms",
+        "Failure: Endpoint answered HTTP 500",
+        "Created: 2026-11-20T10:00:00.000Z",
+        "",
+        "Request body:",
+        "  {",
+        '    "id": "evt_1",',
+        '    "type": "build.completed",',
+        '    "timestamp": "2026-11-20T10:00:00.000Z",',
+        '    "data": {',
+        '      "branch": "main\\u001b[2K"',
+        "    }",
+        "  }",
+        "",
+        "Response body:",
+        "  Internal error",
+        "  Retry later",
+      ].join("\n"),
+    );
+  });
+
+  it("says when the response had no body", () => {
+    expect(
+      formatWebhookDelivery({
+        ...pending,
+        responseBody: null,
+        event: {} as Parameters<typeof formatWebhookDelivery>[0]["event"],
+      }),
+    ).toMatch(/\nResponse body: none$/);
+  });
+
+  it("formats a resent delivery", () => {
+    expect(formatResentWebhookDelivery(pending)).toBe(
+      [
+        "Resent as delivery 301 [pending]",
+        "Event: build.completed · evt_1",
+        "Attempts: 0",
+        "Last attempt: none yet",
+        "Created: 2026-11-20T10:00:00.000Z",
+      ].join("\n"),
+    );
   });
 });
