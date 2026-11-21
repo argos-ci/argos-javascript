@@ -2,7 +2,7 @@ import type { ArgosAPISchema } from "@argos-ci/api-client";
 
 import type { DocsSearchResult } from "./docs";
 import type { SnapshotDownload } from "./download";
-import { sanitizeTerminalText } from "./terminal";
+import { sanitizeTerminalBlock, sanitizeTerminalText } from "./terminal";
 import { formatInTimeZone } from "./time-zone";
 
 type Build = ArgosAPISchema.components["schemas"]["Build"];
@@ -39,6 +39,11 @@ type BuildReviewers = ArgosAPISchema.components["schemas"]["BuildReviewers"];
 type NotificationSubscription =
   ArgosAPISchema.components["schemas"]["NotificationSubscription"];
 type AutomationRule = ArgosAPISchema.components["schemas"]["AutomationRule"];
+type Webhook = ArgosAPISchema.components["schemas"]["Webhook"];
+type CreatedWebhook = ArgosAPISchema.components["schemas"]["CreatedWebhook"];
+type WebhookDelivery = ArgosAPISchema.components["schemas"]["WebhookDelivery"];
+type WebhookDeliveryDetail =
+  ArgosAPISchema.components["schemas"]["WebhookDeliveryDetail"];
 /** A deployment as returned by `listProjectDeployments`; it has no named schema. */
 export type ProjectDeployment =
   ArgosAPISchema.operations["listProjectDeployments"]["responses"][200]["content"]["application/json"]["results"][number];
@@ -779,6 +784,140 @@ export function formatAutomationRules(rules: AutomationRule[]): string {
   ]
     .slice(0, -1)
     .join("\n");
+}
+
+function formatWebhookProjects(projects: Webhook["projects"]): string {
+  return projects
+    ? formatValue(projects.join(", "))
+    : "all, including future ones";
+}
+
+/** The details of a webhook, under its title line. */
+function formatWebhookDetails(webhook: Webhook): string[] {
+  return [
+    `Events: ${webhook.events.join(", ")}`,
+    `Projects: ${formatWebhookProjects(webhook.projects)}`,
+    `Created: ${webhook.createdAt}`,
+  ];
+}
+
+// Webhook URLs are typed by whoever created the webhook, so they are sanitized
+// like any remote text.
+export function formatWebhook(webhook: Webhook): string {
+  return [
+    `Webhook ${webhook.id}`,
+    `URL: ${sanitizeTerminalText(webhook.url)}`,
+    ...formatWebhookDetails(webhook),
+  ].join("\n");
+}
+
+export function formatWebhooks(webhooks: Webhook[]): string {
+  if (webhooks.length === 0) {
+    return "No webhooks found.";
+  }
+  return [
+    `Webhooks (${webhooks.length})`,
+    "",
+    ...webhooks.flatMap((webhook) => [
+      `${sanitizeTerminalText(webhook.url)} · ${webhook.id}`,
+      ...formatWebhookDetails(webhook).map((line) => `  ${line}`),
+      "",
+    ]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+export function formatCreatedWebhook(webhook: CreatedWebhook): string {
+  return [
+    `Created webhook ${webhook.id}`,
+    `URL: ${sanitizeTerminalText(webhook.url)}`,
+    ...formatWebhookDetails(webhook),
+    "",
+    webhook.secret,
+    "",
+    "Save this signing secret now: Argos will not show it again. Use it to verify the webhook-signature header of each request.",
+  ].join("\n");
+}
+
+/** What the latest attempt got back, e.g. `HTTP 500 in 120 ms`. */
+function formatDeliveryResponse(delivery: WebhookDelivery): string {
+  if (delivery.responseStatus === null) {
+    return delivery.durationMs === null
+      ? "none"
+      : `none after ${delivery.durationMs} ms`;
+  }
+  return delivery.durationMs === null
+    ? `HTTP ${delivery.responseStatus}`
+    : `HTTP ${delivery.responseStatus} in ${delivery.durationMs} ms`;
+}
+
+/**
+ * The details of a delivery, under its title line. The failure reason can quote
+ * what the endpoint answered, so it is sanitized like any remote text.
+ */
+function formatDeliveryDetails(delivery: WebhookDelivery): string[] {
+  const lines = [
+    `Event: ${delivery.eventType} · ${delivery.eventId}`,
+    `Attempts: ${delivery.attempts}`,
+  ];
+  if (delivery.attemptedAt) {
+    lines.push(
+      `Last attempt: ${delivery.attemptedAt}`,
+      `Response: ${formatDeliveryResponse(delivery)}`,
+    );
+  } else {
+    lines.push("Last attempt: none yet");
+  }
+  if (delivery.failureReason) {
+    lines.push(`Failure: ${sanitizeTerminalText(delivery.failureReason)}`);
+  }
+  lines.push(`Created: ${delivery.createdAt}`);
+  return lines;
+}
+
+export function formatWebhookDeliveries(deliveries: WebhookDelivery[]): string {
+  if (deliveries.length === 0) {
+    return "No deliveries found.";
+  }
+  return [
+    `Deliveries (${deliveries.length})`,
+    "",
+    ...deliveries.flatMap((delivery) => [
+      `${delivery.id} [${delivery.status}]`,
+      ...formatDeliveryDetails(delivery).map((line) => `  ${line}`),
+      "",
+    ]),
+  ]
+    .slice(0, -1)
+    .join("\n");
+}
+
+/**
+ * Format a delivery with the request Argos sent and the start of the response it
+ * got. Both carry text Argos did not author (branch names, whatever the endpoint
+ * answered), so they are sanitized, keeping their lines.
+ */
+export function formatWebhookDelivery(delivery: WebhookDeliveryDetail): string {
+  const responseBody = sanitizeTerminalBlock(delivery.responseBody);
+  return [
+    `Delivery ${delivery.id} [${delivery.status}]`,
+    ...formatDeliveryDetails(delivery),
+    "",
+    "Request body:",
+    indent(sanitizeTerminalBlock(JSON.stringify(delivery.event, null, 2))),
+    "",
+    responseBody
+      ? `Response body:\n${indent(responseBody)}`
+      : "Response body: none",
+  ].join("\n");
+}
+
+export function formatResentWebhookDelivery(delivery: WebhookDelivery): string {
+  return [
+    `Resent as delivery ${delivery.id} [${delivery.status}]`,
+    ...formatDeliveryDetails(delivery),
+  ].join("\n");
 }
 
 /** Format bytes the way a file listing does. */

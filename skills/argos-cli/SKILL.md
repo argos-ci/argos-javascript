@@ -7,8 +7,9 @@ description: >
   inspect a test's flakiness and its recurring changes, ignore flaky test
   changes, configure a project and its contributors, create, rotate and revoke
   the project tokens CI uses, manage a team's members,
-  invites and email domains, manage automation rules, fetch analytics, upload
-  screenshots, manage CI builds, and search the Argos documentation. Use
+  invites and email domains, manage automation rules and webhooks, debug and
+  resend webhook deliveries, fetch analytics, upload screenshots, manage CI
+  builds, and search the Argos documentation. Use
   whenever running `argos` commands or working with Argos builds, snapshots,
   flakiness, projects, teams, or visual-regression reviews from a shell,
   script, or CI pipeline.
@@ -19,7 +20,7 @@ metadata:
   author: argos-ci
   homepage: https://argos-ci.com
   source: https://github.com/argos-ci/argos-javascript
-argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project owner/project` for build-number refs on review/comment commands, for every `change`, `project` and `automation` command, for `test` commands unless the token is a project token, and for every command when the project token is linked to several projects; `--account <slug>` (or ARGOS_ACCOUNT) for every `account` command.
+argument-hint: Needs a token (ARGOS_TOKEN, --token, or `argos login`); add `--project owner/project` for build-number refs on review/comment commands, for every `change`, `project` and `automation` command, for `test` commands unless the token is a project token, and for every command when the project token is linked to several projects; `--account <slug>` (or ARGOS_ACCOUNT) for every `account` and `webhook` command.
 ---
 
 # Argos CLI
@@ -33,9 +34,10 @@ command map.
 - Pass `--json` whenever you parse stdout; commands print human-readable text
   otherwise.
 - Errors go to **stderr** as `Error: <message>`. Exit `0` = success, `1` = failure.
-- Never print token values. The only commands that print one are the two token
-  creation commands, and only once: pipe the value straight into the secret
-  that needs it (see the token rotation flow below) instead of echoing it.
+- Never print token values or webhook secrets. Only the two token creation
+  commands and `webhook create` print one, and only once: pipe the value
+  straight into the secret that needs it (see the token rotation and webhook
+  flows below) instead of echoing it.
 
 ## Authentication
 
@@ -47,8 +49,8 @@ account, so every `change` command needs `--project owner/project` (or
 project name but not the account, so `test` commands need the same
 `--project`/`ARGOS_PROJECT`, except with a project token, which already
 identifies its own project. `project` and `automation` commands take the same
-`--project owner/project`; `account` commands take `--account <slug>` (or
-`ARGOS_ACCOUNT`).
+`--project owner/project`; `account` and `webhook` commands take `--account
+<slug>` (or `ARGOS_ACCOUNT`).
 
 A project token can be linked to several projects of an account. Such a token
 does not identify a project on its own. Every command that uses it (`upload`,
@@ -60,11 +62,11 @@ the command needs, and only a new token with it fixes that.
 
 There are two token types. Pick one by command:
 
-| Commands                                                                                                                                                                                                                                                                                                                            | Token                       | Resolution order                            |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------- |
-| `build list`, `build get`, `build snapshots`, `build download`, `baseline download`, `test list`, `test get`, `test changes`, `change list`, `project get`, `project deployments`, `project domain get`, `media get`, `media list`, `media versions`, `media update`, `media delete`                                                | Project token               | `--token` › `ARGOS_TOKEN`                   |
-| `review *`, `comment *`, `test comment *`, `media comment *`, `test subscribe` / `unsubscribe`, `build subscribe` / `unsubscribe`, `change ignore` / `unignore`, `account *`, `project update`, `project transfer`, `project contributor *`, `project token *`, `project domain set`, `automation *`, `analytics`, `create-project` | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
-| `upload`, `finalize`, `skip`, `deploy`, `media upload`                                                                                                                                                                                                                                                                              | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
+| Commands                                                                                                                                                                                                                                                                                                                                         | Token                       | Resolution order                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------- |
+| `build list`, `build get`, `build snapshots`, `build download`, `baseline download`, `test list`, `test get`, `test changes`, `change list`, `project get`, `project deployments`, `project domain get`, `media get`, `media list`, `media versions`, `media update`, `media delete`                                                             | Project token               | `--token` › `ARGOS_TOKEN`                   |
+| `review *`, `comment *`, `test comment *`, `media comment *`, `test subscribe` / `unsubscribe`, `build subscribe` / `unsubscribe`, `change ignore` / `unignore`, `account *`, `project update`, `project transfer`, `project contributor *`, `project token *`, `project domain set`, `automation *`, `webhook *`, `analytics`, `create-project` | Personal access token (PAT) | `--token` › `ARGOS_TOKEN` › `argos login`   |
+| `upload`, `finalize`, `skip`, `deploy`, `media upload`                                                                                                                                                                                                                                                                                           | CI / project token          | `--token` › `ARGOS_TOKEN` (or tokenless CI) |
 
 `baseline download` takes only a project token: the baseline lookup it relies on
 rejects a PAT, including the one from `argos login`.
@@ -72,8 +74,8 @@ rejects a PAT, including the one from `argos login`.
 `argos login` asks the user which access to grant. Its default, "Read and
 write", covers reviews, comments and media but not administration: `account *`,
 `create-project`, `project update`, `project transfer`, `project contributor
-set|remove`, `project token create|revoke`, `project domain set` and
-`automation create|update|deactivate` need "Admin" access. An `Insufficient scope` error names the missing
+set|remove`, `project token create|revoke`, `project domain set`,
+`automation create|update|deactivate` and `webhook *` need "Admin" access. An `Insufficient scope` error names the missing
 permission: ask the user to run `argos login` again and choose "Admin", or use
 a PAT.
 
@@ -95,6 +97,7 @@ humans, not CI.
 - **Project tokens**: `project token list` · `project token create --name <name> [--permissions <p…>] [--expire-at <iso> | --expires-in <days>]` · `project token revoke <tokenId>` · `account project-token list|revoke` · `account project-token create --projects <name…> --name <name> […]` (one token for several projects)
 - **Automation**: `automation list [--active true|false]` · `automation get <ruleId>` · `automation create|update [<ruleId>] --definition-file <path>` · `automation deactivate <ruleId>`
 - **Team**: `account get` · `account update --default-user-level <member|contributor>` · `account member list|set-level|remove` · `account invite list|create|cancel|reset-link` · `account domain list|add|remove`
+- **Webhooks**: `webhook list` · `webhook get|delete <webhookId>` · `webhook create --url <https-url> --events <event…> [--projects <name…>]` (events: `build.completed`, `build.reviewed`, `deployment.created`, `deployment.ready`; every project, including future ones, unless `--projects` is given) · `webhook delivery list <webhookId> [--status pending|success|failed] [--event-id <id>]` · `webhook delivery get|resend <webhookId> <deliveryId>`
 - **Account**: `analytics --account <slug> [--from <date>] [--to <date>] [--group-by day|week|month] [--time-zone <iana>] [--project <name>]` · `create-project <name> --account <slug>` · `whoami`
 - **Media**: `media upload <files...> [--branch <b> | --pr <n>] [--state before|after] [--description <text>] [--visibility team|public] [--no-compress]` · `media list [--branch <b>] [--pr <n>] [--stage staged|published] [--search <q>] [--type image|video]` · `media get|delete|versions <mediaId>` · `media update <mediaId> [--name <n>] [--description <text>] [--branch <b>]`
 - **Media comments**: `media comment list <mediaId> [--all]` (open threads by default) · `media comment create <mediaId> --body <md> [--reply-to <id> | <anchor>]` · `media comment get|edit|delete|resolve|unresolve|subscribe|unsubscribe <mediaId> <id>` · `media comment react|unreact <mediaId> <id> <emoji>`
@@ -104,7 +107,8 @@ humans, not CI.
 
 List commands (`build list`, `test list`, `change list`, `account member
 list`, `project contributor list`, `project deployments`, `automation list`,
-`account invite list`) follow pagination up to `--limit` (default 100).
+`account invite list`, `webhook delivery list`) follow pagination up to
+`--limit` (default 100).
 
 An `<anchor>` pins a comment to part of the screenshot, in normalized 0-1
 coordinates (`0.62,0.34` is 62% across, 34% down). Use `--anchor-area
@@ -231,6 +235,28 @@ then names the project on every command:
 ```bash
 argos account project-token create --account acme --projects web docs --name Monorepo --json | jq -r .token | gh secret set ARGOS_TOKEN
 ARGOS_PROJECT=acme/web argos upload ./screenshots
+```
+
+Send build and deployment events to an endpoint. `webhook create` prints the
+signing secret once: store it where the endpoint reads it, to verify the
+`webhook-signature` header ([Standard Webhooks](https://www.standardwebhooks.com)):
+
+```bash
+argos webhook create --account acme --url https://hooks.acme.com/argos \
+  --events build.completed build.reviewed --projects web --json \
+  | jq -r .secret | gh secret set ARGOS_WEBHOOK_SECRET   # never echo the value
+```
+
+Debug a webhook. Argos retries a failing delivery, then marks it `failed`;
+deliveries are kept 7 days. `delivery get` shows the request Argos sent and the
+start of the response. Once the endpoint is fixed, resend: the new delivery
+keeps the event's `webhook-id`, so the endpoint can skip events it already
+processed:
+
+```bash
+argos webhook delivery list <webhookId> --account acme --status failed --json
+argos webhook delivery get <webhookId> <deliveryId> --account acme --json   # responseStatus, failureReason, responseBody, event
+argos webhook delivery resend <webhookId> <deliveryId> --account acme --json
 ```
 
 Ask for a review on a build, then check who is still on the hook:

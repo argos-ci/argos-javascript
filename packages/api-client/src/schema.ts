@@ -244,6 +244,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/accounts/{accountSlug}/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an account's webhooks
+         * @description List the webhooks of an account, newest first. Requires administrator access to the account.
+         */
+        get: operations["listAccountWebhooks"];
+        put?: never;
+        /**
+         * Create a webhook
+         * @description Create a webhook: Argos posts the selected events of the account's projects to its URL, signed with the secret returned once in the response. Requires administrator access to the account.
+         */
+        post: operations["createAccountWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/webhooks/{webhookId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a webhook
+         * @description Get a webhook of an account. Requires administrator access to the account.
+         */
+        get: operations["getAccountWebhook"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a webhook
+         * @description Delete a webhook: Argos stops sending it events, including the deliveries waiting for a retry. Requires administrator access to the account.
+         */
+        delete: operations["deleteAccountWebhook"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/webhooks/{webhookId}/deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a webhook's deliveries
+         * @description List the deliveries of a webhook, most recent first, to find the ones that failed. Deliveries are kept 7 days. Requires administrator access to the account.
+         */
+        get: operations["listWebhookDeliveries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/webhooks/{webhookId}/deliveries/{deliveryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a webhook delivery
+         * @description Get a delivery of a webhook with the request it sent and the start of the response it got. Requires administrator access to the account.
+         */
+        get: operations["getWebhookDelivery"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountSlug}/webhooks/{webhookId}/deliveries/{deliveryId}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resend a webhook delivery
+         * @description Send a delivery's event to its webhook again, as a new delivery. It keeps the event's `webhook-id`, so an endpoint that already processed the event can skip it. Requires administrator access to the account.
+         */
+        post: operations["resendWebhookDelivery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/accounts/{accountSlug}/invite-link/reset": {
         parameters: {
             query?: never;
@@ -1014,6 +1122,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{owner}/{project}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's events
+         * @description Read the events of a project in the order they happened: builds completing and getting reviewed, deployments being created and becoming ready. Each event has the same shape as the body of a webhook request.
+         *
+         *     The list is a feed: pass the `cursor` of each response to the next request to get the events that happened since. When `hasMore` is true, request again right away. Events are kept 7 days: `truncated` is true when some were deleted before you read them.
+         */
+        get: operations["listProjectEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{owner}/{project}/builds/{buildNumber}": {
         parameters: {
             query?: never;
@@ -1619,7 +1749,200 @@ export interface paths {
         trace?: never;
     };
 }
-export type webhooks = Record<string, never>;
+export interface webhooks {
+    "build.completed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * build.completed
+         * @description A build finishes comparing its screenshots. Argos sends it to the webhooks subscribed to `build.completed`. The body is also an item of the events feed.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description The event's `id`, the same on every attempt. Use it to ignore an event you already processed. */
+                    "webhook-id": string;
+                    /** @description When the request was sent, in seconds since the Unix epoch. Refuse a request more than 5 minutes away from your clock. */
+                    "webhook-timestamp": string;
+                    /** @description `v1,` followed by the base64 HMAC-SHA256 of `{webhook-id}.{webhook-timestamp}.{body}`, keyed with the base64-decoded part of your webhook secret after `whsec_`. Any [Standard Webhooks](https://www.standardwebhooks.com) library verifies it. */
+                    "webhook-signature": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["BuildCompletedEvent"];
+                };
+            };
+            responses: {
+                /** @description Answer with any 2xx status within 10 seconds. Argos retries any other status or a timeout up to 3 more times over about 6 minutes. A redirect is not followed and not retried. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "build.reviewed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * build.reviewed
+         * @description A build receives a review. Argos sends it to the webhooks subscribed to `build.reviewed`. The body is also an item of the events feed.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description The event's `id`, the same on every attempt. Use it to ignore an event you already processed. */
+                    "webhook-id": string;
+                    /** @description When the request was sent, in seconds since the Unix epoch. Refuse a request more than 5 minutes away from your clock. */
+                    "webhook-timestamp": string;
+                    /** @description `v1,` followed by the base64 HMAC-SHA256 of `{webhook-id}.{webhook-timestamp}.{body}`, keyed with the base64-decoded part of your webhook secret after `whsec_`. Any [Standard Webhooks](https://www.standardwebhooks.com) library verifies it. */
+                    "webhook-signature": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["BuildReviewedEvent"];
+                };
+            };
+            responses: {
+                /** @description Answer with any 2xx status within 10 seconds. Argos retries any other status or a timeout up to 3 more times over about 6 minutes. A redirect is not followed and not retried. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "deployment.created": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * deployment.created
+         * @description A deployment starts uploading its files. Argos sends it to the webhooks subscribed to `deployment.created`. The body is also an item of the events feed.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description The event's `id`, the same on every attempt. Use it to ignore an event you already processed. */
+                    "webhook-id": string;
+                    /** @description When the request was sent, in seconds since the Unix epoch. Refuse a request more than 5 minutes away from your clock. */
+                    "webhook-timestamp": string;
+                    /** @description `v1,` followed by the base64 HMAC-SHA256 of `{webhook-id}.{webhook-timestamp}.{body}`, keyed with the base64-decoded part of your webhook secret after `whsec_`. Any [Standard Webhooks](https://www.standardwebhooks.com) library verifies it. */
+                    "webhook-signature": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeploymentCreatedEvent"];
+                };
+            };
+            responses: {
+                /** @description Answer with any 2xx status within 10 seconds. Argos retries any other status or a timeout up to 3 more times over about 6 minutes. A redirect is not followed and not retried. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "deployment.ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * deployment.ready
+         * @description A deployment is ready to be served. Argos sends it to the webhooks subscribed to `deployment.ready`. The body is also an item of the events feed.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description The event's `id`, the same on every attempt. Use it to ignore an event you already processed. */
+                    "webhook-id": string;
+                    /** @description When the request was sent, in seconds since the Unix epoch. Refuse a request more than 5 minutes away from your clock. */
+                    "webhook-timestamp": string;
+                    /** @description `v1,` followed by the base64 HMAC-SHA256 of `{webhook-id}.{webhook-timestamp}.{body}`, keyed with the base64-decoded part of your webhook secret after `whsec_`. Any [Standard Webhooks](https://www.standardwebhooks.com) library verifies it. */
+                    "webhook-signature": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeploymentReadyEvent"];
+                };
+            };
+            responses: {
+                /** @description Answer with any 2xx status within 10 seconds. Argos retries any other status or a timeout up to 3 more times over about 6 minutes. A redirect is not followed and not retried. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
 export interface components {
     schemas: {
         /**
@@ -1642,6 +1965,11 @@ export interface components {
          * @enum {string}
          */
         ProjectTokenPermission: "builds:write" | "deployments:write" | "projects:read" | "media:read" | "media:write";
+        /**
+         * @description `pending` until the endpoint accepts the event or the retries run out, then `success` or `failed`.
+         * @enum {string}
+         */
+        WebhookDeliveryStatus: "pending" | "success" | "failed";
         /** @description The public ID of the comment (e.g. `comment-xf23d`) */
         CommentId: string;
         /** @description Public ID of any comment in the thread (e.g. `comment-xf23d`) */
@@ -1686,6 +2014,8 @@ export interface components {
                 url?: string | null;
                 /** @description An URL to an accessible preview of the screenshot */
                 previewUrl?: string | null;
+                /** @description What the screenshot shows, displayed next to it in the build review */
+                description?: string | null;
                 viewport?: {
                     /** @description The width of the viewport */
                     width: number;
@@ -2046,6 +2376,8 @@ export interface components {
             tokenlessAuthEnabled: boolean;
             /** @description Whether deployments are served for this project. */
             deploymentEnabled: boolean;
+            /** @description Whether Argos reports deployments to the linked GitHub repository as GitHub deployments. */
+            githubDeploymentEnabled: boolean;
             deploymentAuth: components["schemas"]["DeploymentAuth"];
             defaultUserLevel: components["schemas"]["ProjectUserLevel"] | null;
             ignoreConfig: components["schemas"]["IgnoreConfigOutput"];
@@ -2114,6 +2446,303 @@ export interface components {
             /** @description The token itself. It is not stored and never returned again: save it now. */
             token: string;
         };
+        /** @description An endpoint Argos posts the events of an account's projects to. Its signing secret is only returned at creation. */
+        Webhook: {
+            id: string;
+            /**
+             * Format: uri
+             * @description The endpoint Argos posts events to.
+             */
+            url: string;
+            /** @description The events the webhook receives. */
+            events: ("build.completed" | "build.reviewed" | "deployment.created" | "deployment.ready")[];
+            /** @description Names of the projects the webhook receives the events of, or `null` for every project of the account, including the ones created later. */
+            projects: string[] | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreatedWebhook: {
+            id: string;
+            /**
+             * Format: uri
+             * @description The endpoint Argos posts events to.
+             */
+            url: string;
+            /** @description The events the webhook receives. */
+            events: ("build.completed" | "build.reviewed" | "deployment.created" | "deployment.ready")[];
+            /** @description Names of the projects the webhook receives the events of, or `null` for every project of the account, including the ones created later. */
+            projects: string[] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description The signing secret (`whsec_…`), to verify the `webhook-signature` header of each request. It is never returned again: save it now. */
+            secret: string;
+        };
+        /** @description An event sent to a webhook, across all of its attempts. */
+        WebhookDelivery: {
+            id: string;
+            status: components["schemas"]["WebhookDeliveryStatus"];
+            /** @description The `id` of the event delivered, its `webhook-id` header. */
+            eventId: string;
+            /** @enum {string} */
+            eventType: "build.completed" | "build.reviewed" | "deployment.created" | "deployment.ready";
+            attempts: number;
+            /** @description When the latest attempt was made. */
+            attemptedAt: string | null;
+            /** @description HTTP status of the latest attempt, `null` when it got no response. */
+            responseStatus: number | null;
+            /** @description How long the latest attempt waited for a response. */
+            durationMs: number | null;
+            /** @description Why the latest attempt failed, `null` when it succeeded. */
+            failureReason: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WebhookDeliveryDetail: {
+            id: string;
+            status: components["schemas"]["WebhookDeliveryStatus"];
+            /** @description The `id` of the event delivered, its `webhook-id` header. */
+            eventId: string;
+            /** @enum {string} */
+            eventType: "build.completed" | "build.reviewed" | "deployment.created" | "deployment.ready";
+            attempts: number;
+            /** @description When the latest attempt was made. */
+            attemptedAt: string | null;
+            /** @description HTTP status of the latest attempt, `null` when it got no response. */
+            responseStatus: number | null;
+            /** @description How long the latest attempt waited for a response. */
+            durationMs: number | null;
+            /** @description Why the latest attempt failed, `null` when it succeeded. */
+            failureReason: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description The start of the latest response body (4 KB at most). */
+            responseBody: string | null;
+            /** @description The event, as the request body. */
+            event: components["schemas"]["Event"];
+        };
+        /** @description A build finishes comparing its screenshots. */
+        BuildCompletedEvent: {
+            /** @description Unique identifier of the event, the same on every delivery of it. Use it to ignore an event you already processed. */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "build.completed";
+            /**
+             * Format: date-time
+             * @description When the event happened.
+             */
+            timestamp: string;
+            data: {
+                project: components["schemas"]["EventProject"];
+                build: components["schemas"]["Build"];
+            };
+        };
+        /** @description The project the event happened in. */
+        EventProject: {
+            id: string;
+            name: string;
+            account: components["schemas"]["Account"];
+            /**
+             * Format: uri
+             * @description The URL of the project in Argos.
+             */
+            url: string;
+        };
+        /** @description Build */
+        Build: {
+            id: components["schemas"]["BuildId"];
+            /**
+             * @description The build number
+             * @example 42
+             */
+            number: number;
+            /** @description The head reference of the build */
+            head: components["schemas"]["BuildGitReference"];
+            /** @description The base reference of the build */
+            base: components["schemas"]["BuildGitReference"] | null;
+            /** @description The status of the build */
+            status: ("accepted" | "rejected") | ("no-changes" | "changes-detected") | ("expired" | "pending" | "progress" | "error" | "aborted");
+            /** @description The conclusion of the build */
+            conclusion: ("no-changes" | "changes-detected") | null;
+            /** @description Stats of the diffs present in the build */
+            stats: {
+                /** @description Added snapshots */
+                added: number;
+                /** @description Removed snapshots */
+                removed: number;
+                /** @description Unchanged snapshots */
+                unchanged: number;
+                /** @description Changed snapshots */
+                changed: number;
+                /** @description Ignored snapshots */
+                ignored: number;
+                /** @description Failure screenshots */
+                failure: number;
+                /** @description Retry failure screenshots */
+                retryFailure: number;
+                /** @description Total number of snapshots */
+                total: number;
+            } | null;
+            metadata: {
+                /** @description Test suite report */
+                testReport?: {
+                    /**
+                     * @description Status of the test suite
+                     * @enum {string}
+                     */
+                    status: "passed" | "failed" | "timedout" | "interrupted";
+                    stats?: {
+                        /** @description Date when the test suite started */
+                        startTime?: string;
+                        /** @description Duration of the test suite in milliseconds */
+                        duration?: number;
+                    };
+                };
+            } | null;
+            /**
+             * Format: uri
+             * @description The URL of the build
+             */
+            url: string;
+            /** @description The notification payload for the build */
+            notification: {
+                description: string;
+                context: string;
+                github: {
+                    /** @enum {string} */
+                    state: "pending" | "success" | "error" | "failure";
+                };
+                gitlab: {
+                    /** @enum {string} */
+                    state: "pending" | "running" | "success" | "failed" | "canceled";
+                };
+                origin: {
+                    /** @enum {string} */
+                    status: "queued" | "in_progress" | "completed";
+                    conclusion: ("success" | "failure") | null;
+                };
+                /** Format: uri */
+                url: string;
+            } | null;
+        };
+        /** @description Git reference */
+        BuildGitReference: {
+            /** @description The commit SHA */
+            sha: components["schemas"]["Sha1Hash"];
+            /** @description The branch name */
+            branch: string;
+        };
+        /** @description A build receives a review. */
+        BuildReviewedEvent: {
+            /** @description Unique identifier of the event, the same on every delivery of it. Use it to ignore an event you already processed. */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "build.reviewed";
+            /**
+             * Format: date-time
+             * @description When the event happened.
+             */
+            timestamp: string;
+            data: {
+                project: components["schemas"]["EventProject"];
+                build: components["schemas"]["Build"];
+                review: components["schemas"]["BuildReview"];
+            };
+        };
+        /** @description Build review */
+        BuildReview: {
+            id: string;
+            buildId: string;
+            /**
+             * @description State of a build review: approved, rejected, commented (neutral) or pending (an unsubmitted draft).
+             * @enum {string}
+             */
+            state: "approved" | "rejected" | "commented" | "pending";
+            /** @description The user who submitted the review. */
+            user: components["schemas"]["User"] | null;
+            /** @description Date the review was dismissed, null if not dismissed. */
+            dismissedAt: string | null;
+            /** @description The user who dismissed the review, if any. */
+            dismissedBy: components["schemas"]["User"] | null;
+            /** @description The coding agent that submitted the review on the reviewer's behalf. Null when they submitted it themselves. */
+            agent: components["schemas"]["Agent"] | null;
+            /** @description Date the review was created. */
+            date: string;
+        };
+        /** @description A coding agent acting on behalf of a user. */
+        Agent: {
+            /** @description Stable id of the agent, e.g. `claude-code`. `unknown` when it could not be identified. */
+            id: string;
+            /** @description Name to display, e.g. `Claude Code`. Null for an agent we cannot name. */
+            name: string | null;
+        };
+        /** @description A deployment starts uploading its files. */
+        DeploymentCreatedEvent: {
+            /** @description Unique identifier of the event, the same on every delivery of it. Use it to ignore an event you already processed. */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "deployment.created";
+            /**
+             * Format: date-time
+             * @description When the event happened.
+             */
+            timestamp: string;
+            data: {
+                project: components["schemas"]["EventProject"];
+                deployment: {
+                    id: string;
+                    /** @enum {string} */
+                    status: "pending" | "ready" | "error";
+                    /** @enum {string} */
+                    environment: "preview" | "production";
+                    branch: components["schemas"]["GitBranch"];
+                    commitSha: components["schemas"]["Sha256Hash"];
+                    /** Format: uri */
+                    url: string;
+                    createdAt: string;
+                };
+            };
+        };
+        /** @description A deployment is ready to be served. */
+        DeploymentReadyEvent: {
+            /** @description Unique identifier of the event, the same on every delivery of it. Use it to ignore an event you already processed. */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "deployment.ready";
+            /**
+             * Format: date-time
+             * @description When the event happened.
+             */
+            timestamp: string;
+            data: {
+                project: components["schemas"]["EventProject"];
+                deployment: {
+                    id: string;
+                    /** @enum {string} */
+                    status: "pending" | "ready" | "error";
+                    /** @enum {string} */
+                    environment: "preview" | "production";
+                    branch: components["schemas"]["GitBranch"];
+                    commitSha: components["schemas"]["Sha256Hash"];
+                    /** Format: uri */
+                    url: string;
+                    createdAt: string;
+                };
+            };
+        };
+        /** @description Something that happened in a project. */
+        Event: components["schemas"]["BuildCompletedEvent"] | components["schemas"]["BuildReviewedEvent"] | components["schemas"]["DeploymentCreatedEvent"] | components["schemas"]["DeploymentReadyEvent"];
         InviteLink: {
             /**
              * Format: uri
@@ -2275,97 +2904,6 @@ export interface components {
                 users: components["schemas"]["User"][];
             }[];
         };
-        /** @description A coding agent acting on behalf of a user. */
-        Agent: {
-            /** @description Stable id of the agent, e.g. `claude-code`. `unknown` when it could not be identified. */
-            id: string;
-            /** @description Name to display, e.g. `Claude Code`. Null for an agent we cannot name. */
-            name: string | null;
-        };
-        /** @description Build */
-        Build: {
-            id: components["schemas"]["BuildId"];
-            /**
-             * @description The build number
-             * @example 42
-             */
-            number: number;
-            /** @description The head reference of the build */
-            head: components["schemas"]["BuildGitReference"];
-            /** @description The base reference of the build */
-            base: components["schemas"]["BuildGitReference"] | null;
-            /** @description The status of the build */
-            status: ("accepted" | "rejected") | ("no-changes" | "changes-detected") | ("expired" | "pending" | "progress" | "error" | "aborted");
-            /** @description The conclusion of the build */
-            conclusion: ("no-changes" | "changes-detected") | null;
-            /** @description Stats of the diffs present in the build */
-            stats: {
-                /** @description Added snapshots */
-                added: number;
-                /** @description Removed snapshots */
-                removed: number;
-                /** @description Unchanged snapshots */
-                unchanged: number;
-                /** @description Changed snapshots */
-                changed: number;
-                /** @description Ignored snapshots */
-                ignored: number;
-                /** @description Failure screenshots */
-                failure: number;
-                /** @description Retry failure screenshots */
-                retryFailure: number;
-                /** @description Total number of snapshots */
-                total: number;
-            } | null;
-            metadata: {
-                /** @description Test suite report */
-                testReport?: {
-                    /**
-                     * @description Status of the test suite
-                     * @enum {string}
-                     */
-                    status: "passed" | "failed" | "timedout" | "interrupted";
-                    stats?: {
-                        /** @description Date when the test suite started */
-                        startTime?: string;
-                        /** @description Duration of the test suite in milliseconds */
-                        duration?: number;
-                    };
-                };
-            } | null;
-            /**
-             * Format: uri
-             * @description The URL of the build
-             */
-            url: string;
-            /** @description The notification payload for the build */
-            notification: {
-                description: string;
-                context: string;
-                github: {
-                    /** @enum {string} */
-                    state: "pending" | "success" | "error" | "failure";
-                };
-                gitlab: {
-                    /** @enum {string} */
-                    state: "pending" | "running" | "success" | "failed" | "canceled";
-                };
-                origin: {
-                    /** @enum {string} */
-                    status: "queued" | "in_progress" | "completed";
-                    conclusion: ("success" | "failure") | null;
-                };
-                /** Format: uri */
-                url: string;
-            } | null;
-        };
-        /** @description Git reference */
-        BuildGitReference: {
-            /** @description The commit SHA */
-            sha: components["schemas"]["Sha1Hash"];
-            /** @description The branch name */
-            branch: string;
-        };
         /** @description The authenticated user. */
         Me: {
             id: string;
@@ -2444,6 +2982,8 @@ export interface components {
                     url?: string | null;
                     /** @description An URL to an accessible preview of the screenshot */
                     previewUrl?: string | null;
+                    /** @description What the screenshot shows, displayed next to it in the build review */
+                    description?: string | null;
                     viewport?: {
                         /** @description The width of the viewport */
                         width: number;
@@ -2560,6 +3100,8 @@ export interface components {
                     url?: string | null;
                     /** @description An URL to an accessible preview of the screenshot */
                     previewUrl?: string | null;
+                    /** @description What the screenshot shows, displayed next to it in the build review */
+                    description?: string | null;
                     viewport?: {
                         /** @description The width of the viewport */
                         width: number;
@@ -2697,26 +3239,6 @@ export interface components {
             ignored: boolean;
             /** @description Number of times this change has been seen over the metrics period. A high count for a recurring change is a strong flakiness signal. */
             occurrences: number;
-        };
-        /** @description Build review */
-        BuildReview: {
-            id: string;
-            buildId: string;
-            /**
-             * @description State of a build review: approved, rejected, commented (neutral) or pending (an unsubmitted draft).
-             * @enum {string}
-             */
-            state: "approved" | "rejected" | "commented" | "pending";
-            /** @description The user who submitted the review. */
-            user: components["schemas"]["User"] | null;
-            /** @description Date the review was dismissed, null if not dismissed. */
-            dismissedAt: string | null;
-            /** @description The user who dismissed the review, if any. */
-            dismissedBy: components["schemas"]["User"] | null;
-            /** @description The coding agent that submitted the review on the reviewer's behalf. Null when they submitted it themselves. */
-            agent: components["schemas"]["Agent"] | null;
-            /** @description Date the review was created. */
-            date: string;
         };
         /** @description The review requests standing on a build. */
         BuildReviewers: {
@@ -4012,6 +4534,520 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listAccountWebhooks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's webhooks */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Webhook"][];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createAccountWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The endpoint to post events to. It must use HTTPS. */
+                    url: string;
+                    /** @description The events to receive. */
+                    events: ("build.completed" | "build.reviewed" | "deployment.created" | "deployment.ready")[];
+                    /**
+                     * @description Names of the projects to receive the events of. Defaults to `null`: every project of the account, including the ones created later.
+                     * @default null
+                     */
+                    projects?: string[] | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The created webhook, with its secret */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedWebhook"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getAccountWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+                /** @description ID of the webhook. */
+                webhookId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The webhook */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Webhook"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteAccountWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+                /** @description ID of the webhook. */
+                webhookId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Webhook deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listWebhookDeliveries: {
+        parameters: {
+            query?: {
+                /** @description Number of items per page (max 100) */
+                perPage?: string;
+                /** @description Page number */
+                page?: string;
+                /** @description Only the deliveries with this status. */
+                status?: components["schemas"]["WebhookDeliveryStatus"];
+                /** @description Only the deliveries of this event. */
+                eventId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+                /** @description ID of the webhook. */
+                webhookId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The webhook's deliveries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pageInfo: components["schemas"]["PageInfo"];
+                        results: components["schemas"]["WebhookDelivery"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getWebhookDelivery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+                /** @description ID of the webhook. */
+                webhookId: string;
+                /** @description ID of the delivery. */
+                deliveryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The delivery */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDeliveryDetail"];
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resendWebhookDelivery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Slug of the account. */
+                accountSlug: string;
+                /** @description ID of the webhook. */
+                webhookId: string;
+                /** @description ID of the delivery. */
+                deliveryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The new delivery */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDelivery"];
+                };
             };
             /** @description Invalid parameters */
             400: {
@@ -6568,6 +7604,8 @@ export interface operations {
                     ignoreConfig?: components["schemas"]["IgnoreConfig"];
                     deploymentEnabled?: boolean;
                     deploymentAuth?: components["schemas"]["DeploymentAuth"];
+                    /** @description Turn GitHub deployments on or off. When `true`, Argos reports each deployment to the linked GitHub repository as a GitHub deployment. */
+                    githubDeploymentEnabled?: boolean;
                     githubActionsOidcEnabled?: boolean;
                     tokenlessAuthEnabled?: boolean;
                 };
@@ -7645,6 +8683,91 @@ export interface operations {
                     "application/json": {
                         pageInfo: components["schemas"]["PageInfo"];
                         results: components["schemas"]["Build"][];
+                    };
+                };
+            };
+            /** @description Invalid parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listProjectEvents: {
+        parameters: {
+            query?: {
+                /** @description Only return the events of this type. */
+                name?: "build.completed" | "build.reviewed" | "deployment.created" | "deployment.ready";
+                /** @description The `cursor` of the previous response. Without it, the feed starts now: the response has no events, only the cursor to read the next ones with. */
+                cursor?: string;
+                /** @description Skip the events older than this many milliseconds. Without a cursor, the feed starts that long ago instead of now. */
+                maxAgeMs?: string;
+                /** @description Maximum number of events to return (max 100). */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                owner: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The events after the cursor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        events: components["schemas"]["Event"][];
+                        /** @description Pass it as `cursor` to read the next events. */
+                        cursor: string;
+                        /** @description Whether events after the given cursor were deleted before being read. */
+                        truncated: boolean;
+                        /** @description Whether more events are ready to be read now. */
+                        hasMore: boolean;
                     };
                 };
             };

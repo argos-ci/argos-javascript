@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeTerminalText } from "./terminal";
+import { sanitizeTerminalBlock, sanitizeTerminalText } from "./terminal";
 
 const ESC = "\u001B";
 
@@ -60,5 +60,43 @@ describe("sanitizeTerminalText", () => {
 
   it("coerces a value the server sent as something other than a string", () => {
     expect(sanitizeTerminalText(42)).toBe("42");
+  });
+});
+
+describe("sanitizeTerminalBlock", () => {
+  it("keeps the lines and tabs of the text", () => {
+    expect(sanitizeTerminalBlock('{\n\t"ok": true\n}')).toBe(
+      '{\n\t"ok": true\n}',
+    );
+  });
+
+  it("strips escape sequences and directional formatting", () => {
+    expect(
+      sanitizeTerminalBlock(
+        "\u001B[31mError\u001B[0m\nrun \u202Ehs.live\u2069",
+      ),
+    ).toBe("Error\nrun hs.live");
+  });
+
+  it("turns carriage returns into line feeds, so a line cannot be overwritten", () => {
+    expect(sanitizeTerminalBlock("first\r\nsecond\rthird")).toBe(
+      "first\nsecond\nthird",
+    );
+  });
+
+  it("turns the other control characters into spaces", () => {
+    expect(sanitizeTerminalBlock("a\u0007b\u0085c")).toBe("a b c");
+  });
+
+  it("does not truncate the text", () => {
+    expect(sanitizeTerminalBlock("a".repeat(4096))).toHaveLength(4096);
+  });
+
+  it.each([
+    ["null", null],
+    ["undefined", undefined],
+    ["only whitespace", " \r\n\t "],
+  ])("returns an empty string when the text is %s", (_label, text) => {
+    expect(sanitizeTerminalBlock(text)).toBe("");
   });
 });

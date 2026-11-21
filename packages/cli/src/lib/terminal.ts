@@ -65,3 +65,28 @@ export function sanitizeTerminalText(text: unknown): string {
     ? `${sanitized.slice(0, MAX_LENGTH)}…`
     : sanitized;
 }
+
+/** Control characters other than the line feed and the tab. */
+const BLOCK_CONTROL_CHARACTER_REGEX =
+  // eslint-disable-next-line no-control-regex
+  /[\u0000-\u0008\u000B-\u001F\u007F-\u009F]/g;
+
+/**
+ * Like {@link sanitizeTerminalText}, for remote text the user asked to read in
+ * full, such as the response body of a webhook delivery: line feeds and tabs
+ * are kept, and the length is left to the caller.
+ *
+ * A carriage return becomes a line feed, so a body cannot overwrite the line
+ * it is printed on.
+ */
+export function sanitizeTerminalBlock(text: unknown): string {
+  if (text === null || text === undefined) {
+    return "";
+  }
+  return String(text)
+    .replace(ESCAPE_SEQUENCE_REGEX, "")
+    .replace(DIRECTIONAL_FORMATTING_REGEX, "")
+    .replace(/\r\n?/g, "\n")
+    .replace(BLOCK_CONTROL_CHARACTER_REGEX, " ")
+    .trimEnd();
+}
