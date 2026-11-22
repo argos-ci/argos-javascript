@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.15.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.14.0...%40argos-ci%2Fcli%406.15.0) (2026-11-22)
+
+### Features
+
+* **cli:** add commands to manage webhooks and their deliveries ([3025d9f](https://github.com/argos-ci/argos-javascript/commit/3025d9f07974f3a36a1be4a680449868e867d7f0)), closes [argos-ci/argos#2787](https://github.com/argos-ci/argos/issues/2787)
+
+
 # [6.14.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.13.0...%40argos-ci%2Fcli%406.14.0) (2026-11-19)
 
 ### Features

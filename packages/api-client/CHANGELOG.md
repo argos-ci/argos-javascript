@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.34.0...%40argos-ci%2Fapi-client%400.35.0) (2026-11-22)
+
+### Features
+
+* **api-client:** add the webhook endpoints ([786a9e3](https://github.com/argos-ci/argos-javascript/commit/786a9e39394c52608256e7535e397d1d8af771e2)), closes [argos-ci/argos#2787](https://github.com/argos-ci/argos/issues/2787)
+
+
 # [0.34.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.33.0...%40argos-ci%2Fapi-client%400.34.0) (2026-11-19)
 
 ### Features
