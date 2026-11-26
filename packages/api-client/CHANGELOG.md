@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.36.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.35.0...%40argos-ci%2Fapi-client%400.36.0) (2026-11-26)
+
+### Features
+
+* **api-client:** accept a url when creating a deployment ([d87fca5](https://github.com/argos-ci/argos-javascript/commit/d87fca5c8fb9b21253d7df0375f5c1991dfde25d)), closes [argos-ci/argos#2786](https://github.com/argos-ci/argos/issues/2786)
+
+
 # [0.35.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fapi-client%400.34.0...%40argos-ci%2Fapi-client%400.35.0) (2026-11-22)
 
 ### Features

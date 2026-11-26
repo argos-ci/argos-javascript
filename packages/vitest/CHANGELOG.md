@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.11.2...%40argos-ci%2Fvitest%400.11.3) (2026-11-26)
+
+**Note:** Version bump only for package @argos-ci/vitest
+
+
+
+
+
 ## [0.11.2](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fvitest%400.11.1...%40argos-ci%2Fvitest%400.11.2) (2026-11-22)
 
 **Note:** Version bump only for package @argos-ci/vitest

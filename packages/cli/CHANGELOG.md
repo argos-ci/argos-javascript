@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.16.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.15.0...%40argos-ci%2Fcli%406.16.0) (2026-11-26)
+
+### Features
+
+* report a deployment hosted elsewhere with `argos deploy --url` ([049af81](https://github.com/argos-ci/argos-javascript/commit/049af812c19f12994431163b2be4b9a42443544e))
+
+
 # [6.15.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcli%406.14.0...%40argos-ci%2Fcli%406.15.0) (2026-11-22)
 
 ### Features

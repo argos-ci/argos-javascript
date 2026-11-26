@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.10.0](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.9.3...%40argos-ci%2Fcore%406.10.0) (2026-11-26)
+
+### Features
+
+* **core:** deprecate `ARGOS_PREVIEW_BASE_URL` and the `previewUrl` option ([e480f82](https://github.com/argos-ci/argos-javascript/commit/e480f82fcab8e7a92d4187feb1f568b206243db4))
+* report a deployment hosted elsewhere with `argos deploy --url` ([049af81](https://github.com/argos-ci/argos-javascript/commit/049af812c19f12994431163b2be4b9a42443544e))
+
+
 ## [6.9.3](https://github.com/argos-ci/argos-javascript/compare/%40argos-ci%2Fcore%406.9.2...%40argos-ci%2Fcore%406.9.3) (2026-11-22)
 
 **Note:** Version bump only for package @argos-ci/core
